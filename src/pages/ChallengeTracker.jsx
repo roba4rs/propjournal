@@ -496,6 +496,7 @@ export default function ChallengeTracker() {
   const [loading, setLoading] = useState(true)
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
   const [viewMode, setViewMode] = useState('cards') // 'cards' | 'compact'
+  const [mobileView, setMobileView] = useState('grid') // 'list' | 'grid'
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768)
@@ -600,15 +601,42 @@ export default function ChallengeTracker() {
             fontFamily: "'Syne', sans-serif", fontSize: '15px',
             fontWeight: '600', color: '#fff', pointerEvents: 'none',
           }}>Challenges</span>
-          <button
-            onClick={() => setShowModal(true)}
-            style={{
-              background: '#fff', border: 'none', borderRadius: '5px',
-              padding: '5px 11px', fontSize: '12px', fontWeight: '600',
-              color: '#000', cursor: 'pointer', fontFamily: "'Syne', sans-serif",
-              pointerEvents: 'auto',
-            }}
-          >+ New</button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', pointerEvents: 'auto' }}>
+            {/* Grid / List toggle */}
+            <div style={{ display: 'flex', background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '6px', padding: '2px', gap: '2px' }}>
+              {/* Grid view */}
+              <button
+                onClick={() => setMobileView('grid')}
+                style={{ background: mobileView === 'grid' ? '#1a1a1a' : 'transparent', border: mobileView === 'grid' ? '0.5px solid #2a2a2a' : '0.5px solid transparent', borderRadius: '4px', padding: '4px 6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                  <rect x="0.5" y="0.5" width="5" height="5" rx="1" fill={mobileView === 'grid' ? '#fff' : '#666'} />
+                  <rect x="7.5" y="0.5" width="5" height="5" rx="1" fill={mobileView === 'grid' ? '#fff' : '#666'} />
+                  <rect x="0.5" y="7.5" width="5" height="5" rx="1" fill={mobileView === 'grid' ? '#fff' : '#666'} />
+                  <rect x="7.5" y="7.5" width="5" height="5" rx="1" fill={mobileView === 'grid' ? '#fff' : '#666'} />
+                </svg>
+              </button>
+              {/* List view */}
+              <button
+                onClick={() => setMobileView('list')}
+                style={{ background: mobileView === 'list' ? '#1a1a1a' : 'transparent', border: mobileView === 'list' ? '0.5px solid #2a2a2a' : '0.5px solid transparent', borderRadius: '4px', padding: '4px 6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                  <rect x="0.5" y="1.5" width="12" height="2" rx="1" fill={mobileView === 'list' ? '#fff' : '#666'} />
+                  <rect x="0.5" y="5.5" width="12" height="2" rx="1" fill={mobileView === 'list' ? '#fff' : '#666'} />
+                  <rect x="0.5" y="9.5" width="12" height="2" rx="1" fill={mobileView === 'list' ? '#fff' : '#666'} />
+                </svg>
+              </button>
+            </div>
+            <button
+              onClick={() => setShowModal(true)}
+              style={{
+                background: '#fff', border: 'none', borderRadius: '5px',
+                padding: '5px 11px', fontSize: '12px', fontWeight: '600',
+                color: '#000', cursor: 'pointer', fontFamily: "'Syne', sans-serif",
+              }}
+            >+ New</button>
+          </div>
         </div>
 
         {/* Filter tabs */}
@@ -635,7 +663,100 @@ export default function ChallengeTracker() {
             <div style={{ padding: '48px', textAlign: 'center', color: '#555', fontSize: '13px', fontFamily: "'DM Sans', sans-serif" }}>
               No challenges yet — tap "+ New" to get started
             </div>
+          ) : mobileView === 'grid' ? (
+
+            /* ── MOBILE GRID VIEW ── */
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', padding: '8px 10px 0' }}>
+              {filtered.map(challenge => {
+                const trades = tradesByAccount[challenge.id] || []
+                const s = computeStats(trades)
+                const p = computeProgress(trades, challenge)
+                const computedStatus = computeStatus(trades, challenge)
+                const badge = statusBadge[computedStatus] || statusBadge.active
+                const pnlColor = s.netPnl > 0 ? '#1db97b' : s.netPnl < 0 ? '#c03535' : '#e0e0e0'
+                const pnlLabel = `${s.netPnl >= 0 ? '+' : ''}$${Math.abs(s.netPnl).toFixed(0)}`
+                const isActive = computedStatus === 'active'
+                const isFailed = computedStatus === 'failed'
+                const phaseLabel = challenge.phase
+                  ? challenge.phase.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())
+                  : '—'
+
+                return (
+                  <div key={challenge.id} style={{
+                    background: '#111',
+                    border: `0.5px solid ${isFailed ? '#2e1515' : '#1e1e1e'}`,
+                    borderRadius: '8px',
+                    padding: '10px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px',
+                  }}>
+                    {/* Header */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontSize: '12px', fontWeight: '700', color: '#fff', fontFamily: "'Syne', sans-serif", textTransform: 'uppercase', letterSpacing: '0.4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {challenge.firm_name}
+                        </div>
+                        <div style={{ fontSize: '9px', color: '#666', fontFamily: "'DM Sans', sans-serif", marginTop: '2px' }}>
+                          {phaseLabel} · ${Number(challenge.account_size).toLocaleString()}
+                        </div>
+                      </div>
+                      <span style={{ background: badge.bg, border: `0.5px solid ${badge.border}`, borderRadius: '4px', padding: '2px 6px', fontSize: '8px', color: badge.color, fontFamily: "'DM Mono', monospace", whiteSpace: 'nowrap', flexShrink: 0, marginLeft: '4px' }}>
+                        {badge.label}
+                      </span>
+                    </div>
+
+                    {/* P&L */}
+                    <div>
+                      <div style={{ fontSize: '8px', color: '#777', marginBottom: '2px', textTransform: 'uppercase', letterSpacing: '0.04em', fontFamily: "'DM Mono', monospace" }}>P&L</div>
+                      <div style={{ fontSize: '18px', fontWeight: '700', color: pnlColor, fontFamily: "'DM Mono', monospace", lineHeight: 1 }}>{pnlLabel}</div>
+                    </div>
+
+                    {/* Win Rate */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '8px', color: '#777', textTransform: 'uppercase', letterSpacing: '0.04em', fontFamily: "'DM Mono', monospace" }}>Win Rate</span>
+                      <span style={{ fontSize: '13px', color: '#e0e0e0', fontFamily: "'DM Mono', monospace" }}>{s.total === 0 ? '0%' : `${s.winRate.toFixed(0)}%`}</span>
+                    </div>
+
+                    {/* Progress bars — all statuses */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
+                          <span style={{ fontSize: '7px', color: '#555', fontFamily: "'DM Mono', monospace" }}>Profit</span>
+                          <span style={{ fontSize: '7px', color: '#1db97b', fontFamily: "'DM Mono', monospace" }}>
+                            {isActive ? `${p.netPnlPct >= 0 ? p.netPnlPct.toFixed(1) : '0.0'}% / ${p.accountSize > 0 ? (p.profitTarget / p.accountSize * 100).toFixed(0) : '—'}%` : (isFailed ? '—' : '100%')}
+                          </span>
+                        </div>
+                        <div style={{ height: '2px', background: '#181818', borderRadius: '2px' }}>
+                          <div style={{ height: '100%', borderRadius: '2px', background: '#1db97b', width: isActive ? `${p.netPnlPct >= 0 ? Math.min(p.profitPct, 100) : 0}%` : isFailed ? '0%' : '100%' }} />
+                        </div>
+                      </div>
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
+                          <span style={{ fontSize: '7px', color: '#555', fontFamily: "'DM Mono', monospace" }}>Max DD</span>
+                          <span style={{ fontSize: '7px', color: '#c03535', fontFamily: "'DM Mono', monospace" }}>
+                            {isActive ? `${p.maxDDUsedPct.toFixed(1)}% / ${p.maxDDLimitPct.toFixed(0)}%` : isFailed ? '100%' : '—'}
+                          </span>
+                        </div>
+                        <div style={{ height: '2px', background: '#181818', borderRadius: '2px' }}>
+                          <div style={{ height: '100%', borderRadius: '2px', background: '#c03535', width: isActive ? `${Math.min(p.maxDDBarPct, 100)}%` : isFailed ? '100%' : '0%' }} />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div style={{ display: 'flex', gap: '4px', marginTop: 'auto' }}>
+                      <button onClick={() => setEditingChallenge(challenge)} style={{ background: 'transparent', border: '0.5px solid #1e1e1e', borderRadius: '4px', padding: '5px 7px', fontSize: '11px', color: '#666', cursor: 'pointer', flexShrink: 0 }}>✏️</button>
+                      <button onClick={() => navigate(`/dashboard?account=${challenge.id}`)} style={{ flex: 1, background: 'transparent', border: `0.5px solid ${isFailed ? '#2e1515' : '#1e1e1e'}`, borderRadius: '4px', padding: '5px', fontSize: '10px', color: '#666', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>Dashboard →</button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
           ) : (
+
+            /* ── MOBILE LIST VIEW (existing) ── */
             filtered.map(challenge => {
               const trades = tradesByAccount[challenge.id] || []
               const s = computeStats(trades)

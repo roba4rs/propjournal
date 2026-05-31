@@ -83,7 +83,7 @@ h1 {
 }
 h1 em { color: var(--green); font-style: normal; }
 .hero-sub { font-size: 16px; color: var(--text2); line-height: 1.65; max-width: 440px; margin-bottom: 32px; }
-.hero-btns { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+.hero-btns { display: flex; gap: 12px; flex-wrap: nowrap; margin-bottom: 20px; }
 .btn-hero-primary {
   font-family: var(--font-body); font-size: 14px; font-weight: 500;
   padding: 12px 24px; border: none; border-radius: 9px;
@@ -407,6 +407,42 @@ h1 em { color: var(--green); font-style: normal; }
 .feat-title { font-family: var(--font-head); font-size: 14px; font-weight: 600; margin-bottom: 6px; }
 .feat-desc { font-size: 13px; color: var(--text2); line-height: 1.55; }
 
+/* ── FEATURES MOBILE SLIDER ── */
+@media (max-width: 900px) {
+  .features-grid {
+    display: flex !important;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 10px;
+    padding-bottom: 12px;
+    scrollbar-width: none;
+    grid-template-columns: unset;
+  }
+  .features-grid::-webkit-scrollbar { display: none; }
+  .feat-card {
+    flex: 0 0 78vw !important;
+    scroll-snap-align: start;
+    min-width: 0;
+  }
+  .plans-row {
+    grid-template-columns: 1fr !important;
+    max-width: 360px !important;
+    margin: 0 auto;
+  }
+  .pcard { padding: 14px 16px; }
+  .pcard-name { margin-bottom: 6px; }
+  .pcard-price { font-size: 32px; margin-bottom: 2px; }
+  .pcard-per { margin-bottom: 2px; }
+  .pcard-total { margin-bottom: 4px; }
+  .pcard-discount { margin-bottom: 10px; }
+  .pop-badge { margin-bottom: 8px; }
+  .pcard hr { margin: 10px 0; }
+  .feats { margin-bottom: 14px; }
+  .feats li { margin-bottom: 5px; }
+  .pbtn { padding: 9px; }
+}
+
 /* ── PRICING ── */
 .pricing {
   padding: 80px 40px; border-top: 0.5px solid var(--border);
@@ -440,6 +476,7 @@ h1 em { color: var(--green); font-style: normal; }
 .feats { list-style: none; margin-bottom: 24px; flex: 1; }
 .feats li { font-size: 13px; color: var(--text2); display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; }
 .feats li svg { width: 13px; height: 13px; color: var(--green); flex-shrink: 0; margin-top: 2px; }
+.feats-text { font-size: 12px; color: var(--text2); line-height: 1.6; margin-bottom: 16px; flex: 1; }
 .pbtn { display: block; width: 100%; text-align: center; font-family: var(--font-body); font-size: 13px; font-weight: 500; padding: 11px; border-radius: 9px; cursor: pointer; transition: opacity .2s, background .2s; }
 .pbtn.outline { background: transparent; border: 0.5px solid var(--border2); color: var(--text); }
 .pbtn.outline:hover { background: var(--bg5); }
@@ -466,10 +503,11 @@ footer { padding: 28px 40px; border-top: 0.5px solid var(--border); display: fle
   nav { padding: 0 24px; }
   .nav-links { display: none; }
   .nav-hamburger { display: block; }
+  .nav-login { display: none; }
   .mobile-menu { display: flex; }
   .hero { grid-template-columns: 1fr; padding: 48px 24px 40px; gap: 40px; }
   h1 { font-size: 40px; }
-  .hero-right { order: -1; }
+  .hero-right { display: none; }
   .firm-stack { height: 420px; }
   .firm-card { max-width: 100%; }
   .steps-grid { grid-template-columns: 1fr; gap: 32px; }
@@ -477,8 +515,8 @@ footer { padding: 28px 40px; border-top: 0.5px solid var(--border); display: fle
   .challenge-inner { grid-template-columns: 1fr; gap: 40px; padding: 0; }
   .analytics-grid { grid-template-columns: 1fr; }
   .analytics-grid-right { grid-template-rows: auto; grid-template-columns: 1fr 1fr; }
-  .features-grid { grid-template-columns: 1fr 1fr; }
-  .plans-row { grid-template-columns: 1fr; max-width: 360px; }
+
+
   .how, .challenge-section, .analytics-section, .features, .pricing { padding: 60px 24px; }
   footer { flex-direction: column; align-items: flex-start; padding: 24px; }
 }
@@ -486,7 +524,7 @@ footer { padding: 28px 40px; border-top: 0.5px solid var(--border); display: fle
   h1 { font-size: 34px; }
   .cc-stats { grid-template-columns: 1fr 1fr; }
   .analytics-grid-right { grid-template-columns: 1fr; }
-  .features-grid { grid-template-columns: 1fr; }
+
   .modal-body { grid-template-columns: 1fr; }
   .modal-col:first-child { border-right: none; border-bottom: 0.5px solid var(--border); }
   .rules-grid { grid-template-columns: 1fr; }
@@ -505,8 +543,8 @@ footer { padding: 28px 40px; border-top: 0.5px solid var(--border); display: fle
     <a href="#pricing">Pricing</a>
   </div>
   <div class="nav-btns">
-    <button class="btn-ghost" onclick="location.href='/login'">Log in</button>
-    <button class="btn-primary" onclick="location.href='/signup'">Start free trial</button>
+    <button class="btn-ghost nav-login" onclick="location.href='/login'">Log in</button>
+    <button class="btn-primary" onclick="location.href='/login'">Log in</button>
     <button class="nav-hamburger" id="hamburger" aria-label="Open menu">&#9776;</button>
   </div>
 </nav>
@@ -527,10 +565,10 @@ footer { padding: 28px 40px; border-top: 0.5px solid var(--border); display: fle
     <h1>The journal that<br><em>knows your</em><br><em>prop firm rules.</em></h1>
     <p class="hero-sub">Select your firm, and PropJournal auto-fills every challenge rule. Track drawdown, hit targets, and pass — no spreadsheets, no guessing.</p>
     <div class="hero-btns">
-      <button class="btn-hero-primary" onclick="location.href='/signup'">Start free trial →</button>
-      <button class="btn-hero-ghost" onclick="location.href='#how'">See how it works</button>
+      <button class="btn-hero-primary" onclick="location.href='/signup'">Free trial →</button>
+      <button class="btn-hero-ghost" onclick="location.href='#how'">How it works</button>
     </div>
-    <p class="hero-note">30-day free trial &nbsp;·&nbsp; Pay with USDT &nbsp;·&nbsp; Cancel anytime</p>
+    <p class="hero-note">7-day free trial &nbsp;·&nbsp; Pay with USDT &nbsp;·&nbsp; Cancel anytime</p>
   </div>
 
   <div class="hero-right">
@@ -1065,89 +1103,40 @@ footer { padding: 28px 40px; border-top: 0.5px solid var(--border); display: fle
   <div class="section-tag" style="display:inline-block;margin-bottom:16px">Pricing</div>
   <h2>Simple, honest pricing</h2>
   <p class="section-sub">One plan. Everything included. No tiers, no confusion.</p>
-  <div class="toggle-row">
-    <span class="tl on" id="tl-m">Monthly</span>
-    <div class="track" id="trk" onclick="tog()" role="switch" aria-checked="false" aria-label="Switch to annual billing">
-      <div class="thumb"></div>
-    </div>
-    <span class="tl" id="tl-a">Annual &nbsp;<span class="save-tag">Save 30%</span></span>
-  </div>
 
   <div class="plans-row" id="m-plans">
     <div class="pcard">
       <div class="pcard-name">Monthly</div>
-      <div class="pcard-price"><sup>$</sup>10</div>
+      <div class="pcard-price"><sup>$</sup>12</div>
       <div class="pcard-per">per month</div>
-      <div class="pcard-total">Paid in USDT · cancel anytime</div>
+      <div class="pcard-total">$12 billed monthly · USDT</div>
       <hr>
-      <ul class="feats">
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Unlimited trades</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Unlimited challenge accounts</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Screenshot uploads</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Full analytics + charts</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Calendar heatmap</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Challenge rule tracker</li>
-      </ul>
+      <p class="feats-text">Everything included — unlimited trades, challenge accounts, screenshot uploads, full analytics, calendar heatmap & rule tracker.</p>
       <button class="pbtn outline" onclick="location.href='/signup'">Start free trial</button>
     </div>
     <div class="pcard pop">
       <div class="pop-badge">Most popular</div>
-      <div class="pcard-name">Quarterly</div>
-      <div class="pcard-price"><sup>$</sup>8</div>
+      <div class="pcard-name">6 Months</div>
+      <div class="pcard-price"><sup>$</sup>10</div>
       <div class="pcard-per">per month</div>
-      <div class="pcard-total">$24 billed every 3 months · USDT</div>
-      <div class="pcard-discount">Save 20%</div>
+      <div class="pcard-total">$60 billed every 6 months · USDT</div>
+      <div class="pcard-discount">Save 17% vs monthly</div>
       <hr>
-      <ul class="feats">
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Unlimited trades</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Unlimited challenge accounts</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Screenshot uploads</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Full analytics + charts</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Calendar heatmap</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Challenge rule tracker</li>
-      </ul>
+      <p class="feats-text">Everything included — unlimited trades, challenge accounts, screenshot uploads, full analytics, calendar heatmap & rule tracker.</p>
       <button class="pbtn solid" onclick="location.href='/signup'">Start free trial</button>
     </div>
     <div class="pcard">
-      <div class="pcard-name">Semi-annual</div>
-      <div class="pcard-price"><sup>$</sup>7</div>
+      <div class="pcard-name">Annual</div>
+      <div class="pcard-price"><sup>$</sup>8</div>
       <div class="pcard-per">per month</div>
-      <div class="pcard-total">$42 billed every 6 months · USDT</div>
-      <div class="pcard-discount">Save 30%</div>
+      <div class="pcard-total">$96 billed once per year · USDT</div>
+      <div class="pcard-discount">Best value — Save 33%</div>
       <hr>
-      <ul class="feats">
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Unlimited trades</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Unlimited challenge accounts</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Screenshot uploads</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Full analytics + charts</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Calendar heatmap</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Challenge rule tracker</li>
-      </ul>
+      <p class="feats-text">Everything included — unlimited trades, challenge accounts, screenshot uploads, full analytics, calendar heatmap & rule tracker.</p>
       <button class="pbtn outline" onclick="location.href='/signup'">Start free trial</button>
     </div>
   </div>
-
-  <div class="plans-row" id="a-plans" style="grid-template-columns:1fr;max-width:320px">
-    <div class="pcard pop">
-      <div class="pop-badge">Best value</div>
-      <div class="pcard-name">Annual</div>
-      <div class="pcard-price"><sup>$</sup>7</div>
-      <div class="pcard-per">per month</div>
-      <div class="pcard-total">$84 billed once per year · USDT</div>
-      <div class="pcard-discount">Save 30% vs monthly</div>
-      <hr>
-      <ul class="feats">
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Unlimited trades</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Unlimited challenge accounts</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Screenshot uploads</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Full analytics + charts</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Calendar heatmap</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Challenge rule tracker</li>
-      </ul>
-      <button class="pbtn solid" onclick="location.href='/signup'">Start free trial</button>
-    </div>
-  </div>
-  <p class="pricing-note">Full access during trial &nbsp;·&nbsp; Cancel anytime</p>
+  <p class="pricing-note">7-day free trial &nbsp;·&nbsp; Full access during trial &nbsp;·&nbsp; Cancel anytime</p>
 </section>
 
 <!-- FIRMS -->
@@ -1181,18 +1170,7 @@ footer { padding: 28px 40px; border-top: 0.5px solid var(--border); display: fle
     document.getElementById('mobileMenu').classList.toggle('open');
   });
 
-  // pricing toggle
-  let isAnnual = false;
-  function tog() {
-    isAnnual = !isAnnual;
-    const trk = document.getElementById('trk');
-    trk.classList.toggle('on', isAnnual);
-    trk.setAttribute('aria-checked', String(isAnnual));
-    document.getElementById('tl-m').classList.toggle('on', !isAnnual);
-    document.getElementById('tl-a').classList.toggle('on', isAnnual);
-    document.getElementById('m-plans').style.display = isAnnual ? 'none' : 'grid';
-    document.getElementById('a-plans').style.display = isAnnual ? 'grid' : 'none';
-  }
+
 
   // ── Firm card deck — smooth auto-cycle + subtle hover zoom ──
   (function() {
