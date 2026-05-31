@@ -601,42 +601,15 @@ export default function ChallengeTracker() {
             fontFamily: "'Syne', sans-serif", fontSize: '15px',
             fontWeight: '600', color: '#fff', pointerEvents: 'none',
           }}>Challenges</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', pointerEvents: 'auto' }}>
-            {/* Grid / List toggle */}
-            <div style={{ display: 'flex', background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '6px', padding: '2px', gap: '2px' }}>
-              {/* Grid view */}
-              <button
-                onClick={() => setMobileView('grid')}
-                style={{ background: mobileView === 'grid' ? '#1a1a1a' : 'transparent', border: mobileView === 'grid' ? '0.5px solid #2a2a2a' : '0.5px solid transparent', borderRadius: '4px', padding: '4px 6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-              >
-                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                  <rect x="0.5" y="0.5" width="5" height="5" rx="1" fill={mobileView === 'grid' ? '#fff' : '#666'} />
-                  <rect x="7.5" y="0.5" width="5" height="5" rx="1" fill={mobileView === 'grid' ? '#fff' : '#666'} />
-                  <rect x="0.5" y="7.5" width="5" height="5" rx="1" fill={mobileView === 'grid' ? '#fff' : '#666'} />
-                  <rect x="7.5" y="7.5" width="5" height="5" rx="1" fill={mobileView === 'grid' ? '#fff' : '#666'} />
-                </svg>
-              </button>
-              {/* List view */}
-              <button
-                onClick={() => setMobileView('list')}
-                style={{ background: mobileView === 'list' ? '#1a1a1a' : 'transparent', border: mobileView === 'list' ? '0.5px solid #2a2a2a' : '0.5px solid transparent', borderRadius: '4px', padding: '4px 6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-              >
-                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                  <rect x="0.5" y="1.5" width="12" height="2" rx="1" fill={mobileView === 'list' ? '#fff' : '#666'} />
-                  <rect x="0.5" y="5.5" width="12" height="2" rx="1" fill={mobileView === 'list' ? '#fff' : '#666'} />
-                  <rect x="0.5" y="9.5" width="12" height="2" rx="1" fill={mobileView === 'list' ? '#fff' : '#666'} />
-                </svg>
-              </button>
-            </div>
-            <button
-              onClick={() => setShowModal(true)}
-              style={{
-                background: '#fff', border: 'none', borderRadius: '5px',
-                padding: '5px 11px', fontSize: '12px', fontWeight: '600',
-                color: '#000', cursor: 'pointer', fontFamily: "'Syne', sans-serif",
-              }}
-            >+ New</button>
-          </div>
+          <button
+            onClick={() => setShowModal(true)}
+            style={{
+              background: '#fff', border: 'none', borderRadius: '5px',
+              padding: '5px 11px', fontSize: '12px', fontWeight: '600',
+              color: '#000', cursor: 'pointer', fontFamily: "'Syne', sans-serif",
+              pointerEvents: 'auto',
+            }}
+          >+ New</button>
         </div>
 
         {/* Filter tabs */}
@@ -644,13 +617,31 @@ export default function ChallengeTracker() {
           position: 'fixed', top: '52px', left: 0, right: 0,
           background: '#0a0a0a', borderBottom: '0.5px solid #111',
           padding: '6px 10px', zIndex: 199,
-          display: 'flex', gap: '5px', overflowX: 'auto', scrollbarWidth: 'none',
+          display: 'flex', alignItems: 'center', gap: '5px', overflowX: 'auto', scrollbarWidth: 'none',
         }}>
           {mobileFilterTabs.map(f => (
             <button key={f} onClick={() => setFilter(f === 'Active' ? 'In Progress' : f)} style={tabStyle(
               f === 'Active' ? filter === 'In Progress' : filter === f
             )}>{f}</button>
           ))}
+          {/* View toggle — flush right */}
+          <div style={{ marginLeft: 'auto', display: 'flex', gap: '2px', flexShrink: 0 }}>
+            <button onClick={() => setMobileView('grid')} style={{ background: 'transparent', border: 'none', padding: '4px 5px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                <rect x="0.5" y="0.5" width="5" height="5" rx="1" fill={mobileView === 'grid' ? '#fff' : '#444'} />
+                <rect x="7.5" y="0.5" width="5" height="5" rx="1" fill={mobileView === 'grid' ? '#fff' : '#444'} />
+                <rect x="0.5" y="7.5" width="5" height="5" rx="1" fill={mobileView === 'grid' ? '#fff' : '#444'} />
+                <rect x="7.5" y="7.5" width="5" height="5" rx="1" fill={mobileView === 'grid' ? '#fff' : '#444'} />
+              </svg>
+            </button>
+            <button onClick={() => setMobileView('list')} style={{ background: 'transparent', border: 'none', padding: '4px 5px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                <rect x="0.5" y="1.5" width="12" height="2" rx="1" fill={mobileView === 'list' ? '#fff' : '#444'} />
+                <rect x="0.5" y="5.5" width="12" height="2" rx="1" fill={mobileView === 'list' ? '#fff' : '#444'} />
+                <rect x="0.5" y="9.5" width="12" height="2" rx="1" fill={mobileView === 'list' ? '#fff' : '#444'} />
+              </svg>
+            </button>
+          </div>
         </div>
 
         {/* Scrollable card list */}
