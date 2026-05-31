@@ -505,8 +505,8 @@ export default function Dashboard() {
     <div style={{ display: 'flex', background: '#0a0a0a', minHeight: '100vh' }}>
       <Sidebar />
       <main style={{ marginLeft: collapsed ? '60px' : '220px', transition: 'margin-left 0.2s ease', flex: 1, padding: '32px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
-          <h1 style={{ color: '#fff', fontFamily: 'Syne, sans-serif', fontSize: '22px', fontWeight: '600', margin: 0 }}>Dashboard</h1>
+        <div style={{ marginBottom: '24px' }}>
+          <h1 style={{ color: '#fff', fontFamily: 'Syne, sans-serif', fontSize: '22px', fontWeight: '600', margin: '0 0 16px 0' }}>Dashboard</h1>
           <AccountSwitcher
             onSwitch={setActiveAccount}
             defaultAccountId={defaultAccountId}
