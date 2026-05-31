@@ -9,7 +9,6 @@ export default function ProtectedRoute({ children }) {
   const navigate = useNavigate()
 
   const checkTrial = async (session) => {
-    console.log('checkTrial called', session?.user?.id)
     if (!session) {
       setChecking(false)
       return
@@ -40,7 +39,6 @@ export default function ProtectedRoute({ children }) {
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
-      console.log('getSession result', session?.user?.id)
       setSession(session)
       await checkTrial(session)
     })

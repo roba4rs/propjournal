@@ -16,23 +16,44 @@ export default function AccountSwitcher({
   const dropdownRef = useRef(null)
 
   useEffect(() => {
-    const fetchAccounts = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      const { data } = await supabase
-        .from('accounts')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .order('created_at', { ascending: true })
-      if (data) {
-        setAccounts(data)
-        const preferred = defaultAccountId
-          ? (data.find(a => a.id === defaultAccountId) || data[0])
-          : data[0]
-        setActive(preferred || null)
-        if (onSwitch) onSwitch(preferred)
+    let cancelled = false
+
+    const fetchAccounts = async (attempt = 0) => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+
+        if (!session?.user) {
+          if (attempt < 5) {
+            setTimeout(() => { if (!cancelled) fetchAccounts(attempt + 1) }, 300 * (attempt + 1))
+          }
+          return
+        }
+
+        const { data } = await supabase
+          .from('accounts')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .order('created_at', { ascending: true })
+
+        if (cancelled) return
+
+        if (data) {
+          setAccounts(data)
+          const preferred = defaultAccountId
+            ? (data.find(a => a.id === defaultAccountId) || data[0])
+            : data[0]
+          setActive(preferred || null)
+          if (onSwitch) onSwitch(preferred)
+        }
+      } catch (err) {
+        if (attempt < 5) {
+          setTimeout(() => { if (!cancelled) fetchAccounts(attempt + 1) }, 300 * (attempt + 1))
+        }
       }
     }
+
     fetchAccounts()
+    return () => { cancelled = true }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Fetch total balance (account_size + sum of pnl) for any active account
