@@ -711,34 +711,36 @@ export default function Settings() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ color: '#cfcfcf', fontSize: '13px', fontFamily: 'DM Sans, sans-serif' }}>Plan</span>
                     <span style={{
-                      background: '#0f2219',
-                      color: '#1db97b',
-                      border: '0.5px solid #1a3826',
+                      background: badge.bg,
+                      color: badge.color,
+                      border: `0.5px solid ${badge.border}`,
                       borderRadius: '4px',
                       padding: '2px 8px',
                       fontFamily: 'DM Mono, monospace',
                       fontSize: '9px',
                       letterSpacing: '0.06em',
                     }}>
-                      FREE TRIAL
+                      {badge.label.toUpperCase()}
                     </span>
                   </div>
-                  <button
-                    onClick={() => window.location.href = '/pricing'}
-                    style={{
-                      background: '#1db97b',
-                      color: '#000',
-                      border: 'none',
-                      borderRadius: '6px',
-                      padding: '7px 14px',
-                      fontFamily: 'DM Sans, sans-serif',
-                      fontSize: '12px',
-                      fontWeight: '600',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    Upgrade
-                  </button>
+                  {isTrialPlan() && (
+                    <button
+                      onClick={() => window.location.href = '/pricing'}
+                      style={{
+                        background: '#1db97b',
+                        color: '#000',
+                        border: 'none',
+                        borderRadius: '6px',
+                        padding: '7px 14px',
+                        fontFamily: 'DM Sans, sans-serif',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Upgrade
+                    </button>
+                  )}
                 </div>
                 {isTrialPlan() && daysLeft !== null && (
                   <div style={{ color: '#c97a00', fontSize: '13px', fontFamily: 'DM Sans, sans-serif', padding: '8px 0 0' }}>
