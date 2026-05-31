@@ -33,12 +33,14 @@ export default function NewChallengeModal({ onClose, onCreated }) {
     return () => window.removeEventListener('resize', onResize)
   }, [])
 
-  const [selectedFirm,  setSelectedFirm]  = useState('')
-  const [selectedType,  setSelectedType]  = useState(null)
-  const [selectedPhase, setSelectedPhase] = useState(null)
-  const [firmOpen, setFirmOpen]           = useState(false)
-  const [phaseOpen, setPhaseOpen]         = useState(false)
-  const [keySearch, setKeySearch]         = useState('')
+  const [selectedFirm,    setSelectedFirm]    = useState('')
+  const [selectedProgram, setSelectedProgram] = useState(null)
+  const [selectedType,    setSelectedType]    = useState(null)
+  const [selectedPhase,   setSelectedPhase]   = useState(null)
+  const [firmOpen,  setFirmOpen]              = useState(false)
+  const [programOpen, setProgramOpen]         = useState(false)
+  const [phaseOpen, setPhaseOpen]             = useState(false)
+  const [keySearch, setKeySearch]             = useState('')
 
   // ── Keyboard navigation for firm dropdown ─────────────────
   useEffect(() => {
@@ -110,6 +112,7 @@ export default function NewChallengeModal({ onClose, onCreated }) {
         .from('firm_presets').select('*').eq('firm_name', selectedFirm)
       if (data) {
         setPresets(data)
+        setSelectedProgram(null)
         const types = TYPE_ORDER.filter(t => data.some(r => r.challenge_type === t))
         setAvailableTypes(types)
         setSelectedType(null); setSelectedPhase(null)
@@ -125,17 +128,22 @@ export default function NewChallengeModal({ onClose, onCreated }) {
     if (!selectedType || !presets.length) return
     const phaseOrder = ['phase_1', 'phase_2', 'phase_3', 'funded']
     const phases = phaseOrder.filter(p =>
-      presets.some(r => r.challenge_type === selectedType && r.phase === p)
+      presets.some(r =>
+        r.challenge_type === selectedType &&
+        r.phase === p &&
+        (programs.length <= 1 || r.program === selectedProgram)
+      )
     )
     setAvailablePhases(phases)
     setSelectedPhase(phases[0] || null)
-  }, [selectedType, presets])
+  }, [selectedType, presets, selectedProgram]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Auto-fill rules ────────────────────────────────────────
   useEffect(() => {
     if (!selectedFirm || selectedFirm === 'Other' || !selectedType || !selectedPhase) return
     const row = presets.find(
-      r => r.challenge_type === selectedType && r.phase === selectedPhase
+      r => r.challenge_type === selectedType && r.phase === selectedPhase &&
+        (programs.length <= 1 || r.program === selectedProgram)
     )
     if (!row) return
     setForm(prev => ({
@@ -203,13 +211,21 @@ export default function NewChallengeModal({ onClose, onCreated }) {
 
   const isOther   = selectedFirm === 'Other'
   const isFunded  = selectedPhase === 'funded'
+
+  // Distinct non-null programs for the selected firm
+  const programs = [...new Set(presets.map(r => r.program).filter(Boolean))]
+
+  // Re-derive available types when program is selected
+  const filteredTypes = programs.length > 1 && selectedProgram
+    ? TYPE_ORDER.filter(t => presets.some(r => r.challenge_type === t && r.program === selectedProgram))
+    : availableTypes
   const canCreate = (isOther ? form.custom_firm : selectedFirm) &&
     form.account_size && form.daily_drawdown_pct &&
     (isFunded || (form.profit_target_pct && form.max_drawdown_pct))
 
   // ── Shared style primitives ────────────────────────────────
   const label = {
-    display: 'block', color: '#777',
+    display: 'block', color: '#555',
     fontFamily: 'DM Sans, sans-serif',
     fontSize: '11px', marginBottom: '6px',
     textTransform: 'uppercase', letterSpacing: '0.05em',
@@ -225,7 +241,7 @@ export default function NewChallengeModal({ onClose, onCreated }) {
     width: '100%', background: '#0d0d0d',
     border: `0.5px solid ${active ? '#1db97b' : '#1e1e1e'}`,
     borderRadius: '8px', padding: '9px 12px',
-    color: active ? '#fff' : '#666',
+    color: active ? '#fff' : '#444',
     fontFamily: 'DM Sans, sans-serif', fontSize: '13px',
     cursor: 'pointer', display: 'flex',
     justifyContent: 'space-between', alignItems: 'center',
@@ -247,7 +263,7 @@ export default function NewChallengeModal({ onClose, onCreated }) {
     flex: 1, background: active ? '#0c1f16' : '#0d0d0d',
     border: `0.5px solid ${active ? '#1db97b' : '#1e1e1e'}`,
     borderRadius: '8px', padding: '8px 6px',
-    color: active ? '#1db97b' : '#666',
+    color: active ? '#1db97b' : '#444',
     fontFamily: 'DM Sans, sans-serif', fontSize: '12px',
     textAlign: 'center', cursor: 'pointer',
   })
@@ -299,7 +315,7 @@ export default function NewChallengeModal({ onClose, onCreated }) {
           </div>
           <button
             onClick={onClose}
-            style={{ background: 'none', border: 'none', color: '#666', fontSize: '20px', cursor: 'pointer', lineHeight: 1 }}
+            style={{ background: 'none', border: 'none', color: '#444', fontSize: '20px', cursor: 'pointer', lineHeight: 1 }}
           >×</button>
         </div>
 
@@ -310,7 +326,7 @@ export default function NewChallengeModal({ onClose, onCreated }) {
           <div style={{ flex: isMobile ? '1' : '0 0 300px', padding: '16px 16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
 
             {/* Section label */}
-            <p style={{ color: '#555', fontFamily: 'DM Sans, sans-serif', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
+            <p style={{ color: '#333', fontFamily: 'DM Sans, sans-serif', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
               Firm Setup
             </p>
 
@@ -323,7 +339,7 @@ export default function NewChallengeModal({ onClose, onCreated }) {
                   onClick={() => { setFirmOpen(o => !o); setPhaseOpen(false) }}
                 >
                   <span>{selectedFirm || 'Select firm'}</span>
-                  <span style={{ color: '#666', fontSize: '9px' }}>{firmOpen ? '▲' : '▼'}</span>
+                  <span style={{ color: '#444', fontSize: '9px' }}>{firmOpen ? '▲' : '▼'}</span>
                 </div>
                 {firmOpen && (
                   <div style={{ ...dropdown, display: 'flex', flexDirection: 'column' }}>
@@ -365,15 +381,49 @@ export default function NewChallengeModal({ onClose, onCreated }) {
               </div>
             )}
 
+            {/* Program dropdown — only shown if firm has multiple programs */}
+            {!isOther && programs.length > 1 && (
+              <div>
+                <label style={label}>Program</label>
+                <div style={{ position: 'relative' }}>
+                  <div
+                    style={selectTrigger(!!selectedProgram)}
+                    onClick={() => { setProgramOpen(o => !o); setFirmOpen(false); setPhaseOpen(false) }}
+                  >
+                    <span>{selectedProgram || 'Select program'}</span>
+                    <span style={{ color: '#444', fontSize: '9px' }}>{programOpen ? '▲' : '▼'}</span>
+                  </div>
+                  {programOpen && (
+                    <div style={dropdown}>
+                      {programs.map(p => (
+                        <div key={p} style={dropItem(selectedProgram === p)}
+                          onClick={() => {
+                            setSelectedProgram(p)
+                            setSelectedType(null)
+                            setSelectedPhase(null)
+                            setAvailablePhases([])
+                            clearRuleFields()
+                            setProgramOpen(false)
+                          }}
+                          onMouseEnter={e => { if (selectedProgram !== p) e.currentTarget.style.background = '#1e1e1e' }}
+                          onMouseLeave={e => { if (selectedProgram !== p) e.currentTarget.style.background = 'transparent' }}
+                        >{p}</div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Challenge type pills */}
-            {!isOther && !isFunded && availableTypes.length > 0 && (
+            {!isOther && !isFunded && filteredTypes.length > 0 && (programs.length <= 1 || selectedProgram) && (
               <div>
                 <label style={label}>Challenge Type</label>
                 <div style={{ display: 'flex', gap: '6px' }}>
-                  {availableTypes.map(t => (
+                  {filteredTypes.map(t => (
                     <button key={t} onClick={() => setSelectedType(t)} style={pill(selectedType === t)}>
                       <span style={{ display: 'block', fontWeight: '600', fontSize: '12px' }}>{TYPE_META[t]?.label || t}</span>
-                      <span style={{ display: 'block', fontSize: '10px', color: selectedType === t ? '#1db97b88' : '#555', marginTop: '2px' }}>
+                      <span style={{ display: 'block', fontSize: '10px', color: selectedType === t ? '#1db97b88' : '#333', marginTop: '2px' }}>
                         {TYPE_META[t]?.desc}
                       </span>
                     </button>
@@ -398,7 +448,7 @@ export default function NewChallengeModal({ onClose, onCreated }) {
                   }}
                 >
                   <span>{selectedPhase ? PHASE_LABELS[selectedPhase] : (isOther ? 'Phase 1' : '—')}</span>
-                  <span style={{ color: '#666', fontSize: '9px' }}>{phaseOpen ? '▲' : '▼'}</span>
+                  <span style={{ color: '#444', fontSize: '9px' }}>{phaseOpen ? '▲' : '▼'}</span>
                 </div>
                 {phaseOpen && (
                   <div style={dropdown}>
@@ -429,7 +479,7 @@ export default function NewChallengeModal({ onClose, onCreated }) {
           {/* RIGHT — account size + rules */}
           <div style={{ flex: 1, padding: '16px 16px', display: 'flex', flexDirection: 'column', gap: '14px', borderTop: isMobile ? '0.5px solid #1a1a1a' : 'none' }}>
 
-            <p style={{ color: '#555', fontFamily: 'DM Sans, sans-serif', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
+            <p style={{ color: '#333', fontFamily: 'DM Sans, sans-serif', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
               Account & Rules
             </p>
 
@@ -456,7 +506,7 @@ export default function NewChallengeModal({ onClose, onCreated }) {
                   background: (autoFilled || isOther) ? '#1db97b' : '#2a2a2a',
                   transition: 'background 0.2s', flexShrink: 0,
                 }} />
-                <span style={{ color: '#666', fontFamily: 'DM Sans, sans-serif', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                <span style={{ color: '#444', fontFamily: 'DM Sans, sans-serif', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                   Challenge Rules
                 </span>
               </div>
@@ -533,7 +583,7 @@ export default function NewChallengeModal({ onClose, onCreated }) {
           <button onClick={onClose} style={{
             flex: 1, background: 'transparent',
             border: '0.5px solid #1e1e1e', borderRadius: '8px',
-            padding: '10px', color: '#777',
+            padding: '10px', color: '#555',
             fontFamily: 'DM Sans, sans-serif', fontSize: '13px', cursor: 'pointer',
           }}>Cancel</button>
           <button onClick={handleSubmit} disabled={loading || !canCreate} style={{
