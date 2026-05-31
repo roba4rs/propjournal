@@ -1,0 +1,9 @@
+{
+  "routes": [
+    { "src": "/static/(.*)", "dest": "/static/$1" },
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/service-worker.js", "dest": "/service-worker.js" },
+    { "src": "/", "dest": "/landing.html" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
+}
