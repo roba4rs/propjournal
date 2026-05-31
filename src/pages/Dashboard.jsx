@@ -349,6 +349,13 @@ export default function Dashboard() {
   const defaultAccountId = searchParams.get('account')
 
   const [activeAccount, setActiveAccount] = useState(null)
+  const [paymentToast, setPaymentToast] = useState(searchParams.get('payment') === 'success')
+
+  useEffect(() => {
+    if (!paymentToast) return
+    const t = setTimeout(() => setPaymentToast(false), 5000)
+    return () => clearTimeout(t)
+  }, [paymentToast])
 
   // Persist active account so Analytics can open the same one
   useEffect(() => {
@@ -416,6 +423,19 @@ export default function Dashboard() {
         </div>
 
         <main style={{ paddingTop: '52px', paddingBottom: '60px', flex: 1, overflowY: 'auto' }}>
+          {paymentToast && (
+            <div style={{
+              margin: '12px 14px 0',
+              background: '#0f2219', border: '0.5px solid #1a3826',
+              borderRadius: '10px', padding: '12px 16px',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            }}>
+              <span style={{ color: '#1db97b', fontFamily: 'DM Sans, sans-serif', fontSize: '13px' }}>
+                ✓ Payment confirmed — your plan is now active!
+              </span>
+              <button onClick={() => setPaymentToast(false)} style={{ background: 'none', border: 'none', color: '#1db97b', cursor: 'pointer', fontSize: '16px', lineHeight: 1 }}>×</button>
+            </div>
+          )}
           <div style={{ padding: '14px 16px 12px', borderBottom: '0.5px solid #111' }}>
             <div style={{ fontSize: '11px', color: '#777', marginBottom: '3px', fontFamily: 'DM Sans, sans-serif' }}>Total PnL</div>
             <div style={{ fontSize: '36px', fontWeight: '500', color: stats.totalPnl >= 0 ? '#1db97b' : '#c03535', lineHeight: 1, marginBottom: '5px', fontFamily: 'DM Sans, sans-serif' }}>
@@ -486,7 +506,19 @@ export default function Dashboard() {
       <Sidebar />
       <main style={{ marginLeft: collapsed ? '60px' : '220px', transition: 'margin-left 0.2s ease', flex: 1, padding: '32px' }}>
         <h1 style={{ color: '#fff', fontFamily: 'Syne, sans-serif', fontSize: '22px', fontWeight: '600', marginBottom: '24px' }}>Dashboard</h1>
-        <AccountSwitcher onSwitch={setActiveAccount} defaultAccountId={defaultAccountId} />
+        {paymentToast && (
+          <div style={{
+            marginBottom: '24px',
+            background: '#0f2219', border: '0.5px solid #1a3826',
+            borderRadius: '10px', padding: '14px 18px',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          }}>
+            <span style={{ color: '#1db97b', fontFamily: 'DM Sans, sans-serif', fontSize: '14px' }}>
+              ✓ Payment confirmed — your plan is now active!
+            </span>
+            <button onClick={() => setPaymentToast(false)} style={{ background: 'none', border: 'none', color: '#1db97b', cursor: 'pointer', fontSize: '18px', lineHeight: 1 }}>×</button>
+          </div>
+        )}
         <div style={{ display: 'flex', gap: '20px', alignItems: 'stretch', marginBottom: '24px' }}>
           <div style={{ flex: '0 0 30%', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
             <ScoreCard trades={trades} />

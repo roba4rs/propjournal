@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 
 export default function ProtectedRoute({ children }) {
   const [session, setSession] = useState(undefined)
   const [trialExpired, setTrialExpired] = useState(false)
   const [checking, setChecking] = useState(true)
+  const navigate = useNavigate()
 
   const checkTrial = async (session) => {
+    console.log('checkTrial called', session?.user?.id)
     if (!session) {
       setChecking(false)
       return
@@ -28,7 +30,7 @@ export default function ProtectedRoute({ children }) {
         const trialEnd = new Date(trialStart)
         trialEnd.setDate(trialEnd.getDate() + 7)
         if (now > trialEnd) {
-          setTrialExpired(true)
+          navigate('/pricing?expired=true', { replace: true })
         }
       }
     }
@@ -37,13 +39,12 @@ export default function ProtectedRoute({ children }) {
   }
 
   useEffect(() => {
-    // Initial session check only
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      console.log('getSession result', session?.user?.id)
       setSession(session)
-      checkTrial(session)
+      await checkTrial(session)
     })
 
-    // Only react to actual sign-in/sign-out, not token refreshes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
         setSession(session)
@@ -55,6 +56,6 @@ export default function ProtectedRoute({ children }) {
 
   if (session === undefined || checking) return null
   if (!session) return <Navigate to="/login" replace />
-  if (trialExpired) return <Navigate to="/pricing" replace />
+  if (trialExpired) return null
   return children
 }

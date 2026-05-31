@@ -30,9 +30,9 @@ export default async function handler(req, res) {
         price_currency: 'usd',
         order_id: `${user_id}_${plan}_${Date.now()}`,
         order_description: selected.description,
-        ipn_callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/nowpayments-webhook`,
-        success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?payment=success`,
-        cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing?payment=cancelled`,
+        ipn_callback_url: `${process.env.APP_URL}/api/nowpayments-webhook`,
+        success_url: `${process.env.APP_URL}/dashboard?payment=success`,
+        cancel_url: `${process.env.APP_URL}/pricing?payment=cancelled`,
       }),
     });
 
