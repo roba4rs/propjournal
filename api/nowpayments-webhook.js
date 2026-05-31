@@ -6,18 +6,35 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
+// Disable Vercel's automatic body parsing — we need the raw bytes for HMAC
+export const config = {
+  api: { bodyParser: false },
+};
+
+// Read raw body from the request stream
+function getRawBody(req) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    req.on('data', chunk => chunks.push(chunk));
+    req.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
+    req.on('error', reject);
+  });
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    // Verify HMAC-SHA512 signature
+    // Read raw body before any parsing
+    const rawBody = await getRawBody(req);
+
+    // Verify HMAC-SHA512 signature over the raw body
     const signature = req.headers['x-nowpayments-sig'];
-    const body = JSON.stringify(req.body);
     const hmac = crypto
       .createHmac('sha512', process.env.NOWPAYMENTS_IPN_SECRET)
-      .update(body)
+      .update(rawBody)
       .digest('hex');
 
     if (hmac !== signature) {
@@ -25,7 +42,8 @@ export default async function handler(req, res) {
       return res.status(401).json({ error: 'Invalid signature' });
     }
 
-    const { payment_status, order_id } = req.body;
+    // Now safe to parse
+    const { payment_status, order_id } = JSON.parse(rawBody);
 
     // Only process confirmed/finished payments
     if (payment_status !== 'confirmed' && payment_status !== 'finished') {
