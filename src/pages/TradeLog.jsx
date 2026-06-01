@@ -1167,11 +1167,14 @@ useEffect(() => {
               tradesByAccount[t.account_id].push(t);
             });
           }
-          // Keep all accounts — personal + all challenge statuses
-          setAccounts(data);
+          // Only show personal accounts + in-progress (active) and funded challenges
+          const filtered = data.filter(a =>
+            a.type === 'personal' || a.status === 'active' || a.status === 'funded'
+          );
+          setAccounts(filtered);
           // Default to last selected account, fallback to first
           const savedId = localStorage.getItem('activeAccountId');
-          const preferred = savedId ? (data.find(a => a.id === savedId) || data[0]) : data[0];
+          const preferred = savedId ? (filtered.find(a => a.id === savedId) || filtered[0]) : filtered[0];
           setActiveAccount(preferred || null);
         }
       } catch {
