@@ -113,9 +113,10 @@ function toPolyStr(pts) {
 }
 
 function dataPoints(scores) {
-  const keys = ['winRate', 'profitFactor', 'avgWinLoss', 'recovery', 'maxDrawdown', 'consistency']
+  // Order must match axisLabels: Win%, ProfitFactor, MaxDrawdown, Recovery, AvgWinLoss, Consistency
+  const keys = ['winRate', 'profitFactor', 'maxDrawdown', 'recovery', 'avgWinLoss', 'consistency']
   return keys.map((k, i) => {
-    const val = scores[k] / 100
+    const val = Math.max(0.02, Math.min(1, scores[k] / 100))
     return axisPoint(i, R * val)
   })
 }
@@ -161,9 +162,9 @@ export default function ScoreCard({ trades, mobile }) {
   const axisLabels = [
     { lines: ['Win %'],           anchor: 'middle', dx: 0,   dy: -10 },
     { lines: ['Profit', 'Factor'],anchor: 'start',  dx: 10,  dy: -2  },
-    { lines: ['Avg', 'Win/Loss'], anchor: 'start',  dx: 10,  dy: -2  },
+    { lines: ['Max', 'Drawdown'], anchor: 'start',  dx: 10,  dy: -2  },
     { lines: ['Recovery'],        anchor: 'middle', dx: 0,   dy: 14  },
-    { lines: ['Max', 'Drawdown'], anchor: 'end',    dx: -10, dy: -2  },
+    { lines: ['Avg', 'Win/Loss'], anchor: 'end',    dx: -10, dy: -2  },
     { lines: ['Consis-', 'tency'],anchor: 'end',    dx: -10, dy: -2  },
   ]
 
@@ -232,18 +233,19 @@ export default function ScoreCard({ trades, mobile }) {
           const outer = axisPoint(i, R + 16)
           const lbl   = axisLabels[i]
           const x = (outer.x + lbl.dx).toFixed(1)
-          const baseY = outer.y + lbl.dy
+          const baseY = (outer.y + lbl.dy).toFixed(1)
           return (
             <text
               key={i}
               x={x}
+              y={baseY}
               textAnchor={lbl.anchor}
               fill="#666"
               fontSize="9"
               fontFamily="DM Sans, sans-serif"
             >
               {lbl.lines.map((line, li) => (
-                <tspan key={li} x={x} dy={li === 0 ? baseY.toFixed(1) : '11'} dominantBaseline="auto">
+                <tspan key={li} x={x} dy={li === 0 ? '0' : '11'}>
                   {line}
                 </tspan>
               ))}

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import Sidebar from "../components/Sidebar";
+import AccountSwitcher from "../components/AccountSwitcher";
 import { supabase } from "../supabaseClient";
 import { useSidebar } from "../SidebarContext";
 import { useLocation } from 'react-router-dom';
@@ -1038,7 +1039,7 @@ function SummaryBar({ trades }) {
     <div style={{
       display: "flex", gap: "1px", background: "#1a1a1a",
       borderRadius: "10px", overflow: "hidden",
-      border: "0.5px solid #1a1a1a", marginBottom: "24px",
+      border: "0.5px solid #1a1a1a", marginBottom: "12px",
     }}>
       {[
         { label: "Total Trades", value: total },
@@ -1216,14 +1217,12 @@ useEffect(() => {
               tradesByAccount[t.account_id].push(t);
             });
           }
-          // Filter: keep personal accounts + active/in-progress challenges only
-          const active = data.filter(acc => {
-            if (acc.type === "personal") return true;
-            const status = computeChallengeStatus(tradesByAccount[acc.id] || [], acc);
-            return status === "active";
-          });
-          setAccounts(active);
-          setActiveAccount(active[0] || null);
+          // Keep all accounts — personal + all challenge statuses
+          setAccounts(data);
+          // Default to last selected account, fallback to first
+          const savedId = localStorage.getItem('activeAccountId');
+          const preferred = savedId ? (data.find(a => a.id === savedId) || data[0]) : data[0];
+          setActiveAccount(preferred || null);
         }
       } catch {
         setError("Failed to load accounts.");
@@ -1560,7 +1559,7 @@ useEffect(() => {
         <MobileAccountRow
           accounts={accounts}
           activeAccount={activeAccount}
-          onSwitch={setActiveAccount}
+          onSwitch={(acc) => { setActiveAccount(acc); if (acc?.id) localStorage.setItem('activeAccountId', acc.id); }}
         />
 
         {/* ── ROW 3: Filter bar — All / Win / Loss / Long / Short ── */}
@@ -1718,25 +1717,47 @@ useEffect(() => {
         `}</style>
 
         {/* Page Header */}
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "28px" }}>
-          <div>
-            <h1 style={{ margin: 0, fontFamily: "'Syne', sans-serif", fontSize: "22px", fontWeight: 700, color: "#fff" }}>Trade Log</h1>
-            <p style={{ margin: "4px 0 0", fontSize: "13px", color: "#777" }}>
-              {activeAccount ? activeAccount.name : "Loading…"}
-            </p>
+        <div style={{ marginBottom: "14px" }}>
+          <h1 style={{ margin: "0 0 16px 0", fontFamily: "'Syne', sans-serif", fontSize: "22px", fontWeight: 700, color: "#fff" }}>Trade Log</h1>
+          <div style={{ marginTop: "14px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            {/* Left: switcher + account name */}
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <div style={{ marginTop: "34px" }}>
+                <AccountSwitcher
+                  onSwitch={(acc) => { setActiveAccount(acc); if (acc?.id) localStorage.setItem("activeAccountId", acc.id); }}
+                  defaultAccountId={activeAccount?.id || localStorage.getItem("activeAccountId")}
+                  showBalance={false}
+                />
+              </div>
+              {activeAccount && (
+                <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+                  <span style={{ fontFamily: "'Syne', sans-serif", fontSize: "18px", fontWeight: 700, color: "#e8e8e8" }}>
+                    {activeAccount.name || activeAccount.firm_name || "Account"}
+                  </span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                    {activeAccount.account_size && (
+                      <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "11px", color: "#aaa" }}>
+                        ${Number(activeAccount.account_size).toLocaleString()}
+                      </span>
+                    )}
+                    {activeAccount.created_at && (
+                      <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "11px", color: "#777" }}>
+                        Since {new Date(activeAccount.created_at).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+            {/* Right: Log Trade button */}
+            <button onClick={openNew} style={{
+              padding: "10px 18px", background: "#fff", border: "none",
+              borderRadius: "8px", color: "#000",
+              fontFamily: "'Syne', sans-serif", fontSize: "13px", fontWeight: 600,
+              cursor: "pointer", whiteSpace: "nowrap",
+            }}>+ Log Trade</button>
           </div>
-          <button onClick={openNew} style={{
-            padding: "10px 18px", background: "#fff", border: "none",
-            borderRadius: "8px", color: "#000",
-            fontFamily: "'Syne', sans-serif", fontSize: "13px", fontWeight: 600,
-            cursor: "pointer",
-          }}>+ Log Trade</button>
         </div>
-
-        {/* Account Tabs */}
-        {accounts.length > 0 && (
-          <AccountTabs accounts={accounts} activeId={activeAccount?.id} onSwitch={setActiveAccount} />
-        )}
 
         {/* Page-level error */}
         {error && (
@@ -1776,7 +1797,37 @@ useEffect(() => {
           ))}
         </div>
 
-        {/* Table */}
+        {/* Export + Table */}
+        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "8px" }}>
+          <button onClick={() => {
+            const headers = ["Date", "Pair", "Direction", "Entry", "Stop Loss", "Take Profit", "R:R", "P&L", "Session", "Outcome", "Notes"];
+            const rows = filtered.map(t => [
+              t.date, t.pair, t.direction,
+              t.entry ?? "", t.stop_loss ?? "", t.take_profit ?? "",
+              t.rr ?? "", t.pnl ?? "",
+              t.session, t.outcome ?? "", (t.notes || "").replace(/,/g, " "),
+            ]);
+            const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
+            const blob = new Blob([csv], { type: "text/csv" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `trades-${activeAccount?.name || "export"}-${new Date().toISOString().split("T")[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+          }} style={{
+            padding: "7px 14px", background: "transparent",
+            border: "0.5px solid #1e1e1e", borderRadius: "7px",
+            color: "#777", cursor: "pointer",
+            fontFamily: "'DM Mono', monospace", fontSize: "11px",
+            textTransform: "uppercase", letterSpacing: "0.08em",
+            transition: "all 0.15s",
+          }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = "#555"; e.currentTarget.style.color = "#ccc"; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = "#1e1e1e"; e.currentTarget.style.color = "#777"; }}
+          >↓ Export CSV</button>
+        </div>
+
         <div style={{ background: "#111", border: "0.5px solid #1e1e1e", borderRadius: "12px", overflow: "hidden" }}>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>

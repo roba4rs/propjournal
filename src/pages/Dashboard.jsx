@@ -346,7 +346,7 @@ function DayTradesModal({ date, trades, onClose, onSelectTrade, isMobile }) {
 export default function Dashboard() {
   const { collapsed } = useSidebar()
   const [searchParams] = useSearchParams()
-  const defaultAccountId = searchParams.get('account')
+  const defaultAccountId = searchParams.get('account') || localStorage.getItem('activeAccountId')
 
   const [activeAccount, setActiveAccount] = useState(null)
   const [paymentToast, setPaymentToast] = useState(searchParams.get('payment') === 'success')
@@ -412,7 +412,10 @@ export default function Dashboard() {
         }}>
           <div style={{ pointerEvents: 'auto' }}>
             <AccountSwitcher
-              onSwitch={setActiveAccount}
+              onSwitch={(acc) => {
+                setActiveAccount(acc)
+                if (acc?.id) localStorage.setItem('activeAccountId', acc.id)
+              }}
               mobile
               showBalance={false}
               compact
@@ -508,7 +511,10 @@ export default function Dashboard() {
         <div style={{ marginBottom: '24px' }}>
           <h1 style={{ color: '#fff', fontFamily: 'Syne, sans-serif', fontSize: '22px', fontWeight: '600', margin: '0 0 16px 0' }}>Dashboard</h1>
           <AccountSwitcher
-            onSwitch={setActiveAccount}
+            onSwitch={(acc) => {
+              setActiveAccount(acc)
+              if (acc?.id) localStorage.setItem('activeAccountId', acc.id)
+            }}
             defaultAccountId={defaultAccountId}
           />
         </div>

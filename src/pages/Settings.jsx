@@ -1301,6 +1301,21 @@ export default function Settings() {
 
             </div>{/* end grid */}
 
+            {/* ── Support ── */}
+            <div style={{ marginTop: '20px', padding: '14px 18px', background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div>
+                <div style={{ fontSize: '13px', color: '#ccc', fontFamily: 'DM Sans, sans-serif', fontWeight: '500', marginBottom: '2px' }}>Need help?</div>
+                <div style={{ fontSize: '11px', color: '#666', fontFamily: 'DM Sans, sans-serif' }}>Reach out and we'll get back to you.</div>
+              </div>
+              <a href="mailto:robel4cs@gmail.com" style={{
+                padding: '8px 16px', background: 'transparent',
+                border: '0.5px solid #1e1e1e', borderRadius: '8px',
+                color: '#aaa', fontFamily: 'DM Mono, monospace',
+                fontSize: '11px', textDecoration: 'none',
+                letterSpacing: '0.04em',
+              }}>robel4cs@gmail.com</a>
+            </div>
+
             {/* ── Save / Cancel ── */}
             <div style={{ display: 'flex', gap: '8px', marginTop: '20px' }}>
               <button

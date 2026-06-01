@@ -309,49 +309,98 @@ export default function Sidebar() {
           borderTop: '0.5px solid #1a1a1a',
         }}>
           {user && !collapsed && (
-            <div style={{ marginBottom: '12px' }}>
-              <p style={{
-                color: '#fff',
-                fontFamily: 'DM Sans, sans-serif',
-                fontSize: '13px',
-                fontWeight: '500',
-                margin: 0,
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-              }}>{user.name}</p>
-              <span style={{
-                display: 'inline-block',
-                marginTop: '4px',
-                padding: '2px 8px',
-                background: '#0f2219',
-                border: '0.5px solid #1a3826',
-                borderRadius: '4px',
-                color: '#1db97b',
-                fontFamily: 'DM Mono, monospace',
-                fontSize: '11px',
-              }}>{user.plan}</span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+              <div style={{ minWidth: 0 }}>
+                <p style={{
+                  color: '#fff',
+                  fontFamily: 'DM Sans, sans-serif',
+                  fontSize: '13px',
+                  fontWeight: '500',
+                  margin: 0,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}>{user.name}</p>
+                <span style={{
+                  display: 'inline-block',
+                  marginTop: '4px',
+                  padding: '2px 8px',
+                  background: '#0f2219',
+                  border: '0.5px solid #1a3826',
+                  borderRadius: '4px',
+                  color: '#1db97b',
+                  fontFamily: 'DM Mono, monospace',
+                  fontSize: '11px',
+                }}>{user.plan}</span>
+              </div>
+              <button
+                onClick={confirmLogout}
+                title="Sign out"
+                style={{
+                  flexShrink: 0,
+                  width: '32px', height: '32px',
+                  background: 'transparent',
+                  border: '0.5px solid #1e1e1e',
+                  borderRadius: '8px',
+                  color: '#666',
+                  cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '15px',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = '#c03535'; e.currentTarget.style.color = '#c03535'; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = '#1e1e1e'; e.currentTarget.style.color = '#666'; }}
+              >⏻</button>
             </div>
           )}
-          <button
-            onClick={handleLogout}
-            title={collapsed ? 'Sign out' : ''}
-            style={{
-              width: '100%',
-              background: 'transparent',
-              border: '0.5px solid #1e1e1e',
-              borderRadius: '8px',
-              padding: '9px',
-              color: '#666',
-              fontFamily: 'DM Sans, sans-serif',
-              fontSize: collapsed ? '16px' : '13px',
-              cursor: 'pointer',
-              textAlign: 'center',
-              whiteSpace: 'nowrap',
+          {user && collapsed && (
+            <button
+              onClick={confirmLogout}
+              title="Sign out"
+              style={{
+                width: '100%',
+                background: 'transparent',
+                border: '0.5px solid #1e1e1e',
+                borderRadius: '8px',
+                padding: '9px',
+                color: '#666',
+                fontSize: '16px',
+                cursor: 'pointer',
+                textAlign: 'center',
+              }}
+            >⏻</button>
+          )}
+          {showConfirm && (
+            <div style={{
+              position: 'fixed', inset: 0, zIndex: 999,
+              background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(2px)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
-          >
-            {collapsed ? '⏻' : 'Sign out'}
-          </button>
+              onClick={cancelLogout}
+            >
+              <div style={{
+                background: '#111', border: '0.5px solid #1e1e1e',
+                borderRadius: '12px', padding: '24px 28px', width: '280px',
+              }}
+                onClick={e => e.stopPropagation()}
+              >
+                <p style={{ color: '#fff', fontFamily: 'DM Sans, sans-serif', fontSize: '15px', fontWeight: '600', margin: '0 0 8px' }}>Sign out?</p>
+                <p style={{ color: '#777', fontFamily: 'DM Sans, sans-serif', fontSize: '13px', margin: '0 0 20px' }}>You'll need to sign back in to access your trades.</p>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button onClick={handleLogout} style={{
+                    flex: 1, padding: '9px', background: '#c03535', border: 'none',
+                    borderRadius: '8px', color: '#fff', fontFamily: 'DM Sans, sans-serif',
+                    fontSize: '13px', fontWeight: '600', cursor: 'pointer',
+                  }}>Sign out</button>
+                  <button onClick={cancelLogout} style={{
+                    flex: 1, padding: '9px', background: 'transparent',
+                    border: '0.5px solid #2a2a2a', borderRadius: '8px',
+                    color: '#aaa', fontFamily: 'DM Sans, sans-serif',
+                    fontSize: '13px', cursor: 'pointer',
+                  }}>Cancel</button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     )

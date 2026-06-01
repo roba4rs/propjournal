@@ -87,6 +87,7 @@ export default function AccountSwitcher({
   const handleSwitch = (account) => {
     setActive(account)
     setOpen(false)
+    if (account?.id) localStorage.setItem('activeAccountId', account.id)
     if (onSwitch) onSwitch(account)
   }
 
