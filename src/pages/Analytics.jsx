@@ -5,7 +5,7 @@ import { supabase } from '../supabaseClient'
 import { useSidebar } from '../SidebarContext'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Cell, Legend,
+  Tooltip, ResponsiveContainer, Cell,
   ScatterChart, Scatter, ZAxis,
   AreaChart, Area, ReferenceLine,
 } from 'recharts'
