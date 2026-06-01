@@ -26,38 +26,6 @@ const PAIRS = [
 ];
 const SESSIONS = ["london", "new_york", "asian"];
 
-// ─── Challenge status helper (mirrors ChallengeTracker logic) ─────────────────
-function _computeChallengeStatus(trades, account) {
-  if (account.failure_reason) return "failed";
-  const withPnl = trades.filter(t => t.pnl != null);
-  const accountSize = parseFloat(account.account_size) || 0;
-  const maxDD = parseFloat(account.max_drawdown) || 0;
-  const dailyDD = parseFloat(account.daily_drawdown) || 0;
-  const profitTarget = parseFloat(account.profit_target) || 0;
-  const minDays = account.min_trading_days || 0;
-  const netPnl = withPnl.reduce((s, t) => s + parseFloat(t.pnl), 0);
-
-  let balance = accountSize, lowestBalance = accountSize;
-  for (const t of withPnl) {
-    balance += parseFloat(t.pnl);
-    if (balance < lowestBalance) lowestBalance = balance;
-  }
-  const maxDrawdownUsed = Math.max(0, accountSize - lowestBalance);
-
-  const byDay = {};
-  withPnl.forEach(t => { byDay[t.date] = (byDay[t.date] || 0) + parseFloat(t.pnl); });
-  const worstDayLoss = Object.values(byDay).length > 0
-    ? Math.max(0, ...Object.values(byDay).map(v => -v)) : 0;
-
-  if ((maxDD > 0 && maxDrawdownUsed >= maxDD) || (dailyDD > 0 && worstDayLoss >= dailyDD)) return "failed";
-
-  const tradingDays = new Set(trades.map(t => t.date)).size;
-  const minDaysMet = minDays === 0 || tradingDays >= minDays;
-  if (profitTarget > 0 && netPnl >= profitTarget && minDaysMet) return "passed";
-
-  return "active";
-}
-
 // ─── Pair Combobox ──────────────────────────────────────────────────────────────
 function PairCombobox({ value, onChange, inputStyle: customInputStyle }) {
   const [query, setQuery] = useState(value || "");
@@ -1051,24 +1019,6 @@ function SummaryBar({ trades }) {
           <div style={{ fontSize: "10px", fontFamily: "'DM Mono', monospace", color: "#777", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "6px" }}>{s.label}</div>
           <div style={{ fontSize: "18px", fontFamily: "'Syne', sans-serif", fontWeight: 600, color: s.color || "#e0e0e0" }}>{s.value}</div>
         </div>
-      ))}
-    </div>
-  );
-}
-
-// ─── Account Tabs ─────────────────────────────────────────────────────────────
-function _AccountTabs({ accounts, activeId, onSwitch }) {
-  return (
-    <div style={{ display: "flex", gap: "8px", marginBottom: "24px", overflowX: "auto" }}>
-      {accounts.map(acc => (
-        <button key={acc.id} onClick={() => onSwitch(acc)} style={{
-          background: activeId === acc.id ? "#0f2219" : "transparent",
-          border: `0.5px solid ${activeId === acc.id ? "#1a3826" : "#1e1e1e"}`,
-          borderRadius: "8px", padding: "8px 16px",
-          color: activeId === acc.id ? "#1db97b" : "#777",
-          fontFamily: "'DM Sans', sans-serif", fontSize: "13px",
-          fontWeight: 500, cursor: "pointer", whiteSpace: "nowrap",
-        }}>{acc.name}</button>
       ))}
     </div>
   );
