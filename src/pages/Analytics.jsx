@@ -272,7 +272,8 @@ function HourDayHeatmap({ trades, mobile }) {
   return (
     <div style={{ display: 'flex', gap: mobile ? 12 : 32, flexDirection: mobile ? 'column' : 'row' }}>
       {/* Heatmap grid */}
-      <div style={{ flex: 1, minWidth: 0 }}>
+      <div style={{ flex: 1, minWidth: 0, overflowX: mobile ? 'auto' : 'visible', WebkitOverflowScrolling: 'touch' }}>
+        <div style={{ minWidth: mobile ? 320 : 'auto' }}>
         <div style={{ display: 'flex', marginLeft: 32, marginBottom: 4 }}>
           {hours.map(h => (
             <div key={h} style={{ flex: 1, textAlign: 'center',
@@ -314,6 +315,7 @@ function HourDayHeatmap({ trades, mobile }) {
               background: `rgba(29,185,123,${a})` }} />
           ))}
           <div style={{ fontFamily: font.mono, fontSize: 9, color: T.muted }}>Profit</div>
+        </div>
         </div>
       </div>
 
@@ -501,7 +503,7 @@ export default function Analytics() {
           marginLeft: isMobile ? 0 : (collapsed ? 60 : 220),
           transition: 'margin-left 0.2s ease',
           flex: 1, minHeight: '100vh',
-          padding: isMobile ? '60px 10px 84px' : '32px 36px',
+          padding: isMobile ? '60px 12px calc(60px + env(safe-area-inset-bottom) + 24px)' : '32px 36px',
           maxWidth: '100%',
         }}>
 
@@ -880,13 +882,13 @@ export default function Analytics() {
               </Card>
 
               {/* ── 8. Pair Performance table ── */}
-              <Card mobile={isMobile} style={{ marginBottom: isMobile ? 8 : 40 }}>
+              <Card mobile={isMobile} style={{ marginBottom: isMobile ? 0 : 40 }}>
                 <SectionTitle mobile={isMobile}>Pair Performance</SectionTitle>
                 {pairData.length === 0 ? (
                   <EmptyState message="No pair data available." />
                 ) : (
-                  <div style={{ width: '100%' }}>
-                    <table style={{ width: '100%', minWidth: isMobile ? 560 : '100%', borderCollapse: 'collapse' }}>
+                  <div style={{ width: '100%', overflowX: isMobile ? 'auto' : 'visible', WebkitOverflowScrolling: 'touch' }}>
+                    <table style={{ width: '100%', minWidth: isMobile ? 480 : '100%', borderCollapse: 'collapse' }}>
                       <thead>
                         <tr>
                           {['Pair', 'Trades', 'Win Rate', 'Net P&L', 'Avg RR'].map(h => (
