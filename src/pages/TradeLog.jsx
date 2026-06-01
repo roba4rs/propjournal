@@ -27,7 +27,7 @@ const PAIRS = [
 const SESSIONS = ["london", "new_york", "asian"];
 
 // ─── Challenge status helper (mirrors ChallengeTracker logic) ─────────────────
-function computeChallengeStatus(trades, account) {
+function _computeChallengeStatus(trades, account) {
   if (account.failure_reason) return "failed";
   const withPnl = trades.filter(t => t.pnl != null);
   const accountSize = parseFloat(account.account_size) || 0;
@@ -1057,7 +1057,7 @@ function SummaryBar({ trades }) {
 }
 
 // ─── Account Tabs ─────────────────────────────────────────────────────────────
-function AccountTabs({ accounts, activeId, onSwitch }) {
+function _AccountTabs({ accounts, activeId, onSwitch }) {
   return (
     <div style={{ display: "flex", gap: "8px", marginBottom: "24px", overflowX: "auto" }}>
       {accounts.map(acc => (
