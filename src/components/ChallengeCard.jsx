@@ -147,8 +147,8 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
         <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }`}</style>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
           <div>
-            <h2 style={{ color: '#fff', fontFamily: 'Syne, sans-serif', fontSize: '15px', fontWeight: '600', margin: '0 0 6px 0' }}>{account?.name || 'Personal Account'}</h2>
-            <p style={{ color: '#666', fontFamily: 'DM Sans, sans-serif', fontSize: '13px', margin: 0 }}>Your personal trading account — no prop firm rules apply</p>
+            <h2 style={{ color: '#fff', fontFamily: 'Syne, sans-serif', fontSize: '15px', fontWeight: '600', margin: 0 }}>{account?.name || 'Personal Account'}</h2>
+
           </div>
           <span style={{ background: '#0f2219', border: '0.5px solid #1a3826', borderRadius: '6px', padding: '4px 10px', color: '#1db97b', fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>Personal</span>
         </div>
