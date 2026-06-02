@@ -449,21 +449,10 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '6px', padding: '10px 14px', borderBottom: '0.5px solid #111' }}>
-            {[
-              { label: 'Win rate', value: `${stats.winRate}%`, green: true },
-              { label: 'Trades', value: stats.tradeCount, neutral: true },
-              { label: 'P. factor', value: stats.profitFactor.toFixed(2), neutral: true },
-              { label: 'Today', value: fmtShort(stats.todayPnl), green: stats.todayPnl >= 0, red: stats.todayPnl < 0 },
-            ].map((s) => (
-              <div key={s.label} style={{ flex: 1, background: '#111', border: '0.5px solid #1a1a1a', borderRadius: '8px', padding: '7px 5px', textAlign: 'center' }}>
-                <div style={{ fontSize: '9px', color: '#777', marginBottom: '3px', fontFamily: 'DM Sans, sans-serif', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.label}</div>
-                <div style={{ fontSize: '13px', fontWeight: '500', fontFamily: 'DM Sans, sans-serif', color: s.green ? '#1db97b' : s.red ? '#c03535' : '#e0e0e0' }}>{s.value}</div>
-              </div>
-            ))}
+          <div style={{ margin: '10px 14px 0' }}>
+            <ChallengeCard account={activeAccount} trades={trades} loading={loading} mobile />
           </div>
-
-          <div style={{ margin: '10px 14px 0', background: '#111', border: '0.5px solid #1a1a1a', borderRadius: '10px', overflow: 'hidden' }}>
+          <div style={{ margin: '8px 14px 0', background: '#111', border: '0.5px solid #1a1a1a', borderRadius: '10px', overflow: 'hidden' }}>
             <PnLChart trades={trades} account={activeAccount} noMargin mobile />
           </div>
           <div style={{ margin: '8px 14px 0', background: '#111', border: '0.5px solid #1a1a1a', borderRadius: '10px', overflow: 'hidden' }}>

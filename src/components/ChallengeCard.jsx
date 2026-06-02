@@ -127,7 +127,7 @@ function calcDrawdown(trades, accountSize, maxDD, drawdownType) {
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
-export default function ChallengeCard({ account, trades = [], loading = false }) {
+export default function ChallengeCard({ account, trades = [], loading = false, mobile = false }) {
   const accountType = account?.type || 'personal'
 
   const Skeleton = ({ w = '60px', h = '22px' }) => (
@@ -154,7 +154,7 @@ export default function ChallengeCard({ account, trades = [], loading = false })
         </div>
 
         {/* Row 1 */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '16px' }}>
+        {!mobile && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '16px' }}>
           {loading ? (
             [1,2,3,4].map(i => <div key={i} style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '10px', padding: '16px' }}><Skeleton w="40px" h="10px" /><div style={{marginTop:'10px'}}><Skeleton w="80px" h="22px" /></div></div>)
           ) : (<>
@@ -163,10 +163,10 @@ export default function ChallengeCard({ account, trades = [], loading = false })
             <StatCell label="Total Trades" value={String(s.total)} />
             <StatCell label="Avg RR" value={s.total === 0 ? '0.00' : `${s.avgRR.toFixed(2)}R`} />
           </>)}
-        </div>
+        </div>}
 
         {/* Row 2 */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '20px' }}>
+        {!mobile && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '20px' }}>
           {loading ? (
             [1,2,3,4].map(i => <div key={i} style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '10px', padding: '16px' }}><Skeleton w="40px" h="10px" /><div style={{marginTop:'10px'}}><Skeleton w="80px" h="22px" /></div></div>)
           ) : (<>
@@ -175,7 +175,7 @@ export default function ChallengeCard({ account, trades = [], loading = false })
             <StatCell label="Worst Trade" value={s.worstTrade != null ? `-$${Math.abs(s.worstTrade).toFixed(2)}` : '—'} color={s.worstTrade != null ? '#c03535' : '#777'} />
             <StatCell label="Avg Win / Loss" value={s.total === 0 ? '— / —' : `$${s.avgWin.toFixed(0)} / $${s.avgLoss.toFixed(0)}`} />
           </>)}
-        </div>
+        </div>}
 
         {/* Progress Bars */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -290,7 +290,7 @@ export default function ChallengeCard({ account, trades = [], loading = false })
       </div>
 
       {/* Stats row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '20px' }}>
+      {!mobile && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '20px' }}>
         {loading ? (
           [1,2,3,4].map(i => <div key={i} style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '10px', padding: '16px' }}><div style={{background:'#1a1a1a',height:'10px',width:'40px',borderRadius:'4px'}}/><div style={{background:'#1a1a1a',height:'22px',width:'80px',borderRadius:'4px',marginTop:'10px'}}/></div>)
         ) : (<>
@@ -299,7 +299,7 @@ export default function ChallengeCard({ account, trades = [], loading = false })
           <StatCell label="Trades" value={String(s.total)} />
           <StatCell label="W / L" value={`${s.wins} / ${s.losses}`} />
         </>)}
-      </div>
+      </div>}
 
       {/* Progress bars */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
