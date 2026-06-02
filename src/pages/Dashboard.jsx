@@ -39,13 +39,6 @@ function fmt(val) {
   return `${sign}$${Math.abs(val).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
 
-function fmtShort(val) {
-  const sign = val >= 0 ? '+' : '-'
-  const abs = Math.abs(val)
-  if (abs >= 1000) return `${sign}$${(abs / 1000).toFixed(1)}k`
-  return `${sign}$${abs.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
-}
-
 // ─── Shared helpers ───────────────────────────────────────────────────────────
 function fmtNum(n) {
   if (n == null || n === '') return '—'
@@ -357,12 +350,12 @@ export default function Dashboard() {
     return () => clearTimeout(t)
   }, [paymentToast])
 
-  // Persist active account so Analytics can open the same one
   useEffect(() => {
     if (activeAccount?.id) {
       localStorage.setItem('activeAccountId', activeAccount.id)
     }
   }, [activeAccount])
+
   const [trades, setTrades] = useState([])
   const [loading, setLoading] = useState(false)
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
@@ -462,7 +455,7 @@ export default function Dashboard() {
             <WinLossDonut trades={trades} mobile />
           </div>
           <div style={{ margin: '8px 14px 0', background: '#111', border: '0.5px solid #1a1a1a', borderRadius: '10px', overflow: 'hidden' }}>
-          <StreakCard trades={trades} mobile />
+            <StreakCard trades={trades} mobile />
           </div>
           <div style={{ margin: '8px 14px 0', background: '#111', border: '0.5px solid #1a1a1a', borderRadius: '10px', overflow: 'hidden' }}>
             <CalendarPnL trades={trades} mobile onDayClick={date => setDayModal(date)} />
