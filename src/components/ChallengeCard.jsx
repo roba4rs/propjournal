@@ -243,12 +243,7 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
   const todayTrades = withPnl.filter(t => t.date === today)
   const todayPnl = todayTrades.reduce((s, t) => s + parseFloat(t.pnl), 0)
   const todayLoss = Math.max(0, -todayPnl)
-  const dailyDDUsedPct  = accountSize > 0 ? (todayLoss / accountSize) * 100 : 0
-  const dailyDDLimitPct = accountSize > 0 ? (dailyDD  / accountSize) * 100 : 0
-
-
   // ── Min trading days ──
-  const tradingDays = new Set(trades.map(t => t.date)).size
 
 
   // ── Status (type-aware, mirrors ChallengeTracker logic) ──
