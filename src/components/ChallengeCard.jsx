@@ -147,10 +147,14 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
         <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }`}</style>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
           <div>
-            <h2 style={{ color: '#fff', fontFamily: 'Syne, sans-serif', fontSize: '15px', fontWeight: '600', margin: 0 }}>{account?.name || 'Personal Account'}</h2>
-
+            <h2 style={{ color: '#fff', fontFamily: 'Syne, sans-serif', fontSize: '15px', fontWeight: '600', margin: '0 0 4px 0' }}>{account?.name || 'Personal Account'}</h2>
+            {mobile ? (
+              <p style={{ color: '#666', fontFamily: 'DM Sans, sans-serif', fontSize: '12px', margin: 0 }}>{s.total} trades · {new Set(trades.map(t => t.date)).size} days</p>
+            ) : (
+              <p style={{ color: '#666', fontFamily: 'DM Sans, sans-serif', fontSize: '13px', margin: 0 }}>Your personal trading account — no prop firm rules apply</p>
+            )}
           </div>
-          <span style={{ background: '#0f2219', border: '0.5px solid #1a3826', borderRadius: '6px', padding: '4px 10px', color: '#1db97b', fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>Personal</span>
+          {!mobile && <span style={{ background: '#0f2219', border: '0.5px solid #1a3826', borderRadius: '6px', padding: '4px 10px', color: '#1db97b', fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>Personal</span>}
         </div>
 
         {/* Row 1 */}
@@ -178,20 +182,33 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
         </div>}
 
         {/* Progress Bars */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          <ProgressBar
-            label="Win Rate — target 60%"
-            pct={Math.min(Math.max(s.winRate / 60 * 100, 0), 100)}
-            color="#1db97b"
-            rightLabel={`${s.winRate.toFixed(1)}% of 60% target`}
-          />
-          <ProgressBar
-            label="Avg RR — target 2.0R"
-            pct={Math.min(Math.max(s.avgRR / 2 * 100, 0), 100)}
-            color="#c97a00"
-            rightLabel={`${s.avgRR.toFixed(2)}R of 2.0R target`}
-          />
-        </div>
+        {(() => {
+          const withPnl = trades.filter(t => t.pnl != null)
+          const profitableDays = Object.entries(
+            withPnl.reduce((acc, t) => { acc[t.date] = (acc[t.date] || 0) + parseFloat(t.pnl); return acc }, {})
+          ).filter(([, v]) => v > 0).length
+          const totalDays = new Set(withPnl.map(t => t.date)).size
+          const consistency = totalDays > 0 ? (profitableDays / totalDays) * 100 : 0
+          const accountSize = parseFloat(account?.account_size) || 0
+          const growth = accountSize > 0 ? Math.min(Math.max((s.netPnl / accountSize) * 100, 0), 100) : 0
+          const growthRaw = accountSize > 0 ? (s.netPnl / accountSize) * 100 : 0
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <ProgressBar
+                label={`Consistency — ${profitableDays} of ${totalDays} days profitable`}
+                pct={consistency}
+                color="#1db97b"
+                rightLabel={`${consistency.toFixed(1)}% profitable days`}
+              />
+              <ProgressBar
+                label={`Account Growth`}
+                pct={growth}
+                color="#4d9fff"
+                rightLabel={accountSize > 0 ? `${growthRaw >= 0 ? '+' : ''}${growthRaw.toFixed(2)}% on $${accountSize.toLocaleString()}` : 'Set account size to track'}
+              />
+            </div>
+          )
+        })()}
       </div>
     )
   }
@@ -315,13 +332,6 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
           color="#c03535"
           rightLabel={`${maxDDUsedPct.toFixed(2)}% used · ${floorLabel}`}
         />
-        <ProgressBar
-          label={`Daily Drawdown — ${dailyDDUsedPct.toFixed(2)}% / ${dailyDDLimitPct.toFixed(1)}%`}
-          pct={dailyDDPct}
-          color="#c97a00"
-          rightLabel={`${dailyDDUsedPct.toFixed(2)}% used of ${dailyDDLimitPct.toFixed(1)}% limit`}
-        />
-        {minDays > 0 && <ProgressBar label={`Min Trading Days (${tradingDays}/${minDays})`} pct={minDaysPct} color="#4d9fff" />}
       </div>
     </div>
   )
