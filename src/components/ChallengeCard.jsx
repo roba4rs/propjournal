@@ -238,13 +238,7 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
   const maxDDPct        = maxDDLimitPct > 0 ? Math.min((maxDDUsedPct / maxDDLimitPct) * 100, 100) : 0
 
   // ── Daily drawdown (always balance-based from today's open) ──
-  const today = new Date().toISOString().split('T')[0]
   const withPnl = trades.filter(t => t.pnl != null)
-  const todayTrades = withPnl.filter(t => t.date === today)
-  const todayPnl = todayTrades.reduce((s, t) => s + parseFloat(t.pnl), 0)
-  const todayLoss = Math.max(0, -todayPnl)
-  // ── Min trading days ──
-
 
   // ── Status (type-aware, mirrors ChallengeTracker logic) ──
   function computeStatus() {
