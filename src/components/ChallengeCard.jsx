@@ -245,11 +245,11 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
   const todayLoss = Math.max(0, -todayPnl)
   const dailyDDUsedPct  = accountSize > 0 ? (todayLoss / accountSize) * 100 : 0
   const dailyDDLimitPct = accountSize > 0 ? (dailyDD  / accountSize) * 100 : 0
-  const dailyDDPct      = dailyDDLimitPct > 0 ? Math.min((dailyDDUsedPct / dailyDDLimitPct) * 100, 100) : 0
+
 
   // ── Min trading days ──
   const tradingDays = new Set(trades.map(t => t.date)).size
-  const minDaysPct  = minDays > 0 ? Math.min((tradingDays / minDays) * 100, 100) : 0
+
 
   // ── Status (type-aware, mirrors ChallengeTracker logic) ──
   function computeStatus() {
