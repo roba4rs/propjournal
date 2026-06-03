@@ -148,11 +148,11 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
           <div>
             <h2 style={{ color: '#fff', fontFamily: 'Syne, sans-serif', fontSize: '15px', fontWeight: '600', margin: '0 0 4px 0' }}>{account?.name || 'Personal Account'}</h2>
-            <p style={{ color: '#666', fontFamily: 'DM Sans, sans-serif', fontSize: '13px', margin: 0 }}>
-              {mobile
-                ? `${s.total} trades · ${new Set(trades.map(t => t.date)).size} days`
-                : 'Your personal trading account — no prop firm rules apply'}
-            </p>
+            {mobile ? (
+              <p style={{ color: '#666', fontFamily: 'DM Sans, sans-serif', fontSize: '12px', margin: 0 }}>{s.total} trades · {new Set(trades.map(t => t.date)).size} days</p>
+            ) : (
+              <p style={{ color: '#666', fontFamily: 'DM Sans, sans-serif', fontSize: '13px', margin: 0 }}>Your personal trading account — no prop firm rules apply</p>
+            )}
           </div>
           {!mobile && <span style={{ background: '#0f2219', border: '0.5px solid #1a3826', borderRadius: '6px', padding: '4px 10px', color: '#1db97b', fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>Personal</span>}
         </div>
@@ -237,10 +237,19 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
   // Progress bar: how much of the DD limit has been consumed
   const maxDDPct        = maxDDLimitPct > 0 ? Math.min((maxDDUsedPct / maxDDLimitPct) * 100, 100) : 0
 
+  // ── Daily drawdown (always balance-based from today's open) ──
+  const today = new Date().toISOString().split('T')[0]
+  const withPnl = trades.filter(t => t.pnl != null)
+  const todayTrades = withPnl.filter(t => t.date === today)
+  const todayPnl = todayTrades.reduce((s, t) => s + parseFloat(t.pnl), 0)
+  const todayLoss = Math.max(0, -todayPnl)
+  const dailyDDUsedPct  = accountSize > 0 ? (todayLoss / accountSize) * 100 : 0
+  const dailyDDLimitPct = accountSize > 0 ? (dailyDD  / accountSize) * 100 : 0
+  const dailyDDPct      = dailyDDLimitPct > 0 ? Math.min((dailyDDUsedPct / dailyDDLimitPct) * 100, 100) : 0
 
   // ── Min trading days ──
-  const withPnl = trades.filter(t => t.pnl != null)
   const tradingDays = new Set(trades.map(t => t.date)).size
+  const minDaysPct  = minDays > 0 ? Math.min((tradingDays / minDays) * 100, 100) : 0
 
   // ── Status (type-aware, mirrors ChallengeTracker logic) ──
   function computeStatus() {
