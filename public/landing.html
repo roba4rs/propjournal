@@ -498,15 +498,116 @@ footer { padding: 28px 40px; border-top: 0.5px solid var(--border); display: fle
 .footer-links a:hover { color: var(--text2); }
 .copy { font-size: 11px; color: var(--text3); }
 
+/* ── HERO STATS BAR (mobile only element) ── */
+.hero-stats-bar { display: none; }
+
 /* ── RESPONSIVE ── */
 @media (max-width: 900px) {
-  nav { padding: 0 24px; }
+  nav { padding: 0 20px; }
   .nav-links { display: none; }
   .nav-hamburger { display: block; }
   .nav-login { display: none; }
   .mobile-menu { display: flex; }
-  .hero { grid-template-columns: 1fr; padding: 48px 24px 40px; gap: 40px; }
-  h1 { font-size: 40px; }
+
+  /* ── HERO — Nexus-style full-width centered ── */
+  .hero {
+    grid-template-columns: 1fr;
+    padding: 64px 28px 48px;
+    gap: 0;
+    text-align: center;
+    min-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .hero-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+  .pill { margin-bottom: 28px; }
+  h1 {
+    font-size: 46px;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-bottom: 18px;
+    max-width: 360px;
+  }
+  .hero-sub {
+    font-size: 15px;
+    text-align: center;
+    max-width: 320px;
+    margin: 0 auto 32px;
+  }
+  .hero-btns {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    max-width: 320px;
+    margin-bottom: 16px;
+  }
+  .btn-hero-primary {
+    width: 100%;
+    padding: 14px 24px;
+    font-size: 15px;
+    border-radius: 10px;
+  }
+  .btn-hero-ghost {
+    width: 100%;
+    padding: 14px 24px;
+    font-size: 15px;
+    border-radius: 10px;
+  }
+  .hero-note {
+    font-size: 12px;
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  /* ── HERO STATS BAR ── */
+  .hero-stats-bar {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    gap: 0;
+    width: 100%;
+    max-width: 360px;
+    margin-top: 32px;
+    border: 0.5px solid var(--border2);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .hero-stat-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 8px;
+    gap: 4px;
+    border-right: 0.5px solid var(--border2);
+  }
+  .hero-stat-item:last-child { border-right: none; }
+  .hero-stat-main {
+    font-family: var(--font-head);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .hero-stat-sub {
+    font-size: 9px;
+    color: var(--text3);
+    font-family: var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: center;
+  }
+
   .hero-right { display: none; }
   .firm-stack { height: 420px; }
   .firm-card { max-width: 100%; }
@@ -516,12 +617,11 @@ footer { padding: 28px 40px; border-top: 0.5px solid var(--border); display: fle
   .analytics-grid { grid-template-columns: 1fr; }
   .analytics-grid-right { grid-template-rows: auto; grid-template-columns: 1fr 1fr; }
 
-
   .how, .challenge-section, .analytics-section, .features, .pricing { padding: 60px 24px; }
   footer { flex-direction: column; align-items: flex-start; padding: 24px; }
 }
 @media (max-width: 560px) {
-  h1 { font-size: 34px; }
+  h1 { font-size: 38px; }
   .cc-stats { grid-template-columns: 1fr 1fr; }
   .analytics-grid-right { grid-template-columns: 1fr; }
 
@@ -569,6 +669,22 @@ footer { padding: 28px 40px; border-top: 0.5px solid var(--border); display: fle
       <button class="btn-hero-ghost" onclick="location.href='#how'">How it works</button>
     </div>
     <p class="hero-note">7-day free trial &nbsp;·&nbsp; Pay with USDT &nbsp;·&nbsp; Cancel anytime</p>
+
+    <!-- Mobile stats bar (Nexus-inspired) -->
+    <div class="hero-stats-bar">
+      <div class="hero-stat-item">
+        <span class="hero-stat-main">Prop-First</span>
+        <span class="hero-stat-sub">Built for<br>challenge traders</span>
+      </div>
+      <div class="hero-stat-item">
+        <span class="hero-stat-main">Auto-Fill</span>
+        <span class="hero-stat-sub">Firm rules<br>pre-loaded</span>
+      </div>
+      <div class="hero-stat-item">
+        <span class="hero-stat-main">7 Days</span>
+        <span class="hero-stat-sub">Free trial,<br>full access</span>
+      </div>
+    </div>
   </div>
 
   <div class="hero-right">
