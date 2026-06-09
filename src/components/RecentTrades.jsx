@@ -10,7 +10,7 @@ function pnlColor(n) {
   if (n == null) return '#777'
   if (parseFloat(n) > 0) return '#1db97b'
   if (parseFloat(n) < 0) return '#c03535'
-  return '#666'
+  return '#999'
 }
 
 function dirBadge(dir, small = false) {
@@ -93,7 +93,7 @@ export default function RecentTrades({ trades = [], loading = false, mobile = fa
                 <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '12px', fontWeight: '500', color: pnlColor(t.pnl) }}>
                   {fmt$(t.pnl)}
                 </div>
-                <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '9px', color: '#666', marginTop: '1px' }}>
+                <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '9px', color: '#999', marginTop: '1px' }}>
                   {fmtDate(t.date)}{t.session ? ` · ${t.session}` : ''}
                 </div>
               </div>
@@ -118,7 +118,7 @@ export default function RecentTrades({ trades = [], loading = false, mobile = fa
       <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', padding: '0 12px 10px', borderBottom: '0.5px solid #1a1a1a' }}>
         {['Pair', 'Outcome', 'Date'].map((h, i) => (
           <span key={h} style={{
-            color: '#666', fontFamily: 'DM Mono, monospace', fontSize: '11px',
+            color: '#999', fontFamily: 'DM Mono, monospace', fontSize: '11px',
             textTransform: 'uppercase', letterSpacing: '0.5px',
             textAlign: i === 1 ? 'center' : i === 2 ? 'right' : 'left',
           }}>{h}</span>

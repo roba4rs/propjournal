@@ -63,7 +63,7 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick })
 
     let bg = '#141414'
     let border = '0.5px solid #1e1e1e'
-    let color = '#666'
+    let color = '#999'
 
     if (isWin)  { bg = '#0f2219'; border = '0.5px solid #1a3826'; color = '#1db97b' }
     if (isLoss) { bg = '#1e0d0d'; border = '0.5px solid #2e1515'; color = '#c03535' }
@@ -89,7 +89,7 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick })
         {/* Day headers */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px', marginBottom: '3px' }}>
           {DAYS_SHORT.map((d, i) => (
-            <div key={i} style={{ color: '#666', fontFamily: 'DM Mono, monospace', fontSize: '9px', textAlign: 'center' }}>{d}</div>
+            <div key={i} style={{ color: '#999', fontFamily: 'DM Mono, monospace', fontSize: '9px', textAlign: 'center' }}>{d}</div>
           ))}
         </div>
 
@@ -196,14 +196,14 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick })
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <h2 style={{ color: '#fff', fontFamily: 'Syne, sans-serif', fontSize: '15px', fontWeight: '600', margin: 0 }}>Calendar P&L</h2>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <button onClick={prevMonth} style={{ background: 'transparent', border: '0.5px solid #1e1e1e', borderRadius: '6px', color: '#666', padding: '4px 10px', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', fontSize: '13px' }}>←</button>
+          <button onClick={prevMonth} style={{ background: 'transparent', border: '0.5px solid #1e1e1e', borderRadius: '6px', color: '#999', padding: '4px 10px', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', fontSize: '13px' }}>←</button>
           <span style={{ color: '#fff', fontFamily: 'DM Sans, sans-serif', fontSize: '13px' }}>{MONTHS[current.month]} {current.year}</span>
-          <button onClick={nextMonth} style={{ background: 'transparent', border: '0.5px solid #1e1e1e', borderRadius: '6px', color: '#666', padding: '4px 10px', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', fontSize: '13px' }}>→</button>
+          <button onClick={nextMonth} style={{ background: 'transparent', border: '0.5px solid #1e1e1e', borderRadius: '6px', color: '#999', padding: '4px 10px', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', fontSize: '13px' }}>→</button>
         </div>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', marginBottom: '4px' }}>
         {DAYS_FULL.map(d => (
-          <div key={d} style={{ color: '#666', fontFamily: 'DM Mono, monospace', fontSize: '11px', textAlign: 'center', padding: '4px 0' }}>{d}</div>
+          <div key={d} style={{ color: '#999', fontFamily: 'DM Mono, monospace', fontSize: '11px', textAlign: 'center', padding: '4px 0' }}>{d}</div>
         ))}
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px' }}>
@@ -231,7 +231,7 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick })
               border: day ? `0.5px solid ${borderColor}` : 'none',
               borderRadius: '6px', padding: '8px 6px', minHeight: '56px',
               display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
-              position: 'relative', overflow: 'hidden',
+              position: 'relative',
               cursor: hasTrade && onDayClick ? 'pointer' : 'default',
               transition: 'opacity 0.1s',
             }}
@@ -241,13 +241,13 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick })
             >
               {day && (
                 <>
-                  <span style={{ position: 'absolute', top: '6px', left: '7px', color: isToday ? '#1db97b' : '#666', fontFamily: 'DM Mono, monospace', fontSize: '11px', fontWeight: '600' }}>{day}</span>
+                  <span style={{ position: 'absolute', top: '6px', left: '7px', color: isToday ? '#1db97b' : '#999', fontFamily: 'DM Mono, monospace', fontSize: '11px', fontWeight: '600' }}>{day}</span>
                   {hasTrade && (
                     <>
                       <span style={{ color: pnlColor, fontFamily: 'DM Mono, monospace', fontSize: '15px', fontWeight: '400', textAlign: 'center', lineHeight: 1.2 }}>
                         {pnl >= 0 ? '+' : ''}${Math.abs(pnl).toFixed(0)}
                       </span>
-                      <span style={{ position: 'absolute', bottom: '6px', left: '7px', color: '#666', fontFamily: 'DM Mono, monospace', fontSize: '9px' }}>
+                      <span style={{ position: 'absolute', bottom: '6px', left: '7px', color: '#999', fontFamily: 'DM Mono, monospace', fontSize: '9px' }}>
                         {count} trade{count !== 1 ? 's' : ''}
                       </span>
                     </>

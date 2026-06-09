@@ -93,7 +93,7 @@ export default function Login() {
           marginBottom: '8px',
         }}>Welcome back</h1>
         <p style={{
-          color: '#666',
+          color: '#999',
           fontFamily: 'DM Sans, sans-serif',
           fontSize: '14px',
           marginBottom: '32px',
@@ -138,7 +138,7 @@ export default function Login() {
           marginBottom: '24px',
         }}>
           <div style={{ flex: 1, height: '0.5px', background: '#1e1e1e' }} />
-          <span style={{ color: '#666', fontSize: '12px', fontFamily: 'DM Sans, sans-serif' }}>or</span>
+          <span style={{ color: '#999', fontSize: '12px', fontFamily: 'DM Sans, sans-serif' }}>or</span>
           <div style={{ flex: 1, height: '0.5px', background: '#1e1e1e' }} />
         </div>
 
@@ -252,7 +252,7 @@ export default function Login() {
             </form>
 
             <p style={{
-              color: '#666', fontFamily: 'DM Sans, sans-serif',
+              color: '#999', fontFamily: 'DM Sans, sans-serif',
               fontSize: '13px', textAlign: 'center', marginTop: '24px',
             }}>
               Don't have an account?{' '}
@@ -318,7 +318,7 @@ export default function Login() {
               style={{
                 width: '100%', background: 'transparent',
                 border: '0.5px solid #2a2a2a', borderRadius: '8px',
-                padding: '12px', color: '#666',
+                padding: '12px', color: '#999',
                 fontFamily: 'DM Sans, sans-serif', fontSize: '13px', cursor: 'pointer',
                 minHeight: '44px',
               }}

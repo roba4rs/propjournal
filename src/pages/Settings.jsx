@@ -72,7 +72,7 @@ function Field({ label, children }) {
     <div style={{ marginBottom: '14px' }}>
       <label style={{
         display: 'block',
-        color: '#666',
+        color: '#999',
         fontFamily: 'DM Sans, sans-serif',
         fontSize: '11px',
         marginBottom: '6px',
@@ -237,7 +237,7 @@ function EditAccountModal({ account, onSave, onClose }) {
             </div>
 
             <div style={{ marginBottom: '14px' }}>
-              <label style={{ display: 'block', color: '#666', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>
+              <label style={{ display: 'block', color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>
                 Amount ($)
               </label>
               <input
@@ -277,7 +277,7 @@ function EditAccountModal({ account, onSave, onClose }) {
         {/* Rename content */}
         {isRename && (
           <div style={{ marginBottom: '14px' }}>
-            <label style={{ display: 'block', color: '#666', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>
+            <label style={{ display: 'block', color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>
               Account name
             </label>
             <input
@@ -585,7 +585,7 @@ export default function Settings() {
           minHeight: '100vh',
           padding: isMobile ? '14px' : '32px',
         }}>
-          <p style={{ color: '#666', fontFamily: 'DM Sans, sans-serif', fontSize: '13px' }}>Loading...</p>
+          <p style={{ color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '13px' }}>Loading...</p>
         </main>
       </div>
     )
@@ -662,7 +662,7 @@ export default function Settings() {
 
             {mobileView === 'main' && (
               <>
-                <SectionLabel style={{ marginBottom: '8px', fontSize: '9px', color: '#666' }}>Account</SectionLabel>
+                <SectionLabel style={{ marginBottom: '8px', fontSize: '9px', color: '#999' }}>Account</SectionLabel>
                 <div
                   onClick={() => setMobileView('profile')}
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: '0.5px solid #141414', cursor: 'pointer' }}
@@ -684,7 +684,7 @@ export default function Settings() {
                   <span style={{ color: '#2f2f2f', fontSize: '16px' }}>›</span>
                 </div>
 
-                <SectionLabel style={{ marginTop: '14px', marginBottom: '8px', fontSize: '9px', color: '#666' }}>Preferences</SectionLabel>
+                <SectionLabel style={{ marginTop: '14px', marginBottom: '8px', fontSize: '9px', color: '#999' }}>Preferences</SectionLabel>
                 <div onClick={() => setMobileView('preferences')} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '0.5px solid #141414', cursor: 'pointer' }}>
                   <span style={{ color: '#cfcfcf', fontSize: '13px', fontFamily: 'DM Sans, sans-serif' }}>Currency</span>
                   <span style={{ color: '#5a5a5a', fontSize: '13px', fontFamily: 'DM Sans, sans-serif' }}>{currency} <span style={{ color: '#2f2f2f' }}>›</span></span>
@@ -694,7 +694,7 @@ export default function Settings() {
                   <span style={{ color: '#5a5a5a', fontSize: '13px', fontFamily: 'DM Sans, sans-serif' }}>{timezone.replace('Africa/', '')} <span style={{ color: '#2f2f2f' }}>›</span></span>
                 </div>
 
-                <SectionLabel style={{ marginTop: '14px', marginBottom: '8px', fontSize: '9px', color: '#666' }}>Manage</SectionLabel>
+                <SectionLabel style={{ marginTop: '14px', marginBottom: '8px', fontSize: '9px', color: '#999' }}>Manage</SectionLabel>
                 <div onClick={() => setMobileView('accounts')} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '0.5px solid #141414', cursor: 'pointer' }}>
                   <span style={{ color: '#cfcfcf', fontSize: '13px', fontFamily: 'DM Sans, sans-serif' }}>Personal Accounts</span>
                   <span style={{ color: '#5a5a5a', fontSize: '13px', fontFamily: 'DM Sans, sans-serif' }}>{personalAccounts.length} account{personalAccounts.length !== 1 ? 's' : ''} <span style={{ color: '#2f2f2f' }}>›</span></span>
@@ -706,7 +706,7 @@ export default function Settings() {
                   </span>
                 </div>
 
-                <SectionLabel style={{ marginTop: '14px', marginBottom: '8px', fontSize: '9px', color: '#666' }}>Billing</SectionLabel>
+                <SectionLabel style={{ marginTop: '14px', marginBottom: '8px', fontSize: '9px', color: '#999' }}>Billing</SectionLabel>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '0.5px solid #141414' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ color: '#cfcfcf', fontSize: '13px', fontFamily: 'DM Sans, sans-serif' }}>Plan</span>
@@ -752,7 +752,7 @@ export default function Settings() {
                 <div style={{ border: '0.5px solid #2e1515', borderRadius: '10px', padding: '10px 10px 8px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '10px' }}>
                   <div>
                     <div style={{ color: '#c03535', fontSize: '13px', fontFamily: 'DM Sans, sans-serif' }}>Delete account</div>
-                    <div style={{ color: '#666', fontSize: '11px', fontFamily: 'DM Sans, sans-serif', marginTop: '2px' }}>
+                    <div style={{ color: '#999', fontSize: '11px', fontFamily: 'DM Sans, sans-serif', marginTop: '2px' }}>
                       Permanently deletes all your data.
                     </div>
                   </div>
@@ -782,8 +782,8 @@ export default function Settings() {
                   <input style={inputBase} value={name} onChange={e => setName(e.target.value)} placeholder="Your name" />
                 </Field>
                 <div style={{ marginBottom: 0 }}>
-                  <label style={{ display: 'block', color: '#666', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>Email</label>
-                  <input style={{ ...inputBase, color: '#666', cursor: 'not-allowed' }} value={email} disabled />
+                  <label style={{ display: 'block', color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>Email</label>
+                  <input style={{ ...inputBase, color: '#999', cursor: 'not-allowed' }} value={email} disabled />
                 </div>
               </Card>
             )}
@@ -800,7 +800,7 @@ export default function Settings() {
                   </select>
                 </Field>
                 <div style={{ marginBottom: 0 }}>
-                  <label style={{ display: 'block', color: '#666', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>Timezone</label>
+                  <label style={{ display: 'block', color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>Timezone</label>
                   <select style={selectStyle} value={timezone} onChange={e => setTimezone(e.target.value)}>
                     <option value="Africa/Addis_Ababa">Africa/Addis_Ababa (UTC+3)</option>
                     <option value="Europe/London">Europe/London (UTC+0)</option>
@@ -848,7 +848,7 @@ export default function Settings() {
                   <div key={item.label} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: i < arr.length - 1 ? '0.5px solid #1a1a1a' : 'none' }}>
                     <div>
                       <div style={{ color: '#ccc', fontFamily: 'DM Sans, sans-serif', fontSize: '13px' }}>{item.label}</div>
-                      <div style={{ color: '#666', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginTop: '2px' }}>{item.sub}</div>
+                      <div style={{ color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginTop: '2px' }}>{item.sub}</div>
                     </div>
                     <Toggle on={item.val} onToggle={() => item.set(v => !v)} />
                   </div>
@@ -954,9 +954,9 @@ export default function Settings() {
             </Field>
 
             <div style={{ marginBottom: 0 }}>
-              <label style={{ display: 'block', color: '#666', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>Email</label>
+              <label style={{ display: 'block', color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>Email</label>
               <input
-                style={{ ...inputBase, color: '#666', cursor: 'not-allowed' }}
+                style={{ ...inputBase, color: '#999', cursor: 'not-allowed' }}
                 value={email}
                 disabled
               />
@@ -977,7 +977,7 @@ export default function Settings() {
             </Field>
 
             <div style={{ marginBottom: 0 }}>
-              <label style={{ display: 'block', color: '#666', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>Timezone</label>
+              <label style={{ display: 'block', color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>Timezone</label>
               <select style={selectStyle} value={timezone} onChange={e => setTimezone(e.target.value)}>
                 <option value="Africa/Addis_Ababa">Africa/Addis_Ababa (UTC+3)</option>
                 <option value="Europe/London">Europe/London (UTC+0)</option>
@@ -1084,7 +1084,7 @@ export default function Settings() {
                   flexDirection: isMobile ? 'column' : 'row',
                 }}>
                   <div style={{ flex: 1 }}>
-                    <label style={{ display: 'block', color: '#666', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>
+                    <label style={{ display: 'block', color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>
                       Account name
                     </label>
                     <input
@@ -1097,7 +1097,7 @@ export default function Settings() {
                     />
                   </div>
                   <div style={{ flex: 1 }}>
-                    <label style={{ display: 'block', color: '#666', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>
+                    <label style={{ display: 'block', color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>
                       Starting balance ($)
                     </label>
                     <input
@@ -1158,7 +1158,7 @@ export default function Settings() {
               }}>
                 <div>
                   <div style={{ color: '#ccc', fontFamily: 'DM Sans, sans-serif', fontSize: '13px' }}>{item.label}</div>
-                  <div style={{ color: '#666', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginTop: '2px' }}>{item.sub}</div>
+                  <div style={{ color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginTop: '2px' }}>{item.sub}</div>
                 </div>
                 <Toggle on={item.val} onToggle={() => item.set(v => !v)} />
               </div>
@@ -1204,7 +1204,7 @@ export default function Settings() {
                 {/* Billing history */}
                 <div style={{ marginTop: isTrialPlan() && daysLeft !== null ? 0 : '12px' }}>
                   <div style={{ color: '#3a3a3a', fontFamily: 'DM Mono, monospace', fontSize: '10px', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '8px' }}>Billing history</div>
-                  <div style={{ color: '#666', fontFamily: 'DM Sans, sans-serif', fontSize: '12px' }}>No payments yet.</div>
+                  <div style={{ color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '12px' }}>No payments yet.</div>
                 </div>
               </div>
 
@@ -1238,7 +1238,7 @@ export default function Settings() {
             }}>
               <div>
                 <div style={{ color: '#ccc', fontFamily: 'DM Sans, sans-serif', fontSize: '13px' }}>Export all trades</div>
-                <div style={{ color: '#666', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginTop: '3px' }}>
+                <div style={{ color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginTop: '3px' }}>
                   Download your complete trade history as a CSV file.
                 </div>
               </div>
@@ -1280,7 +1280,7 @@ export default function Settings() {
             }}>
               <div>
                 <div style={{ color: '#ccc', fontFamily: 'DM Sans, sans-serif', fontSize: '13px' }}>Delete account</div>
-                <div style={{ color: '#666', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginTop: '3px' }}>
+                <div style={{ color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginTop: '3px' }}>
                   Permanently delete your account and all associated data. Cannot be undone.
                 </div>
               </div>
@@ -1305,7 +1305,7 @@ export default function Settings() {
             <div style={{ marginTop: '20px', padding: '14px 18px', background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
                 <div style={{ fontSize: '13px', color: '#ccc', fontFamily: 'DM Sans, sans-serif', fontWeight: '500', marginBottom: '2px' }}>Need help?</div>
-                <div style={{ fontSize: '11px', color: '#666', fontFamily: 'DM Sans, sans-serif' }}>Reach out and we'll get back to you.</div>
+                <div style={{ fontSize: '11px', color: '#999', fontFamily: 'DM Sans, sans-serif' }}>Reach out and we'll get back to you.</div>
               </div>
               <a href="mailto:robel4cs@gmail.com" style={{
                 padding: '8px 16px', background: 'transparent',

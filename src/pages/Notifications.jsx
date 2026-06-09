@@ -141,7 +141,7 @@ export default function Notifications() {
         {loading && (
           <div style={{
             padding: '60px 24px', textAlign: 'center',
-            color: '#666', fontFamily: "'DM Mono', monospace", fontSize: '12px',
+            color: '#999', fontFamily: "'DM Mono', monospace", fontSize: '12px',
           }}>Loading…</div>
         )}
 
@@ -152,7 +152,7 @@ export default function Notifications() {
           }}>
             <div style={{ fontSize: '32px' }}>🔔</div>
             <p style={{
-              color: '#666', fontFamily: "'DM Sans', sans-serif",
+              color: '#999', fontFamily: "'DM Sans', sans-serif",
               fontSize: '14px', margin: 0,
             }}>No notifications yet</p>
             <p style={{
@@ -191,7 +191,7 @@ export default function Notifications() {
               }}>{n.message}</p>
               <span style={{
                 fontFamily: "'DM Mono', monospace",
-                fontSize: '10px', color: '#666',
+                fontSize: '10px', color: '#999',
               }}>{timeAgo(n.created_at)}</span>
             </div>
           </div>

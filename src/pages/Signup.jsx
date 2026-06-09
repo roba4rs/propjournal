@@ -73,7 +73,7 @@ export default function Signup() {
           marginBottom: '8px',
         }}>Create account</h1>
         <p style={{
-          color: '#666',
+          color: '#999',
           fontFamily: 'DM Sans, sans-serif',
           fontSize: '14px',
           marginBottom: '32px',
@@ -119,7 +119,7 @@ export default function Signup() {
           marginBottom: '24px',
         }}>
           <div style={{ flex: 1, height: '0.5px', background: '#1e1e1e' }} />
-          <span style={{ color: '#666', fontSize: '12px', fontFamily: 'DM Sans, sans-serif' }}>or</span>
+          <span style={{ color: '#999', fontSize: '12px', fontFamily: 'DM Sans, sans-serif' }}>or</span>
           <div style={{ flex: 1, height: '0.5px', background: '#1e1e1e' }} />
         </div>
 
@@ -232,7 +232,7 @@ export default function Signup() {
         </form>
 
         <p style={{
-          color: '#666', fontFamily: 'DM Sans, sans-serif',
+          color: '#999', fontFamily: 'DM Sans, sans-serif',
           fontSize: '13px', textAlign: 'center', marginTop: '24px',
         }}>
           Already have an account?{' '}

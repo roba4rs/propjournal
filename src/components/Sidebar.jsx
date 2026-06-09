@@ -3,6 +3,7 @@ import { LayoutDashboard, Flame, TrendingUp, Settings2, BookOpen, Plus, Bell } f
 
 import { supabase } from '../supabaseClient'
 import { useEffect, useState, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { useSidebar } from '../SidebarContext'
 import NotificationPanel from './NotificationPanel'
 
@@ -147,6 +148,7 @@ export default function Sidebar() {
   if (!isMobile) {
     const w = collapsed ? '60px' : '220px'
     return (
+      <>
       <div style={{
         width: w,
         minHeight: '100vh',
@@ -187,7 +189,7 @@ export default function Sidebar() {
             style={{
               background: 'transparent',
               border: 'none',
-              color: '#666',
+              color: '#999',
               cursor: 'pointer',
               fontSize: '16px',
               padding: '4px',
@@ -199,7 +201,7 @@ export default function Sidebar() {
               transition: 'color 0.15s ease',
             }}
             onMouseEnter={e => e.currentTarget.style.color = '#fff'}
-            onMouseLeave={e => e.currentTarget.style.color = '#666'}
+            onMouseLeave={e => e.currentTarget.style.color = '#999'}
           >
             {collapsed ? '›' : '‹'}
           </button>
@@ -223,7 +225,7 @@ export default function Sidebar() {
                 marginBottom: '4px',
                 textDecoration: 'none',
                 background: isActive ? '#0f2219' : 'transparent',
-                color: isActive ? '#1db97b' : '#666',
+                color: isActive ? '#1db97b' : '#999',
                 fontFamily: 'DM Sans, sans-serif',
                 fontSize: '14px',
                 fontWeight: isActive ? '500' : '400',
@@ -250,7 +252,7 @@ export default function Sidebar() {
               borderRadius: '8px',
               marginTop: '4px',
               background: panelOpen ? '#0f2219' : 'transparent',
-              color: panelOpen ? '#1db97b' : '#666',
+              color: panelOpen ? '#1db97b' : '#999',
               fontFamily: 'DM Sans, sans-serif',
               fontSize: '14px',
               fontWeight: '400',
@@ -262,7 +264,7 @@ export default function Sidebar() {
               position: 'relative',
             }}
             onMouseEnter={e => { if (!panelOpen) e.currentTarget.style.color = '#aaa' }}
-            onMouseLeave={e => { if (!panelOpen) e.currentTarget.style.color = '#666' }}
+            onMouseLeave={e => { if (!panelOpen) e.currentTarget.style.color = '#999' }}
           >
             {/* Bell icon + badge */}
             <div style={{ position: 'relative', flexShrink: 0, display: 'flex' }}>
@@ -342,13 +344,13 @@ export default function Sidebar() {
                   background: 'transparent',
                   border: '0.5px solid #1e1e1e',
                   borderRadius: '8px',
-                  color: '#666',
+                  color: '#999',
                   cursor: 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: '15px',
                 }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = '#c03535'; e.currentTarget.style.color = '#c03535'; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = '#1e1e1e'; e.currentTarget.style.color = '#666'; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = '#1e1e1e'; e.currentTarget.style.color = '#999'; }}
               >⏻</button>
             </div>
           )}
@@ -362,47 +364,50 @@ export default function Sidebar() {
                 border: '0.5px solid #1e1e1e',
                 borderRadius: '8px',
                 padding: '9px',
-                color: '#666',
+                color: '#999',
                 fontSize: '16px',
                 cursor: 'pointer',
                 textAlign: 'center',
               }}
             >⏻</button>
           )}
-          {showConfirm && (
-            <div style={{
-              position: 'fixed', inset: 0, zIndex: 999,
-              background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(2px)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}
-              onClick={cancelLogout}
-            >
-              <div style={{
-                background: '#111', border: '0.5px solid #1e1e1e',
-                borderRadius: '12px', padding: '24px 28px', width: '280px',
-              }}
-                onClick={e => e.stopPropagation()}
-              >
-                <p style={{ color: '#fff', fontFamily: 'DM Sans, sans-serif', fontSize: '15px', fontWeight: '600', margin: '0 0 8px' }}>Sign out?</p>
-                <p style={{ color: '#777', fontFamily: 'DM Sans, sans-serif', fontSize: '13px', margin: '0 0 20px' }}>You'll need to sign back in to access your trades.</p>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button onClick={handleLogout} style={{
-                    flex: 1, padding: '9px', background: '#c03535', border: 'none',
-                    borderRadius: '8px', color: '#fff', fontFamily: 'DM Sans, sans-serif',
-                    fontSize: '13px', fontWeight: '600', cursor: 'pointer',
-                  }}>Sign out</button>
-                  <button onClick={cancelLogout} style={{
-                    flex: 1, padding: '9px', background: 'transparent',
-                    border: '0.5px solid #2a2a2a', borderRadius: '8px',
-                    color: '#aaa', fontFamily: 'DM Sans, sans-serif',
-                    fontSize: '13px', cursor: 'pointer',
-                  }}>Cancel</button>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
+
+      {showConfirm && createPortal(
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 99999,
+          background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(2px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}
+          onClick={cancelLogout}
+        >
+          <div style={{
+            background: '#111', border: '0.5px solid #1e1e1e',
+            borderRadius: '12px', padding: '24px 28px', width: '280px',
+          }}
+            onClick={e => e.stopPropagation()}
+          >
+            <p style={{ color: '#fff', fontFamily: 'DM Sans, sans-serif', fontSize: '15px', fontWeight: '600', margin: '0 0 8px' }}>Sign out?</p>
+            <p style={{ color: '#777', fontFamily: 'DM Sans, sans-serif', fontSize: '13px', margin: '0 0 20px' }}>You'll need to sign back in to access your trades.</p>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button onClick={handleLogout} style={{
+                flex: 1, padding: '9px', background: '#c03535', border: 'none',
+                borderRadius: '8px', color: '#fff', fontFamily: 'DM Sans, sans-serif',
+                fontSize: '13px', fontWeight: '600', cursor: 'pointer',
+              }}>Sign out</button>
+              <button onClick={cancelLogout} style={{
+                flex: 1, padding: '9px', background: 'transparent',
+                border: '0.5px solid #2a2a2a', borderRadius: '8px',
+                color: '#aaa', fontFamily: 'DM Sans, sans-serif',
+                fontSize: '13px', cursor: 'pointer',
+              }}>Cancel</button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+      </>
     )
   }
 
@@ -588,7 +593,7 @@ export default function Sidebar() {
                   fontSize: '10px',
                 }}>{user.plan}</span>
               </div>
-              <span style={{ color: '#666', fontSize: '15px', flexShrink: 0 }}>⏻</span>
+              <span style={{ color: '#999', fontSize: '15px', flexShrink: 0 }}>⏻</span>
             </div>
           )}
         </div>
@@ -721,7 +726,7 @@ export default function Sidebar() {
           position: 'fixed',
           inset: 0,
           background: 'rgba(0,0,0,0.6)',
-          zIndex: 900,
+          zIndex: 1000,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',

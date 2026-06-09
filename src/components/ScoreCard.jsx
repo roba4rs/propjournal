@@ -240,7 +240,7 @@ export default function ScoreCard({ trades, mobile }) {
               x={x}
               y={baseY}
               textAnchor={lbl.anchor}
-              fill="#666"
+              fill="#999"
               fontSize="9"
               fontFamily="DM Sans, sans-serif"
             >
@@ -277,7 +277,7 @@ export default function ScoreCard({ trades, mobile }) {
           </div>
         </div>
         <div style={{ flex: 1 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '9px', color: '#666', marginBottom: '4px', fontFamily: 'DM Mono, monospace' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '9px', color: '#999', marginBottom: '4px', fontFamily: 'DM Mono, monospace' }}>
             {[0, 20, 40, 60, 80, 100].map(n => <span key={n}>{n}</span>)}
           </div>
           <div style={{ height: '5px', background: '#181818', borderRadius: '3px', overflow: 'hidden' }}>

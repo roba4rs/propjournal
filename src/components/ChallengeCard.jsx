@@ -47,7 +47,7 @@ function StatCell({ label, value, color }) {
       padding: '16px',
     }}>
       <p style={{
-        color: '#666',
+        color: '#999',
         fontFamily: 'DM Sans, sans-serif',
         fontSize: '11px',
         textTransform: 'uppercase',
@@ -69,8 +69,8 @@ function ProgressBar({ label, pct, color, rightLabel }) {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-        <span style={{ color: '#666', fontFamily: 'DM Sans, sans-serif', fontSize: '11px' }}>{label}</span>
-        <span style={{ color: '#666', fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>{clamped.toFixed(1)}%</span>
+        <span style={{ color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '11px' }}>{label}</span>
+        <span style={{ color: '#999', fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>{clamped.toFixed(1)}%</span>
       </div>
       <div style={{ height: '3px', background: '#181818', borderRadius: '2px' }}>
         <div style={{ height: '3px', width: `${clamped}%`, background: color, borderRadius: '2px', transition: 'width 0.4s ease' }} />
@@ -149,9 +149,9 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
           <div>
             <h2 style={{ color: '#fff', fontFamily: 'Syne, sans-serif', fontSize: '15px', fontWeight: '600', margin: '0 0 4px 0' }}>{account?.name || 'Personal Account'}</h2>
             {mobile ? (
-              <p style={{ color: '#666', fontFamily: 'DM Sans, sans-serif', fontSize: '12px', margin: 0 }}>{s.total} trades · {new Set(trades.map(t => t.date)).size} days</p>
+              <p style={{ color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '12px', margin: 0 }}>{s.total} trades · {new Set(trades.map(t => t.date)).size} days</p>
             ) : (
-              <p style={{ color: '#666', fontFamily: 'DM Sans, sans-serif', fontSize: '13px', margin: 0 }}>Your personal trading account — no prop firm rules apply</p>
+              <p style={{ color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '13px', margin: 0 }}>Your personal trading account — no prop firm rules apply</p>
             )}
           </div>
           {!mobile && <span style={{ background: '#0f2219', border: '0.5px solid #1a3826', borderRadius: '6px', padding: '4px 10px', color: '#1db97b', fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>Personal</span>}
@@ -288,15 +288,15 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
         <div>
           <h2 style={{ color: '#fff', fontFamily: 'Syne, sans-serif', fontSize: '15px', fontWeight: '600', margin: '0 0 4px 0' }}>{account.name}</h2>
-          <p style={{ color: '#666', fontFamily: 'DM Sans, sans-serif', fontSize: '13px', margin: 0 }}>
+          <p style={{ color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '13px', margin: 0 }}>
             {account.firm_name} · {account.phase?.replace('_', ' ')} · ${accountSize.toLocaleString()}
           </p>
         </div>
         <span style={{ background: badge.bg, border: `0.5px solid ${badge.border}`, borderRadius: '6px', padding: '4px 10px', color: badge.color, fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>{badge.label}</span>
       </div>
 
-      {/* Stats row */}
-      {!mobile && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '20px' }}>
+      {/* Stats row 1 */}
+      {!mobile && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '16px' }}>
         {loading ? (
           [1,2,3,4].map(i => <div key={i} style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '10px', padding: '16px' }}><div style={{background:'#1a1a1a',height:'10px',width:'40px',borderRadius:'4px'}}/><div style={{background:'#1a1a1a',height:'22px',width:'80px',borderRadius:'4px',marginTop:'10px'}}/></div>)
         ) : (<>
@@ -304,6 +304,18 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
           <StatCell label="Win Rate" value={s.total === 0 ? '0%' : `${s.winRate.toFixed(1)}%`} />
           <StatCell label="Trades" value={String(s.total)} />
           <StatCell label="W / L" value={`${s.wins} / ${s.losses}`} />
+        </>)}
+      </div>}
+
+      {/* Stats row 2 */}
+      {!mobile && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '20px' }}>
+        {loading ? (
+          [1,2,3,4].map(i => <div key={i} style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '10px', padding: '16px' }}><div style={{background:'#1a1a1a',height:'10px',width:'40px',borderRadius:'4px'}}/><div style={{background:'#1a1a1a',height:'22px',width:'80px',borderRadius:'4px',marginTop:'10px'}}/></div>)
+        ) : (<>
+          <StatCell label="Profit Factor" value={s.total === 0 ? '0.00' : isFinite(s.profitFactor) ? s.profitFactor.toFixed(2) : '∞'} />
+          <StatCell label="Best Trade" value={s.bestTrade != null ? `+$${s.bestTrade.toFixed(2)}` : '—'} color={s.bestTrade != null ? '#1db97b' : '#777'} />
+          <StatCell label="Worst Trade" value={s.worstTrade != null ? `-$${Math.abs(s.worstTrade).toFixed(2)}` : '—'} color={s.worstTrade != null ? '#c03535' : '#777'} />
+          <StatCell label="Avg Win / Loss" value={s.total === 0 ? '— / —' : `$${s.avgWin.toFixed(0)} / $${s.avgLoss.toFixed(0)}`} />
         </>)}
       </div>}
 

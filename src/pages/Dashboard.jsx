@@ -48,7 +48,7 @@ function pnlColorModal(n) {
   if (n == null) return '#777'
   if (parseFloat(n) > 0) return '#1db97b'
   if (parseFloat(n) < 0) return '#c03535'
-  return '#666'
+  return '#999'
 }
 function dirBadgeModal(dir) {
   const isLong = dir === 'long'
@@ -198,7 +198,7 @@ function TradeDetailModal({ trade, onClose, isMobile }) {
           </div>
           {/* Price levels */}
           <div>
-            <div style={{ fontSize: '10px', fontFamily: 'DM Mono, monospace', color: '#666', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '12px' }}>Price Levels</div>
+            <div style={{ fontSize: '10px', fontFamily: 'DM Mono, monospace', color: '#999', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '12px' }}>Price Levels</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
               {[{ label: 'Entry', value: fmtNum(trade.entry) }, { label: 'Stop Loss', value: fmtNum(trade.stop_loss) }, { label: 'Take Profit', value: fmtNum(trade.take_profit) }].map(item => (
                 <div key={item.label} style={{ background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '10px', padding: '14px 16px' }}>
@@ -211,7 +211,7 @@ function TradeDetailModal({ trade, onClose, isMobile }) {
           {/* Screenshot */}
           {trade.screenshot_url && (
             <div>
-              <div style={{ fontSize: '10px', fontFamily: 'DM Mono, monospace', color: '#666', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '12px' }}>Chart Screenshot</div>
+              <div style={{ fontSize: '10px', fontFamily: 'DM Mono, monospace', color: '#999', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '12px' }}>Chart Screenshot</div>
               <div style={{ borderRadius: '10px', overflow: 'hidden', border: '0.5px solid #1e1e1e', background: '#111' }}>
                 <img src={trade.screenshot_url} alt="Trade chart" style={{ width: '100%', display: 'block', maxHeight: '460px', objectFit: 'contain', background: '#0a0a0a' }} />
               </div>
@@ -220,7 +220,7 @@ function TradeDetailModal({ trade, onClose, isMobile }) {
           {/* Notes */}
           {trade.notes && (
             <div>
-              <div style={{ fontSize: '10px', fontFamily: 'DM Mono, monospace', color: '#666', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '12px' }}>Notes</div>
+              <div style={{ fontSize: '10px', fontFamily: 'DM Mono, monospace', color: '#999', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '12px' }}>Notes</div>
               <div style={{ background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '10px', padding: '16px 18px', color: '#999', fontSize: '14px', fontFamily: 'DM Sans, sans-serif', lineHeight: '1.65', whiteSpace: 'pre-wrap' }}>{trade.notes}</div>
             </div>
           )}
@@ -437,7 +437,7 @@ export default function Dashboard() {
             <div style={{ fontSize: '36px', fontWeight: '500', color: stats.totalPnl >= 0 ? '#1db97b' : '#c03535', lineHeight: 1, marginBottom: '5px', fontFamily: 'DM Sans, sans-serif' }}>
               {fmt(stats.totalPnl)}
             </div>
-            <div style={{ fontSize: '11px', color: '#666', fontFamily: 'DM Sans, sans-serif' }}>
+            <div style={{ fontSize: '11px', color: '#999', fontFamily: 'DM Sans, sans-serif' }}>
               {stats.tradeCount} trades · {stats.dayCount} days
             </div>
           </div>
@@ -445,22 +445,22 @@ export default function Dashboard() {
           <div style={{ margin: '10px 14px 0' }}>
             <ChallengeCard account={activeAccount} trades={trades} loading={loading} mobile />
           </div>
-          <div style={{ margin: '8px 14px 0', background: '#111', border: '0.5px solid #1a1a1a', borderRadius: '10px', overflow: 'hidden' }}>
+          <div style={{ margin: '8px 14px 0', background: '#111', border: '0.5px solid #1a1a1a', borderRadius: '10px' }}>
             <PnLChart trades={trades} account={activeAccount} noMargin mobile />
           </div>
-          <div style={{ margin: '8px 14px 0', background: '#111', border: '0.5px solid #1a1a1a', borderRadius: '10px', overflow: 'hidden' }}>
+          <div style={{ margin: '8px 14px 0', background: '#111', border: '0.5px solid #1a1a1a', borderRadius: '10px' }}>
             <DailyBarChart trades={trades} mobile />
           </div>
-          <div style={{ margin: '8px 14px 0', background: '#111', border: '0.5px solid #1a1a1a', borderRadius: '10px', overflow: 'hidden' }}>
+          <div style={{ margin: '8px 14px 0', background: '#111', border: '0.5px solid #1a1a1a', borderRadius: '10px' }}>
             <WinLossDonut trades={trades} mobile />
           </div>
-          <div style={{ margin: '8px 14px 0', background: '#111', border: '0.5px solid #1a1a1a', borderRadius: '10px', overflow: 'hidden' }}>
+          <div style={{ margin: '8px 14px 0', background: '#111', border: '0.5px solid #1a1a1a', borderRadius: '10px' }}>
             <StreakCard trades={trades} mobile />
           </div>
-          <div style={{ margin: '8px 14px 0', background: '#111', border: '0.5px solid #1a1a1a', borderRadius: '10px', overflow: 'hidden' }}>
+          <div style={{ margin: '8px 14px 0', background: '#111', border: '0.5px solid #1a1a1a', borderRadius: '10px' }}>
             <CalendarPnL trades={trades} mobile onDayClick={date => setDayModal(date)} />
           </div>
-          <div style={{ margin: '8px 14px 16px', background: '#111', border: '0.5px solid #1a1a1a', borderRadius: '10px', overflow: 'hidden' }}>
+          <div style={{ margin: '8px 14px 16px', background: '#111', border: '0.5px solid #1a1a1a', borderRadius: '10px' }}>
             <RecentTrades trades={trades} loading={loading} mobile onTradeClick={t => setDetailTrade(t)} />
           </div>
         </main>
@@ -489,7 +489,7 @@ export default function Dashboard() {
   return (
     <div style={{ display: 'flex', background: '#0a0a0a', minHeight: '100vh' }}>
       <Sidebar />
-      <main style={{ marginLeft: collapsed ? '60px' : '220px', transition: 'margin-left 0.2s ease', flex: 1, padding: '32px' }}>
+      <main style={{ marginLeft: collapsed ? '60px' : '220px', transition: 'margin-left 0.2s ease', flex: 1, padding: '32px', isolation: 'isolate' }}>
         <div style={{ marginBottom: '24px' }}>
           <h1 style={{ color: '#fff', fontFamily: 'Syne, sans-serif', fontSize: '22px', fontWeight: '600', margin: '0 0 16px 0' }}>Dashboard</h1>
           <AccountSwitcher

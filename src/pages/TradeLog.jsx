@@ -166,7 +166,7 @@ function pnlColor(pnl) {
   const v = parseFloat(pnl);
   if (v > 0) return "#1db97b";
   if (v < 0) return "#c03535";
-  return "#666";
+  return "#999";
 }
 
 function directionBadge(dir) {
@@ -255,7 +255,7 @@ function Field({ label, children, hint }) {
         letterSpacing: "0.1em", textTransform: "uppercase", color: "#777",
       }}>{label}</label>
       {children}
-      {hint && <span style={{ fontSize: "11px", color: "#666", fontFamily: "'DM Mono', monospace" }}>{hint}</span>}
+      {hint && <span style={{ fontSize: "11px", color: "#999", fontFamily: "'DM Mono', monospace" }}>{hint}</span>}
     </div>
   );
 }
@@ -493,7 +493,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
         {/* ── Left: trade details ── */}
         <div style={{ paddingRight: "48px", display: "flex", flexDirection: "column", gap: "28px" }}>
           <div>
-            <div style={{ fontSize: "10px", fontFamily: "'DM Mono', monospace", color: "#666", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "18px" }}>
+            <div style={{ fontSize: "10px", fontFamily: "'DM Mono', monospace", color: "#999", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "18px" }}>
               Trade Details
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
@@ -549,7 +549,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                 <Field label="R:R (auto-calculated)">
                   <input type="text" readOnly
                     value={form.rr ? `${form.rr}R` : "—"}
-                    style={{ ...inputStyle, color: form.rr ? "#e0e0e0" : "#666", cursor: "default" }} />
+                    style={{ ...inputStyle, color: form.rr ? "#e0e0e0" : "#999", cursor: "default" }} />
                 </Field>
                 <Field label="Session">
                   <select value={form.session} onChange={e => set("session", e.target.value)} style={selectStyle}>
@@ -601,7 +601,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                 <div onClick={() => fileRef.current.click()} style={{
                   border: "0.5px dashed #2a2a2a", borderRadius: "10px", padding: "28px 20px",
                   cursor: "pointer", textAlign: "center",
-                  color: "#666", fontSize: "13px", transition: "border-color 0.15s",
+                  color: "#999", fontSize: "13px", transition: "border-color 0.15s",
                   fontFamily: "'DM Sans', sans-serif",
                 }}
                   onMouseEnter={e => e.currentTarget.style.borderColor = "#3a3a3a"}
@@ -630,10 +630,10 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
           display: "flex", flexDirection: "column", gap: "20px",
           position: "sticky", top: "80px",
         }}>
-          <div style={{ fontSize: "10px", fontFamily: "'DM Mono', monospace", color: "#666", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+          <div style={{ fontSize: "10px", fontFamily: "'DM Mono', monospace", color: "#999", textTransform: "uppercase", letterSpacing: "0.1em" }}>
             Accounts
           </div>
-          <div style={{ fontSize: "12px", color: "#666", fontFamily: "'DM Sans', sans-serif", marginTop: "-10px" }}>
+          <div style={{ fontSize: "12px", color: "#999", fontFamily: "'DM Sans', sans-serif", marginTop: "-10px" }}>
             Select which accounts took this trade. Each account uses its own risk sizing.
           </div>
 
@@ -688,7 +688,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                       <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
                         {accountTypeBadge(acc.type)}
                         {acc.account_size && (
-                          <span style={{ fontSize: "10px", color: "#666", fontFamily: "'DM Mono', monospace" }}>
+                          <span style={{ fontSize: "10px", color: "#999", fontFamily: "'DM Mono', monospace" }}>
                             ${parseFloat(acc.account_size).toLocaleString()}
                           </span>
                         )}
@@ -761,7 +761,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                       display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px",
                     }}>
                       <div>
-                        <div style={{ fontSize: "9px", fontFamily: "'DM Mono', monospace", color: "#666", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "4px" }}>
+                        <div style={{ fontSize: "9px", fontFamily: "'DM Mono', monospace", color: "#999", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "4px" }}>
                           Risk %
                         </div>
                         <div style={{ fontSize: "14px", fontFamily: "'Syne', sans-serif", fontWeight: 600, color: resolvedPct ? "#e0e0e0" : "#555" }}>
@@ -769,7 +769,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                         </div>
                       </div>
                       <div>
-                        <div style={{ fontSize: "9px", fontFamily: "'DM Mono', monospace", color: "#666", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "4px" }}>
+                        <div style={{ fontSize: "9px", fontFamily: "'DM Mono', monospace", color: "#999", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "4px" }}>
                           Risk $
                         </div>
                         <div style={{ fontSize: "14px", fontFamily: "'Syne', sans-serif", fontWeight: 600, color: resolvedDollar ? "#e0e0e0" : "#555" }}>
@@ -777,7 +777,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                         </div>
                       </div>
                       <div>
-                        <div style={{ fontSize: "9px", fontFamily: "'DM Mono', monospace", color: "#666", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "4px" }}>
+                        <div style={{ fontSize: "9px", fontFamily: "'DM Mono', monospace", color: "#999", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "4px" }}>
                           Est. P&L
                         </div>
                         <div style={{ fontSize: "14px", fontFamily: "'Syne', sans-serif", fontWeight: 600, color: pnlNum !== null ? pnlColor(pnlNum) : "#555" }}>
@@ -787,7 +787,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                     </div>
 
                     {!form.rr && rawVal && (
-                      <div style={{ fontSize: "11px", color: "#666", fontFamily: "'DM Mono', monospace" }}>
+                      <div style={{ fontSize: "11px", color: "#999", fontFamily: "'DM Mono', monospace" }}>
                         Fill Entry, SL, TP to calculate P&L
                       </div>
                     )}
@@ -803,7 +803,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
               background: "#0a0a0a", border: "0.5px solid #1a1a1a",
               borderRadius: "10px", padding: "14px 16px",
             }}>
-              <div style={{ fontSize: "10px", fontFamily: "'DM Mono', monospace", color: "#666", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "10px" }}>
+              <div style={{ fontSize: "10px", fontFamily: "'DM Mono', monospace", color: "#999", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "10px" }}>
                 Summary
               </div>
               {selectedAccountsList.map(acc => {
@@ -906,7 +906,7 @@ function TradeDetailModal({ trade, onClose, onEdit, onDelete }) {
 
           {/* Price levels */}
           <div>
-            <div style={{ fontSize: "10px", fontFamily: "'DM Mono', monospace", color: "#666", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "14px" }}>Price Levels</div>
+            <div style={{ fontSize: "10px", fontFamily: "'DM Mono', monospace", color: "#999", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "14px" }}>Price Levels</div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px" }}>
               {[
                 { label: "Entry", value: fmt(trade.entry) },
@@ -924,7 +924,7 @@ function TradeDetailModal({ trade, onClose, onEdit, onDelete }) {
           {/* Screenshot */}
           {trade.screenshot_url && (
             <div>
-              <div style={{ fontSize: "10px", fontFamily: "'DM Mono', monospace", color: "#666", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "14px" }}>Chart Screenshot</div>
+              <div style={{ fontSize: "10px", fontFamily: "'DM Mono', monospace", color: "#999", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "14px" }}>Chart Screenshot</div>
               <div style={{ borderRadius: "10px", overflow: "hidden", border: "0.5px solid #1e1e1e", background: "#111", position: "relative" }}>
                 <img src={trade.screenshot_url} alt="Trade screenshot" style={{ width: "100%", display: "block", maxHeight: "460px", objectFit: "contain", background: "#0a0a0a" }} />
                 <a href={trade.screenshot_url} target="_blank" rel="noreferrer" style={{
@@ -941,7 +941,7 @@ function TradeDetailModal({ trade, onClose, onEdit, onDelete }) {
           {/* Notes */}
           {trade.notes && (
             <div>
-              <div style={{ fontSize: "10px", fontFamily: "'DM Mono', monospace", color: "#666", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "12px" }}>Notes</div>
+              <div style={{ fontSize: "10px", fontFamily: "'DM Mono', monospace", color: "#999", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "12px" }}>Notes</div>
               <div style={{
                 background: "#111", border: "0.5px solid #1e1e1e",
                 borderRadius: "10px", padding: "16px 18px",
@@ -1125,6 +1125,9 @@ export default function TradeLog() {
   const [filterDir, setFilterDir] = useState("all");
   const [filterSession, setFilterSession] = useState("all");
   const [detailTrade, setDetailTrade] = useState(null);
+  const [loggableAccounts, setLoggableAccounts] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 20;
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   useEffect(() => {
@@ -1144,7 +1147,7 @@ useEffect(() => {
   }
 }, [location.state]);
 
-  // ── Fetch accounts — exclude passed/failed challenges ──
+  // ── Fetch accounts ──
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
@@ -1167,14 +1170,44 @@ useEffect(() => {
               tradesByAccount[t.account_id].push(t);
             });
           }
-          // Only show personal accounts + in-progress (active) and funded challenges
-          const filtered = data.filter(a =>
-            a.type === 'personal' || a.status === 'active' || a.status === 'funded'
-          );
-          setAccounts(filtered);
+          const computeStatus = (trades, account) => {
+            if (account.failure_reason) return 'failed';
+            if (account.phase === 'funded') return 'funded';
+            const withPnl = trades.filter(t => t.pnl != null);
+            const netPnl = withPnl.reduce((s, t) => s + parseFloat(t.pnl), 0);
+            const accountSize = parseFloat(account.account_size) || 0;
+            const profitTarget = parseFloat(account.profit_target) || 0;
+            const maxDD = parseFloat(account.max_drawdown) || 0;
+            const dailyDD = parseFloat(account.daily_drawdown) || 0;
+            const minDays = account.min_trading_days || 0;
+            let balance = accountSize;
+            let lowestBalance = accountSize;
+            for (const t of withPnl) {
+              balance += parseFloat(t.pnl);
+              if (balance < lowestBalance) lowestBalance = balance;
+            }
+            const maxDrawdownUsed = Math.max(0, accountSize - lowestBalance);
+            const byDay = {};
+            withPnl.forEach(t => { byDay[t.date] = (byDay[t.date] || 0) + parseFloat(t.pnl); });
+            const worstDayLoss = Object.values(byDay).length > 0
+              ? Math.max(0, ...Object.values(byDay).map(v => -v)) : 0;
+            if ((maxDD > 0 && maxDrawdownUsed >= maxDD) || (dailyDD > 0 && worstDayLoss >= dailyDD)) return 'failed';
+            const tradingDays = new Set(trades.map(t => t.date)).size;
+            if (profitTarget > 0 && netPnl >= profitTarget && (minDays === 0 || tradingDays >= minDays)) return 'passed';
+            return 'active';
+          };
+          // All accounts shown in switcher (history viewing)
+          setAccounts(data);
+          // Only active/funded challenges available when logging a trade
+          const loggableAccounts = data.filter(a => {
+            if (a.type === 'personal') return true;
+            const status = computeStatus(tradesByAccount[a.id] || [], a);
+            return status === 'active' || status === 'funded';
+          });
+          setLoggableAccounts(loggableAccounts);
           // Default to last selected account, fallback to first
           const savedId = localStorage.getItem('activeAccountId');
-          const preferred = savedId ? (filtered.find(a => a.id === savedId) || filtered[0]) : filtered[0];
+          const preferred = savedId ? (data.find(a => a.id === savedId) || data[0]) : data[0];
           setActiveAccount(preferred || null);
         }
       } catch {
@@ -1545,11 +1578,11 @@ useEffect(() => {
           )}
 
           {loading ? (
-            <div style={{ padding: '48px', textAlign: 'center', color: '#666', fontSize: '13px', fontFamily: "'DM Mono', monospace" }}>
+            <div style={{ padding: '48px', textAlign: 'center', color: '#999', fontSize: '13px', fontFamily: "'DM Mono', monospace" }}>
               Loading trades…
             </div>
           ) : filtered.length === 0 ? (
-            <div style={{ padding: '48px', textAlign: 'center', color: '#666', fontSize: '13px', fontFamily: "'DM Mono', monospace" }}>
+            <div style={{ padding: '48px', textAlign: 'center', color: '#999', fontSize: '13px', fontFamily: "'DM Mono', monospace" }}>
               No trades yet.
             </div>
           ) : (
@@ -1571,7 +1604,7 @@ useEffect(() => {
                   padding: '9px 14px', borderBottom: '0.5px solid #111', gap: '8px',
                 }} onClick={() => setDetailTrade(t)}>
                   {/* Date */}
-                  <div style={{ fontSize: '10px', color: '#666', width: '36px', flexShrink: 0, fontFamily: "'DM Mono', monospace" }}>
+                  <div style={{ fontSize: '10px', color: '#999', width: '36px', flexShrink: 0, fontFamily: "'DM Mono', monospace" }}>
                     {t.date ? new Date(t.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'}
                   </div>
 
@@ -1585,7 +1618,7 @@ useEffect(() => {
                         isLong ? '#1db97b' : '#c03535',
                         isLong ? '#1a3826' : '#2e1515'
                       )}
-                      <span style={{ fontSize: '9px', color: '#666', fontFamily: "'DM Sans', sans-serif" }}>{sessionLabel(t.session)}</span>
+                      <span style={{ fontSize: '9px', color: '#999', fontFamily: "'DM Sans', sans-serif" }}>{sessionLabel(t.session)}</span>
                     </div>
                   </div>
 
@@ -1604,7 +1637,7 @@ useEffect(() => {
                     <button onClick={() => { setEditTrade(t); setFormOpen(true); }} style={{
                       width: '28px', height: '28px', background: '#1a1a1a',
                       border: '0.5px solid #222', borderRadius: '5px',
-                      color: '#666', cursor: 'pointer', fontSize: '11px',
+                      color: '#999', cursor: 'pointer', fontSize: '11px',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>✏</button>
                     <button onClick={() => handleDelete(t.id)} style={{
@@ -1638,7 +1671,7 @@ useEffect(() => {
             onSave={handleSave}
             editTrade={editTrade}
             saving={saving}
-            accounts={accounts}
+            accounts={loggableAccounts}
           />
         )}
       </div>
@@ -1649,6 +1682,10 @@ useEffect(() => {
   const filtered = trades
     .filter(t => filterDir === "all" || t.direction === filterDir)
     .filter(t => filterSession === "all" || t.session === filterSession);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginated = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   return (
     <div style={{ display: "flex", background: "#0a0a0a", minHeight: "100vh" }}>
@@ -1670,36 +1707,47 @@ useEffect(() => {
         `}</style>
 
         {/* Page Header */}
-        <div style={{ marginBottom: "14px" }}>
-          <h1 style={{ margin: "0 0 16px 0", fontFamily: "'Syne', sans-serif", fontSize: "22px", fontWeight: 700, color: "#fff" }}>Trade Log</h1>
-          <div style={{ marginTop: "14px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            {/* Left: switcher + account name */}
+        <div style={{ marginBottom: "20px" }}>
+          <h1 style={{ margin: "0 0 12px 0", fontFamily: "'Syne', sans-serif", fontSize: "22px", fontWeight: 700, color: "#fff" }}>Trade Log</h1>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            {/* Left: account selector + account meta */}
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <div style={{ marginTop: "34px" }}>
-                <AccountSwitcher
-                  onSwitch={(acc) => { setActiveAccount(acc); if (acc?.id) localStorage.setItem("activeAccountId", acc.id); }}
-                  defaultAccountId={activeAccount?.id || localStorage.getItem("activeAccountId")}
-                  showBalance={false}
-                />
-              </div>
+              <select
+                value={activeAccount?.id || ""}
+                onChange={e => {
+                  const acc = accounts.find(a => a.id === e.target.value);
+                  if (acc) { setActiveAccount(acc); localStorage.setItem("activeAccountId", acc.id); }
+                }}
+                style={{
+                  background: "#111", border: "0.5px solid #2a2a2a", borderRadius: "8px",
+                  padding: "7px 12px", color: "#e0e0e0",
+                  fontFamily: "'DM Sans', sans-serif", fontSize: "13px",
+                  cursor: "pointer", outline: "none", appearance: "none",
+                  paddingRight: "28px",
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")`,
+                  backgroundRepeat: "no-repeat", backgroundPosition: "right 10px center",
+                }}
+              >
+                {accounts.map(a => (
+                  <option key={a.id} value={a.id}>{a.name || a.firm_name || "Account"}</option>
+                ))}
+              </select>
               {activeAccount && (
-                <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-                  <span style={{ fontFamily: "'Syne', sans-serif", fontSize: "18px", fontWeight: 700, color: "#e8e8e8" }}>
+                <>
+                  <span style={{ fontFamily: "'Syne', sans-serif", fontSize: "16px", fontWeight: 700, color: "#e8e8e8" }}>
                     {activeAccount.name || activeAccount.firm_name || "Account"}
                   </span>
-                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    {activeAccount.account_size && (
-                      <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "11px", color: "#aaa" }}>
-                        ${Number(activeAccount.account_size).toLocaleString()}
-                      </span>
-                    )}
-                    {activeAccount.created_at && (
-                      <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "11px", color: "#777" }}>
-                        Since {new Date(activeAccount.created_at).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
-                      </span>
-                    )}
-                  </div>
-                </div>
+                  {activeAccount.account_size && (
+                    <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "11px", color: "#aaa" }}>
+                      ${Number(activeAccount.account_size).toLocaleString()}
+                    </span>
+                  )}
+                  {activeAccount.created_at && (
+                    <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "11px", color: "#555" }}>
+                      Since {new Date(activeAccount.created_at).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+                    </span>
+                  )}
+                </>
               )}
             </div>
             {/* Right: Log Trade button */}
@@ -1721,12 +1769,11 @@ useEffect(() => {
           }}>{error}</div>
         )}
 
-        <SummaryBar trades={filtered} />
 
-        {/* Filters */}
-        <div style={{ display: "flex", gap: "8px", marginBottom: "16px" }}>
+        {/* Filters + Export */}
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
           {["all", "long", "short"].map(d => (
-            <button key={d} onClick={() => setFilterDir(d)} style={{
+            <button key={d} onClick={() => { setFilterDir(d); setCurrentPage(1); }} style={{
               padding: "6px 14px", borderRadius: "6px", border: "0.5px solid",
               borderColor: filterDir === d ? "#555" : "#1a1a1a",
               background: filterDir === d ? "#181818" : "transparent",
@@ -1736,9 +1783,9 @@ useEffect(() => {
               cursor: "pointer", transition: "all 0.15s",
             }}>{d}</button>
           ))}
-          <div style={{ width: "1px", background: "#1a1a1a", margin: "0 4px" }} />
+          <div style={{ width: "1px", background: "#1a1a1a", margin: "0 4px", alignSelf: "stretch" }} />
           {["all", ...SESSIONS].map(s => (
-            <button key={s} onClick={() => setFilterSession(s)} style={{
+            <button key={s} onClick={() => { setFilterSession(s); setCurrentPage(1); }} style={{
               padding: "6px 14px", borderRadius: "6px", border: "0.5px solid",
               borderColor: filterSession === s ? "#555" : "#1a1a1a",
               background: filterSession === s ? "#181818" : "transparent",
@@ -1748,37 +1795,35 @@ useEffect(() => {
               cursor: "pointer", transition: "all 0.15s",
             }}>{s === "all" ? "All Sessions" : sessionLabel(s)}</button>
           ))}
-        </div>
-
-        {/* Export + Table */}
-        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "8px" }}>
-          <button onClick={() => {
-            const headers = ["Date", "Pair", "Direction", "Entry", "Stop Loss", "Take Profit", "R:R", "P&L", "Session", "Outcome", "Notes"];
-            const rows = filtered.map(t => [
-              t.date, t.pair, t.direction,
-              t.entry ?? "", t.stop_loss ?? "", t.take_profit ?? "",
-              t.rr ?? "", t.pnl ?? "",
-              t.session, t.outcome ?? "", (t.notes || "").replace(/,/g, " "),
-            ]);
-            const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
-            const blob = new Blob([csv], { type: "text/csv" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `trades-${activeAccount?.name || "export"}-${new Date().toISOString().split("T")[0]}.csv`;
-            a.click();
-            URL.revokeObjectURL(url);
-          }} style={{
-            padding: "7px 14px", background: "transparent",
-            border: "0.5px solid #1e1e1e", borderRadius: "7px",
-            color: "#777", cursor: "pointer",
-            fontFamily: "'DM Mono', monospace", fontSize: "11px",
-            textTransform: "uppercase", letterSpacing: "0.08em",
-            transition: "all 0.15s",
-          }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = "#555"; e.currentTarget.style.color = "#ccc"; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = "#1e1e1e"; e.currentTarget.style.color = "#777"; }}
-          >↓ Export CSV</button>
+          <div style={{ marginLeft: "auto" }}>
+            <button onClick={() => {
+              const headers = ["Date", "Pair", "Direction", "Entry", "Stop Loss", "Take Profit", "R:R", "P&L", "Session", "Outcome", "Notes"];
+              const rows = filtered.map(t => [
+                t.date, t.pair, t.direction,
+                t.entry ?? "", t.stop_loss ?? "", t.take_profit ?? "",
+                t.rr ?? "", t.pnl ?? "",
+                t.session, t.outcome ?? "", (t.notes || "").replace(/,/g, " "),
+              ]);
+              const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
+              const blob = new Blob([csv], { type: "text/csv" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = `trades-${activeAccount?.name || "export"}-${new Date().toISOString().split("T")[0]}.csv`;
+              a.click();
+              URL.revokeObjectURL(url);
+            }} style={{
+              padding: "6px 14px", background: "transparent",
+              border: "0.5px solid #1e1e1e", borderRadius: "6px",
+              color: "#777", cursor: "pointer",
+              fontFamily: "'DM Mono', monospace", fontSize: "11px",
+              textTransform: "uppercase", letterSpacing: "0.08em",
+              transition: "all 0.15s",
+            }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = "#555"; e.currentTarget.style.color = "#ccc"; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = "#1e1e1e"; e.currentTarget.style.color = "#777"; }}
+            >↓ Export CSV</button>
+          </div>
         </div>
 
         <div style={{ background: "#111", border: "0.5px solid #1e1e1e", borderRadius: "12px", overflow: "hidden" }}>
@@ -1790,20 +1835,20 @@ useEffect(() => {
                     padding: "10px 14px", textAlign: i === 7 ? "right" : "left",
                     fontSize: "10px", fontFamily: "'DM Mono', monospace",
                     letterSpacing: "0.1em", textTransform: "uppercase",
-                    color: "#666", fontWeight: 500, background: "#0d0d0d",
+                    color: "#999", fontWeight: 500, background: "#0d0d0d",
                   }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={8} style={{ padding: "48px", textAlign: "center", color: "#666", fontSize: "13px" }}>Loading trades…</td></tr>
+                <tr><td colSpan={8} style={{ padding: "48px", textAlign: "center", color: "#999", fontSize: "13px" }}>Loading trades…</td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={8} style={{ padding: "48px", textAlign: "center", color: "#666", fontSize: "13px" }}>
-                  No trades yet. Click <strong style={{ color: "#666" }}>+ Log Trade</strong> to get started.
+                <tr><td colSpan={8} style={{ padding: "48px", textAlign: "center", color: "#999", fontSize: "13px" }}>
+                  No trades yet. Click <strong style={{ color: "#999" }}>+ Log Trade</strong> to get started.
                 </td></tr>
               ) : (
-                filtered.map(t => (
+                paginated.map(t => (
                   <TradeRow key={t.id} trade={t} onViewDetail={setDetailTrade} onEdit={openEdit} onDelete={handleDelete} />
                 ))
               )}
@@ -1812,9 +1857,33 @@ useEffect(() => {
         </div>
 
         {!loading && filtered.length > 0 && (
-          <p style={{ marginTop: "12px", fontSize: "12px", color: "#666", fontFamily: "'DM Mono', monospace" }}>
-            {filtered.length} trade{filtered.length !== 1 ? "s" : ""}
-          </p>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "12px" }}>
+            <p style={{ fontSize: "12px", color: "#555", fontFamily: "'DM Mono', monospace", margin: 0 }}>
+              {((safePage - 1) * PAGE_SIZE) + 1}–{Math.min(safePage * PAGE_SIZE, filtered.length)} of {filtered.length} trade{filtered.length !== 1 ? "s" : ""}
+            </p>
+            <div style={{ display: "flex", gap: "6px" }}>
+              <button
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={safePage === 1}
+                style={{
+                  padding: "6px 14px", borderRadius: "6px", border: "0.5px solid #1e1e1e",
+                  background: "transparent", color: safePage === 1 ? "#333" : "#777",
+                  fontFamily: "'DM Mono', monospace", fontSize: "11px", cursor: safePage === 1 ? "default" : "pointer",
+                  textTransform: "uppercase", letterSpacing: "0.08em",
+                }}
+              >← Prev</button>
+              <button
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={safePage === totalPages}
+                style={{
+                  padding: "6px 14px", borderRadius: "6px", border: "0.5px solid #1e1e1e",
+                  background: "transparent", color: safePage === totalPages ? "#333" : "#777",
+                  fontFamily: "'DM Mono', monospace", fontSize: "11px", cursor: safePage === totalPages ? "default" : "pointer",
+                  textTransform: "uppercase", letterSpacing: "0.08em",
+                }}
+              >Next →</button>
+            </div>
+          </div>
         )}
 
         {/* Trade Detail Modal */}
@@ -1835,7 +1904,7 @@ useEffect(() => {
           onSave={handleSave}
           editTrade={editTrade}
           saving={saving}
-          accounts={accounts}
+          accounts={loggableAccounts}
         />
       </div>
     </div>
@@ -2052,7 +2121,7 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
                   background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '6px',
                   height: '36px', display: 'flex', alignItems: 'center', padding: '0 10px',
                 }}>
-                  <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '12px', color: form.rr ? '#e0e0e0' : '#666' }}>
+                  <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '12px', color: form.rr ? '#e0e0e0' : '#999' }}>
                     {form.rr ? `${form.rr}R` : '—'}
                   </span>
                 </div>
@@ -2174,10 +2243,10 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
                         {[
                           { label: 'Risk %', value: resolvedPct ? `${parseFloat(resolvedPct).toFixed(2)}%` : '—' },
                           { label: 'Risk $', value: resolvedDollar ? `$${resolvedDollar}` : '—' },
-                          { label: 'Est. P&L', value: pnlNum !== null ? `${pnlNum >= 0 ? '+' : ''}$${Math.abs(pnlNum).toFixed(2)}` : '—', color: pnlNum !== null ? pnlColor(pnlNum) : '#666' },
+                          { label: 'Est. P&L', value: pnlNum !== null ? `${pnlNum >= 0 ? '+' : ''}$${Math.abs(pnlNum).toFixed(2)}` : '—', color: pnlNum !== null ? pnlColor(pnlNum) : '#999' },
                         ].map(s => (
                           <div key={s.label}>
-                            <div style={{ fontSize: '9px', color: '#666', fontFamily: "'DM Mono', monospace" }}>{s.label}</div>
+                            <div style={{ fontSize: '9px', color: '#999', fontFamily: "'DM Mono', monospace" }}>{s.label}</div>
                             <div style={{ fontSize: '11px', fontWeight: '500', color: s.color || '#aaa', fontFamily: "'DM Mono', monospace" }}>{s.value}</div>
                           </div>
                         ))}
@@ -2208,7 +2277,7 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
                 ? <span style={{ color: '#1db97b', fontFamily: "'DM Mono', monospace", fontSize: '11px' }}>📎 {screenshotFile.name}</span>
                 : form.screenshot_url
                   ? <span style={{ color: '#4d9fff', fontFamily: "'DM Mono', monospace", fontSize: '11px' }}>📎 Screenshot attached</span>
-                  : <span style={{ color: '#666', fontFamily: "'DM Sans', sans-serif", fontSize: '12px' }}>Tap to upload</span>
+                  : <span style={{ color: '#999', fontFamily: "'DM Sans', sans-serif", fontSize: '12px' }}>Tap to upload</span>
               }
             </div>
             <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => { if (e.target.files[0]) setScreenshotFile(e.target.files[0]); }} />

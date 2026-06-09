@@ -184,7 +184,7 @@ export default function NotificationPanel({ onClose, onRead, anchorRef }) {
           <div style={{
             padding: '32px 16px',
             textAlign: 'center',
-            color: '#666',
+            color: '#999',
             fontFamily: 'DM Mono, monospace',
             fontSize: '12px',
           }}>Loading…</div>
@@ -194,7 +194,7 @@ export default function NotificationPanel({ onClose, onRead, anchorRef }) {
           <div style={{
             padding: '40px 16px',
             textAlign: 'center',
-            color: '#666',
+            color: '#999',
             fontFamily: 'DM Sans, sans-serif',
             fontSize: '13px',
           }}>No notifications yet</div>
@@ -233,13 +233,13 @@ export default function NotificationPanel({ onClose, onRead, anchorRef }) {
                 margin: '0 0 4px 0',
                 fontFamily: 'DM Sans, sans-serif',
                 fontSize: '13px',
-                color: n.read ? '#666' : '#ccc',
+                color: n.read ? '#999' : '#ccc',
                 lineHeight: '1.45',
               }}>{n.message}</p>
               <span style={{
                 fontFamily: 'DM Mono, monospace',
                 fontSize: '10px',
-                color: '#666',
+                color: '#999',
               }}>{timeAgo(n.created_at)}</span>
             </div>
 

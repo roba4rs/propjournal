@@ -579,7 +579,7 @@ export default function Analytics() {
 
           {!selectedId ? (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: 60 }}>
-              <span style={{ fontFamily: font.mono, fontSize: 12, color: '#666' }}>
+              <span style={{ fontFamily: font.mono, fontSize: 12, color: '#999' }}>
                 Select an account to view analytics
               </span>
             </div>

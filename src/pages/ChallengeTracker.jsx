@@ -269,7 +269,7 @@ function EditChallengeModal({ challenge, onClose, onSaved, onDeleted }) {
         )}
 
         <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
-          <button onClick={onClose} style={{ flex: 1, background: 'transparent', border: '0.5px solid #1e1e1e', borderRadius: '8px', padding: '11px', color: '#666', fontFamily: 'DM Sans, sans-serif', fontSize: '13px', cursor: 'pointer' }}>
+          <button onClick={onClose} style={{ flex: 1, background: 'transparent', border: '0.5px solid #1e1e1e', borderRadius: '8px', padding: '11px', color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '13px', cursor: 'pointer' }}>
             Cancel
           </button>
           <button onClick={handleSave} disabled={loading} style={{ flex: 2, background: '#1db97b', border: 'none', borderRadius: '8px', padding: '11px', color: '#000', fontFamily: 'DM Sans, sans-serif', fontWeight: '600', fontSize: '13px', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1 }}>
@@ -282,12 +282,12 @@ function EditChallengeModal({ challenge, onClose, onSaved, onDeleted }) {
           <div style={{ background: '#1e0d0d', border: '0.5px solid #2e1515', borderRadius: '8px', padding: '16px', marginBottom: '16px' }}>
             <p style={{ color: '#c03535', fontFamily: 'DM Mono, monospace', fontSize: '10px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 6px 0' }}>Marked as Failed</p>
             <p style={{ color: '#aaa', fontFamily: 'DM Sans, sans-serif', fontSize: '13px', margin: '0 0 4px 0' }}>Reason: <span style={{ color: '#ccc' }}>{challenge.failure_reason}</span></p>
-            {challenge.failure_notes && <p style={{ color: '#666', fontFamily: 'DM Sans, sans-serif', fontSize: '12px', margin: 0 }}>{challenge.failure_notes}</p>}
+            {challenge.failure_notes && <p style={{ color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '12px', margin: 0 }}>{challenge.failure_notes}</p>}
           </div>
         ) : (
           <div style={{ border: '0.5px solid #1e1e1e', borderRadius: '8px', padding: '16px', marginBottom: '16px' }}>
             <p style={{ color: '#777', fontFamily: 'DM Mono, monospace', fontSize: '10px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 6px 0' }}>Rule Violation / Manual Fail</p>
-            <p style={{ color: '#666', fontFamily: 'DM Sans, sans-serif', fontSize: '12px', margin: '0 0 12px 0' }}>
+            <p style={{ color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '12px', margin: '0 0 12px 0' }}>
               Use this if the prop firm failed your account due to a rule violation not captured by drawdown numbers.
             </p>
             {!manualFail ? (
@@ -346,7 +346,7 @@ function EditChallengeModal({ challenge, onClose, onSaved, onDeleted }) {
             </button>
           ) : (
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <span style={{ color: '#666', fontFamily: 'DM Sans, sans-serif', fontSize: '12px' }}>Are you sure?</span>
+              <span style={{ color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '12px' }}>Are you sure?</span>
               <button onClick={handleDelete} disabled={deleting} style={{ background: '#c03535', border: 'none', borderRadius: '6px', padding: '8px 16px', color: '#fff', fontFamily: 'DM Sans, sans-serif', fontSize: '12px', fontWeight: '600', cursor: deleting ? 'not-allowed' : 'pointer' }}>
                 {deleting ? 'Deleting...' : 'Yes, delete'}
               </button>
@@ -470,7 +470,7 @@ function computeStatus(trades, account) {
 function ProgressBlock({ label, barPct, barColor, leftLabel, rightLabel }) {
   return (
     <div style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '8px', padding: '14px' }}>
-      <p style={{ color: '#666', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', textTransform: 'uppercase', margin: '0 0 8px 0', letterSpacing: '0.5px' }}>
+      <p style={{ color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', textTransform: 'uppercase', margin: '0 0 8px 0', letterSpacing: '0.5px' }}>
         {label}
       </p>
       <div style={{ height: '3px', background: '#181818', borderRadius: '2px', marginBottom: '6px' }}>
@@ -478,7 +478,7 @@ function ProgressBlock({ label, barPct, barColor, leftLabel, rightLabel }) {
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         <span style={{ color: barColor, fontFamily: 'DM Mono, monospace', fontSize: '12px' }}>{leftLabel}</span>
-        <span style={{ color: '#666', fontFamily: 'DM Mono, monospace', fontSize: '12px' }}>{rightLabel}</span>
+        <span style={{ color: '#999', fontFamily: 'DM Mono, monospace', fontSize: '12px' }}>{rightLabel}</span>
       </div>
     </div>
   )
@@ -495,7 +495,7 @@ export default function ChallengeTracker() {
   const [editingChallenge, setEditingChallenge] = useState(null)
   const [loading, setLoading] = useState(true)
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
-  const [viewMode, setViewMode] = useState('cards') // 'cards' | 'compact'
+  const [viewMode, setViewMode] = useState('compact') // 'cards' | 'compact'
   const [mobileView, setMobileView] = useState('grid') // 'list' | 'grid'
 
   useEffect(() => {
@@ -647,7 +647,7 @@ export default function ChallengeTracker() {
         {/* Scrollable card list */}
         <main style={{ paddingTop: '94px', paddingBottom: '68px', flex: 1, overflowY: 'auto' }}>
           {loading ? (
-            <div style={{ padding: '48px', textAlign: 'center', color: '#666', fontSize: '13px', fontFamily: "'DM Mono', monospace" }}>
+            <div style={{ padding: '48px', textAlign: 'center', color: '#999', fontSize: '13px', fontFamily: "'DM Mono', monospace" }}>
               Loading...
             </div>
           ) : filtered.length === 0 ? (
@@ -688,7 +688,7 @@ export default function ChallengeTracker() {
                         <div style={{ fontSize: '12px', fontWeight: '700', color: '#fff', fontFamily: "'Syne', sans-serif", textTransform: 'uppercase', letterSpacing: '0.4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {challenge.firm_name}
                         </div>
-                        <div style={{ fontSize: '9px', color: '#666', fontFamily: "'DM Sans', sans-serif", marginTop: '2px' }}>
+                        <div style={{ fontSize: '9px', color: '#999', fontFamily: "'DM Sans', sans-serif", marginTop: '2px' }}>
                           {phaseLabel} · ${Number(challenge.account_size).toLocaleString()}
                         </div>
                       </div>
@@ -737,8 +737,8 @@ export default function ChallengeTracker() {
 
                     {/* Actions */}
                     <div style={{ display: 'flex', gap: '4px', marginTop: 'auto' }}>
-                      <button onClick={() => setEditingChallenge(challenge)} style={{ background: 'transparent', border: '0.5px solid #1e1e1e', borderRadius: '4px', padding: '5px 7px', fontSize: '11px', color: '#666', cursor: 'pointer', flexShrink: 0 }}>✏️</button>
-                      <button onClick={() => navigate(`/dashboard?account=${challenge.id}`)} style={{ flex: 1, background: 'transparent', border: `0.5px solid ${isFailed ? '#2e1515' : '#1e1e1e'}`, borderRadius: '4px', padding: '5px', fontSize: '10px', color: '#666', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>Dashboard →</button>
+                      <button onClick={() => setEditingChallenge(challenge)} style={{ background: 'transparent', border: '0.5px solid #1e1e1e', borderRadius: '4px', padding: '5px 7px', fontSize: '11px', color: '#999', cursor: 'pointer', flexShrink: 0 }}>✏️</button>
+                      <button onClick={() => navigate(`/dashboard?account=${challenge.id}`)} style={{ flex: 1, background: 'transparent', border: `0.5px solid ${isFailed ? '#2e1515' : '#1e1e1e'}`, borderRadius: '4px', padding: '5px', fontSize: '10px', color: '#999', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>Dashboard →</button>
                     </div>
                   </div>
                 )
@@ -783,7 +783,7 @@ export default function ChallengeTracker() {
                         fontSize: '14px', fontWeight: '700', color: '#fff',
                         fontFamily: "'Syne', sans-serif", textTransform: 'uppercase', letterSpacing: '0.5px',
                       }}>{challenge.firm_name}</span>
-                      <div style={{ fontSize: '10px', color: '#666', marginTop: '3px', fontFamily: "'DM Sans', sans-serif" }}>
+                      <div style={{ fontSize: '10px', color: '#999', marginTop: '3px', fontFamily: "'DM Sans', sans-serif" }}>
                         {phaseLabel} · ${Number(challenge.account_size).toLocaleString()} · Started {startFormatted}
                       </div>
                     </div>
@@ -848,7 +848,7 @@ export default function ChallengeTracker() {
                         background: 'transparent',
                         border: '0.5px solid #1e1e1e',
                         borderRadius: '5px', padding: '6px 10px',
-                        fontSize: '13px', color: '#666', cursor: 'pointer',
+                        fontSize: '13px', color: '#999', cursor: 'pointer',
                         flexShrink: 0,
                       }}
                     >✏️</button>
@@ -858,7 +858,7 @@ export default function ChallengeTracker() {
                         flex: 1, background: 'transparent',
                         border: `0.5px solid ${isFailed ? '#2e1515' : '#1e1e1e'}`,
                         borderRadius: '5px', padding: '6px',
-                        fontSize: '11px', color: '#666', cursor: 'pointer',
+                        fontSize: '11px', color: '#999', cursor: 'pointer',
                         fontFamily: "'DM Sans', sans-serif",
                       }}
                     >Go to Dashboard →</button>
@@ -918,22 +918,6 @@ export default function ChallengeTracker() {
 
           {/* View Mode Toggle */}
           <div style={{ display: 'flex', background: '#0d0d0d', border: '0.5px solid #1e1e1e', borderRadius: '8px', padding: '3px', gap: '2px' }}>
-            {/* Cards view — lines icon (wide detailed rows) */}
-            <button
-              onClick={() => setViewMode('cards')}
-              title="Detailed"
-              style={{
-                background: viewMode === 'cards' ? '#1a1a1a' : 'transparent',
-                border: viewMode === 'cards' ? '0.5px solid #2a2a2a' : '0.5px solid transparent',
-                borderRadius: '6px', padding: '6px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}
-            >
-              <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-                <rect x="1" y="2" width="13" height="2" rx="1" fill={viewMode === 'cards' ? '#fff' : '#666'} />
-                <rect x="1" y="6.5" width="13" height="2" rx="1" fill={viewMode === 'cards' ? '#fff' : '#666'} />
-                <rect x="1" y="11" width="13" height="2" rx="1" fill={viewMode === 'cards' ? '#fff' : '#666'} />
-              </svg>
-            </button>
             {/* Compact view — grid/tiles icon */}
             <button
               onClick={() => setViewMode('compact')}
@@ -945,20 +929,34 @@ export default function ChallengeTracker() {
               }}
             >
               <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-                <rect x="1" y="1" width="6" height="6" rx="1.5" fill={viewMode === 'compact' ? '#fff' : '#666'} />
-                <rect x="8" y="1" width="6" height="6" rx="1.5" fill={viewMode === 'compact' ? '#fff' : '#666'} />
-                <rect x="1" y="8" width="6" height="6" rx="1.5" fill={viewMode === 'compact' ? '#fff' : '#666'} />
-                <rect x="8" y="8" width="6" height="6" rx="1.5" fill={viewMode === 'compact' ? '#fff' : '#666'} />
+                <rect x="1" y="1" width="6" height="6" rx="1.5" fill={viewMode === 'compact' ? '#fff' : '#999'} />
+                <rect x="8" y="1" width="6" height="6" rx="1.5" fill={viewMode === 'compact' ? '#fff' : '#999'} />
+                <rect x="1" y="8" width="6" height="6" rx="1.5" fill={viewMode === 'compact' ? '#fff' : '#999'} />
+                <rect x="8" y="8" width="6" height="6" rx="1.5" fill={viewMode === 'compact' ? '#fff' : '#999'} />
               </svg>
             </button>
-            {/* Compact list view */}
-
+            {/* Cards view — lines icon (wide detailed rows) */}
+            <button
+              onClick={() => setViewMode('cards')}
+              title="Detailed"
+              style={{
+                background: viewMode === 'cards' ? '#1a1a1a' : 'transparent',
+                border: viewMode === 'cards' ? '0.5px solid #2a2a2a' : '0.5px solid transparent',
+                borderRadius: '6px', padding: '6px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+                <rect x="1" y="2" width="13" height="2" rx="1" fill={viewMode === 'cards' ? '#fff' : '#999'} />
+                <rect x="1" y="6.5" width="13" height="2" rx="1" fill={viewMode === 'cards' ? '#fff' : '#999'} />
+                <rect x="1" y="11" width="13" height="2" rx="1" fill={viewMode === 'cards' ? '#fff' : '#999'} />
+              </svg>
+            </button>
           </div>
         </div>
 
         {/* Challenge List */}
         {loading ? (
-          <p style={{ color: '#666', fontFamily: 'DM Sans, sans-serif', fontSize: '13px' }}>Loading...</p>
+          <p style={{ color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '13px' }}>Loading...</p>
         ) : filtered.length === 0 ? (
           <div style={{ background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '12px', padding: '48px', textAlign: 'center' }}>
             <p style={{ color: '#555', fontFamily: 'DM Sans, sans-serif', fontSize: '14px', margin: 0 }}>
@@ -988,7 +986,7 @@ export default function ChallengeTracker() {
                         <p style={{ color: '#fff', fontFamily: 'Syne, sans-serif', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.4px', margin: '0 0 2px 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{challenge.firm_name}</p>
                         <button onClick={() => setEditingChallenge(challenge)} style={{ background: 'transparent', border: 'none', color: '#555', cursor: 'pointer', fontSize: '10px', padding: '1px 2px', lineHeight: 1, flexShrink: 0, marginBottom: '2px' }}>✏️</button>
                       </div>
-                      <span style={{ color: '#666', fontFamily: 'DM Mono, monospace', fontSize: '10px' }}>{challenge.phase?.replace('_', ' ').toUpperCase()} · ${Number(challenge.account_size).toLocaleString()}</span>
+                      <span style={{ color: '#999', fontFamily: 'DM Mono, monospace', fontSize: '10px' }}>{challenge.phase?.replace('_', ' ').toUpperCase()} · ${Number(challenge.account_size).toLocaleString()}</span>
                     </div>
                     <span style={{ background: badge.bg, border: `0.5px solid ${badge.border}`, borderRadius: '5px', padding: '3px 8px', color: badge.color, fontFamily: 'DM Mono, monospace', fontSize: '10px', fontWeight: '600', whiteSpace: 'nowrap', flexShrink: 0 }}>{badge.label}</span>
                   </div>
@@ -1027,7 +1025,7 @@ export default function ChallengeTracker() {
                   </div>
 
                   {/* Go to Dashboard */}
-                  <button onClick={() => navigate(`/dashboard?account=${challenge.id}`)} style={{ background: 'transparent', border: '0.5px solid #1e1e1e', borderRadius: '6px', padding: '7px 14px', color: '#666', fontFamily: 'DM Sans, sans-serif', fontSize: '12px', cursor: 'pointer', width: '100%' }}>
+                  <button onClick={() => navigate(`/dashboard?account=${challenge.id}`)} style={{ background: 'transparent', border: '0.5px solid #1e1e1e', borderRadius: '6px', padding: '7px 14px', color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '12px', cursor: 'pointer', width: '100%' }}>
                     Go to Dashboard →
                   </button>
 
@@ -1060,9 +1058,9 @@ export default function ChallengeTracker() {
                         <h2 style={{ color: '#fff', fontFamily: 'Syne, sans-serif', fontSize: '18px', fontWeight: '700', margin: 0, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                           {challenge.firm_name}
                         </h2>
-                        <button onClick={() => setEditingChallenge(challenge)} style={{ background: 'transparent', border: 'none', color: '#666', cursor: 'pointer', fontSize: '13px', padding: '2px 4px', lineHeight: 1 }}>✏️</button>
+                        <button onClick={() => setEditingChallenge(challenge)} style={{ background: 'transparent', border: 'none', color: '#999', cursor: 'pointer', fontSize: '13px', padding: '2px 4px', lineHeight: 1 }}>✏️</button>
                       </div>
-                      <p style={{ color: '#666', fontFamily: 'DM Sans, sans-serif', fontSize: '12px', margin: 0 }}>
+                      <p style={{ color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '12px', margin: 0 }}>
                         {challenge.phase?.replace('_', ' ').toUpperCase()} · ${Number(challenge.account_size).toLocaleString()} · Started {challenge.start_date} · {s.total} trade{s.total !== 1 ? 's' : ''}
                       </p>
                     </div>
@@ -1079,7 +1077,7 @@ export default function ChallengeTracker() {
                       { label: 'W / L / BE', value: `${s.wins}W · ${s.losses}L · ${s.be}BE`, color: '#fff' },
                     ].map(stat => (
                       <div key={stat.label} style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '8px', padding: '14px' }}>
-                        <p style={{ color: '#666', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 6px 0' }}>{stat.label}</p>
+                        <p style={{ color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 6px 0' }}>{stat.label}</p>
                         <p style={{ color: stat.color, fontFamily: 'DM Mono, monospace', fontSize: '15px', margin: 0 }}>{stat.value}</p>
                       </div>
                     ))}
@@ -1117,7 +1115,7 @@ export default function ChallengeTracker() {
                   </div>
 
                   <div style={{ display: 'flex', gap: '8px' }}>
-                    <button onClick={() => navigate(`/dashboard?account=${challenge.id}`)} style={{ background: 'transparent', border: '0.5px solid #1e1e1e', borderRadius: '6px', padding: '7px 14px', color: '#666', fontFamily: 'DM Sans, sans-serif', fontSize: '12px', cursor: 'pointer' }}>
+                    <button onClick={() => navigate(`/dashboard?account=${challenge.id}`)} style={{ background: 'transparent', border: '0.5px solid #1e1e1e', borderRadius: '6px', padding: '7px 14px', color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '12px', cursor: 'pointer' }}>
                       Go to Dashboard →
                     </button>
                   </div>
