@@ -501,6 +501,55 @@ footer { padding: 28px 40px; border-top: 0.5px solid var(--border); display: fle
 /* ── HERO STATS BAR (mobile only element) ── */
 .hero-stats-bar { display: none; }
 
+/* ── MOBILE GATE ── */
+.mg-wrap { display: none; }
+@media (max-width: 900px) {
+  .mg-wrap { display: block; position: fixed; inset: 0; z-index: 9999; background: var(--bg); overflow-y: auto; }
+  body.mg-active { overflow: hidden; }
+  .mg-topnav { display: flex; align-items: center; justify-content: space-between; padding: 0 20px; height: 58px; border-bottom: 0.5px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 2; }
+  .mg-logo { font-family: var(--font-head); font-size: 17px; font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
+  .mg-logo span { color: var(--green); }
+  .mg-topnav-right { display: flex; align-items: center; gap: 10px; }
+  .mg-login-btn { font-family: var(--font-body); font-size: 13px; font-weight: 500; padding: 7px 16px; border: none; border-radius: 8px; background: var(--green); color: #fff; cursor: pointer; }
+  .mg-hamburger { background: none; border: none; color: var(--text); font-size: 22px; cursor: pointer; padding: 4px; line-height: 1; }
+  .mg-page { display: none; flex-direction: column; align-items: center; justify-content: center; padding: 48px 28px 40px; min-height: calc(100vh - 58px); text-align: center; }
+  .mg-page.active { display: flex; }
+  .mg-h1 { font-family: var(--font-head); font-size: 38px; font-weight: 700; line-height: 1.08; letter-spacing: -0.03em; margin-bottom: 18px; color: var(--text); }
+  .mg-h1 em { color: var(--green); font-style: normal; }
+  .mg-sub { font-size: 15px; color: var(--text2); line-height: 1.65; max-width: 320px; margin: 0 auto 32px; }
+  .mg-btns { display: flex; flex-direction: column; width: 100%; max-width: 320px; gap: 10px; margin-bottom: 16px; }
+  .mg-btn-primary { width: 100%; padding: 14px 24px; font-family: var(--font-body); font-size: 15px; font-weight: 500; border: none; border-radius: 10px; background: var(--green); color: #fff; cursor: pointer; }
+  .mg-btn-ghost { width: 100%; padding: 14px 24px; font-family: var(--font-body); font-size: 15px; border: 0.5px solid var(--border2); border-radius: 10px; background: transparent; color: var(--text); cursor: pointer; }
+  .mg-note { font-size: 12px; color: var(--text3); text-align: center; }
+  .mg-inner-page { text-align: left; width: 100%; max-width: 360px; padding-top: 8px; }
+  .mg-back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text2); background: none; border: none; cursor: pointer; padding: 0; margin-bottom: 28px; font-family: var(--font-body); }
+  .mg-page-title { font-family: var(--font-head); font-size: 28px; font-weight: 700; letter-spacing: -0.025em; margin-bottom: 8px; color: var(--text); }
+  .mg-page-sub { font-size: 14px; color: var(--text2); line-height: 1.6; margin-bottom: 24px; }
+  .mg-feature-item { display: flex; align-items: flex-start; gap: 12px; padding: 14px 0; border-bottom: 0.5px solid var(--border); }
+  .mg-feature-item:last-child { border-bottom: none; }
+  .mg-feat-icon { width: 32px; height: 32px; background: var(--green-dim); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--green); }
+  .mg-feat-icon svg { width: 15px; height: 15px; }
+  .mg-feat-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+  .mg-feat-desc { font-size: 12px; color: var(--text2); line-height: 1.5; }
+  .mg-plan-card { background: var(--bg3); border: 0.5px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 10px; }
+  .mg-plan-card.pop { border-color: rgba(29,185,123,0.4); }
+  .mg-plan-label { font-size: 11px; color: var(--text3); font-family: var(--font-mono); margin-bottom: 4px; display: flex; justify-content: space-between; }
+  .mg-plan-price { font-family: var(--font-head); font-size: 28px; font-weight: 700; color: var(--text); }
+  .mg-plan-per { font-size: 12px; color: var(--text3); margin-left: 3px; }
+  .mg-how-step { padding: 16px 0; border-bottom: 0.5px solid var(--border); }
+  .mg-how-step:last-child { border-bottom: none; }
+  .mg-step-num { width: 28px; height: 28px; border-radius: 50%; background: var(--bg3); border: 0.5px solid var(--green-border); display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 11px; color: var(--green); margin-bottom: 10px; }
+  .mg-step-title { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 4px; font-family: var(--font-head); }
+  .mg-step-desc { font-size: 12px; color: var(--text2); line-height: 1.55; }
+  .mg-nav-overlay { position: fixed; inset: 0; z-index: 10000; background: var(--bg2); display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.28s cubic-bezier(0.4,0,0.2,1); }
+  .mg-nav-overlay.open { transform: translateX(0); }
+  .mg-nav-header { display: flex; align-items: center; justify-content: space-between; padding: 0 20px; height: 58px; border-bottom: 0.5px solid var(--border); }
+  .mg-close { background: none; border: none; color: var(--text2); font-size: 22px; cursor: pointer; line-height: 1; }
+  .mg-nav-item { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; border-bottom: 0.5px solid var(--border); color: var(--text); font-size: 15px; cursor: pointer; background: none; border-left: none; border-right: none; border-top: none; width: 100%; font-family: var(--font-body); text-align: left; }
+  .mg-nav-arrow { color: var(--text3); font-size: 14px; }
+  .mg-nav-cta { margin-top: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; border-top: 0.5px solid var(--border); }
+}
+
 /* ── RESPONSIVE ── */
 @media (max-width: 900px) {
   nav { padding: 0 20px; }
@@ -634,6 +683,129 @@ footer { padding: 28px 40px; border-top: 0.5px solid var(--border); display: fle
 </head>
 <body>
 
+<!-- MOBILE GATE -->
+<div class="mg-wrap" id="mgWrap">
+
+  <!-- Top nav bar -->
+  <div class="mg-topnav">
+    <div class="mg-logo"><span>Prop</span>Journal</div>
+    <div class="mg-topnav-right">
+      <button class="mg-hamburger" id="mgHamburger" aria-label="Open menu">&#9776;</button>
+    </div>
+  </div>
+
+  <!-- HOME page -->
+  <div class="mg-page active" id="mg-home">
+    <h1 class="mg-h1">The journal that<br><em>knows your</em><br><em>prop firm rules.</em></h1>
+    <p class="mg-sub">Select your firm, and PropJournal auto-fills every challenge rule. Track drawdown, hit targets, and pass — no spreadsheets, no guessing.</p>
+    <div class="mg-btns">
+      <button class="mg-btn-primary" onclick="location.href='/signup'">Free trial &rarr;</button>
+      <button class="mg-btn-ghost" onclick="location.href='/login'">Log in</button>
+    </div>
+    <p class="mg-note">7-day free trial &nbsp;·&nbsp; Pay with USDT &nbsp;·&nbsp; Cancel anytime</p>
+  </div>
+
+  <!-- HOW IT WORKS page -->
+  <div class="mg-page" id="mg-how">
+    <div class="mg-inner-page">
+      <button class="mg-back" onclick="mgShowPage('home')">&#8592; Home</button>
+      <div class="mg-page-title">How it works</div>
+      <p class="mg-page-sub">From zero to tracking in under a minute.</p>
+      <div class="mg-how-step">
+        <div class="mg-step-num">01</div>
+        <div class="mg-step-title">Pick your prop firm</div>
+        <p class="mg-step-desc">Choose from a growing list of pre-loaded firms — FTMO, MyFundedFX, E8, Funded Next, and more.</p>
+      </div>
+      <div class="mg-how-step">
+        <div class="mg-step-num">02</div>
+        <div class="mg-step-title">Rules auto-fill instantly</div>
+        <p class="mg-step-desc">Profit targets, max drawdown, daily loss limits — all pre-populated. Edit anything you need.</p>
+      </div>
+      <div class="mg-how-step">
+        <div class="mg-step-num">03</div>
+        <div class="mg-step-title">Track, analyse, pass</div>
+        <p class="mg-step-desc">Log trades, watch your rule progress in real time, and use deep analytics to understand your edge.</p>
+      </div>
+      <div style="margin-top:28px;">
+        <button class="mg-btn-primary" onclick="location.href='/signup'">Free trial &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURES page -->
+  <div class="mg-page" id="mg-features">
+    <div class="mg-inner-page">
+      <button class="mg-back" onclick="mgShowPage('home')">&#8592; Home</button>
+      <div class="mg-page-title">Features</div>
+      <p class="mg-page-sub">No bloat. Just what you need to pass challenges and stay funded.</p>
+      <div class="mg-feature-item">
+        <div class="mg-feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg></div>
+        <div><div class="mg-feat-title">Auto-fill challenge rules</div><div class="mg-feat-desc">Select your firm and every rule is pre-populated — profit target, drawdown limits, min days.</div></div>
+      </div>
+      <div class="mg-feature-item">
+        <div class="mg-feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg></div>
+        <div><div class="mg-feat-title">Deep analytics</div><div class="mg-feat-desc">Cumulative P&L, win rate, profit factor, RR distribution, streak tracker, and calendar heatmap.</div></div>
+      </div>
+      <div class="mg-feature-item">
+        <div class="mg-feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        <div><div class="mg-feat-title">Trade log</div><div class="mg-feat-desc">Log every trade with entry, exit, notes, and screenshots linked to its challenge account.</div></div>
+      </div>
+      <div class="mg-feature-item">
+        <div class="mg-feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+        <div><div class="mg-feat-title">Calendar heatmap</div><div class="mg-feat-desc">See P&L by day at a glance. Spot patterns in your best and worst trading days quickly.</div></div>
+      </div>
+      <div style="margin-top:28px;">
+        <button class="mg-btn-primary" onclick="location.href='/signup'">Free trial &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRICING page -->
+  <div class="mg-page" id="mg-pricing">
+    <div class="mg-inner-page">
+      <button class="mg-back" onclick="mgShowPage('home')">&#8592; Home</button>
+      <div class="mg-page-title">Simple pricing</div>
+      <p class="mg-page-sub">One plan. Everything included. Paid in USDT.</p>
+      <div class="mg-plan-card">
+        <div class="mg-plan-label"><span>MONTHLY</span></div>
+        <span class="mg-plan-price">$12</span><span class="mg-plan-per">/mo</span>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px;font-family:var(--font-mono);">$12 billed monthly</div>
+      </div>
+      <div class="mg-plan-card pop">
+        <div class="mg-plan-label"><span>6 MONTHS</span><span style="color:var(--green)">MOST POPULAR</span></div>
+        <span class="mg-plan-price">$10</span><span class="mg-plan-per">/mo</span>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px;font-family:var(--font-mono);">$60 billed every 6 months · Save 17%</div>
+      </div>
+      <div class="mg-plan-card">
+        <div class="mg-plan-label"><span>ANNUAL</span><span style="color:var(--text3)">BEST VALUE</span></div>
+        <span class="mg-plan-price">$8</span><span class="mg-plan-per">/mo</span>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px;font-family:var(--font-mono);">$96 billed yearly · Save 33%</div>
+      </div>
+      <div style="margin-top:8px;">
+        <button class="mg-btn-primary" onclick="location.href='/signup'">Start 7-day free trial</button>
+        <p style="text-align:center;font-size:11px;color:var(--text3);margin-top:10px;">Full access during trial · Cancel anytime</p>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /mg-wrap -->
+
+<!-- MOBILE NAV OVERLAY -->
+<div class="mg-nav-overlay" id="mgNavOverlay">
+  <div class="mg-nav-header">
+    <div class="mg-logo"><span>Prop</span>Journal</div>
+    <button class="mg-close" id="mgClose">&#10005;</button>
+  </div>
+  <button class="mg-nav-item" id="mgNavHome" style="display:none" onclick="mgNavGo('home')">Home <span class="mg-nav-arrow">›</span></button>
+  <button class="mg-nav-item" onclick="location.href='/login'">Log in <span class="mg-nav-arrow">›</span></button>
+  <button class="mg-nav-item" onclick="mgNavGo('features')">Features <span class="mg-nav-arrow">›</span></button>
+  <button class="mg-nav-item" onclick="mgNavGo('pricing')">Pricing <span class="mg-nav-arrow">›</span></button>
+  <div class="mg-nav-cta">
+    <button class="mg-btn-primary" onclick="location.href='/signup'">Start free trial</button>
+    <button class="mg-btn-ghost" onclick="location.href='/login'">Log in</button>
+  </div>
+</div>
+
 <!-- NAV -->
 <nav>
   <div class="logo"><span>Prop</span>Journal</div>
@@ -658,10 +830,6 @@ footer { padding: 28px 40px; border-top: 0.5px solid var(--border); display: fle
 <!-- HERO -->
 <section class="hero">
   <div class="hero-left">
-    <div class="pill">
-      <span class="pill-dot"></span>
-      Built exclusively for prop firm traders
-    </div>
     <h1>The journal that<br><em>knows your</em><br><em>prop firm rules.</em></h1>
     <p class="hero-sub">Select your firm, and PropJournal auto-fills every challenge rule. Track drawdown, hit targets, and pass — no spreadsheets, no guessing.</p>
     <div class="hero-btns">
@@ -1281,10 +1449,30 @@ footer { padding: 28px 40px; border-top: 0.5px solid var(--border); display: fle
 </footer>
 
 <script>
-  // mobile menu
+  // mobile menu (desktop hamburger, kept for safety)
   document.getElementById('hamburger').addEventListener('click', function() {
     document.getElementById('mobileMenu').classList.toggle('open');
   });
+
+  // ── Mobile gate ──
+  function mgShowPage(id) {
+    document.querySelectorAll('.mg-page').forEach(function(p) { p.classList.remove('active'); });
+    var el = document.getElementById('mg-' + id);
+    if (el) el.classList.add('active');
+    document.getElementById('mgWrap').scrollTop = 0;
+    document.getElementById('mgNavHome').style.display = id === 'home' ? 'none' : 'flex';
+  }
+  function mgNavGo(id) {
+    document.getElementById('mgNavOverlay').classList.remove('open');
+    mgShowPage(id);
+  }
+  document.getElementById('mgHamburger').addEventListener('click', function() {
+    document.getElementById('mgNavOverlay').classList.add('open');
+  });
+  document.getElementById('mgClose').addEventListener('click', function() {
+    document.getElementById('mgNavOverlay').classList.remove('open');
+  });
+  document.body.classList.add('mg-active');
 
 
 
