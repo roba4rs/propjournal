@@ -52,14 +52,14 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
       }
     }
     return { year: today.getFullYear(), month: today.getMonth() }
-  }, [account, trades])
+  }, [account, trades, today.getFullYear(), today.getMonth()])
 
   const [current, setCurrent] = useState(defaultMonth)
   const [manualNav, setManualNav] = useState(false)
 
   useEffect(() => {
     if (!manualNav) setCurrent(defaultMonth)
-  }, [defaultMonth])
+  }, [defaultMonth, manualNav])
 
   const daysInMonth = getDaysInMonth(current.year, current.month)
   const firstDay = getFirstDayOfMonth(current.year, current.month)
