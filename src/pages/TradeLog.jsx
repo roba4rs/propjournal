@@ -1148,11 +1148,11 @@ useEffect(() => {
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { user } } = await supabase.auth.getUser();
         const { data, error } = await supabase
           .from("accounts")
           .select("*")
-          .eq("user_id", session.user.id)
+          .eq("user_id", user.id)
           .order("created_at", { ascending: true });
         if (error) throw error;
         if (data && data.length > 0) {
@@ -1225,7 +1225,7 @@ useEffect(() => {
     setSaving(true);
     setError(null);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { user } } = await supabase.auth.getUser();
       const selectedIds = [...selectedAccounts];
 
       let sharedScreenshotUrl = form.screenshot_url || null;
@@ -1259,7 +1259,7 @@ useEffect(() => {
         if (error) throw error;
 
         // Fire notification checks after a successful edit
-        await checkAndInsertNotifications(accId, session.user.id, form.date);
+        await checkAndInsertNotifications(accId, user.id, form.date);
 
       } else {
         // New: insert one row per selected account
@@ -1271,7 +1271,7 @@ useEffect(() => {
           const { data: inserted, error: insertError } = await supabase
             .from("trades")
             .insert({
-              user_id: session.user.id,
+              user_id: user.id,
               account_id: accId,
               pair: form.pair,
               direction: form.direction,
@@ -1300,7 +1300,7 @@ useEffect(() => {
           }
 
           // Fire notification checks after each successful insert
-          await checkAndInsertNotifications(accId, session.user.id, form.date);
+          await checkAndInsertNotifications(accId, user.id, form.date);
         }
       }
 
