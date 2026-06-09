@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import Sidebar from "../components/Sidebar";
-import AccountSwitcher from "../components/AccountSwitcher";
 import { supabase } from "../supabaseClient";
 import { useSidebar } from "../SidebarContext";
 import { useLocation } from 'react-router-dom';
@@ -996,33 +995,6 @@ function TradeRow({ trade, onViewDetail, onEdit, onDelete }) {
   );
 }
 
-// ─── Summary Bar ──────────────────────────────────────────────────────────────
-function SummaryBar({ trades }) {
-  const wins = trades.filter(t => parseFloat(t.pnl) > 0).length;
-  const total = trades.length;
-  const totalPnl = trades.reduce((s, t) => s + (parseFloat(t.pnl) || 0), 0);
-  const winRate = total > 0 ? ((wins / total) * 100).toFixed(0) : 0;
-
-  return (
-    <div style={{
-      display: "flex", gap: "1px", background: "#1a1a1a",
-      borderRadius: "10px", overflow: "hidden",
-      border: "0.5px solid #1a1a1a", marginBottom: "12px",
-    }}>
-      {[
-        { label: "Total Trades", value: total },
-        { label: "Win Rate", value: `${winRate}%` },
-        { label: "Net P&L", value: `${totalPnl >= 0 ? "+" : ""}${totalPnl.toFixed(2)}`, color: pnlColor(totalPnl) },
-        { label: "Wins / Losses", value: `${wins} / ${total - wins}` },
-      ].map(s => (
-        <div key={s.label} style={{ flex: 1, padding: "14px 18px", background: "#0f0f0f" }}>
-          <div style={{ fontSize: "10px", fontFamily: "'DM Mono', monospace", color: "#777", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "6px" }}>{s.label}</div>
-          <div style={{ fontSize: "18px", fontFamily: "'Syne', sans-serif", fontWeight: 600, color: s.color || "#e0e0e0" }}>{s.value}</div>
-        </div>
-      ))}
-    </div>
-  );
-}
 
 // ─── Mobile Account Dropdown Row ─────────────────────────────────────────────
 function MobileAccountRow({ accounts, activeAccount, onSwitch }) {
