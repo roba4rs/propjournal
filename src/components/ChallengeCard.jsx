@@ -281,7 +281,7 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
   const floorLabel = `Floor $${ddFloor.toLocaleString(undefined, { maximumFractionDigits: 0 })}`
 
   return (
-    <div style={{ background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '12px', padding: '24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+    <div style={{ background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '12px', padding: mobile ? '16px' : '24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
       <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }`}</style>
 
       {/* Header */}
@@ -295,7 +295,7 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
         <span style={{ background: badge.bg, border: `0.5px solid ${badge.border}`, borderRadius: '6px', padding: '4px 10px', color: badge.color, fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>{badge.label}</span>
       </div>
 
-      {/* Stats row 1 */}
+      {/* Stats row 1 — desktop only */}
       {!mobile && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '16px' }}>
         {loading ? (
           [1,2,3,4].map(i => <div key={i} style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '10px', padding: '16px' }}><div style={{background:'#1a1a1a',height:'10px',width:'40px',borderRadius:'4px'}}/><div style={{background:'#1a1a1a',height:'22px',width:'80px',borderRadius:'4px',marginTop:'10px'}}/></div>)
@@ -307,7 +307,7 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
         </>)}
       </div>}
 
-      {/* Stats row 2 */}
+      {/* Stats row 2 — desktop only */}
       {!mobile && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '20px' }}>
         {loading ? (
           [1,2,3,4].map(i => <div key={i} style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '10px', padding: '16px' }}><div style={{background:'#1a1a1a',height:'10px',width:'40px',borderRadius:'4px'}}/><div style={{background:'#1a1a1a',height:'22px',width:'80px',borderRadius:'4px',marginTop:'10px'}}/></div>)
@@ -317,6 +317,50 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
           <StatCell label="Worst Trade" value={s.worstTrade != null ? `-$${Math.abs(s.worstTrade).toFixed(2)}` : '—'} color={s.worstTrade != null ? '#c03535' : '#777'} />
           <StatCell label="Avg Win / Loss" value={s.total === 0 ? '— / —' : `$${s.avgWin.toFixed(0)} / $${s.avgLoss.toFixed(0)}`} />
         </>)}
+      </div>}
+
+      {/* Mobile stats — single row */}
+      {mobile && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px', marginBottom: '10px' }}>
+        {loading ? (
+          [1,2,3,4].map(i => <div key={i} style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '8px', padding: '10px 8px' }}><div style={{background:'#1a1a1a',height:'8px',width:'30px',borderRadius:'4px'}}/><div style={{background:'#1a1a1a',height:'16px',width:'50px',borderRadius:'4px',marginTop:'8px'}}/></div>)
+        ) : (<>
+          <div style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '8px', padding: '10px 8px', textAlign: 'center' }}>
+            <p style={{ color: '#999', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 4px 0' }}>P&L</p>
+            <p style={{ color: s.total === 0 ? '#fff' : pnlColor(netPnl), fontFamily: 'DM Mono, monospace', fontSize: '13px', fontWeight: '600', margin: 0 }}>{s.total === 0 ? '$0' : fmt$(netPnl)}</p>
+          </div>
+          <div style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '8px', padding: '10px 8px', textAlign: 'center' }}>
+            <p style={{ color: '#999', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 4px 0' }}>Win%</p>
+            <p style={{ color: '#fff', fontFamily: 'DM Mono, monospace', fontSize: '13px', fontWeight: '600', margin: 0 }}>{s.total === 0 ? '0%' : `${s.winRate.toFixed(1)}%`}</p>
+          </div>
+          <div style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '8px', padding: '10px 8px', textAlign: 'center' }}>
+            <p style={{ color: '#999', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 4px 0' }}>Trades</p>
+            <p style={{ color: '#fff', fontFamily: 'DM Mono, monospace', fontSize: '13px', fontWeight: '600', margin: 0 }}>{String(s.total)}</p>
+          </div>
+          <div style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '8px', padding: '10px 8px', textAlign: 'center' }}>
+            <p style={{ color: '#999', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 4px 0' }}>W/L</p>
+            <p style={{ color: '#fff', fontFamily: 'DM Mono, monospace', fontSize: '13px', fontWeight: '600', margin: 0 }}>{`${s.wins}/${s.losses}`}</p>
+          </div>
+        </>)}
+      </div>}
+
+      {/* Mobile rules strip */}
+      {mobile && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px', marginBottom: '12px' }}>
+        <div style={{ background: '#0a0a0a', border: '0.5px solid #1a1a1a', borderRadius: '6px', padding: '7px 8px', textAlign: 'center' }}>
+          <p style={{ color: '#555', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', margin: '0 0 3px 0' }}>Target</p>
+          <p style={{ color: '#1db97b', fontFamily: 'DM Mono, monospace', fontSize: '12px', margin: 0 }}>{profitTarget > 0 ? `${(profitTarget / accountSize * 100).toFixed(0)}%` : '—'}</p>
+        </div>
+        <div style={{ background: '#0a0a0a', border: '0.5px solid #1a1a1a', borderRadius: '6px', padding: '7px 8px', textAlign: 'center' }}>
+          <p style={{ color: '#555', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', margin: '0 0 3px 0' }}>Max DD</p>
+          <p style={{ color: '#c03535', fontFamily: 'DM Mono, monospace', fontSize: '12px', margin: 0 }}>{maxDD > 0 ? `${(maxDD / accountSize * 100).toFixed(0)}%` : '—'}</p>
+        </div>
+        <div style={{ background: '#0a0a0a', border: '0.5px solid #1a1a1a', borderRadius: '6px', padding: '7px 8px', textAlign: 'center' }}>
+          <p style={{ color: '#555', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', margin: '0 0 3px 0' }}>Daily DD</p>
+          <p style={{ color: '#c97a00', fontFamily: 'DM Mono, monospace', fontSize: '12px', margin: 0 }}>{dailyDD > 0 ? `${(dailyDD / accountSize * 100).toFixed(0)}%` : '—'}</p>
+        </div>
+        <div style={{ background: '#0a0a0a', border: '0.5px solid #1a1a1a', borderRadius: '6px', padding: '7px 8px', textAlign: 'center' }}>
+          <p style={{ color: '#555', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', margin: '0 0 3px 0' }}>Min Days</p>
+          <p style={{ color: '#fff', fontFamily: 'DM Mono, monospace', fontSize: '12px', margin: 0 }}>{minDays > 0 ? minDays : '—'}</p>
+        </div>
       </div>}
 
       {/* Progress bars */}
