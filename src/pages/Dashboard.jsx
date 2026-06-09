@@ -458,7 +458,7 @@ export default function Dashboard() {
             <StreakCard trades={trades} mobile />
           </div>
           <div style={{ margin: '8px 14px 0', background: '#111', border: '0.5px solid #1a1a1a', borderRadius: '10px' }}>
-            <CalendarPnL trades={trades} mobile onDayClick={date => setDayModal(date)} />
+            <CalendarPnL trades={trades} account={activeAccount} mobile onDayClick={date => setDayModal(date)} />
           </div>
           <div style={{ margin: '8px 14px 16px', background: '#111', border: '0.5px solid #1a1a1a', borderRadius: '10px' }}>
             <RecentTrades trades={trades} loading={loading} mobile onTradeClick={t => setDetailTrade(t)} />
@@ -539,7 +539,7 @@ export default function Dashboard() {
         </div>
         <div style={{ display: 'flex', gap: '20px', alignItems: 'stretch', marginBottom: '24px' }}>
           <div style={{ flex: '0 0 65%', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-            <CalendarPnL trades={trades} onDayClick={date => setDayModal(date)} />
+            <CalendarPnL trades={trades} account={activeAccount} onDayClick={date => setDayModal(date)} />
           </div>
           <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
             <RecentTrades trades={trades} loading={loading} onTradeClick={t => setDetailTrade(t)} />

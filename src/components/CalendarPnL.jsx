@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 
 const DAYS_FULL = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const DAYS_SHORT = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
@@ -16,9 +16,50 @@ function pad(n) {
   return String(n).padStart(2, '0')
 }
 
-export default function CalendarPnL({ trades = [], mobile = false, onDayClick }) {
+export default function CalendarPnL({ trades = [], mobile = false, onDayClick, account }) {
   const today = new Date()
-  const [current, setCurrent] = useState({ year: today.getFullYear(), month: today.getMonth() })
+
+  const defaultMonth = useMemo(() => {
+    if (account && account.type !== 'personal') {
+      const withPnl = trades.filter(t => t.pnl != null)
+      const netPnl = withPnl.reduce((s, t) => s + parseFloat(t.pnl), 0)
+      const accountSize = parseFloat(account.account_size) || 0
+      const profitTarget = parseFloat(account.profit_target) || 0
+      const maxDD = parseFloat(account.max_drawdown) || 0
+      const dailyDD = parseFloat(account.daily_drawdown) || 0
+      const minDays = account.min_trading_days || 0
+      let balance = accountSize
+      let lowestBalance = accountSize
+      for (const t of withPnl) {
+        balance += parseFloat(t.pnl)
+        if (balance < lowestBalance) lowestBalance = balance
+      }
+      const maxDrawdownUsed = Math.max(0, accountSize - lowestBalance)
+      const byDay = {}
+      withPnl.forEach(t => { byDay[t.date] = (byDay[t.date] || 0) + parseFloat(t.pnl) })
+      const worstDayLoss = Object.values(byDay).length > 0
+        ? Math.max(0, ...Object.values(byDay).map(v => -v)) : 0
+      const tradingDays = new Set(trades.map(t => t.date)).size
+      const isFailed = account.failure_reason || (maxDD > 0 && maxDrawdownUsed >= maxDD) || (dailyDD > 0 && worstDayLoss >= dailyDD)
+      const isPassed = !isFailed && profitTarget > 0 && netPnl >= profitTarget && (minDays === 0 || tradingDays >= minDays)
+      if (isFailed || isPassed) {
+        const dates = trades.filter(t => t.date).map(t => t.date.slice(0, 10)).sort()
+        const last = dates[dates.length - 1]
+        if (last) {
+          const d = new Date(last)
+          return { year: d.getFullYear(), month: d.getMonth() }
+        }
+      }
+    }
+    return { year: today.getFullYear(), month: today.getMonth() }
+  }, [account, trades])
+
+  const [current, setCurrent] = useState(defaultMonth)
+  const [manualNav, setManualNav] = useState(false)
+
+  useEffect(() => {
+    if (!manualNav) setCurrent(defaultMonth)
+  }, [defaultMonth])
 
   const daysInMonth = getDaysInMonth(current.year, current.month)
   const firstDay = getFirstDayOfMonth(current.year, current.month)
@@ -40,14 +81,14 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick })
     return map
   }, [trades])
 
-  const prevMonth = () => setCurrent(c => {
+  const prevMonth = () => { setManualNav(true); setCurrent(c => {
     const d = new Date(c.year, c.month - 1)
     return { year: d.getFullYear(), month: d.getMonth() }
-  })
-  const nextMonth = () => setCurrent(c => {
+  })}
+  const nextMonth = () => { setManualNav(true); setCurrent(c => {
     const d = new Date(c.year, c.month + 1)
     return { year: d.getFullYear(), month: d.getMonth() }
-  })
+  })}
 
   // shared cell logic
   function getCellStyle(day) {

@@ -60,7 +60,7 @@ function SplitGradient({ id, zeroPercent }) {
 }
 
 export default function PnLChart({ trades = [], account, noMargin, mobile }) {
-  const [activeTab, setActiveTab] = useState('30D')
+  const [activeTab, setActiveTab] = useState('All')
 
   const data = useMemo(() => {
     const filtered = filterTrades(trades, activeTab, account)
