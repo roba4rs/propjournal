@@ -16,8 +16,12 @@ function pad(n) {
   return String(n).padStart(2, '0')
 }
 
+const TODAY = new Date()
+const TODAY_YEAR = TODAY.getFullYear()
+const TODAY_MONTH = TODAY.getMonth()
+
 export default function CalendarPnL({ trades = [], mobile = false, onDayClick, account }) {
-  const today = new Date()
+  const today = TODAY
 
   const defaultMonth = useMemo(() => {
     if (account && account.type !== 'personal') {
@@ -51,8 +55,8 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
         }
       }
     }
-    return { year: today.getFullYear(), month: today.getMonth() }
-  }, [account, trades, today.getFullYear(), today.getMonth()])
+    return { year: TODAY_YEAR, month: TODAY_MONTH }
+  }, [account, trades])
 
   const [current, setCurrent] = useState(defaultMonth)
   const [manualNav, setManualNav] = useState(false)
