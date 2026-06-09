@@ -258,7 +258,7 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
     const tradingDayCount = new Set(trades.map(t => t.date)).size
     const minDaysMet = minDays === 0 || tradingDayCount >= minDays
     if (profitTarget > 0 && netPnl >= profitTarget && minDaysMet) {
-      return account.phase === 'phase_2' || account.phase === 'funded' ? 'funded' : 'passed'
+      return account.phase === 'funded' ? 'funded' : 'passed'
     }
     return 'active'
   }
