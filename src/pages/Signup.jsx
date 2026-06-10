@@ -133,7 +133,7 @@ export default function Signup() {
             <input
               {...register('name', { required: 'Name is required' })}
               type="text"
-              placeholder="Robel Gidey"
+              placeholder="Your full name"
               style={inputStyle}
             />
             {errors.name && (
