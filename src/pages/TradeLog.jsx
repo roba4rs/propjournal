@@ -311,6 +311,12 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
   const [accountRisks, setAccountRisks] = useState(initRisk);
   const [accountRiskModes, setAccountRiskModes] = useState(initRiskModes);
   const [selectedAccounts, setSelectedAccounts] = useState(initSelectedAccounts);
+  // 'manual' = quick-select R:R (default), 'auto' = Entry/SL/TP price mode
+  const [rrMode, setRrMode] = useState(() => {
+    // If editing a trade that has entry/sl/tp, open in auto mode
+    if (editTrade && editTrade.entry && editTrade.stop_loss && editTrade.take_profit) return 'auto';
+    return 'manual';
+  });
   const fileRef = useRef();
 
   // On mount (new trade only), pre-fill entry/SL/TP from last trade for the default pair
@@ -526,35 +532,92 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                 </Field>
               </div>
 
-              {/* Entry / SL / TP */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "14px" }}>
-                <Field label={"Entry"}>
-                  <input type="number" step="0.00001" placeholder="0.00000"
-                    value={form.entry} onChange={e => set("entry", e.target.value)}
-                    style={{ ...inputStyle }} />
-                </Field>
-                <Field label="Stop Loss">
-                  <input type="number" step="0.00001" placeholder="0.00000"
-                    value={form.stop_loss} onChange={e => set("stop_loss", e.target.value)} style={inputStyle} />
-                </Field>
-                <Field label="Take Profit">
-                  <input type="number" step="0.00001" placeholder="0.00000"
-                    value={form.take_profit} onChange={e => set("take_profit", e.target.value)} style={inputStyle} />
-                </Field>
-              </div>
+              {/* R:R Section — mode toggle */}
+              <div>
+                {/* Mode toggle header */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
+                  <span style={{ fontSize: "10px", fontFamily: "'DM Mono', monospace", color: "#777", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+                    {rrMode === "manual" ? "Risk:Reward" : "Entry / SL / TP"}
+                  </span>
+                  <div style={{ display: "flex", border: "0.5px solid #1e1e1e", borderRadius: "6px", overflow: "hidden" }}>
+                    {[["manual", "R:R Select"], ["auto", "Price Mode"]].map(([mode, label]) => (
+                      <button key={mode} onClick={() => setRrMode(mode)} style={{
+                        padding: "5px 12px", border: "none", cursor: "pointer", fontSize: "10px",
+                        fontFamily: "'DM Mono', monospace", textTransform: "uppercase", letterSpacing: "0.06em",
+                        background: rrMode === mode ? "#1db97b22" : "#111",
+                        color: rrMode === mode ? "#1db97b" : "#555",
+                        transition: "all 0.15s",
+                      }}>{label}</button>
+                    ))}
+                  </div>
+                </div>
 
-              {/* RR (auto) */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
-                <Field label="R:R (auto-calculated)">
-                  <input type="text" readOnly
-                    value={form.rr ? `${form.rr}R` : "—"}
-                    style={{ ...inputStyle, color: form.rr ? "#e0e0e0" : "#999", cursor: "default" }} />
-                </Field>
-                <Field label="Session">
-                  <select value={form.session} onChange={e => set("session", e.target.value)} style={selectStyle}>
-                    {SESSIONS.map(s => <option key={s} value={s}>{sessionLabel(s)}</option>)}
-                  </select>
-                </Field>
+                {rrMode === "manual" ? (
+                  /* Quick-select R:R buttons + custom input */
+                  <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                    <div style={{ display: "flex", gap: "8px" }}>
+                      {["1", "2", "3", "4", "5"].map(n => {
+                        const val = n;
+                        const active = form.rr === val;
+                        return (
+                          <button key={n} onClick={() => setForm(prev => ({ ...prev, rr: active ? "" : val }))} style={{
+                            flex: 1, padding: "10px 4px", borderRadius: "8px", cursor: "pointer",
+                            border: `0.5px solid ${active ? "#1a3826" : "#1e1e1e"}`,
+                            background: active ? "#0f2219" : "#111",
+                            color: active ? "#1db97b" : "#666",
+                            fontFamily: "'DM Mono', monospace", fontSize: "12px",
+                            transition: "all 0.15s",
+                          }}>1:{n}</button>
+                        );
+                      })}
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+                      <Field label="Custom R:R">
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                          <span style={{ color: "#555", fontFamily: "'DM Mono', monospace", fontSize: "12px", flexShrink: 0 }}>1:</span>
+                          <input type="number" step="0.1" min="0.1" placeholder="2.5"
+                            value={form.rr} onChange={e => setForm(prev => ({ ...prev, rr: e.target.value }))}
+                            style={{ ...inputStyle }} />
+                        </div>
+                      </Field>
+                      <Field label="Session">
+                        <select value={form.session} onChange={e => set("session", e.target.value)} style={selectStyle}>
+                          {SESSIONS.map(s => <option key={s} value={s}>{sessionLabel(s)}</option>)}
+                        </select>
+                      </Field>
+                    </div>
+                  </div>
+                ) : (
+                  /* Auto price mode: Entry / SL / TP → R:R auto-calculates */
+                  <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "14px" }}>
+                      <Field label="Entry">
+                        <input type="number" step="0.00001" placeholder="0.00000"
+                          value={form.entry} onChange={e => set("entry", e.target.value)} style={inputStyle} />
+                      </Field>
+                      <Field label="Stop Loss">
+                        <input type="number" step="0.00001" placeholder="0.00000"
+                          value={form.stop_loss} onChange={e => set("stop_loss", e.target.value)} style={inputStyle} />
+                      </Field>
+                      <Field label="Take Profit">
+                        <input type="number" step="0.00001" placeholder="0.00000"
+                          value={form.take_profit} onChange={e => set("take_profit", e.target.value)} style={inputStyle} />
+                      </Field>
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+                      <Field label="R:R (auto-calculated)">
+                        <input type="text" readOnly
+                          value={form.rr ? `1:${form.rr}` : "—"}
+                          style={{ ...inputStyle, color: form.rr ? "#1db97b" : "#999", cursor: "default" }} />
+                      </Field>
+                      <Field label="Session">
+                        <select value={form.session} onChange={e => set("session", e.target.value)} style={selectStyle}>
+                          {SESSIONS.map(s => <option key={s} value={s}>{sessionLabel(s)}</option>)}
+                        </select>
+                      </Field>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Date */}
@@ -1925,6 +1988,11 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
   const [selectedAccounts, setSelectedAccounts] = useState(initSelected);
   const [formError, setFormError] = useState(null);
   const [screenshotFile, setScreenshotFile] = useState(null);
+  // 'manual' = quick-select R:R (default), 'auto' = Entry/SL/TP price mode
+  const [rrMode, setRrMode] = useState(() => {
+    if (editTrade && editTrade.entry && editTrade.stop_loss && editTrade.take_profit) return 'auto';
+    return 'manual';
+  });
   const fileRef = useRef();
 
   // On mount (new trade only), pre-fill entry/SL/TP from last trade for default pair
@@ -2070,41 +2138,79 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
             </div>
           </div>
 
-          {/* Entry / SL / TP */}
+          {/* R:R Section — mode toggle */}
           <div style={{ padding: '10px 16px', borderBottom: '0.5px solid #111' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-              {[['Entry', 'entry'], ['Stop Loss', 'stop_loss'], ['Take Profit', 'take_profit']].map(([label, key]) => (
-                <div key={key}>
-                  <span style={formLbl}>{label}</span>
-                  <input type="number" step="0.00001" placeholder="0.00000"
-                    value={form[key]} onChange={e => set(key, e.target.value)}
+            {/* Mode toggle */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+              <span style={formLbl}>{rrMode === 'manual' ? 'Risk:Reward' : 'Entry / SL / TP'}</span>
+              <div style={{ display: 'flex', border: '0.5px solid #1e1e1e', borderRadius: '5px', overflow: 'hidden' }}>
+                {[['manual', 'R:R'], ['auto', 'Price']].map(([mode, label]) => (
+                  <button key={mode} onClick={() => setRrMode(mode)} style={{
+                    padding: '4px 10px', border: 'none', cursor: 'pointer', fontSize: '10px',
+                    fontFamily: "'DM Mono', monospace", textTransform: 'uppercase',
+                    background: rrMode === mode ? '#1db97b22' : '#111',
+                    color: rrMode === mode ? '#1db97b' : '#555',
+                  }}>{label}</button>
+                ))}
+              </div>
+            </div>
+
+            {rrMode === 'manual' ? (
+              /* Quick-select buttons */
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  {['1', '2', '3', '4', '5'].map(n => {
+                    const active = form.rr === n;
+                    return (
+                      <button key={n} onClick={() => setForm(prev => ({ ...prev, rr: active ? '' : n }))} style={{
+                        flex: 1, padding: '9px 2px', borderRadius: '6px', cursor: 'pointer',
+                        border: `0.5px solid ${active ? '#1a3826' : '#1e1e1e'}`,
+                        background: active ? '#0f2219' : '#111',
+                        color: active ? '#1db97b' : '#666',
+                        fontFamily: "'DM Mono', monospace", fontSize: '11px',
+                      }}>1:{n}</button>
+                    );
+                  })}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ color: '#555', fontFamily: "'DM Mono', monospace", fontSize: '12px', flexShrink: 0 }}>1:</span>
+                  <input type="number" step="0.1" min="0.1" placeholder="Custom (e.g. 2.5)"
+                    value={form.rr} onChange={e => setForm(prev => ({ ...prev, rr: e.target.value }))}
                     style={mobileInput} />
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* R:R + Session */}
-          <div style={{ padding: '10px 16px', borderBottom: '0.5px solid #111' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-              <div>
-                <span style={formLbl}>R:R (auto)</span>
+              </div>
+            ) : (
+              /* Auto price mode */
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+                  {[['Entry', 'entry'], ['Stop Loss', 'stop_loss'], ['Take Profit', 'take_profit']].map(([label, key]) => (
+                    <div key={key}>
+                      <span style={formLbl}>{label}</span>
+                      <input type="number" step="0.00001" placeholder="0.00000"
+                        value={form[key]} onChange={e => set(key, e.target.value)}
+                        style={mobileInput} />
+                    </div>
+                  ))}
+                </div>
                 <div style={{
-                  background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '6px',
-                  height: '36px', display: 'flex', alignItems: 'center', padding: '0 10px',
+                  background: '#111', border: `0.5px solid ${form.rr ? '#1a3826' : '#1e1e1e'}`,
+                  borderRadius: '6px', height: '36px', display: 'flex', alignItems: 'center', padding: '0 10px',
                 }}>
-                  <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '12px', color: form.rr ? '#e0e0e0' : '#999' }}>
-                    {form.rr ? `${form.rr}R` : '—'}
+                  <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '12px', color: '#777', marginRight: '6px' }}>R:R</span>
+                  <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '13px', color: form.rr ? '#1db97b' : '#555' }}>
+                    {form.rr ? `1:${form.rr}` : '—'}
                   </span>
                 </div>
               </div>
-              <div>
-                <span style={formLbl}>Session</span>
-                <select value={form.session} onChange={e => set('session', e.target.value)} style={{ ...mobileInput, appearance: 'none', cursor: 'pointer' }}>
-                  {SESSIONS.map(s => <option key={s} value={s}>{sessionLabel(s)}</option>)}
-                </select>
-              </div>
-            </div>
+            )}
+          </div>
+
+          {/* Session */}
+          <div style={{ padding: '10px 16px', borderBottom: '0.5px solid #111' }}>
+            <span style={formLbl}>Session</span>
+            <select value={form.session} onChange={e => set('session', e.target.value)} style={{ ...mobileInput, appearance: 'none', cursor: 'pointer' }}>
+              {SESSIONS.map(s => <option key={s} value={s}>{sessionLabel(s)}</option>)}
+            </select>
           </div>
 
           {/* Date + Outcome */}
