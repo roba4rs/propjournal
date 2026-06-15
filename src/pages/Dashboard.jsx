@@ -382,7 +382,19 @@ export default function Dashboard() {
         .eq('account_id', accountId)
         .order('date', { ascending: true })
       if (error) throw error
-      setTrades(data || [])
+      // Fold swap + commission into pnl so every stat/chart on the dashboard
+      // reflects the true net result of each trade. Trades with no pnl,
+      // swap, or commission at all (e.g. still in_progress) are left as-is
+      // so they keep showing as "—" instead of "$0.00".
+      const normalized = (data || []).map(t => {
+        if (t.pnl == null && t.swap == null && t.commission == null) return t
+        return {
+          ...t,
+          pnl_gross: t.pnl,
+          pnl: (parseFloat(t.pnl) || 0) + (parseFloat(t.swap) || 0) + (parseFloat(t.commission) || 0),
+        }
+      })
+      setTrades(normalized)
     } catch (err) {
       console.error('Failed to fetch trades:', err)
       setTrades([])

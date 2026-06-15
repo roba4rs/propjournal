@@ -65,9 +65,10 @@ export default function AccountSwitcher({
     const fetchBalance = async () => {
       const { data } = await supabase
         .from('trades')
-        .select('pnl')
+        .select('pnl, swap, commission')
         .eq('account_id', active.id)
-      const totalPnl = (data || []).reduce((sum, t) => sum + (Number(t.pnl) || 0), 0)
+      const totalPnl = (data || []).reduce((sum, t) =>
+        sum + (Number(t.pnl) || 0) + (Number(t.swap) || 0) + (Number(t.commission) || 0), 0)
       setTotalBalance((Number(active.account_size) || 0) + totalPnl)
     }
     fetchBalance()

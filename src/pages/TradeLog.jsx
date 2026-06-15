@@ -956,6 +956,8 @@ function TradeDetailModal({ trade, onClose, onEdit, onDelete }) {
             {[
               { label: "P&L", value: trade.pnl != null ? `${parseFloat(trade.pnl) >= 0 ? "+" : ""}${fmt(trade.pnl)}` : "—", color: pnlColor(trade.pnl) },
               { label: "R:R", value: trade.rr ? `${trade.rr}R` : "—" },
+              { label: "Swap", value: trade.swap != null ? `${parseFloat(trade.swap) >= 0 ? "+" : ""}${fmt(trade.swap)}` : "—", color: trade.swap != null ? pnlColor(trade.swap) : "#777" },
+              { label: "Commission", value: trade.commission != null ? `${parseFloat(trade.commission) >= 0 ? "+" : ""}${fmt(trade.commission)}` : "—", color: trade.commission != null ? pnlColor(trade.commission) : "#777" },
               { label: "Session", value: sessionLabel(trade.session) },
               { label: "Entry", value: fmt(trade.entry) },
             ].map(s => (
@@ -1035,15 +1037,17 @@ function TradeRow({ trade, onViewDetail, onEdit, onDelete }) {
       onMouseLeave={e => e.currentTarget.style.background = "transparent"}
     >
       <td style={td}>{trade.date}</td>
-      <td style={td}>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "13px", color: "#e0e0e0" }}>{trade.pair}</span>
-          {outcomeBadge(trade.outcome)}
-        </div>
-      </td>
+      <td style={{ ...td, fontFamily: "'DM Mono', monospace", fontSize: "13px", color: "#e0e0e0" }}>{trade.pair}</td>
+      <td style={td}>{outcomeBadge(trade.outcome) || <span style={{ color: "#555" }}>—</span>}</td>
       <td style={td}>{directionBadge(trade.direction)}</td>
       <td style={{ ...td, fontFamily: "'DM Mono', monospace", fontSize: "12px", color: "#aaa" }}>{fmt(trade.entry)}</td>
       <td style={{ ...td, fontFamily: "'DM Mono', monospace", fontSize: "12px", color: "#aaa" }}>{trade.rr ? `${trade.rr}R` : "—"}</td>
+      <td style={{ ...td, fontFamily: "'DM Mono', monospace", fontSize: "12px", color: trade.swap != null ? pnlColor(trade.swap) : "#555" }}>
+        {trade.swap != null ? `${parseFloat(trade.swap) >= 0 ? "+" : ""}${fmt(trade.swap)}` : "—"}
+      </td>
+      <td style={{ ...td, fontFamily: "'DM Mono', monospace", fontSize: "12px", color: trade.commission != null ? pnlColor(trade.commission) : "#555" }}>
+        {trade.commission != null ? `${parseFloat(trade.commission) >= 0 ? "+" : ""}${fmt(trade.commission)}` : "—"}
+      </td>
       <td style={{ ...td, fontFamily: "'DM Mono', monospace", fontSize: "13px", fontWeight: 500, color: pnlColor(trade.pnl) }}>
         {trade.pnl != null ? `${parseFloat(trade.pnl) >= 0 ? "+" : ""}${fmt(trade.pnl)}` : "—"}
       </td>
@@ -1060,7 +1064,464 @@ function TradeRow({ trade, onViewDetail, onEdit, onDelete }) {
 
 
 // ─── Mobile Account Dropdown Row ─────────────────────────────────────────────
-function MobileAccountRow({ accounts, activeAccount, onSwitch }) {
+// ─── CSV Import Modal ─────────────────────────────────────────────────────────
+
+// Normalize a header string: lowercase, remove spaces/underscores/dashes/dots
+function normalizeKey(str) {
+  return str.toLowerCase().replace(/[\s_\-\.\/\\]/g, "");
+}
+
+// Aliases for each target field (all pre-normalized)
+const FIELD_ALIASES = {
+  pair:        ["symbol","instrument","market","ticker","pair","currency","currencypair","asset"],
+  direction:   ["type","side","direction","action","ordertype","tradetype","buysell","bs"],
+  entry:       ["openprice","entryprice","open","entry","openrate","entryrate","fillprice","execprice","executionprice","openprice","price"],
+  stop_loss:   ["sl","stoploss","stop","stoplosslevel","stoplossrate","slprice"],
+  take_profit: ["tp","takeprofit","target","takeprofitlevel","takeprofitrate","tpprice","profittarget"],
+  pnl:         ["profit","pl","pandl","netpl","netprofit","nettprofit","grosspnl","netpnl","realizedpnl","closedpnl","gainloss","result","return"],
+  commission:  ["commission","commissions","comm","fee","fees","brokerfee","tradingfee","execfee"],
+  swap:        ["swap","swaps","overnight","rollover","overnightfee","swapfee","financing","financingfee","interest"],
+  date:        ["opentime","entrytime","opendate","entrydate","date","closetime","closedate","tradetime","tradedate","datetime","timestamp","time","opendatetime"],
+  time:        ["time","tradetime","opentime","entrytime"],
+};
+
+// Does a value look like a date or datetime string?
+// Matches "2026-03-30", "2026.03.30 15:05:49", "30/03/2026 15:05", etc.
+function looksLikeDatetime(val) {
+  if (val === null || val === undefined) return false;
+  const s = String(val).trim();
+  if (!s) return false;
+  return (
+    /^\d{4}[-.\/]\d{2}[-.\/]\d{2}([ T]\d{1,2}:\d{2}(:\d{2})?)?$/.test(s) ||
+    /^\d{2}\/\d{2}\/\d{4}([ T]\d{1,2}:\d{2}(:\d{2})?)?$/.test(s)
+  );
+}
+
+// Find the value from a row for a target field using fuzzy alias matching.
+// If excludeDatetime is true, skip matches whose value looks like a date/time
+// (used for numeric fields, since some broker exports reuse names like "Open"
+// for both an open-time column and an open-price column).
+function fuzzyGet(row, field, { excludeDatetime = false } = {}) {
+  const aliases = FIELD_ALIASES[field] || [];
+  for (const [rawKey, val] of Object.entries(row)) {
+    const nk = normalizeKey(rawKey);
+    if (aliases.includes(nk)) {
+      if (excludeDatetime && looksLikeDatetime(val)) continue;
+      return val;
+    }
+  }
+  return null;
+}
+
+// Parse a date/time string into { date, time }
+function parseDatetime(raw) {
+  if (!raw) return { date: null, time: null };
+  const str = String(raw).trim();
+  // Try "YYYY.MM.DD HH:MM" or "YYYY-MM-DD HH:MM:SS" or "DD/MM/YYYY HH:MM"
+  const spaceIdx = str.indexOf(" ");
+  if (spaceIdx > -1) {
+    let datePart = str.slice(0, spaceIdx);
+    const timePart = str.slice(spaceIdx + 1).slice(0, 8); // HH:MM:SS max
+    // Normalize dots to dashes
+    datePart = datePart.replace(/\./g, "-");
+    // Handle DD/MM/YYYY → YYYY-MM-DD
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(datePart)) {
+      const [d, m, y] = datePart.split("/");
+      datePart = `${y}-${m}-${d}`;
+    }
+    return { date: datePart, time: timePart || null };
+  }
+  // No space — just a date
+  let datePart = str.replace(/\./g, "-");
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(datePart)) {
+    const [d, m, y] = datePart.split("/");
+    datePart = `${y}-${m}-${d}`;
+  }
+  return { date: datePart, time: null };
+}
+
+// Normalize direction string → "long" | "short" | null
+function parseDirection(raw) {
+  if (!raw) return null;
+  const s = String(raw).toLowerCase().trim();
+  if (s.includes("buy") || s === "long" || s === "b" || s === "1") return "long";
+  if (s.includes("sell") || s === "short" || s === "s" || s === "-1") return "short";
+  return null;
+}
+
+// Map a single raw CSV row → normalized trade object
+function fuzzyMapRow(row) {
+  // Date — try dedicated date/datetime field first via header alias matching
+  let rawDate = fuzzyGet(row, "date");
+
+  // Fallback: some exports (e.g. MT5) just label columns "Open" / "Close"
+  // with no "time" or "date" in the name at all. In that case, scan every
+  // column's *value* for something that looks like a date/datetime, and
+  // prefer one whose header suggests the open/entry side of the trade.
+  if (!rawDate || !looksLikeDatetime(rawDate)) {
+    const candidates = Object.entries(row).filter(([, v]) => looksLikeDatetime(v));
+    if (candidates.length) {
+      const preferred =
+        candidates.find(([h]) => /open|entry|start/i.test(h)) || candidates[0];
+      rawDate = preferred[1];
+    }
+  }
+
+  const { date, time } = parseDatetime(rawDate);
+
+  const pnlRaw = fuzzyGet(row, "pnl", { excludeDatetime: true });
+  const pnl = pnlRaw !== null && pnlRaw !== "" ? parseFloat(pnlRaw) : null;
+  const outcome = pnl === null ? null : pnl > 0 ? "win" : pnl < 0 ? "loss" : "be";
+
+  const commRaw = fuzzyGet(row, "commission", { excludeDatetime: true });
+  const swapRaw = fuzzyGet(row, "swap", { excludeDatetime: true });
+
+  const pairRaw = fuzzyGet(row, "pair");
+  const entryRaw = fuzzyGet(row, "entry", { excludeDatetime: true });
+  const slRaw = fuzzyGet(row, "stop_loss", { excludeDatetime: true });
+  const tpRaw = fuzzyGet(row, "take_profit", { excludeDatetime: true });
+  const dirRaw = fuzzyGet(row, "direction");
+
+  return {
+    pair: pairRaw ? String(pairRaw).toUpperCase().trim() : null,
+    direction: parseDirection(dirRaw),
+    entry: entryRaw !== null && entryRaw !== "" ? parseFloat(entryRaw) || null : null,
+    stop_loss: slRaw !== null && slRaw !== "" ? parseFloat(slRaw) || null : null,
+    take_profit: tpRaw !== null && tpRaw !== "" ? parseFloat(tpRaw) || null : null,
+    pnl: isNaN(pnl) ? null : pnl,
+    commission: commRaw !== null && commRaw !== "" ? parseFloat(commRaw) || null : null,
+    swap: swapRaw !== null && swapRaw !== "" ? parseFloat(swapRaw) || null : null,
+    outcome,
+    date: date || null,
+    time: time || null,
+  };
+}
+
+// Detect which fields were successfully mapped, based on the actual mapped
+// rows (not just header names) — this way the coverage pills reflect what
+// will really get imported, including fields filled via fallback logic.
+function detectMappingCoverage(mapped) {
+  const fields = ["pair","direction","entry","stop_loss","take_profit","pnl","commission","swap","date","time"];
+  const coverage = {};
+  for (const field of fields) {
+    coverage[field] = mapped.some(r => r[field] !== null && r[field] !== "" && r[field] !== undefined);
+  }
+  return coverage;
+}
+
+function parseCSV(text) {
+  const lines = text.trim().split(/\r?\n/);
+  if (lines.length < 2) return { headers: [], rows: [] };
+  // Parse headers preserving original casing for display, but also store raw.
+  // Strip a leading BOM (common in CSVs saved from Excel) from the first header.
+  const rawHeaders = lines[0].split(",").map(h => h.trim().replace(/^"|"$/g, "").replace(/^\uFEFF/, ""));
+  // De-duplicate repeated header names (e.g. MT5 exports use "Price" for both
+  // open price and close price) so neither column's data gets overwritten.
+  const seen = {};
+  const headers = rawHeaders.map(h => {
+    const key = h || "column";
+    if (seen[key] === undefined) { seen[key] = 0; return key; }
+    seen[key] += 1;
+    return `${key}_${seen[key] + 1}`;
+  });
+  const rows = lines.slice(1).map(line => {
+    const cols = [];
+    let cur = "";
+    let inQuote = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') { inQuote = !inQuote; }
+      else if (ch === "," && !inQuote) { cols.push(cur.trim()); cur = ""; }
+      else { cur += ch; }
+    }
+    cols.push(cur.trim());
+    const obj = {};
+    headers.forEach((h, i) => { obj[h] = (cols[i] || "").replace(/^"|"$/g, "").trim(); });
+    return obj;
+  }).filter(row => Object.values(row).some(v => v !== ""));
+  return { headers, rows };
+}
+
+function CSVImportModal({ open, onClose, activeAccount, onImported }) {
+  const [stage, setStage] = useState("upload"); // upload | preview | importing | done
+  const [preview, setPreview] = useState([]);
+  const [coverage, setCoverage] = useState({});
+  const [totalRows, setTotalRows] = useState(0);
+  const [error, setError] = useState(null);
+  const [importCount, setImportCount] = useState(0);
+  const fileRef = useRef();
+
+  function reset() {
+    setStage("upload");
+    setPreview([]);
+    setCoverage({});
+    setTotalRows(0);
+    setError(null);
+    setImportCount(0);
+  }
+
+  function handleClose() { reset(); onClose(); }
+
+  function handleFile(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    setError(null);
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const text = ev.target.result;
+      const { headers, rows } = parseCSV(text);
+      if (!headers.length || !rows.length) {
+        setError("The file appears to be empty or unreadable.");
+        return;
+      }
+      const mapped = rows.map(r => fuzzyMapRow(r)).filter(r => r.pair || r.pnl !== null);
+      if (!mapped.length) {
+        setError("No valid trades found. Make sure the CSV has at least a symbol/pair column or a profit/P&L column.");
+        return;
+      }
+      const cov = detectMappingCoverage(mapped);
+      setCoverage(cov);
+      setTotalRows(rows.length);
+      setPreview(mapped);
+      setStage("preview");
+    };
+    reader.readAsText(file);
+  }
+
+  async function handleConfirm() {
+    if (!activeAccount) return;
+    setStage("importing");
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const records = preview.map(t => ({
+        user_id: user.id,
+        account_id: activeAccount.id,
+        pair: t.pair,
+        direction: t.direction,
+        entry: t.entry,
+        stop_loss: t.stop_loss,
+        take_profit: t.take_profit,
+        pnl: t.pnl,
+        commission: t.commission,
+        swap: t.swap,
+        outcome: t.outcome,
+        date: t.date,
+        time: t.time,
+        rr: null,
+        session: null,
+        notes: null,
+        screenshot_url: null,
+      }));
+      const { error: insertError } = await supabase.from("trades").insert(records);
+      if (insertError) throw insertError;
+      setImportCount(records.length);
+      setStage("done");
+      onImported();
+    } catch (err) {
+      setError("Import failed: " + (err.message || "Unknown error"));
+      setStage("preview");
+    }
+  }
+
+  if (!open) return null;
+
+  // Fields we warn about if missing
+  const IMPORTANT_FIELDS = ["pair", "direction", "entry", "pnl", "date"];
+  const missingImportant = IMPORTANT_FIELDS.filter(f => !coverage[f]);
+
+  const overlayStyle = {
+    position: "fixed", inset: 0, zIndex: 300,
+    background: "rgba(0,0,0,0.7)", display: "flex",
+    alignItems: "center", justifyContent: "center",
+    padding: "20px",
+  };
+  const modalStyle = {
+    background: "#0d0d0d", border: "0.5px solid #1e1e1e",
+    borderRadius: "12px", width: "100%", maxWidth: "760px",
+    maxHeight: "85vh", display: "flex", flexDirection: "column",
+    overflow: "hidden",
+  };
+
+  const tdStyle = { padding: "7px 10px", color: "#aaa", whiteSpace: "nowrap", fontSize: "11px" };
+
+  return (
+    <div style={overlayStyle} onClick={handleClose}>
+      <div style={modalStyle} onClick={e => e.stopPropagation()}>
+
+        {/* Header */}
+        <div style={{ padding: "18px 24px", borderBottom: "0.5px solid #1a1a1a", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+          <div>
+            <span style={{ fontFamily: "'Syne', sans-serif", fontSize: "16px", fontWeight: 700, color: "#fff" }}>
+              Import CSV
+            </span>
+            {activeAccount && (
+              <div style={{ fontSize: "11px", color: "#555", fontFamily: "'DM Mono', monospace", marginTop: "3px" }}>
+                → {activeAccount.name}
+              </div>
+            )}
+          </div>
+          <button onClick={handleClose} style={{ background: "none", border: "0.5px solid #1e1e1e", borderRadius: "6px", padding: "6px 14px", color: "#777", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: "13px" }}>
+            Close
+          </button>
+        </div>
+
+        {/* Body */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "24px" }}>
+
+          {/* UPLOAD stage */}
+          {stage === "upload" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+              <p style={{ margin: 0, fontSize: "13px", color: "#777", fontFamily: "'DM Sans', sans-serif", lineHeight: "1.6" }}>
+                Upload a trade history CSV from any broker platform — MT4, MT5, cTrader, DXtrade, Match Trader, or any custom export. PropJournal will automatically detect the columns.
+              </p>
+              <div
+                onClick={() => fileRef.current.click()}
+                style={{ border: "0.5px dashed #2a2a2a", borderRadius: "10px", padding: "40px 20px", textAlign: "center", cursor: "pointer", transition: "border-color 0.15s" }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = "#3a3a3a"}
+                onMouseLeave={e => e.currentTarget.style.borderColor = "#2a2a2a"}
+              >
+                <div style={{ fontSize: "28px", marginBottom: "10px" }}>📂</div>
+                <div style={{ fontSize: "14px", color: "#aaa", fontFamily: "'DM Sans', sans-serif" }}>Click to select CSV file</div>
+                <div style={{ fontSize: "11px", color: "#555", fontFamily: "'DM Mono', monospace", marginTop: "6px" }}>.csv files only</div>
+              </div>
+              <input ref={fileRef} type="file" accept=".csv" style={{ display: "none" }} onChange={handleFile} />
+              {error && (
+                <div style={{ background: "#1e0d0d", border: "0.5px solid #2e1515", borderRadius: "8px", padding: "12px 14px", color: "#c03535", fontSize: "12px", fontFamily: "'DM Sans', sans-serif" }}>
+                  {error}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* PREVIEW stage */}
+          {stage === "preview" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+
+              {/* Summary row */}
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+                <span style={{ fontSize: "12px", color: "#777", fontFamily: "'DM Mono', monospace" }}>
+                  {preview.length} of {totalRows} row{totalRows !== 1 ? "s" : ""} mapped
+                </span>
+                {/* Field coverage pills */}
+                {Object.entries(coverage).map(([field, found]) => (
+                  <span key={field} style={{
+                    fontSize: "9px", fontFamily: "'DM Mono', monospace", textTransform: "uppercase",
+                    padding: "2px 7px", borderRadius: "4px", letterSpacing: "0.06em",
+                    background: found ? "#0f2219" : "#1e0d0d",
+                    color: found ? "#1db97b" : "#c03535",
+                    border: `0.5px solid ${found ? "#1a3826" : "#2e1515"}`,
+                  }}>
+                    {found ? "✓" : "✗"} {field.replace("_", " ")}
+                  </span>
+                ))}
+              </div>
+
+              {/* Warning if important fields missing */}
+              {missingImportant.length > 0 && (
+                <div style={{ background: "#1a1200", border: "0.5px solid #2a1e00", borderRadius: "8px", padding: "10px 14px", color: "#c97a00", fontSize: "12px", fontFamily: "'DM Sans', sans-serif" }}>
+                  ⚠ Could not detect: <strong>{missingImportant.join(", ")}</strong>. These fields will be empty. You can edit individual trades after importing.
+                </div>
+              )}
+
+              {error && (
+                <div style={{ background: "#1e0d0d", border: "0.5px solid #2e1515", borderRadius: "8px", padding: "10px 14px", color: "#c03535", fontSize: "12px", fontFamily: "'DM Sans', sans-serif" }}>
+                  {error}
+                </div>
+              )}
+
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "11px", fontFamily: "'DM Mono', monospace" }}>
+                  <thead>
+                    <tr>
+                      {["Date", "Pair", "Dir", "Entry", "SL", "TP", "P&L", "Comm", "Swap", "Outcome"].map(h => (
+                        <th key={h} style={{ padding: "7px 10px", textAlign: "left", color: "#555", fontWeight: 500, borderBottom: "0.5px solid #1a1a1a", whiteSpace: "nowrap", fontSize: "9px", textTransform: "uppercase", letterSpacing: "0.08em" }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {preview.map((t, i) => {
+                      const pnlNum = t.pnl !== null ? parseFloat(t.pnl) : null;
+                      const commNum = t.commission !== null ? parseFloat(t.commission) : null;
+                      const swapNum = t.swap !== null ? parseFloat(t.swap) : null;
+                      return (
+                        <tr key={i} style={{ borderBottom: "0.5px solid #111" }}>
+                          <td style={{ ...tdStyle, color: "#777" }}>{t.date || "—"}</td>
+                          <td style={{ ...tdStyle, color: "#ccc" }}>{t.pair || "—"}</td>
+                          <td style={tdStyle}>
+                            {t.direction
+                              ? <span style={{ color: t.direction === "long" ? "#1db97b" : "#c03535", textTransform: "uppercase" }}>{t.direction}</span>
+                              : "—"}
+                          </td>
+                          <td style={tdStyle}>{t.entry ?? "—"}</td>
+                          <td style={tdStyle}>{t.stop_loss ?? "—"}</td>
+                          <td style={tdStyle}>{t.take_profit ?? "—"}</td>
+                          <td style={{ ...tdStyle, color: pnlNum !== null ? pnlColor(pnlNum) : "#555" }}>
+                            {pnlNum !== null ? `${pnlNum >= 0 ? "+" : ""}$${Math.abs(pnlNum).toFixed(2)}` : "—"}
+                          </td>
+                          <td style={{ ...tdStyle, color: commNum !== null ? "#c97a00" : "#555" }}>
+                            {commNum !== null ? `$${commNum.toFixed(2)}` : "—"}
+                          </td>
+                          <td style={{ ...tdStyle, color: swapNum !== null ? "#4d9fff" : "#555" }}>
+                            {swapNum !== null ? `$${swapNum.toFixed(2)}` : "—"}
+                          </td>
+                          <td style={tdStyle}>{t.outcome ? outcomeBadge(t.outcome) : "—"}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* IMPORTING stage */}
+          {stage === "importing" && (
+            <div style={{ textAlign: "center", padding: "40px 20px" }}>
+              <div style={{ fontSize: "28px", marginBottom: "14px" }}>⏳</div>
+              <div style={{ fontSize: "14px", color: "#aaa", fontFamily: "'DM Sans', sans-serif" }}>Importing trades…</div>
+            </div>
+          )}
+
+          {/* DONE stage */}
+          {stage === "done" && (
+            <div style={{ textAlign: "center", padding: "40px 20px" }}>
+              <div style={{ fontSize: "36px", marginBottom: "14px" }}>✅</div>
+              <div style={{ fontSize: "16px", color: "#1db97b", fontFamily: "'Syne', sans-serif", fontWeight: 700, marginBottom: "8px" }}>
+                {importCount} trade{importCount !== 1 ? "s" : ""} imported
+              </div>
+              <div style={{ fontSize: "13px", color: "#777", fontFamily: "'DM Sans', sans-serif" }}>
+                All trades logged under <span style={{ color: "#ccc" }}>{activeAccount?.name}</span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        {(stage === "preview" || stage === "done") && (
+          <div style={{ padding: "16px 24px", borderTop: "0.5px solid #1a1a1a", display: "flex", justifyContent: "flex-end", gap: "10px", flexShrink: 0 }}>
+            {stage === "preview" && (
+              <>
+                <button onClick={reset} style={{ padding: "9px 18px", background: "none", border: "0.5px solid #1e1e1e", borderRadius: "8px", color: "#777", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: "13px" }}>
+                  Back
+                </button>
+                <button onClick={handleConfirm} style={{ padding: "9px 22px", background: "#1db97b", border: "none", borderRadius: "8px", color: "#000", cursor: "pointer", fontFamily: "'Syne', sans-serif", fontSize: "13px", fontWeight: 600 }}>
+                  Import {preview.length} Trade{preview.length !== 1 ? "s" : ""}
+                </button>
+              </>
+            )}
+            {stage === "done" && (
+              <button onClick={handleClose} style={{ padding: "9px 22px", background: "#fff", border: "none", borderRadius: "8px", color: "#000", cursor: "pointer", fontFamily: "'Syne', sans-serif", fontSize: "13px", fontWeight: 600 }}>
+                Done
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function MobileAccountRow({ accounts, activeAccount, onSwitch, onImport }) {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef(null);
 
@@ -1076,7 +1537,7 @@ function MobileAccountRow({ accounts, activeAccount, onSwitch }) {
     <div style={{
       position: 'fixed', top: '52px', left: 0, right: 0,
       background: '#0a0a0a', borderBottom: '0.5px solid #111',
-      padding: '7px 14px', zIndex: 199,
+      padding: '7px 14px', zIndex: 199, height: '48px', boxSizing: 'border-box',
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
     }}>
       {/* Account dropdown pill */}
@@ -1142,6 +1603,15 @@ function MobileAccountRow({ accounts, activeAccount, onSwitch }) {
         )}
       </div>
 
+      {/* Import CSV button */}
+      {onImport && (
+        <button onClick={onImport} style={{
+          background: "none", border: "0.5px solid #1e1e1e",
+          borderRadius: "6px", padding: "5px 10px", cursor: "pointer",
+          color: "#777", fontFamily: "'DM Mono', monospace", fontSize: "11px",
+          whiteSpace: "nowrap",
+        }}>↑ CSV</button>
+      )}
     </div>
   );
 }
@@ -1164,6 +1634,7 @@ export default function TradeLog() {
   const [currentPage, setCurrentPage] = useState(1);
   const PAGE_SIZE = 20;
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [importOpen, setImportOpen] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
@@ -1548,12 +2019,18 @@ useEffect(() => {
       letterSpacing: '0.04em',
     });
 
+    const colTemplate = '36px 1fr 46px 38px 52px 48px';
+    const headerCellStyle = {
+      fontSize: '9px', color: '#555', fontFamily: "'DM Mono', monospace",
+      textTransform: 'uppercase', letterSpacing: '0.08em',
+    };
+
     const mobileBadge = (label, bg, color, border) => (
       <span style={{
-        fontSize: '9px', padding: '1px 5px', borderRadius: '3px',
+        fontSize: '8px', padding: '1px 4px', borderRadius: '3px',
         background: bg, color, border: `0.5px solid ${border}`,
         fontFamily: "'DM Mono', monospace", textTransform: 'uppercase',
-        letterSpacing: '0.04em',
+        letterSpacing: '0.03em', whiteSpace: 'nowrap',
       }}>{label}</span>
     );
 
@@ -1604,8 +2081,23 @@ useEffect(() => {
           ))}
         </div>
 
+        {/* ── ROW 4: Column headers ── */}
+        <div style={{
+          position: 'fixed', top: '134px', left: 0, right: 0,
+          background: '#0a0a0a', borderBottom: '0.5px solid #161616',
+          padding: '8px 14px', zIndex: 197,
+          display: 'grid', gridTemplateColumns: colTemplate, gap: '6px', alignItems: 'center',
+        }}>
+          <span style={headerCellStyle}>Date</span>
+          <span style={headerCellStyle}>Pair</span>
+          <span style={{ ...headerCellStyle, textAlign: 'center' }}>Result</span>
+          <span style={{ ...headerCellStyle, textAlign: 'center' }}>Side</span>
+          <span style={{ ...headerCellStyle, textAlign: 'right' }}>P&L</span>
+          <span style={headerCellStyle} />
+        </div>
+
         {/* Scrollable trade list */}
-        <main style={{ paddingTop: '142px', paddingBottom: '68px', flex: 1, overflowY: 'auto' }}>
+        <main style={{ paddingTop: '166px', paddingBottom: '68px', flex: 1, overflowY: 'auto' }}>
           {error && (
             <div style={{ margin: '10px 14px', background: '#1e0d0d', border: '0.5px solid #2e1515', borderRadius: '8px', padding: '10px 14px', color: '#c03535', fontSize: '12px' }}>
               {error}
@@ -1635,50 +2127,58 @@ useEffect(() => {
 
               return (
                 <div key={t.id} style={{
-                  display: 'flex', alignItems: 'center',
-                  padding: '9px 14px', borderBottom: '0.5px solid #111', gap: '8px',
+                  display: 'grid', gridTemplateColumns: colTemplate, gap: '6px', alignItems: 'center',
+                  padding: '10px 14px', borderBottom: '0.5px solid #111',
                 }} onClick={() => setDetailTrade(t)}>
                   {/* Date */}
-                  <div style={{ fontSize: '10px', color: '#999', width: '36px', flexShrink: 0, fontFamily: "'DM Mono', monospace" }}>
+                  <div style={{ fontSize: '10px', color: '#999', fontFamily: "'DM Mono', monospace" }}>
                     {t.date ? new Date(t.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'}
                   </div>
 
-                  {/* Middle */}
-                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                    <span style={{ fontSize: '14px', fontWeight: '500', color: '#ccc', fontFamily: "'DM Mono', monospace" }}>{t.pair}</span>
-                    <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-                      {ob && mobileBadge(ob.label, ob.bg, ob.color, ob.border)}
-                      {mobileBadge(isLong ? 'BUY' : 'SELL',
-                        isLong ? '#0f2219' : '#1e0d0d',
-                        isLong ? '#1db97b' : '#c03535',
-                        isLong ? '#1a3826' : '#2e1515'
-                      )}
-                      <span style={{ fontSize: '9px', color: '#999', fontFamily: "'DM Sans', sans-serif" }}>{sessionLabel(t.session)}</span>
-                    </div>
+                  {/* Pair */}
+                  <div style={{
+                    fontSize: '12px', fontWeight: '500', color: '#ccc', fontFamily: "'DM Mono', monospace",
+                    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                  }}>
+                    {t.pair}
                   </div>
 
-                  {/* Right: P&L + RR */}
-                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                  {/* Result */}
+                  <div style={{ display: 'flex', justifyContent: 'center' }}>
+                    {ob ? mobileBadge(ob.label, ob.bg, ob.color, ob.border) : <span style={{ color: '#555', fontSize: '11px' }}>—</span>}
+                  </div>
+
+                  {/* Side */}
+                  <div style={{ display: 'flex', justifyContent: 'center' }}>
+                    {mobileBadge(isLong ? 'BUY' : 'SELL',
+                      isLong ? '#0f2219' : '#1e0d0d',
+                      isLong ? '#1db97b' : '#c03535',
+                      isLong ? '#1a3826' : '#2e1515'
+                    )}
+                  </div>
+
+                  {/* P&L + RR */}
+                  <div style={{ textAlign: 'right' }}>
                     <div style={{ fontSize: '13px', fontWeight: '500', color: pnlClr, fontFamily: "'DM Mono', monospace" }}>
                       {pnlVal != null ? `${pnlVal >= 0 ? '+' : ''}$${Math.abs(pnlVal).toFixed(0)}` : '—'}
                     </div>
-                    <div style={{ fontSize: '10px', color: '#777', fontFamily: "'DM Mono', monospace" }}>
-                      {t.rr ? `${t.rr}R` : '—'}
+                    <div style={{ fontSize: '9px', color: '#777', fontFamily: "'DM Mono', monospace" }}>
+                      {t.rr ? `${t.rr}R` : ''}
                     </div>
                   </div>
 
                   {/* Actions */}
-                  <div style={{ display: 'flex', gap: '5px', flexShrink: 0 }} onClick={e => e.stopPropagation()}>
+                  <div style={{ display: 'flex', gap: '4px', justifyContent: 'flex-end' }} onClick={e => e.stopPropagation()}>
                     <button onClick={() => { setEditTrade(t); setFormOpen(true); }} style={{
-                      width: '28px', height: '28px', background: '#1a1a1a',
+                      width: '22px', height: '22px', background: '#1a1a1a',
                       border: '0.5px solid #222', borderRadius: '5px',
-                      color: '#999', cursor: 'pointer', fontSize: '11px',
+                      color: '#999', cursor: 'pointer', fontSize: '10px', padding: 0,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>✏</button>
                     <button onClick={() => handleDelete(t.id)} style={{
-                      width: '28px', height: '28px', background: '#1e0d0d',
+                      width: '22px', height: '22px', background: '#1e0d0d',
                       border: '0.5px solid #2e1515', borderRadius: '5px',
-                      color: '#c03535', cursor: 'pointer', fontSize: '11px',
+                      color: '#c03535', cursor: 'pointer', fontSize: '10px', padding: 0,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>✕</button>
                   </div>
@@ -1785,13 +2285,21 @@ useEffect(() => {
                 </>
               )}
             </div>
-            {/* Right: Log Trade button */}
-            <button onClick={openNew} style={{
-              padding: "10px 18px", background: "#fff", border: "none",
-              borderRadius: "8px", color: "#000",
-              fontFamily: "'Syne', sans-serif", fontSize: "13px", fontWeight: 600,
-              cursor: "pointer", whiteSpace: "nowrap",
-            }}>+ Log Trade</button>
+            {/* Right: Import CSV + Log Trade buttons */}
+            <div style={{ display: "flex", gap: "8px" }}>
+              <button onClick={() => setImportOpen(true)} style={{
+                padding: "10px 16px", background: "none",
+                border: "0.5px solid #1e1e1e", borderRadius: "8px", color: "#777",
+                fontFamily: "'DM Mono', monospace", fontSize: "12px",
+                cursor: "pointer", whiteSpace: "nowrap",
+              }}>↑ Import CSV</button>
+              <button onClick={openNew} style={{
+                padding: "10px 18px", background: "#fff", border: "none",
+                borderRadius: "8px", color: "#000",
+                fontFamily: "'Syne', sans-serif", fontSize: "13px", fontWeight: 600,
+                cursor: "pointer", whiteSpace: "nowrap",
+              }}>+ Log Trade</button>
+            </div>
           </div>
         </div>
 
@@ -1832,12 +2340,12 @@ useEffect(() => {
           ))}
           <div style={{ marginLeft: "auto" }}>
             <button onClick={() => {
-              const headers = ["Date", "Pair", "Direction", "Entry", "Stop Loss", "Take Profit", "R:R", "P&L", "Session", "Outcome", "Notes"];
+              const headers = ["Date", "Pair", "Outcome", "Direction", "Entry", "Stop Loss", "Take Profit", "R:R", "Swap", "Commission", "P&L", "Session", "Notes"];
               const rows = filtered.map(t => [
-                t.date, t.pair, t.direction,
+                t.date, t.pair, t.outcome ?? "", t.direction,
                 t.entry ?? "", t.stop_loss ?? "", t.take_profit ?? "",
-                t.rr ?? "", t.pnl ?? "",
-                t.session, t.outcome ?? "", (t.notes || "").replace(/,/g, " "),
+                t.rr ?? "", t.swap ?? "", t.commission ?? "", t.pnl ?? "",
+                t.session, (t.notes || "").replace(/,/g, " "),
               ]);
               const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
               const blob = new Blob([csv], { type: "text/csv" });
@@ -1865,9 +2373,9 @@ useEffect(() => {
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ borderBottom: "0.5px solid #1a1a1a" }}>
-                {["Date", "Pair", "Dir", "Entry", "R:R", "P&L", "Session", ""].map((h, i) => (
+                {["Date", "Pair", "Outcome", "Dir", "Entry", "R:R", "Swap", "Commission", "P&L", "Session", ""].map((h, i) => (
                   <th key={i} style={{
-                    padding: "10px 14px", textAlign: i === 7 ? "right" : "left",
+                    padding: "10px 14px", textAlign: i === 10 ? "right" : "left",
                     fontSize: "10px", fontFamily: "'DM Mono', monospace",
                     letterSpacing: "0.1em", textTransform: "uppercase",
                     color: "#999", fontWeight: 500, background: "#0d0d0d",
@@ -1877,9 +2385,9 @@ useEffect(() => {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={8} style={{ padding: "48px", textAlign: "center", color: "#999", fontSize: "13px" }}>Loading trades…</td></tr>
+                <tr><td colSpan={11} style={{ padding: "48px", textAlign: "center", color: "#999", fontSize: "13px" }}>Loading trades…</td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={8} style={{ padding: "48px", textAlign: "center", color: "#999", fontSize: "13px" }}>
+                <tr><td colSpan={11} style={{ padding: "48px", textAlign: "center", color: "#999", fontSize: "13px" }}>
                   No trades yet. Click <strong style={{ color: "#999" }}>+ Log Trade</strong> to get started.
                 </td></tr>
               ) : (
@@ -1930,6 +2438,14 @@ useEffect(() => {
             onDelete={handleDelete}
           />
         )}
+
+        {/* CSV Import Modal */}
+        <CSVImportModal
+          open={importOpen}
+          onClose={() => setImportOpen(false)}
+          activeAccount={activeAccount}
+          onImported={() => { if (activeAccount) fetchTrades(activeAccount.id); }}
+        />
 
         {/* Full-screen trade form */}
         <TradeForm

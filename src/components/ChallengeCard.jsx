@@ -157,6 +157,34 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
           {!mobile && <span style={{ background: '#0f2219', border: '0.5px solid #1a3826', borderRadius: '6px', padding: '4px 10px', color: '#1db97b', fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>Personal</span>}
         </div>
 
+        {/* Mobile stats — single row */}
+        {mobile && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px', marginBottom: '12px' }}>
+          {loading ? (
+            [1,2,3,4].map(i => <div key={i} style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '8px', padding: '10px 8px' }}><div style={{background:'#1a1a1a',height:'8px',width:'30px',borderRadius:'4px'}}/><div style={{background:'#1a1a1a',height:'16px',width:'50px',borderRadius:'4px',marginTop:'8px'}}/></div>)
+          ) : (<>
+            <div style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '8px', padding: '10px 8px', textAlign: 'center' }}>
+              <p style={{ color: '#999', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 4px 0' }}>Win%</p>
+              <p style={{ color: s.total === 0 ? '#fff' : s.winRate >= 50 ? '#1db97b' : '#c03535', fontFamily: 'DM Mono, monospace', fontSize: '13px', fontWeight: '600', margin: 0 }}>{s.total === 0 ? '0%' : `${s.winRate.toFixed(1)}%`}</p>
+            </div>
+            <div style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '8px', padding: '10px 8px', textAlign: 'center' }}>
+              <p style={{ color: '#999', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 4px 0' }}>P.Factor</p>
+              <p style={{ color: s.total === 0 ? '#fff' : s.profitFactor >= 1 ? '#1db97b' : '#c03535', fontFamily: 'DM Mono, monospace', fontSize: '13px', fontWeight: '600', margin: 0 }}>{s.total === 0 ? '0.00' : isFinite(s.profitFactor) ? s.profitFactor.toFixed(2) : '∞'}</p>
+            </div>
+            <div style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '8px', padding: '10px 8px', textAlign: 'center' }}>
+              <p style={{ color: '#999', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 4px 0' }}>Trades</p>
+              <p style={{ color: '#fff', fontFamily: 'DM Mono, monospace', fontSize: '13px', fontWeight: '600', margin: 0 }}>{String(s.total)}</p>
+            </div>
+            <div style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '8px', padding: '10px 8px', textAlign: 'center' }}>
+              <p style={{ color: '#999', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 4px 0' }}>W/L</p>
+              <p style={{ fontFamily: 'DM Mono, monospace', fontSize: '13px', fontWeight: '600', margin: 0 }}>
+                <span style={{ color: '#1db97b' }}>{s.wins}</span>
+                <span style={{ color: '#555' }}>/</span>
+                <span style={{ color: '#c03535' }}>{s.losses}</span>
+              </p>
+            </div>
+          </>)}
+        </div>}
+
         {/* Row 1 */}
         {!mobile && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '16px' }}>
           {loading ? (
