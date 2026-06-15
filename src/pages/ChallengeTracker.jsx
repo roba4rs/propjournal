@@ -669,21 +669,15 @@ export default function ChallengeTracker() {
           position: 'fixed', top: '52px', left: 0, right: 0,
           background: '#0a0a0a', borderBottom: '0.5px solid #111',
           padding: '6px 10px', zIndex: 199,
-          display: 'flex', alignItems: 'center', gap: '5px',
+          display: 'flex', alignItems: 'center', gap: '5px', overflowX: 'auto', scrollbarWidth: 'none',
         }}>
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: '5px',
-            overflowX: 'auto', scrollbarWidth: 'none',
-            flex: 1, minWidth: 0,
-          }}>
-            {mobileFilterTabs.map(f => (
-              <button key={f} onClick={() => setFilter(f === 'Active' ? 'In Progress' : f)} style={tabStyle(
-                f === 'Active' ? filter === 'In Progress' : filter === f
-              )}>{f}</button>
-            ))}
-          </div>
-          {/* View toggle — pinned, never scrolls out of view */}
-          <div style={{ display: 'flex', gap: '2px', flexShrink: 0 }}>
+          {mobileFilterTabs.map(f => (
+            <button key={f} onClick={() => setFilter(f === 'Active' ? 'In Progress' : f)} style={tabStyle(
+              f === 'Active' ? filter === 'In Progress' : filter === f
+            )}>{f}</button>
+          ))}
+          {/* View toggle — flush right */}
+          <div style={{ marginLeft: 'auto', display: 'flex', gap: '2px', flexShrink: 0 }}>
             <button onClick={() => setMobileView('grid')} style={{ background: 'transparent', border: 'none', padding: '4px 5px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
               <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
                 <rect x="0.5" y="0.5" width="5" height="5" rx="1" fill={mobileView === 'grid' ? '#fff' : '#444'} />
