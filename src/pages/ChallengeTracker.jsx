@@ -733,6 +733,8 @@ export default function ChallengeTracker() {
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '8px',
+                    minWidth: 0,
+                    overflow: 'hidden',
                   }}>
                     {/* Header */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
