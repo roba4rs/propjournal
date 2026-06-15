@@ -93,8 +93,8 @@ function PairCombobox({ value, onChange, inputStyle: customInputStyle }) {
               onMouseDown={() => select(p)}
               onTouchEnd={e => { e.preventDefault(); select(p); }}
               style={{
-              padding: "8px 12px", cursor: "pointer", fontFamily: "'DM Mono', monospace",
-              fontSize: "12px", color: p === value ? "#1db97b" : "#ccc",
+              padding: "8px 12px", cursor: "pointer", fontFamily: "'JetBrains Mono', monospace",
+              fontSize: "12px", color: p === value ? "#1bba7c" : "#ccc",
               background: p === value ? "#0f2219" : "transparent",
               transition: "background 0.1s",
             }}
@@ -163,7 +163,7 @@ function fmt(n) {
 
 function pnlColor(pnl) {
   const v = parseFloat(pnl);
-  if (v > 0) return "#1db97b";
+  if (v > 0) return "#1bba7c";
   if (v < 0) return "#c03535";
   return "#999";
 }
@@ -172,11 +172,11 @@ function directionBadge(dir) {
   const isLong = dir === "long";
   return (
     <span style={{
-      fontSize: "10px", fontFamily: "'DM Mono', monospace",
+      fontSize: "10px", fontFamily: "'JetBrains Mono', monospace",
       letterSpacing: "0.08em", textTransform: "uppercase",
       padding: "2px 8px", borderRadius: "4px",
       background: isLong ? "#0f2219" : "#1e0d0d",
-      color: isLong ? "#1db97b" : "#c03535",
+      color: isLong ? "#1bba7c" : "#c03535",
       border: `0.5px solid ${isLong ? "#1a3826" : "#2e1515"}`,
     }}>{dir}</span>
   );
@@ -184,7 +184,7 @@ function directionBadge(dir) {
 
 function outcomeBadge(outcome) {
   const map = {
-    win:         { label: "WIN",         bg: "#0f2219", color: "#1db97b", border: "#1a3826" },
+    win:         { label: "WIN",         bg: "#0f2219", color: "#1bba7c", border: "#1a3826" },
     loss:        { label: "LOSS",        bg: "#1e0d0d", color: "#c03535", border: "#2e1515" },
     be:          { label: "BE",          bg: "#141414", color: "#aaa",    border: "#2a2a2a" },
     in_progress: { label: "IN PROGRESS", bg: "#0f1a2e", color: "#4d9fff", border: "#1a3050" },
@@ -193,7 +193,7 @@ function outcomeBadge(outcome) {
   if (!s) return null;
   return (
     <span style={{
-      fontSize: "9px", fontFamily: "'DM Mono', monospace",
+      fontSize: "9px", fontFamily: "'JetBrains Mono', monospace",
       padding: "2px 7px", borderRadius: "4px",
       background: s.bg, color: s.color, border: `0.5px solid ${s.border}`,
       textTransform: "uppercase", letterSpacing: "0.08em",
@@ -208,7 +208,7 @@ function sessionLabel(s) {
 function accountTypeBadge(type) {
   if (type === "personal") return (
     <span style={{
-      fontSize: "9px", fontFamily: "'DM Mono', monospace",
+      fontSize: "9px", fontFamily: "'JetBrains Mono', monospace",
       padding: "1px 6px", borderRadius: "3px",
       background: "#111", border: "0.5px solid #222",
       color: "#777", textTransform: "uppercase", letterSpacing: "0.06em",
@@ -216,7 +216,7 @@ function accountTypeBadge(type) {
   );
   return (
     <span style={{
-      fontSize: "9px", fontFamily: "'DM Mono', monospace",
+      fontSize: "9px", fontFamily: "'JetBrains Mono', monospace",
       padding: "1px 6px", borderRadius: "3px",
       background: "#0f1a2e", border: "0.5px solid #1a3050",
       color: "#4d9fff", textTransform: "uppercase", letterSpacing: "0.06em",
@@ -228,7 +228,7 @@ function accountTypeBadge(type) {
 const inputStyle = {
   width: "100%", background: "#111", border: "0.5px solid #1e1e1e",
   borderRadius: "8px", padding: "8px 10px", color: "#ccc",
-  fontFamily: "'DM Mono', monospace", fontSize: "13px",
+  fontFamily: "'JetBrains Mono', monospace", fontSize: "13px",
   outline: "none", boxSizing: "border-box",
 };
 
@@ -238,7 +238,7 @@ const iconBtn = {
   background: "none", border: "0.5px solid #1e1e1e",
   borderRadius: "6px", padding: "4px 8px",
   color: "#777", cursor: "pointer", fontSize: "12px",
-  fontFamily: "'DM Mono', monospace",
+  fontFamily: "'JetBrains Mono', monospace",
 };
 
 const td = {
@@ -250,11 +250,11 @@ function Field({ label, children, hint }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
       <label style={{
-        fontSize: "10px", fontFamily: "'DM Mono', monospace",
+        fontSize: "10px", fontFamily: "'JetBrains Mono', monospace",
         letterSpacing: "0.1em", textTransform: "uppercase", color: "#777",
       }}>{label}</label>
       {children}
-      {hint && <span style={{ fontSize: "11px", color: "#999", fontFamily: "'DM Mono', monospace" }}>{hint}</span>}
+      {hint && <span style={{ fontSize: "11px", color: "#999", fontFamily: "'JetBrains Mono', monospace" }}>{hint}</span>}
     </div>
   );
 }
@@ -451,17 +451,17 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
         padding: "0 40px", height: "60px",
         display: "flex", alignItems: "center", justifyContent: "space-between",
       }}>
-        <span style={{ fontFamily: "'Syne', sans-serif", fontSize: "16px", fontWeight: 700, color: "#fff" }}>
+        <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "16px", fontWeight: 700, color: "#fff" }}>
           {editTrade ? "Edit Trade" : "Log Trade"}
         </span>
         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
           {successMsg && (
-            <span style={{ color: "#1db97b", fontSize: "13px", fontFamily: "'DM Sans', sans-serif" }}>
+            <span style={{ color: "#1bba7c", fontSize: "13px", fontFamily: "'Inter', sans-serif" }}>
               ✓ {successMsg}
             </span>
           )}
           {formError && (
-            <span style={{ color: "#c03535", fontSize: "13px", fontFamily: "'DM Sans', sans-serif" }}>
+            <span style={{ color: "#c03535", fontSize: "13px", fontFamily: "'Inter', sans-serif" }}>
               {formError}
             </span>
           )}
@@ -469,7 +469,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
             padding: "8px 16px", background: "none",
             border: "0.5px solid #1e1e1e", borderRadius: "8px",
             color: "#777", cursor: "pointer",
-            fontFamily: "'DM Sans', sans-serif", fontSize: "13px",
+            fontFamily: "'Inter', sans-serif", fontSize: "13px",
           }}>Cancel</button>
           <button onClick={handleSave} disabled={saving} style={{
             padding: "8px 22px",
@@ -477,7 +477,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
             border: "none", borderRadius: "8px",
             color: saving ? "#777" : "#000",
             cursor: saving ? "not-allowed" : "pointer",
-            fontFamily: "'Syne', sans-serif", fontSize: "13px", fontWeight: 600,
+            fontFamily: "'Inter', sans-serif", fontSize: "13px", fontWeight: 600,
             transition: "background 0.15s",
           }}>
             {saving ? "Saving…" : "Save Trade"}
@@ -498,7 +498,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
         {/* ── Left: trade details ── */}
         <div style={{ paddingRight: "48px", display: "flex", flexDirection: "column", gap: "28px" }}>
           <div>
-            <div style={{ fontSize: "10px", fontFamily: "'DM Mono', monospace", color: "#999", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "18px" }}>
+            <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "#999", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "18px" }}>
               Trade Details
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
@@ -522,8 +522,8 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                         background: form.direction === d
                           ? (d === "long" ? "#0f2219" : "#1e0d0d") : "#111",
                         color: form.direction === d
-                          ? (d === "long" ? "#1db97b" : "#c03535") : "#777",
-                        cursor: "pointer", fontFamily: "'DM Mono', monospace",
+                          ? (d === "long" ? "#1bba7c" : "#c03535") : "#777",
+                        cursor: "pointer", fontFamily: "'JetBrains Mono', monospace",
                         fontSize: "11px", textTransform: "uppercase",
                         letterSpacing: "0.08em", transition: "all 0.15s",
                       }}>{d}</button>
@@ -536,16 +536,16 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
               <div>
                 {/* Mode toggle header */}
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
-                  <span style={{ fontSize: "10px", fontFamily: "'DM Mono', monospace", color: "#777", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+                  <span style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "#777", textTransform: "uppercase", letterSpacing: "0.1em" }}>
                     {rrMode === "manual" ? "Risk:Reward" : "Entry / SL / TP"}
                   </span>
                   <div style={{ display: "flex", border: "0.5px solid #1e1e1e", borderRadius: "6px", overflow: "hidden" }}>
                     {[["manual", "R:R Select"], ["auto", "Price Mode"]].map(([mode, label]) => (
                       <button key={mode} onClick={() => setRrMode(mode)} style={{
                         padding: "5px 12px", border: "none", cursor: "pointer", fontSize: "10px",
-                        fontFamily: "'DM Mono', monospace", textTransform: "uppercase", letterSpacing: "0.06em",
-                        background: rrMode === mode ? "#1db97b22" : "#111",
-                        color: rrMode === mode ? "#1db97b" : "#555",
+                        fontFamily: "'JetBrains Mono', monospace", textTransform: "uppercase", letterSpacing: "0.06em",
+                        background: rrMode === mode ? "#1bba7c22" : "#111",
+                        color: rrMode === mode ? "#1bba7c" : "#555",
                         transition: "all 0.15s",
                       }}>{label}</button>
                     ))}
@@ -564,8 +564,8 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                             flex: 1, padding: "10px 4px", borderRadius: "8px", cursor: "pointer",
                             border: `0.5px solid ${active ? "#1a3826" : "#1e1e1e"}`,
                             background: active ? "#0f2219" : "#111",
-                            color: active ? "#1db97b" : "#666",
-                            fontFamily: "'DM Mono', monospace", fontSize: "12px",
+                            color: active ? "#1bba7c" : "#666",
+                            fontFamily: "'JetBrains Mono', monospace", fontSize: "12px",
                             transition: "all 0.15s",
                           }}>1:{n}</button>
                         );
@@ -574,7 +574,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
                       <Field label="Custom R:R">
                         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                          <span style={{ color: "#555", fontFamily: "'DM Mono', monospace", fontSize: "12px", flexShrink: 0 }}>1:</span>
+                          <span style={{ color: "#555", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", flexShrink: 0 }}>1:</span>
                           <input type="number" step="0.1" min="0.1" placeholder="2.5"
                             value={form.rr} onChange={e => setForm(prev => ({ ...prev, rr: e.target.value }))}
                             style={{ ...inputStyle }} />
@@ -608,7 +608,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                       <Field label="R:R (auto-calculated)">
                         <input type="text" readOnly
                           value={form.rr ? `1:${form.rr}` : "—"}
-                          style={{ ...inputStyle, color: form.rr ? "#1db97b" : "#999", cursor: "default" }} />
+                          style={{ ...inputStyle, color: form.rr ? "#1bba7c" : "#999", cursor: "default" }} />
                       </Field>
                       <Field label="Session">
                         <select value={form.session} onChange={e => set("session", e.target.value)} style={selectStyle}>
@@ -630,7 +630,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
               <Field label="Outcome">
                 <div style={{ display: "flex", gap: "8px" }}>
                   {[
-                    { value: "win",         label: "WIN",         active: "#0f2219", activeText: "#1db97b", activeBorder: "#1a3826" },
+                    { value: "win",         label: "WIN",         active: "#0f2219", activeText: "#1bba7c", activeBorder: "#1a3826" },
                     { value: "loss",        label: "LOSS",        active: "#1e0d0d", activeText: "#c03535", activeBorder: "#2e1515" },
                     { value: "be",          label: "BE",          active: "#141414", activeText: "#aaa",    activeBorder: "#2a2a2a" },
                     { value: "in_progress", label: "IN PROGRESS", active: "#0f1a2e", activeText: "#4d9fff", activeBorder: "#1a3050" },
@@ -642,7 +642,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                         border: `0.5px solid ${isActive ? activeBorder : "#1e1e1e"}`,
                         background: isActive ? active : "#111",
                         color: isActive ? activeText : "#777",
-                        cursor: "pointer", fontFamily: "'DM Mono', monospace",
+                        cursor: "pointer", fontFamily: "'JetBrains Mono', monospace",
                         fontSize: "10px", textTransform: "uppercase",
                         letterSpacing: "0.08em", transition: "all 0.15s",
                       }}>{label}</button>
@@ -655,7 +655,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
               <Field label="Notes">
                 <textarea value={form.notes} onChange={e => set("notes", e.target.value)}
                   placeholder="Trade rationale, confluences, lessons learned…" rows={5}
-                  style={{ ...inputStyle, resize: "vertical", minHeight: "110px", fontFamily: "'DM Sans', sans-serif", lineHeight: "1.6", fontSize: "14px" }} />
+                  style={{ ...inputStyle, resize: "vertical", minHeight: "110px", fontFamily: "'Inter', sans-serif", lineHeight: "1.6", fontSize: "14px" }} />
               </Field>
 
               {/* Screenshot */}
@@ -664,15 +664,15 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                   border: "0.5px dashed #2a2a2a", borderRadius: "10px", padding: "28px 20px",
                   cursor: "pointer", textAlign: "center",
                   color: "#999", fontSize: "13px", transition: "border-color 0.15s",
-                  fontFamily: "'DM Sans', sans-serif",
+                  fontFamily: "'Inter', sans-serif",
                 }}
                   onMouseEnter={e => e.currentTarget.style.borderColor = "#3a3a3a"}
                   onMouseLeave={e => e.currentTarget.style.borderColor = "#2a2a2a"}
                 >
                   {screenshotFile
-                    ? <span style={{ color: "#1db97b", fontFamily: "'DM Mono', monospace", fontSize: "12px" }}>📎 {screenshotFile.name}</span>
+                    ? <span style={{ color: "#1bba7c", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px" }}>📎 {screenshotFile.name}</span>
                     : form.screenshot_url
-                      ? <span style={{ color: "#4d9fff", fontFamily: "'DM Mono', monospace", fontSize: "12px" }}>📎 Screenshot attached — click to replace</span>
+                      ? <span style={{ color: "#4d9fff", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px" }}>📎 Screenshot attached — click to replace</span>
                       : <>
                           <div style={{ fontSize: "22px", marginBottom: "8px" }}>📷</div>
                           <div style={{ color: "#777" }}>Click to upload chart screenshot</div>
@@ -692,10 +692,10 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
           display: "flex", flexDirection: "column", gap: "20px",
           position: "sticky", top: "80px",
         }}>
-          <div style={{ fontSize: "10px", fontFamily: "'DM Mono', monospace", color: "#999", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+          <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "#999", textTransform: "uppercase", letterSpacing: "0.1em" }}>
             Accounts
           </div>
-          <div style={{ fontSize: "12px", color: "#999", fontFamily: "'DM Sans', sans-serif", marginTop: "-10px" }}>
+          <div style={{ fontSize: "12px", color: "#999", fontFamily: "'Inter', sans-serif", marginTop: "-10px" }}>
             Select which accounts took this trade. Each account uses its own risk sizing.
           </div>
 
@@ -736,21 +736,21 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                     {/* Checkbox */}
                     <div style={{
                       width: "16px", height: "16px", borderRadius: "4px",
-                      border: `0.5px solid ${isSelected ? "#1db97b" : "#2a2a2a"}`,
+                      border: `0.5px solid ${isSelected ? "#1bba7c" : "#2a2a2a"}`,
                       background: isSelected ? "#0f2219" : "transparent",
                       display: "flex", alignItems: "center", justifyContent: "center",
                       flexShrink: 0, transition: "all 0.15s",
                     }}>
-                      {isSelected && <span style={{ color: "#1db97b", fontSize: "10px", lineHeight: 1 }}>✓</span>}
+                      {isSelected && <span style={{ color: "#1bba7c", fontSize: "10px", lineHeight: 1 }}>✓</span>}
                     </div>
                     <div>
-                      <div style={{ fontSize: "13px", fontFamily: "'DM Sans', sans-serif", fontWeight: 500, color: "#e0e0e0" }}>
+                      <div style={{ fontSize: "13px", fontFamily: "'Inter', sans-serif", fontWeight: 500, color: "#e0e0e0" }}>
                         {acc.name}
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
                         {accountTypeBadge(acc.type)}
                         {acc.account_size && (
-                          <span style={{ fontSize: "10px", color: "#999", fontFamily: "'DM Mono', monospace" }}>
+                          <span style={{ fontSize: "10px", color: "#999", fontFamily: "'JetBrains Mono', monospace" }}>
                             ${parseFloat(acc.account_size).toLocaleString()}
                           </span>
                         )}
@@ -766,7 +766,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                     {/* Risk input with % / $ toggle */}
                     <div>
                       <label style={{
-                        fontSize: "10px", fontFamily: "'DM Mono', monospace",
+                        fontSize: "10px", fontFamily: "'JetBrains Mono', monospace",
                         letterSpacing: "0.1em", textTransform: "uppercase", color: "#777",
                         display: "block", marginBottom: "6px",
                       }}>Risk</label>
@@ -787,7 +787,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                                   padding: "7px 13px", border: "none", cursor: "pointer",
                                   background: active ? "#1e1e1e" : "transparent",
                                   color: active ? "#e0e0e0" : "#777",
-                                  fontFamily: "'DM Mono', monospace", fontSize: "12px",
+                                  fontFamily: "'JetBrains Mono', monospace", fontSize: "12px",
                                   transition: "all 0.15s", lineHeight: 1,
                                 }}
                               >{m}</button>
@@ -810,7 +810,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                             position: "absolute", right: "10px", top: "50%",
                             transform: "translateY(-50%)",
                             color: "#777", fontSize: "12px",
-                            fontFamily: "'DM Mono', monospace", pointerEvents: "none",
+                            fontFamily: "'JetBrains Mono', monospace", pointerEvents: "none",
                           }}>{mode}</span>
                         </div>
                       </div>
@@ -823,33 +823,33 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                       display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px",
                     }}>
                       <div>
-                        <div style={{ fontSize: "9px", fontFamily: "'DM Mono', monospace", color: "#999", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "4px" }}>
+                        <div style={{ fontSize: "9px", fontFamily: "'JetBrains Mono', monospace", color: "#999", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "4px" }}>
                           Risk %
                         </div>
-                        <div style={{ fontSize: "14px", fontFamily: "'Syne', sans-serif", fontWeight: 600, color: resolvedPct ? "#e0e0e0" : "#555" }}>
+                        <div style={{ fontSize: "14px", fontFamily: "'Inter', sans-serif", fontWeight: 600, color: resolvedPct ? "#e0e0e0" : "#555" }}>
                           {resolvedPct ? `${parseFloat(resolvedPct).toFixed(2)}%` : "—"}
                         </div>
                       </div>
                       <div>
-                        <div style={{ fontSize: "9px", fontFamily: "'DM Mono', monospace", color: "#999", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "4px" }}>
+                        <div style={{ fontSize: "9px", fontFamily: "'JetBrains Mono', monospace", color: "#999", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "4px" }}>
                           Risk $
                         </div>
-                        <div style={{ fontSize: "14px", fontFamily: "'Syne', sans-serif", fontWeight: 600, color: resolvedDollar ? "#e0e0e0" : "#555" }}>
+                        <div style={{ fontSize: "14px", fontFamily: "'Inter', sans-serif", fontWeight: 600, color: resolvedDollar ? "#e0e0e0" : "#555" }}>
                           {resolvedDollar ? `$${resolvedDollar}` : "—"}
                         </div>
                       </div>
                       <div>
-                        <div style={{ fontSize: "9px", fontFamily: "'DM Mono', monospace", color: "#999", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "4px" }}>
+                        <div style={{ fontSize: "9px", fontFamily: "'JetBrains Mono', monospace", color: "#999", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "4px" }}>
                           Est. P&L
                         </div>
-                        <div style={{ fontSize: "14px", fontFamily: "'Syne', sans-serif", fontWeight: 600, color: pnlNum !== null ? pnlColor(pnlNum) : "#555" }}>
+                        <div style={{ fontSize: "14px", fontFamily: "'Inter', sans-serif", fontWeight: 600, color: pnlNum !== null ? pnlColor(pnlNum) : "#555" }}>
                           {pnlNum !== null ? `${pnlNum >= 0 ? "+" : ""}$${Math.abs(pnlNum).toFixed(2)}` : "—"}
                         </div>
                       </div>
                     </div>
 
                     {!form.rr && rawVal && (
-                      <div style={{ fontSize: "11px", color: "#999", fontFamily: "'DM Mono', monospace" }}>
+                      <div style={{ fontSize: "11px", color: "#999", fontFamily: "'JetBrains Mono', monospace" }}>
                         Fill Entry, SL, TP to calculate P&L
                       </div>
                     )}
@@ -865,7 +865,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
               background: "#0a0a0a", border: "0.5px solid #1a1a1a",
               borderRadius: "10px", padding: "14px 16px",
             }}>
-              <div style={{ fontSize: "10px", fontFamily: "'DM Mono', monospace", color: "#999", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "10px" }}>
+              <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "#999", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "10px" }}>
                 Summary
               </div>
               {selectedAccountsList.map(acc => {
@@ -880,8 +880,8 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                 const pnlNum = pnl !== null ? parseFloat(pnl) : null;
                 return (
                   <div key={acc.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-                    <span style={{ fontSize: "12px", fontFamily: "'DM Sans', sans-serif", color: "#aaa" }}>{acc.name}</span>
-                    <span style={{ fontSize: "12px", fontFamily: "'DM Mono', monospace", color: pnlNum !== null ? pnlColor(pnlNum) : "#555" }}>
+                    <span style={{ fontSize: "12px", fontFamily: "'Inter', sans-serif", color: "#aaa" }}>{acc.name}</span>
+                    <span style={{ fontSize: "12px", fontFamily: "'JetBrains Mono', monospace", color: pnlNum !== null ? pnlColor(pnlNum) : "#555" }}>
                       {pnlNum !== null ? `${pnlNum >= 0 ? "+" : ""}$${Math.abs(pnlNum).toFixed(2)}` : "—"}
                     </span>
                   </div>
@@ -919,25 +919,25 @@ function TradeDetailModal({ trade, onClose, onEdit, onDelete }) {
           position: "sticky", top: 0, background: "#0d0d0d", zIndex: 1,
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-            <span style={{ fontFamily: "'Syne', sans-serif", fontSize: "18px", fontWeight: 700, color: "#fff" }}>
+            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "18px", fontWeight: 700, color: "#fff" }}>
               {trade.pair}
             </span>
             {directionBadge(trade.direction)}
             {outcomeBadge(trade.outcome)}
-            <span style={{ fontSize: "12px", fontFamily: "'DM Mono', monospace", color: "#777" }}>{trade.date}</span>
+            <span style={{ fontSize: "12px", fontFamily: "'JetBrains Mono', monospace", color: "#777" }}>{trade.date}</span>
           </div>
           <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
             <button onClick={() => { onClose(); onEdit(trade); }} style={{
               padding: "7px 14px", borderRadius: "7px",
               border: "0.5px solid #1e1e1e", background: "none",
               color: "#aaa", cursor: "pointer",
-              fontFamily: "'DM Sans', sans-serif", fontSize: "13px",
+              fontFamily: "'Inter', sans-serif", fontSize: "13px",
             }}>Edit</button>
             <button onClick={() => { onClose(); onDelete(trade.id); }} style={{
               padding: "7px 14px", borderRadius: "7px",
               border: "0.5px solid #2e1515", background: "#1e0d0d",
               color: "#c03535", cursor: "pointer",
-              fontFamily: "'DM Sans', sans-serif", fontSize: "13px",
+              fontFamily: "'Inter', sans-serif", fontSize: "13px",
             }}>Delete</button>
             <button onClick={onClose} style={{
               background: "none", border: "none", color: "#777",
@@ -962,15 +962,15 @@ function TradeDetailModal({ trade, onClose, onEdit, onDelete }) {
               { label: "Entry", value: fmt(trade.entry) },
             ].map(s => (
               <div key={s.label} style={{ flex: 1, padding: "16px 20px", background: "#0f0f0f" }}>
-                <div style={{ fontSize: "10px", fontFamily: "'DM Mono', monospace", color: "#777", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>{s.label}</div>
-                <div style={{ fontSize: "20px", fontFamily: "'Syne', sans-serif", fontWeight: 600, color: s.color || "#e0e0e0" }}>{s.value}</div>
+                <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "#777", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>{s.label}</div>
+                <div style={{ fontSize: "20px", fontFamily: "'Inter', sans-serif", fontWeight: 600, color: s.color || "#e0e0e0" }}>{s.value}</div>
               </div>
             ))}
           </div>
 
           {/* Price levels */}
           <div>
-            <div style={{ fontSize: "10px", fontFamily: "'DM Mono', monospace", color: "#999", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "14px" }}>Price Levels</div>
+            <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "#999", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "14px" }}>Price Levels</div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px" }}>
               {[
                 { label: "Entry", value: fmt(trade.entry) },
@@ -978,8 +978,8 @@ function TradeDetailModal({ trade, onClose, onEdit, onDelete }) {
                 { label: "Take Profit", value: fmt(trade.take_profit) },
               ].map(item => (
                 <div key={item.label} style={{ background: "#111", border: "0.5px solid #1e1e1e", borderRadius: "10px", padding: "14px 16px" }}>
-                  <div style={{ fontSize: "10px", fontFamily: "'DM Mono', monospace", color: "#777", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "6px" }}>{item.label}</div>
-                  <div style={{ fontSize: "15px", fontFamily: "'DM Mono', monospace", color: "#ccc" }}>{item.value}</div>
+                  <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "#777", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "6px" }}>{item.label}</div>
+                  <div style={{ fontSize: "15px", fontFamily: "'JetBrains Mono', monospace", color: "#ccc" }}>{item.value}</div>
                 </div>
               ))}
             </div>
@@ -988,7 +988,7 @@ function TradeDetailModal({ trade, onClose, onEdit, onDelete }) {
           {/* Screenshot */}
           {trade.screenshot_url && (
             <div>
-              <div style={{ fontSize: "10px", fontFamily: "'DM Mono', monospace", color: "#999", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "14px" }}>Chart Screenshot</div>
+              <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "#999", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "14px" }}>Chart Screenshot</div>
               <div style={{ borderRadius: "10px", overflow: "hidden", border: "0.5px solid #1e1e1e", background: "#111", position: "relative" }}>
                 <img src={trade.screenshot_url} alt="Trade screenshot" style={{ width: "100%", display: "block", maxHeight: "460px", objectFit: "contain", background: "#0a0a0a" }} />
                 <a href={trade.screenshot_url} target="_blank" rel="noreferrer" style={{
@@ -996,7 +996,7 @@ function TradeDetailModal({ trade, onClose, onEdit, onDelete }) {
                   background: "rgba(0,0,0,0.7)", border: "0.5px solid #2a2a2a",
                   borderRadius: "6px", padding: "5px 10px",
                   color: "#4d9fff", fontSize: "11px",
-                  fontFamily: "'DM Mono', monospace", textDecoration: "none",
+                  fontFamily: "'JetBrains Mono', monospace", textDecoration: "none",
                 }}>Open full size ↗</a>
               </div>
             </div>
@@ -1005,19 +1005,19 @@ function TradeDetailModal({ trade, onClose, onEdit, onDelete }) {
           {/* Notes */}
           {trade.notes && (
             <div>
-              <div style={{ fontSize: "10px", fontFamily: "'DM Mono', monospace", color: "#999", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "12px" }}>Notes</div>
+              <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "#999", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "12px" }}>Notes</div>
               <div style={{
                 background: "#111", border: "0.5px solid #1e1e1e",
                 borderRadius: "10px", padding: "16px 18px",
                 color: "#999", fontSize: "14px",
-                fontFamily: "'DM Sans', sans-serif", lineHeight: "1.65",
+                fontFamily: "'Inter', sans-serif", lineHeight: "1.65",
                 whiteSpace: "pre-wrap",
               }}>{trade.notes}</div>
             </div>
           )}
 
           {!trade.screenshot_url && !trade.notes && (
-            <div style={{ textAlign: "center", color: "#555", fontSize: "13px", fontFamily: "'DM Mono', monospace", padding: "16px" }}>
+            <div style={{ textAlign: "center", color: "#555", fontSize: "13px", fontFamily: "'JetBrains Mono', monospace", padding: "16px" }}>
               No screenshot or notes attached to this trade.
             </div>
           )}
@@ -1037,18 +1037,18 @@ function TradeRow({ trade, onViewDetail, onEdit, onDelete }) {
       onMouseLeave={e => e.currentTarget.style.background = "transparent"}
     >
       <td style={td}>{trade.date}</td>
-      <td style={{ ...td, fontFamily: "'DM Mono', monospace", fontSize: "13px", color: "#e0e0e0" }}>{trade.pair}</td>
+      <td style={{ ...td, fontFamily: "'JetBrains Mono', monospace", fontSize: "13px", color: "#e0e0e0" }}>{trade.pair}</td>
       <td style={td}>{outcomeBadge(trade.outcome) || <span style={{ color: "#555" }}>—</span>}</td>
       <td style={td}>{directionBadge(trade.direction)}</td>
-      <td style={{ ...td, fontFamily: "'DM Mono', monospace", fontSize: "12px", color: "#aaa" }}>{fmt(trade.entry)}</td>
-      <td style={{ ...td, fontFamily: "'DM Mono', monospace", fontSize: "12px", color: "#aaa" }}>{trade.rr ? `${trade.rr}R` : "—"}</td>
-      <td style={{ ...td, fontFamily: "'DM Mono', monospace", fontSize: "12px", color: trade.swap != null ? pnlColor(trade.swap) : "#555" }}>
+      <td style={{ ...td, fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", color: "#aaa" }}>{fmt(trade.entry)}</td>
+      <td style={{ ...td, fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", color: "#aaa" }}>{trade.rr ? `${trade.rr}R` : "—"}</td>
+      <td style={{ ...td, fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", color: trade.swap != null ? pnlColor(trade.swap) : "#555" }}>
         {trade.swap != null ? `${parseFloat(trade.swap) >= 0 ? "+" : ""}${fmt(trade.swap)}` : "—"}
       </td>
-      <td style={{ ...td, fontFamily: "'DM Mono', monospace", fontSize: "12px", color: trade.commission != null ? pnlColor(trade.commission) : "#555" }}>
+      <td style={{ ...td, fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", color: trade.commission != null ? pnlColor(trade.commission) : "#555" }}>
         {trade.commission != null ? `${parseFloat(trade.commission) >= 0 ? "+" : ""}${fmt(trade.commission)}` : "—"}
       </td>
-      <td style={{ ...td, fontFamily: "'DM Mono', monospace", fontSize: "13px", fontWeight: 500, color: pnlColor(trade.pnl) }}>
+      <td style={{ ...td, fontFamily: "'JetBrains Mono', monospace", fontSize: "13px", fontWeight: 500, color: pnlColor(trade.pnl) }}>
         {trade.pnl != null ? `${parseFloat(trade.pnl) >= 0 ? "+" : ""}${fmt(trade.pnl)}` : "—"}
       </td>
       <td style={{ ...td, color: "#777", fontSize: "12px" }}>{sessionLabel(trade.session)}</td>
@@ -1351,16 +1351,16 @@ function CSVImportModal({ open, onClose, activeAccount, onImported }) {
         {/* Header */}
         <div style={{ padding: "18px 24px", borderBottom: "0.5px solid #1a1a1a", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
           <div>
-            <span style={{ fontFamily: "'Syne', sans-serif", fontSize: "16px", fontWeight: 700, color: "#fff" }}>
+            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "16px", fontWeight: 700, color: "#fff" }}>
               Import CSV
             </span>
             {activeAccount && (
-              <div style={{ fontSize: "11px", color: "#555", fontFamily: "'DM Mono', monospace", marginTop: "3px" }}>
+              <div style={{ fontSize: "11px", color: "#555", fontFamily: "'JetBrains Mono', monospace", marginTop: "3px" }}>
                 → {activeAccount.name}
               </div>
             )}
           </div>
-          <button onClick={handleClose} style={{ background: "none", border: "0.5px solid #1e1e1e", borderRadius: "6px", padding: "6px 14px", color: "#777", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: "13px" }}>
+          <button onClick={handleClose} style={{ background: "none", border: "0.5px solid #1e1e1e", borderRadius: "6px", padding: "6px 14px", color: "#777", cursor: "pointer", fontFamily: "'Inter', sans-serif", fontSize: "13px" }}>
             Close
           </button>
         </div>
@@ -1371,7 +1371,7 @@ function CSVImportModal({ open, onClose, activeAccount, onImported }) {
           {/* UPLOAD stage */}
           {stage === "upload" && (
             <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-              <p style={{ margin: 0, fontSize: "13px", color: "#777", fontFamily: "'DM Sans', sans-serif", lineHeight: "1.6" }}>
+              <p style={{ margin: 0, fontSize: "13px", color: "#777", fontFamily: "'Inter', sans-serif", lineHeight: "1.6" }}>
                 Upload a trade history CSV from any broker platform — MT4, MT5, cTrader, DXtrade, Match Trader, or any custom export. PropJournal will automatically detect the columns.
               </p>
               <div
@@ -1381,12 +1381,12 @@ function CSVImportModal({ open, onClose, activeAccount, onImported }) {
                 onMouseLeave={e => e.currentTarget.style.borderColor = "#2a2a2a"}
               >
                 <div style={{ fontSize: "28px", marginBottom: "10px" }}>📂</div>
-                <div style={{ fontSize: "14px", color: "#aaa", fontFamily: "'DM Sans', sans-serif" }}>Click to select CSV file</div>
-                <div style={{ fontSize: "11px", color: "#555", fontFamily: "'DM Mono', monospace", marginTop: "6px" }}>.csv files only</div>
+                <div style={{ fontSize: "14px", color: "#aaa", fontFamily: "'Inter', sans-serif" }}>Click to select CSV file</div>
+                <div style={{ fontSize: "11px", color: "#555", fontFamily: "'JetBrains Mono', monospace", marginTop: "6px" }}>.csv files only</div>
               </div>
               <input ref={fileRef} type="file" accept=".csv" style={{ display: "none" }} onChange={handleFile} />
               {error && (
-                <div style={{ background: "#1e0d0d", border: "0.5px solid #2e1515", borderRadius: "8px", padding: "12px 14px", color: "#c03535", fontSize: "12px", fontFamily: "'DM Sans', sans-serif" }}>
+                <div style={{ background: "#1e0d0d", border: "0.5px solid #2e1515", borderRadius: "8px", padding: "12px 14px", color: "#c03535", fontSize: "12px", fontFamily: "'Inter', sans-serif" }}>
                   {error}
                 </div>
               )}
@@ -1399,16 +1399,16 @@ function CSVImportModal({ open, onClose, activeAccount, onImported }) {
 
               {/* Summary row */}
               <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
-                <span style={{ fontSize: "12px", color: "#777", fontFamily: "'DM Mono', monospace" }}>
+                <span style={{ fontSize: "12px", color: "#777", fontFamily: "'JetBrains Mono', monospace" }}>
                   {preview.length} of {totalRows} row{totalRows !== 1 ? "s" : ""} mapped
                 </span>
                 {/* Field coverage pills */}
                 {Object.entries(coverage).map(([field, found]) => (
                   <span key={field} style={{
-                    fontSize: "9px", fontFamily: "'DM Mono', monospace", textTransform: "uppercase",
+                    fontSize: "9px", fontFamily: "'JetBrains Mono', monospace", textTransform: "uppercase",
                     padding: "2px 7px", borderRadius: "4px", letterSpacing: "0.06em",
                     background: found ? "#0f2219" : "#1e0d0d",
-                    color: found ? "#1db97b" : "#c03535",
+                    color: found ? "#1bba7c" : "#c03535",
                     border: `0.5px solid ${found ? "#1a3826" : "#2e1515"}`,
                   }}>
                     {found ? "✓" : "✗"} {field.replace("_", " ")}
@@ -1418,19 +1418,19 @@ function CSVImportModal({ open, onClose, activeAccount, onImported }) {
 
               {/* Warning if important fields missing */}
               {missingImportant.length > 0 && (
-                <div style={{ background: "#1a1200", border: "0.5px solid #2a1e00", borderRadius: "8px", padding: "10px 14px", color: "#c97a00", fontSize: "12px", fontFamily: "'DM Sans', sans-serif" }}>
+                <div style={{ background: "#1a1200", border: "0.5px solid #2a1e00", borderRadius: "8px", padding: "10px 14px", color: "#c97a00", fontSize: "12px", fontFamily: "'Inter', sans-serif" }}>
                   ⚠ Could not detect: <strong>{missingImportant.join(", ")}</strong>. These fields will be empty. You can edit individual trades after importing.
                 </div>
               )}
 
               {error && (
-                <div style={{ background: "#1e0d0d", border: "0.5px solid #2e1515", borderRadius: "8px", padding: "10px 14px", color: "#c03535", fontSize: "12px", fontFamily: "'DM Sans', sans-serif" }}>
+                <div style={{ background: "#1e0d0d", border: "0.5px solid #2e1515", borderRadius: "8px", padding: "10px 14px", color: "#c03535", fontSize: "12px", fontFamily: "'Inter', sans-serif" }}>
                   {error}
                 </div>
               )}
 
               <div style={{ overflowX: "auto" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "11px", fontFamily: "'DM Mono', monospace" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "11px", fontFamily: "'JetBrains Mono', monospace" }}>
                   <thead>
                     <tr>
                       {["Date", "Pair", "Dir", "Entry", "SL", "TP", "P&L", "Comm", "Swap", "Outcome"].map(h => (
@@ -1449,7 +1449,7 @@ function CSVImportModal({ open, onClose, activeAccount, onImported }) {
                           <td style={{ ...tdStyle, color: "#ccc" }}>{t.pair || "—"}</td>
                           <td style={tdStyle}>
                             {t.direction
-                              ? <span style={{ color: t.direction === "long" ? "#1db97b" : "#c03535", textTransform: "uppercase" }}>{t.direction}</span>
+                              ? <span style={{ color: t.direction === "long" ? "#1bba7c" : "#c03535", textTransform: "uppercase" }}>{t.direction}</span>
                               : "—"}
                           </td>
                           <td style={tdStyle}>{t.entry ?? "—"}</td>
@@ -1478,7 +1478,7 @@ function CSVImportModal({ open, onClose, activeAccount, onImported }) {
           {stage === "importing" && (
             <div style={{ textAlign: "center", padding: "40px 20px" }}>
               <div style={{ fontSize: "28px", marginBottom: "14px" }}>⏳</div>
-              <div style={{ fontSize: "14px", color: "#aaa", fontFamily: "'DM Sans', sans-serif" }}>Importing trades…</div>
+              <div style={{ fontSize: "14px", color: "#aaa", fontFamily: "'Inter', sans-serif" }}>Importing trades…</div>
             </div>
           )}
 
@@ -1486,10 +1486,10 @@ function CSVImportModal({ open, onClose, activeAccount, onImported }) {
           {stage === "done" && (
             <div style={{ textAlign: "center", padding: "40px 20px" }}>
               <div style={{ fontSize: "36px", marginBottom: "14px" }}>✅</div>
-              <div style={{ fontSize: "16px", color: "#1db97b", fontFamily: "'Syne', sans-serif", fontWeight: 700, marginBottom: "8px" }}>
+              <div style={{ fontSize: "16px", color: "#1bba7c", fontFamily: "'Inter', sans-serif", fontWeight: 700, marginBottom: "8px" }}>
                 {importCount} trade{importCount !== 1 ? "s" : ""} imported
               </div>
-              <div style={{ fontSize: "13px", color: "#777", fontFamily: "'DM Sans', sans-serif" }}>
+              <div style={{ fontSize: "13px", color: "#777", fontFamily: "'Inter', sans-serif" }}>
                 All trades logged under <span style={{ color: "#ccc" }}>{activeAccount?.name}</span>
               </div>
             </div>
@@ -1501,16 +1501,19 @@ function CSVImportModal({ open, onClose, activeAccount, onImported }) {
           <div style={{ padding: "16px 24px", borderTop: "0.5px solid #1a1a1a", display: "flex", justifyContent: "flex-end", gap: "10px", flexShrink: 0 }}>
             {stage === "preview" && (
               <>
-                <button onClick={reset} style={{ padding: "9px 18px", background: "none", border: "0.5px solid #1e1e1e", borderRadius: "8px", color: "#777", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: "13px" }}>
+                <button onClick={reset} style={{ padding: "9px 18px", background: "none", border: "0.5px solid #1e1e1e", borderRadius: "8px", color: "#777", cursor: "pointer", fontFamily: "'Inter', sans-serif", fontSize: "13px" }}>
                   Back
                 </button>
-                <button onClick={handleConfirm} style={{ padding: "9px 22px", background: "#1db97b", border: "none", borderRadius: "8px", color: "#000", cursor: "pointer", fontFamily: "'Syne', sans-serif", fontSize: "13px", fontWeight: 600 }}>
+                <button onClick={handleConfirm} style={{ padding: "9px 22px", background: "oklch(0.72 0.17 152)", border: "none", borderRadius: "8px", color: "#000", cursor: "pointer", fontFamily: "'Inter', sans-serif", fontSize: "13px", fontWeight: 600, transition: "background 0.15s" }}
+                  onMouseEnter={e => e.currentTarget.style.background = "oklch(0.78 0.17 152)"}
+                  onMouseLeave={e => e.currentTarget.style.background = "oklch(0.72 0.17 152)"}
+                >
                   Import {preview.length} Trade{preview.length !== 1 ? "s" : ""}
                 </button>
               </>
             )}
             {stage === "done" && (
-              <button onClick={handleClose} style={{ padding: "9px 22px", background: "#fff", border: "none", borderRadius: "8px", color: "#000", cursor: "pointer", fontFamily: "'Syne', sans-serif", fontSize: "13px", fontWeight: 600 }}>
+              <button onClick={handleClose} style={{ padding: "9px 22px", background: "#fff", border: "none", borderRadius: "8px", color: "#000", cursor: "pointer", fontFamily: "'Inter', sans-serif", fontSize: "13px", fontWeight: 600 }}>
                 Done
               </button>
             )}
@@ -1550,10 +1553,10 @@ function MobileAccountRow({ accounts, activeAccount, onSwitch, onImport }) {
             borderRadius: '6px', padding: '5px 9px', cursor: 'pointer',
           }}
         >
-          <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#1db97b', flexShrink: 0 }} />
+          <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#1bba7c', flexShrink: 0 }} />
           <span style={{
             fontSize: '12px', fontWeight: '500', color: '#ccc',
-            fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap',
+            fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap',
             maxWidth: '160px', overflow: 'hidden', textOverflow: 'ellipsis',
           }}>
             {activeAccount?.name || 'Select Account'}
@@ -1585,15 +1588,15 @@ function MobileAccountRow({ accounts, activeAccount, onSwitch, onImport }) {
                     cursor: 'pointer', textAlign: 'left',
                   }}
                 >
-                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: isActive ? '#1db97b' : '#555', flexShrink: 0 }} />
+                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: isActive ? '#1bba7c' : '#555', flexShrink: 0 }} />
                   <span style={{
                     flex: 1, fontSize: '12px', fontWeight: '500',
-                    color: isActive ? '#1db97b' : '#aaa',
-                    fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap',
+                    color: isActive ? '#1bba7c' : '#aaa',
+                    fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap',
                   }}>{acc.name}</span>
                   {isActive && (
                     <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                      <path d="M2 5L4 7L8 3" stroke="#1db97b" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M2 5L4 7L8 3" stroke="#1bba7c" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   )}
                 </button>
@@ -1608,7 +1611,7 @@ function MobileAccountRow({ accounts, activeAccount, onSwitch, onImport }) {
         <button onClick={onImport} style={{
           background: "none", border: "0.5px solid #1e1e1e",
           borderRadius: "6px", padding: "5px 10px", cursor: "pointer",
-          color: "#777", fontFamily: "'DM Mono', monospace", fontSize: "11px",
+          color: "#777", fontFamily: "'JetBrains Mono', monospace", fontSize: "11px",
           whiteSpace: "nowrap",
         }}>↑ CSV</button>
       )}
@@ -2012,7 +2015,7 @@ useEffect(() => {
       border: `0.5px solid ${active ? '#555' : '#1e1e1e'}`,
       background: active ? '#1e1e1e' : '#111',
       color: active ? '#e0e0e0' : '#777',
-      fontFamily: "'DM Mono', monospace",
+      fontFamily: "'JetBrains Mono', monospace",
       whiteSpace: 'nowrap',
       flexShrink: 0,
       cursor: 'pointer',
@@ -2022,7 +2025,7 @@ useEffect(() => {
 
     const colTemplate = '36px 1fr 46px 38px 52px 48px';
     const headerCellStyle = {
-      fontSize: '9px', color: '#555', fontFamily: "'DM Mono', monospace",
+      fontSize: '9px', color: '#555', fontFamily: "'JetBrains Mono', monospace",
       textTransform: 'uppercase', letterSpacing: '0.08em',
     };
 
@@ -2030,7 +2033,7 @@ useEffect(() => {
       <span style={{
         fontSize: '8px', padding: '1px 4px', borderRadius: '3px',
         background: bg, color, border: `0.5px solid ${border}`,
-        fontFamily: "'DM Mono', monospace", textTransform: 'uppercase',
+        fontFamily: "'JetBrains Mono', monospace", textTransform: 'uppercase',
         letterSpacing: '0.03em', whiteSpace: 'nowrap',
       }}>{label}</span>
     );
@@ -2049,7 +2052,7 @@ useEffect(() => {
           zIndex: 201, pointerEvents: 'none',
         }}>
           <span style={{
-            fontFamily: "'DM Sans', sans-serif", fontSize: '15px',
+            fontFamily: "'Inter', sans-serif", fontSize: '15px',
             fontWeight: '500', color: '#e0e0e0',
           }}>Trade Log</span>
         </div>
@@ -2106,19 +2109,19 @@ useEffect(() => {
           )}
 
           {loading ? (
-            <div style={{ padding: '48px', textAlign: 'center', color: '#999', fontSize: '13px', fontFamily: "'DM Mono', monospace" }}>
+            <div style={{ padding: '48px', textAlign: 'center', color: '#999', fontSize: '13px', fontFamily: "'JetBrains Mono', monospace" }}>
               Loading trades…
             </div>
           ) : filtered.length === 0 ? (
-            <div style={{ padding: '48px', textAlign: 'center', color: '#999', fontSize: '13px', fontFamily: "'DM Mono', monospace" }}>
+            <div style={{ padding: '48px', textAlign: 'center', color: '#999', fontSize: '13px', fontFamily: "'JetBrains Mono', monospace" }}>
               No trades yet.
             </div>
           ) : (
             filtered.map(t => {
               const pnlVal = t.pnl != null ? parseFloat(t.pnl) : null;
-              const pnlClr = pnlVal > 0 ? '#1db97b' : pnlVal < 0 ? '#c03535' : '#c97a00';
+              const pnlClr = pnlVal > 0 ? '#1bba7c' : pnlVal < 0 ? '#c03535' : '#c97a00';
               const outcomeMap = {
-                win: { label: 'WIN', bg: '#0f2219', color: '#1db97b', border: '#1a3826' },
+                win: { label: 'WIN', bg: '#0f2219', color: '#1bba7c', border: '#1a3826' },
                 loss: { label: 'LOSS', bg: '#1e0d0d', color: '#c03535', border: '#2e1515' },
                 be: { label: 'BE', bg: '#1a1400', color: '#c97a00', border: '#2a2000' },
                 in_progress: { label: 'IN PROG', bg: '#0f1a2e', color: '#4d9fff', border: '#1a3050' },
@@ -2132,13 +2135,13 @@ useEffect(() => {
                   padding: '10px 14px', borderBottom: '0.5px solid #111',
                 }} onClick={() => setDetailTrade(t)}>
                   {/* Date */}
-                  <div style={{ fontSize: '10px', color: '#999', fontFamily: "'DM Mono', monospace" }}>
+                  <div style={{ fontSize: '10px', color: '#999', fontFamily: "'JetBrains Mono', monospace" }}>
                     {t.date ? new Date(t.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'}
                   </div>
 
                   {/* Pair */}
                   <div style={{
-                    fontSize: '12px', fontWeight: '500', color: '#ccc', fontFamily: "'DM Mono', monospace",
+                    fontSize: '12px', fontWeight: '500', color: '#ccc', fontFamily: "'JetBrains Mono', monospace",
                     whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                   }}>
                     {t.pair}
@@ -2153,17 +2156,17 @@ useEffect(() => {
                   <div style={{ display: 'flex', justifyContent: 'center' }}>
                     {mobileBadge(isLong ? 'BUY' : 'SELL',
                       isLong ? '#0f2219' : '#1e0d0d',
-                      isLong ? '#1db97b' : '#c03535',
+                      isLong ? '#1bba7c' : '#c03535',
                       isLong ? '#1a3826' : '#2e1515'
                     )}
                   </div>
 
                   {/* P&L + RR */}
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '13px', fontWeight: '500', color: pnlClr, fontFamily: "'DM Mono', monospace" }}>
+                    <div style={{ fontSize: '13px', fontWeight: '500', color: pnlClr, fontFamily: "'JetBrains Mono', monospace" }}>
                       {pnlVal != null ? `${pnlVal >= 0 ? '+' : ''}$${Math.abs(pnlVal).toFixed(0)}` : '—'}
                     </div>
-                    <div style={{ fontSize: '9px', color: '#777', fontFamily: "'DM Mono', monospace" }}>
+                    <div style={{ fontSize: '9px', color: '#777', fontFamily: "'JetBrains Mono', monospace" }}>
                       {t.rr ? `${t.rr}R` : ''}
                     </div>
                   </div>
@@ -2229,10 +2232,10 @@ useEffect(() => {
       <div style={{
         marginLeft: collapsed ? "60px" : "220px", transition: "margin-left 0.2s ease", flex: 1, minHeight: "100vh",
         background: "#0a0a0a", color: "#e0e0e0",
-        fontFamily: "'DM Sans', sans-serif", padding: "32px",
+        fontFamily: "'Inter', sans-serif", padding: "32px",
       }}>
         <style>{`
-          @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
           * { box-sizing: border-box; }
           input[type=number]::-webkit-outer-spin-button,
           input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
@@ -2244,7 +2247,7 @@ useEffect(() => {
 
         {/* Page Header */}
         <div style={{ marginBottom: "20px" }}>
-          <h1 style={{ margin: "0 0 12px 0", fontFamily: "'Syne', sans-serif", fontSize: "22px", fontWeight: 700, color: "#fff" }}>Trade Log</h1>
+          <h1 style={{ margin: "0 0 12px 0", fontFamily: "'Inter', sans-serif", fontSize: "22px", fontWeight: 700, color: "#fff" }}>Trade Log</h1>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             {/* Left: account selector + account meta */}
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
@@ -2257,7 +2260,7 @@ useEffect(() => {
                 style={{
                   background: "#111", border: "0.5px solid #2a2a2a", borderRadius: "8px",
                   padding: "7px 12px", color: "#e0e0e0",
-                  fontFamily: "'DM Sans', sans-serif", fontSize: "13px",
+                  fontFamily: "'Inter', sans-serif", fontSize: "13px",
                   cursor: "pointer", outline: "none", appearance: "none",
                   paddingRight: "28px",
                   backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")`,
@@ -2270,16 +2273,16 @@ useEffect(() => {
               </select>
               {activeAccount && (
                 <>
-                  <span style={{ fontFamily: "'Syne', sans-serif", fontSize: "16px", fontWeight: 700, color: "#e8e8e8" }}>
+                  <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "16px", fontWeight: 700, color: "#e8e8e8" }}>
                     {activeAccount.name || activeAccount.firm_name || "Account"}
                   </span>
                   {activeAccount.account_size && (
-                    <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "11px", color: "#aaa" }}>
+                    <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", color: "#aaa" }}>
                       ${Number(activeAccount.account_size).toLocaleString()}
                     </span>
                   )}
                   {activeAccount.created_at && (
-                    <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "11px", color: "#555" }}>
+                    <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", color: "#555" }}>
                       Since {new Date(activeAccount.created_at).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
                     </span>
                   )}
@@ -2291,15 +2294,18 @@ useEffect(() => {
               <button onClick={() => setImportOpen(true)} style={{
                 padding: "10px 16px", background: "none",
                 border: "0.5px solid #1e1e1e", borderRadius: "8px", color: "#777",
-                fontFamily: "'DM Mono', monospace", fontSize: "12px",
+                fontFamily: "'JetBrains Mono', monospace", fontSize: "12px",
                 cursor: "pointer", whiteSpace: "nowrap",
               }}>↑ Import CSV</button>
               <button onClick={openNew} style={{
-                padding: "10px 18px", background: "#1db97b", border: "none",
-                borderRadius: "8px", color: "#0a0a0a",
-                fontFamily: "'Syne', sans-serif", fontSize: "13px", fontWeight: 600,
-                cursor: "pointer", whiteSpace: "nowrap",
-              }}>+ Log Trade</button>
+                padding: "10px 18px", background: "oklch(0.72 0.17 152)", border: "none",
+                borderRadius: "8px", color: "#000",
+                fontFamily: "'Inter', sans-serif", fontSize: "13px", fontWeight: 600,
+                cursor: "pointer", whiteSpace: "nowrap", transition: "background 0.15s",
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = "oklch(0.78 0.17 152)"}
+              onMouseLeave={e => e.currentTarget.style.background = "oklch(0.72 0.17 152)"}
+              >+ Log Trade</button>
             </div>
           </div>
         </div>
@@ -2321,8 +2327,8 @@ useEffect(() => {
               padding: "6px 14px", borderRadius: "6px", border: "0.5px solid",
               borderColor: filterDir === d ? "#1a3826" : "#1a1a1a",
               background: filterDir === d ? "#0f2219" : "transparent",
-              color: filterDir === d ? "#1db97b" : "#777",
-              fontFamily: "'DM Mono', monospace", fontSize: "11px",
+              color: filterDir === d ? "#1bba7c" : "#777",
+              fontFamily: "'JetBrains Mono', monospace", fontSize: "11px",
               textTransform: "uppercase", letterSpacing: "0.08em",
               cursor: "pointer", transition: "all 0.15s",
             }}>{d}</button>
@@ -2333,8 +2339,8 @@ useEffect(() => {
               padding: "6px 14px", borderRadius: "6px", border: "0.5px solid",
               borderColor: filterSession === s ? "#1a3826" : "#1a1a1a",
               background: filterSession === s ? "#0f2219" : "transparent",
-              color: filterSession === s ? "#1db97b" : "#777",
-              fontFamily: "'DM Mono', monospace", fontSize: "11px",
+              color: filterSession === s ? "#1bba7c" : "#777",
+              fontFamily: "'JetBrains Mono', monospace", fontSize: "11px",
               textTransform: "uppercase", letterSpacing: "0.08em",
               cursor: "pointer", transition: "all 0.15s",
             }}>{sessionLabel(s)}</button>
@@ -2360,7 +2366,7 @@ useEffect(() => {
               padding: "6px 14px", background: "transparent",
               border: "0.5px solid #1e1e1e", borderRadius: "6px",
               color: "#777", cursor: "pointer",
-              fontFamily: "'DM Mono', monospace", fontSize: "11px",
+              fontFamily: "'JetBrains Mono', monospace", fontSize: "11px",
               textTransform: "uppercase", letterSpacing: "0.08em",
               transition: "all 0.15s",
             }}
@@ -2377,7 +2383,7 @@ useEffect(() => {
                 {["Date", "Pair", "Outcome", "Dir", "Entry", "R:R", "Swap", "Commission", "P&L", "Session", ""].map((h, i) => (
                   <th key={i} style={{
                     padding: "10px 14px", textAlign: i === 10 ? "right" : "left",
-                    fontSize: "10px", fontFamily: "'DM Mono', monospace",
+                    fontSize: "10px", fontFamily: "'JetBrains Mono', monospace",
                     letterSpacing: "0.1em", textTransform: "uppercase",
                     color: "#999", fontWeight: 500, background: "#0d0d0d",
                   }}>{h}</th>
@@ -2402,7 +2408,7 @@ useEffect(() => {
 
         {!loading && filtered.length > 0 && (
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "12px" }}>
-            <p style={{ fontSize: "12px", color: "#555", fontFamily: "'DM Mono', monospace", margin: 0 }}>
+            <p style={{ fontSize: "12px", color: "#555", fontFamily: "'JetBrains Mono', monospace", margin: 0 }}>
               {((safePage - 1) * PAGE_SIZE) + 1}–{Math.min(safePage * PAGE_SIZE, filtered.length)} of {filtered.length} trade{filtered.length !== 1 ? "s" : ""}
             </p>
             <div style={{ display: "flex", gap: "6px" }}>
@@ -2412,7 +2418,7 @@ useEffect(() => {
                 style={{
                   padding: "6px 14px", borderRadius: "6px", border: "0.5px solid #1e1e1e",
                   background: "transparent", color: safePage === 1 ? "#333" : "#777",
-                  fontFamily: "'DM Mono', monospace", fontSize: "11px", cursor: safePage === 1 ? "default" : "pointer",
+                  fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", cursor: safePage === 1 ? "default" : "pointer",
                   textTransform: "uppercase", letterSpacing: "0.08em",
                 }}
               >← Prev</button>
@@ -2422,7 +2428,7 @@ useEffect(() => {
                 style={{
                   padding: "6px 14px", borderRadius: "6px", border: "0.5px solid #1e1e1e",
                   background: "transparent", color: safePage === totalPages ? "#333" : "#777",
-                  fontFamily: "'DM Mono', monospace", fontSize: "11px", cursor: safePage === totalPages ? "default" : "pointer",
+                  fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", cursor: safePage === totalPages ? "default" : "pointer",
                   textTransform: "uppercase", letterSpacing: "0.08em",
                 }}
               >Next →</button>
@@ -2588,11 +2594,11 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
   const mobileInput = {
     width: '100%', background: '#111', border: '0.5px solid #1e1e1e',
     borderRadius: '6px', padding: '8px 10px', color: '#ccc',
-    fontFamily: "'DM Mono', monospace", fontSize: '13px',
+    fontFamily: "'JetBrains Mono', monospace", fontSize: '13px',
     outline: 'none', boxSizing: 'border-box',
   };
 
-  const formLbl = { fontSize: '10px', color: '#777', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.4px', fontFamily: "'DM Mono', monospace", display: 'block' };
+  const formLbl = { fontSize: '10px', color: '#777', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.4px', fontFamily: "'JetBrains Mono', monospace", display: 'block' };
 
   return (
     <>
@@ -2613,7 +2619,7 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
           flexShrink: 0,
         }}>
           <span style={{
-            fontFamily: "'DM Sans', sans-serif", fontSize: '15px',
+            fontFamily: "'Inter', sans-serif", fontSize: '15px',
             fontWeight: '600', color: '#e0e0e0',
           }}>
             {editTrade ? 'Edit Trade' : 'Log Trade'}
@@ -2646,8 +2652,8 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
                         ? `0.5px solid ${d === 'long' ? '#1a3826' : '#2e1515'}`
                         : '0.5px solid #1e1e1e',
                       background: form.direction === d ? (d === 'long' ? '#0f2219' : '#1e0d0d') : '#111',
-                      color: form.direction === d ? (d === 'long' ? '#1db97b' : '#c03535') : '#777',
-                      fontFamily: "'DM Mono', monospace", fontSize: '11px', textTransform: 'uppercase',
+                      color: form.direction === d ? (d === 'long' ? '#1bba7c' : '#c03535') : '#777',
+                      fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', textTransform: 'uppercase',
                     }}>{d === 'long' ? 'LONG' : 'SHORT'}</button>
                   ))}
                 </div>
@@ -2664,9 +2670,9 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
                 {[['manual', 'R:R'], ['auto', 'Price']].map(([mode, label]) => (
                   <button key={mode} onClick={() => setRrMode(mode)} style={{
                     padding: '4px 10px', border: 'none', cursor: 'pointer', fontSize: '10px',
-                    fontFamily: "'DM Mono', monospace", textTransform: 'uppercase',
-                    background: rrMode === mode ? '#1db97b22' : '#111',
-                    color: rrMode === mode ? '#1db97b' : '#555',
+                    fontFamily: "'JetBrains Mono', monospace", textTransform: 'uppercase',
+                    background: rrMode === mode ? '#1bba7c22' : '#111',
+                    color: rrMode === mode ? '#1bba7c' : '#555',
                   }}>{label}</button>
                 ))}
               </div>
@@ -2683,14 +2689,14 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
                         flex: 1, padding: '9px 2px', borderRadius: '6px', cursor: 'pointer',
                         border: `0.5px solid ${active ? '#1a3826' : '#1e1e1e'}`,
                         background: active ? '#0f2219' : '#111',
-                        color: active ? '#1db97b' : '#666',
-                        fontFamily: "'DM Mono', monospace", fontSize: '11px',
+                        color: active ? '#1bba7c' : '#666',
+                        fontFamily: "'JetBrains Mono', monospace", fontSize: '11px',
                       }}>1:{n}</button>
                     );
                   })}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ color: '#555', fontFamily: "'DM Mono', monospace", fontSize: '12px', flexShrink: 0 }}>1:</span>
+                  <span style={{ color: '#555', fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', flexShrink: 0 }}>1:</span>
                   <input type="number" step="0.1" min="0.1" placeholder="Custom (e.g. 2.5)"
                     value={form.rr} onChange={e => setForm(prev => ({ ...prev, rr: e.target.value }))}
                     style={mobileInput} />
@@ -2713,8 +2719,8 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
                   background: '#111', border: `0.5px solid ${form.rr ? '#1a3826' : '#1e1e1e'}`,
                   borderRadius: '6px', height: '36px', display: 'flex', alignItems: 'center', padding: '0 10px',
                 }}>
-                  <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '12px', color: '#777', marginRight: '6px' }}>R:R</span>
-                  <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '13px', color: form.rr ? '#1db97b' : '#555' }}>
+                  <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', color: '#777', marginRight: '6px' }}>R:R</span>
+                  <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '13px', color: form.rr ? '#1bba7c' : '#555' }}>
                     {form.rr ? `1:${form.rr}` : '—'}
                   </span>
                 </div>
@@ -2738,7 +2744,7 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
             <span style={formLbl}>Outcome</span>
             <div style={{ display: 'flex', gap: '5px' }}>
               {[
-                { value: 'win', label: 'WIN', bg: '#0f2219', color: '#1db97b', border: '#1a3826' },
+                { value: 'win', label: 'WIN', bg: '#0f2219', color: '#1bba7c', border: '#1a3826' },
                 { value: 'loss', label: 'LOSS', bg: '#1e0d0d', color: '#c03535', border: '#2e1515' },
                 { value: 'be', label: 'BE', bg: '#1a1400', color: '#c97a00', border: '#2a2000' },
                 { value: 'in_progress', label: 'IN PROG', bg: '#0f1a2e', color: '#4d9fff', border: '#1a3050' },
@@ -2750,7 +2756,7 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
                     border: `0.5px solid ${active ? border : '#1e1e1e'}`,
                     background: active ? bg : '#111',
                     color: active ? color : '#777',
-                    fontFamily: "'DM Mono', monospace", fontSize: '9px', textTransform: 'uppercase',
+                    fontFamily: "'JetBrains Mono', monospace", fontSize: '9px', textTransform: 'uppercase',
                   }}>{label}</button>
                 );
               })}
@@ -2783,21 +2789,21 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: isSelected ? '10px' : 0 }}>
                     <div style={{
                       width: '14px', height: '14px', borderRadius: '3px', flexShrink: 0,
-                      border: `0.5px solid ${isSelected ? '#1db97b' : '#555'}`,
+                      border: `0.5px solid ${isSelected ? '#1bba7c' : '#555'}`,
                       background: isSelected ? '#0f2219' : '#1a1a1a',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>
-                      {isSelected && <span style={{ color: '#1db97b', fontSize: '9px', lineHeight: 1 }}>✓</span>}
+                      {isSelected && <span style={{ color: '#1bba7c', fontSize: '9px', lineHeight: 1 }}>✓</span>}
                     </div>
-                    <span style={{ flex: 1, fontSize: '12px', fontWeight: '500', color: isSelected ? '#ccc' : '#777', fontFamily: "'DM Sans', sans-serif" }}>{acc.name}</span>
+                    <span style={{ flex: 1, fontSize: '12px', fontWeight: '500', color: isSelected ? '#ccc' : '#777', fontFamily: "'Inter', sans-serif" }}>{acc.name}</span>
                     <span style={{
                       fontSize: '9px', padding: '1px 5px', borderRadius: '3px',
                       background: isChallenge ? '#0f1a2e' : '#1a1a1a',
                       color: isChallenge ? '#4d9fff' : '#777',
                       border: `0.5px solid ${isChallenge ? '#1a3050' : '#222'}`,
-                      fontFamily: "'DM Mono', monospace", textTransform: 'uppercase',
+                      fontFamily: "'JetBrains Mono', monospace", textTransform: 'uppercase',
                     }}>{isChallenge ? 'CHALLENGE' : 'PERSONAL'}</span>
-                    {acc.account_size && <span style={{ fontSize: '10px', color: '#777', fontFamily: "'DM Mono', monospace" }}>${(parseFloat(acc.account_size) / 1000).toFixed(0)}k</span>}
+                    {acc.account_size && <span style={{ fontSize: '10px', color: '#777', fontFamily: "'JetBrains Mono', monospace" }}>${(parseFloat(acc.account_size) / 1000).toFixed(0)}k</span>}
                   </div>
 
                   {/* Risk inputs — only when selected */}
@@ -2819,17 +2825,17 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
                               if (converted) setAccountRisks(prev => ({ ...prev, [acc.id]: converted }));
                             }} style={{
                               fontSize: '10px', padding: '3px 8px', cursor: 'pointer', border: 'none',
-                              background: mode === m ? '#1db97b22' : '#1a1a1a',
-                              color: mode === m ? '#1db97b' : '#777',
+                              background: mode === m ? '#1bba7c22' : '#1a1a1a',
+                              color: mode === m ? '#1bba7c' : '#777',
                             }}>{m}</button>
                           ))}
                         </div>
                         <input type="number" step="0.01" placeholder="1.0"
                           value={rawVal}
                           onChange={e => setAccountRisks(prev => ({ ...prev, [acc.id]: e.target.value }))}
-                          style={{ flex: 1, background: '#0f0f0f', border: '0.5px solid #1e1e1e', borderRadius: '4px', padding: '4px 8px', color: '#ccc', fontFamily: "'DM Mono', monospace", fontSize: '12px', outline: 'none' }}
+                          style={{ flex: 1, background: '#0f0f0f', border: '0.5px solid #1e1e1e', borderRadius: '4px', padding: '4px 8px', color: '#ccc', fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', outline: 'none' }}
                         />
-                        <span style={{ fontSize: '10px', color: '#777', fontFamily: "'DM Mono', monospace", whiteSpace: 'nowrap' }}>
+                        <span style={{ fontSize: '10px', color: '#777', fontFamily: "'JetBrains Mono', monospace", whiteSpace: 'nowrap' }}>
                           {mode === '%' && rawVal ? `${rawVal}%` : mode === '$' && rawVal ? `$${rawVal}` : ''}
                         </span>
                       </div>
@@ -2841,8 +2847,8 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
                           { label: 'Est. P&L', value: pnlNum !== null ? `${pnlNum >= 0 ? '+' : ''}$${Math.abs(pnlNum).toFixed(2)}` : '—', color: pnlNum !== null ? pnlColor(pnlNum) : '#999' },
                         ].map(s => (
                           <div key={s.label}>
-                            <div style={{ fontSize: '9px', color: '#999', fontFamily: "'DM Mono', monospace" }}>{s.label}</div>
-                            <div style={{ fontSize: '11px', fontWeight: '500', color: s.color || '#aaa', fontFamily: "'DM Mono', monospace" }}>{s.value}</div>
+                            <div style={{ fontSize: '9px', color: '#999', fontFamily: "'JetBrains Mono', monospace" }}>{s.label}</div>
+                            <div style={{ fontSize: '11px', fontWeight: '500', color: s.color || '#aaa', fontFamily: "'JetBrains Mono', monospace" }}>{s.value}</div>
                           </div>
                         ))}
                       </div>
@@ -2858,7 +2864,7 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
             <span style={formLbl}>Notes</span>
             <textarea value={form.notes} onChange={e => set('notes', e.target.value)}
               placeholder="Trade rationale, confluences…" rows={3}
-              style={{ ...mobileInput, resize: 'vertical', minHeight: '70px', fontFamily: "'DM Sans', sans-serif", lineHeight: '1.5' }} />
+              style={{ ...mobileInput, resize: 'vertical', minHeight: '70px', fontFamily: "'Inter', sans-serif", lineHeight: '1.5' }} />
           </div>
 
           {/* Screenshot */}
@@ -2869,10 +2875,10 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
               padding: '16px', textAlign: 'center', cursor: 'pointer',
             }}>
               {screenshotFile
-                ? <span style={{ color: '#1db97b', fontFamily: "'DM Mono', monospace", fontSize: '11px' }}>📎 {screenshotFile.name}</span>
+                ? <span style={{ color: '#1bba7c', fontFamily: "'JetBrains Mono', monospace", fontSize: '11px' }}>📎 {screenshotFile.name}</span>
                 : form.screenshot_url
-                  ? <span style={{ color: '#4d9fff', fontFamily: "'DM Mono', monospace", fontSize: '11px' }}>📎 Screenshot attached</span>
-                  : <span style={{ color: '#999', fontFamily: "'DM Sans', sans-serif", fontSize: '12px' }}>Tap to upload</span>
+                  ? <span style={{ color: '#4d9fff', fontFamily: "'JetBrains Mono', monospace", fontSize: '11px' }}>📎 Screenshot attached</span>
+                  : <span style={{ color: '#999', fontFamily: "'Inter', sans-serif", fontSize: '12px' }}>Tap to upload</span>
               }
             </div>
             <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => { if (e.target.files[0]) setScreenshotFile(e.target.files[0]); }} />
@@ -2886,13 +2892,16 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
           background: '#0d0d0d',
           borderTop: '0.5px solid #1a1a1a', flexShrink: 0,
         }}>
-          {formError && <div style={{ color: '#c03535', fontSize: '11px', marginBottom: '6px', fontFamily: "'DM Sans', sans-serif" }}>{formError}</div>}
+          {formError && <div style={{ color: '#c03535', fontSize: '11px', marginBottom: '6px', fontFamily: "'Inter', sans-serif" }}>{formError}</div>}
           <button onClick={handleSave} disabled={saving} style={{
-            width: '100%', height: '44px', background: saving ? '#555' : '#1db97b',
-            border: 'none', borderRadius: '8px', color: saving ? '#777' : '#0a0a0a',
-            fontFamily: "'DM Sans', sans-serif", fontSize: '14px', fontWeight: '600',
-            cursor: saving ? 'not-allowed' : 'pointer',
-          }}>
+            width: '100%', height: '44px', background: saving ? '#555' : 'oklch(0.72 0.17 152)',
+            border: 'none', borderRadius: '8px', color: saving ? '#777' : '#000',
+            fontFamily: "'Inter', sans-serif", fontSize: '14px', fontWeight: '600',
+            cursor: saving ? 'not-allowed' : 'pointer', transition: 'background 0.15s',
+          }}
+          onMouseEnter={e => { if (!saving) e.currentTarget.style.background = 'oklch(0.78 0.17 152)' }}
+          onMouseLeave={e => { if (!saving) e.currentTarget.style.background = 'oklch(0.72 0.17 152)' }}
+          >
             {saving ? 'Saving…' : 'Save Trade'}
           </button>
         </div>

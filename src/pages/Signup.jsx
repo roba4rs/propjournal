@@ -44,7 +44,7 @@ export default function Signup() {
     borderRadius: '8px',
     padding: '12px 14px',
     color: '#fff',
-    fontFamily: 'DM Sans, sans-serif',
+    fontFamily: 'Inter, sans-serif',
     fontSize: '14px',
     outline: 'none',
     boxSizing: 'border-box',
@@ -68,13 +68,13 @@ export default function Signup() {
       }}>
         <h1 style={{
           color: '#fff',
-          fontFamily: 'Syne, sans-serif',
+          fontFamily: 'Inter, sans-serif',
           fontSize: '24px',
           marginBottom: '8px',
         }}>Create account</h1>
         <p style={{
           color: '#999',
-          fontFamily: 'DM Sans, sans-serif',
+          fontFamily: 'Inter, sans-serif',
           fontSize: '14px',
           marginBottom: '32px',
         }}>Start your 7-day free trial</p>
@@ -89,7 +89,7 @@ export default function Signup() {
             borderRadius: '8px',
             padding: '12px',
             color: '#fff',
-            fontFamily: 'DM Sans, sans-serif',
+            fontFamily: 'Inter, sans-serif',
             fontSize: '14px',
             cursor: 'pointer',
             display: 'flex',
@@ -119,7 +119,7 @@ export default function Signup() {
           marginBottom: '24px',
         }}>
           <div style={{ flex: 1, height: '0.5px', background: '#1e1e1e' }} />
-          <span style={{ color: '#999', fontSize: '12px', fontFamily: 'DM Sans, sans-serif' }}>or</span>
+          <span style={{ color: '#999', fontSize: '12px', fontFamily: 'Inter, sans-serif' }}>or</span>
           <div style={{ flex: 1, height: '0.5px', background: '#1e1e1e' }} />
         </div>
 
@@ -128,7 +128,7 @@ export default function Signup() {
           <div style={{ marginBottom: '20px' }}>
             <label style={{
               display: 'block', color: '#aaa',
-              fontFamily: 'DM Sans, sans-serif', fontSize: '13px', marginBottom: '8px',
+              fontFamily: 'Inter, sans-serif', fontSize: '13px', marginBottom: '8px',
             }}>Full name</label>
             <input
               {...register('name', { required: 'Name is required' })}
@@ -146,7 +146,7 @@ export default function Signup() {
           <div style={{ marginBottom: '20px' }}>
             <label style={{
               display: 'block', color: '#aaa',
-              fontFamily: 'DM Sans, sans-serif', fontSize: '13px', marginBottom: '8px',
+              fontFamily: 'Inter, sans-serif', fontSize: '13px', marginBottom: '8px',
             }}>Email</label>
             <input
               {...register('email', {
@@ -167,7 +167,7 @@ export default function Signup() {
           <div style={{ marginBottom: '20px' }}>
             <label style={{
               display: 'block', color: '#aaa',
-              fontFamily: 'DM Sans, sans-serif', fontSize: '13px', marginBottom: '8px',
+              fontFamily: 'Inter, sans-serif', fontSize: '13px', marginBottom: '8px',
             }}>Password</label>
             <input
               {...register('password', {
@@ -188,7 +188,7 @@ export default function Signup() {
           <div style={{ marginBottom: '28px' }}>
             <label style={{
               display: 'block', color: '#aaa',
-              fontFamily: 'DM Sans, sans-serif', fontSize: '13px', marginBottom: '8px',
+              fontFamily: 'Inter, sans-serif', fontSize: '13px', marginBottom: '8px',
             }}>Confirm password</label>
             <input
               {...register('confirmPassword', {
@@ -210,7 +210,7 @@ export default function Signup() {
             <div style={{
               background: '#1e0d0d', border: '0.5px solid #2e1515',
               borderRadius: '8px', padding: '12px', marginBottom: '20px',
-              color: '#c03535', fontSize: '13px', fontFamily: 'DM Sans, sans-serif',
+              color: '#c03535', fontSize: '13px', fontFamily: 'Inter, sans-serif',
             }}>
               {authError}
             </div>
@@ -220,23 +220,25 @@ export default function Signup() {
             type="submit"
             disabled={loading}
             style={{
-              width: '100%', background: '#1db97b', border: 'none',
+              width: '100%', background: 'oklch(0.72 0.17 152)', border: 'none',
               borderRadius: '8px', padding: '13px', color: '#000',
-              fontFamily: 'DM Sans, sans-serif', fontWeight: '600',
+              fontFamily: 'Inter, sans-serif', fontWeight: '600',
               fontSize: '14px', cursor: loading ? 'not-allowed' : 'pointer',
-              opacity: loading ? 0.7 : 1,
+              opacity: loading ? 0.7 : 1, transition: 'background 0.15s',
             }}
+            onMouseEnter={e => { if (!loading) e.currentTarget.style.background = 'oklch(0.78 0.17 152)' }}
+            onMouseLeave={e => { if (!loading) e.currentTarget.style.background = 'oklch(0.72 0.17 152)' }}
           >
             {loading ? 'Creating account...' : 'Create account'}
           </button>
         </form>
 
         <p style={{
-          color: '#999', fontFamily: 'DM Sans, sans-serif',
+          color: '#999', fontFamily: 'Inter, sans-serif',
           fontSize: '13px', textAlign: 'center', marginTop: '24px',
         }}>
           Already have an account?{' '}
-          <Link to="/login" style={{ color: '#1db97b', textDecoration: 'none' }}>
+          <Link to="/login" style={{ color: 'oklch(0.72 0.17 152)', textDecoration: 'none' }}>
             Sign in
           </Link>
         </p>

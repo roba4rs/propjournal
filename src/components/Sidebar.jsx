@@ -176,12 +176,12 @@ export default function Sidebar() {
           {!collapsed && (
             <span style={{
               color: '#fff',
-              fontFamily: 'Syne, sans-serif',
+              fontFamily: 'Inter, sans-serif',
               fontWeight: '700',
               fontSize: '18px',
               letterSpacing: '-0.3px',
               whiteSpace: 'nowrap',
-            }}>Prop<span style={{ color: '#1db97b' }}>Journal</span></span>
+            }}>Prop<span style={{ color: '#1bba7c' }}>Journal</span></span>
           )}
           <button
             onClick={toggle}
@@ -225,8 +225,8 @@ export default function Sidebar() {
                 marginBottom: '4px',
                 textDecoration: 'none',
                 background: isActive ? '#0f2219' : 'transparent',
-                color: isActive ? '#1db97b' : '#999',
-                fontFamily: 'DM Sans, sans-serif',
+                color: isActive ? '#1bba7c' : '#999',
+                fontFamily: 'Inter, sans-serif',
                 fontSize: '14px',
                 fontWeight: isActive ? '500' : '400',
                 transition: 'all 0.15s ease',
@@ -252,8 +252,8 @@ export default function Sidebar() {
               borderRadius: '8px',
               marginTop: '4px',
               background: panelOpen ? '#0f2219' : 'transparent',
-              color: panelOpen ? '#1db97b' : '#999',
-              fontFamily: 'DM Sans, sans-serif',
+              color: panelOpen ? '#1bba7c' : '#999',
+              fontFamily: 'Inter, sans-serif',
               fontSize: '14px',
               fontWeight: '400',
               border: 'none',
@@ -279,7 +279,7 @@ export default function Sidebar() {
                   borderRadius: '50%',
                   fontSize: '9px',
                   fontWeight: '700',
-                  fontFamily: 'DM Mono, monospace',
+                  fontFamily: 'JetBrains Mono, monospace',
                   minWidth: '14px',
                   height: '14px',
                   display: 'flex',
@@ -315,7 +315,7 @@ export default function Sidebar() {
               <div style={{ minWidth: 0 }}>
                 <p style={{
                   color: '#fff',
-                  fontFamily: 'DM Sans, sans-serif',
+                  fontFamily: 'Inter, sans-serif',
                   fontSize: '13px',
                   fontWeight: '500',
                   margin: 0,
@@ -330,8 +330,8 @@ export default function Sidebar() {
                   background: '#0f2219',
                   border: '0.5px solid #1a3826',
                   borderRadius: '4px',
-                  color: '#1db97b',
-                  fontFamily: 'DM Mono, monospace',
+                  color: '#1bba7c',
+                  fontFamily: 'JetBrains Mono, monospace',
                   fontSize: '11px',
                 }}>{user.plan}</span>
               </div>
@@ -388,18 +388,18 @@ export default function Sidebar() {
           }}
             onClick={e => e.stopPropagation()}
           >
-            <p style={{ color: '#fff', fontFamily: 'DM Sans, sans-serif', fontSize: '15px', fontWeight: '600', margin: '0 0 8px' }}>Sign out?</p>
-            <p style={{ color: '#777', fontFamily: 'DM Sans, sans-serif', fontSize: '13px', margin: '0 0 20px' }}>You'll need to sign back in to access your trades.</p>
+            <p style={{ color: '#fff', fontFamily: 'Inter, sans-serif', fontSize: '15px', fontWeight: '600', margin: '0 0 8px' }}>Sign out?</p>
+            <p style={{ color: '#777', fontFamily: 'Inter, sans-serif', fontSize: '13px', margin: '0 0 20px' }}>You'll need to sign back in to access your trades.</p>
             <div style={{ display: 'flex', gap: '8px' }}>
               <button onClick={handleLogout} style={{
                 flex: 1, padding: '9px', background: '#c03535', border: 'none',
-                borderRadius: '8px', color: '#fff', fontFamily: 'DM Sans, sans-serif',
+                borderRadius: '8px', color: '#fff', fontFamily: 'Inter, sans-serif',
                 fontSize: '13px', fontWeight: '600', cursor: 'pointer',
               }}>Sign out</button>
               <button onClick={cancelLogout} style={{
                 flex: 1, padding: '9px', background: 'transparent',
                 border: '0.5px solid #2a2a2a', borderRadius: '8px',
-                color: '#aaa', fontFamily: 'DM Sans, sans-serif',
+                color: '#aaa', fontFamily: 'Inter, sans-serif',
                 fontSize: '13px', cursor: 'pointer',
               }}>Cancel</button>
             </div>
@@ -497,11 +497,11 @@ export default function Sidebar() {
         }}>
           <span style={{
             color: '#fff',
-            fontFamily: 'Syne, sans-serif',
+            fontFamily: 'Inter, sans-serif',
             fontWeight: '700',
             fontSize: '18px',
             letterSpacing: '-0.3px',
-          }}>Prop<span style={{ color: '#1db97b' }}>Journal</span></span>
+          }}>Prop<span style={{ color: '#1bba7c' }}>Journal</span></span>
         </div>
 
 
@@ -522,8 +522,8 @@ export default function Sidebar() {
                 marginBottom: '4px',
                 textDecoration: 'none',
                 background: isActive ? '#0f2219' : 'transparent',
-                color: isActive ? '#1db97b' : '#aaa',
-                fontFamily: 'DM Sans, sans-serif',
+                color: isActive ? '#1bba7c' : '#aaa',
+                fontFamily: 'Inter, sans-serif',
                 fontSize: '15px',
                 fontWeight: isActive ? '500' : '400',
               })}
@@ -567,14 +567,14 @@ export default function Sidebar() {
                 justifyContent: 'center',
                 flexShrink: 0,
               }}>
-                <span style={{ color: '#1db97b', fontFamily: 'Syne, sans-serif', fontWeight: '700', fontSize: '13px' }}>
+                <span style={{ color: '#1bba7c', fontFamily: 'Inter, sans-serif', fontWeight: '700', fontSize: '13px' }}>
                   {user.name ? user.name.charAt(0).toUpperCase() : '?'}
                 </span>
               </div>
               <div style={{ minWidth: 0, flex: 1 }}>
                 <p style={{
                   color: '#fff',
-                  fontFamily: 'DM Sans, sans-serif',
+                  fontFamily: 'Inter, sans-serif',
                   fontSize: '13px',
                   fontWeight: '500',
                   margin: '0 0 3px 0',
@@ -588,8 +588,8 @@ export default function Sidebar() {
                   background: '#0f2219',
                   border: '0.5px solid #1a3826',
                   borderRadius: '4px',
-                  color: '#1db97b',
-                  fontFamily: 'DM Mono, monospace',
+                  color: '#1bba7c',
+                  fontFamily: 'JetBrains Mono, monospace',
                   fontSize: '10px',
                 }}>{user.plan}</span>
               </div>
@@ -640,7 +640,7 @@ export default function Sidebar() {
                   width: '40px',
                   height: '40px',
                   borderRadius: '50%',
-                  background: '#1db97b',
+                  background: '#1bba7c',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -667,7 +667,7 @@ export default function Sidebar() {
                 flex: 1,
                 height: '100%',
                 textDecoration: 'none',
-                color: isActive ? '#1db97b' : '#777',
+                color: isActive ? '#1bba7c' : '#777',
                 transition: 'color 0.15s ease',
                 position: 'relative',
               }}
@@ -684,7 +684,7 @@ export default function Sidebar() {
                     borderRadius: '50%',
                     fontSize: '9px',
                     fontWeight: '700',
-                    fontFamily: 'DM Mono, monospace',
+                    fontFamily: 'JetBrains Mono, monospace',
                     minWidth: '14px',
                     height: '14px',
                     display: 'flex',
@@ -698,7 +698,7 @@ export default function Sidebar() {
                 )}
               </div>
               <span style={{
-                fontFamily: 'DM Sans, sans-serif',
+                fontFamily: 'Inter, sans-serif',
                 fontSize: '10px',
                 fontWeight: isActive ? '500' : '400',
                 letterSpacing: '0.2px',
@@ -711,7 +711,7 @@ export default function Sidebar() {
                   transform: 'translateX(-50%)',
                   width: '28px',
                   height: '2px',
-                  background: '#1db97b',
+                  background: '#1bba7c',
                   borderRadius: '0 0 2px 2px',
                 }} />
               )}
@@ -741,7 +741,7 @@ export default function Sidebar() {
           }}>
             <p style={{
               color: '#fff',
-              fontFamily: 'DM Sans, sans-serif',
+              fontFamily: 'Inter, sans-serif',
               fontSize: '14px',
               fontWeight: '500',
               margin: '0 0 4px 0',
@@ -749,7 +749,7 @@ export default function Sidebar() {
             }}>Sign out?</p>
             <p style={{
               color: '#777',
-              fontFamily: 'DM Sans, sans-serif',
+              fontFamily: 'Inter, sans-serif',
               fontSize: '12px',
               margin: '0 0 16px 0',
               textAlign: 'center',
@@ -764,7 +764,7 @@ export default function Sidebar() {
                   borderRadius: '8px',
                   padding: '9px',
                   color: '#aaa',
-                  fontFamily: 'DM Sans, sans-serif',
+                  fontFamily: 'Inter, sans-serif',
                   fontSize: '13px',
                   cursor: 'pointer',
                 }}
@@ -778,7 +778,7 @@ export default function Sidebar() {
                   borderRadius: '8px',
                   padding: '9px',
                   color: '#c03535',
-                  fontFamily: 'DM Sans, sans-serif',
+                  fontFamily: 'Inter, sans-serif',
                   fontSize: '13px',
                   fontWeight: '500',
                   cursor: 'pointer',

@@ -63,7 +63,7 @@ export default function Login() {
     borderRadius: '8px',
     padding: '12px 14px',
     color: '#fff',
-    fontFamily: 'DM Sans, sans-serif',
+    fontFamily: 'Inter, sans-serif',
     fontSize: '16px', // 16px prevents iOS zoom on focus
     outline: 'none',
     boxSizing: 'border-box',
@@ -88,13 +88,13 @@ export default function Login() {
       }}>
         <h1 style={{
           color: '#fff',
-          fontFamily: 'Syne, sans-serif',
+          fontFamily: 'Inter, sans-serif',
           fontSize: 'clamp(20px, 5vw, 24px)',
           marginBottom: '8px',
         }}>Welcome back</h1>
         <p style={{
           color: '#999',
-          fontFamily: 'DM Sans, sans-serif',
+          fontFamily: 'Inter, sans-serif',
           fontSize: '14px',
           marginBottom: '32px',
         }}>Sign in to your PropJournal account</p>
@@ -108,7 +108,7 @@ export default function Login() {
             borderRadius: '8px',
             padding: '12px',
             color: '#fff',
-            fontFamily: 'DM Sans, sans-serif',
+            fontFamily: 'Inter, sans-serif',
             fontSize: '14px',
             cursor: 'pointer',
             display: 'flex',
@@ -138,7 +138,7 @@ export default function Login() {
           marginBottom: '24px',
         }}>
           <div style={{ flex: 1, height: '0.5px', background: '#1e1e1e' }} />
-          <span style={{ color: '#999', fontSize: '12px', fontFamily: 'DM Sans, sans-serif' }}>or</span>
+          <span style={{ color: '#999', fontSize: '12px', fontFamily: 'Inter, sans-serif' }}>or</span>
           <div style={{ flex: 1, height: '0.5px', background: '#1e1e1e' }} />
         </div>
 
@@ -148,7 +148,7 @@ export default function Login() {
               <div style={{ marginBottom: '20px' }}>
                 <label style={{
                   display: 'block', color: '#aaa',
-                  fontFamily: 'DM Sans, sans-serif', fontSize: '13px', marginBottom: '8px',
+                  fontFamily: 'Inter, sans-serif', fontSize: '13px', marginBottom: '8px',
                 }}>Email</label>
                 <input
                   {...register('email', {
@@ -170,7 +170,7 @@ export default function Login() {
               <div style={{ marginBottom: '10px' }}>
                 <label style={{
                   display: 'block', color: '#aaa',
-                  fontFamily: 'DM Sans, sans-serif', fontSize: '13px', marginBottom: '8px',
+                  fontFamily: 'Inter, sans-serif', fontSize: '13px', marginBottom: '8px',
                 }}>Password</label>
                 <div style={{ position: 'relative' }}>
                   <input
@@ -217,7 +217,7 @@ export default function Login() {
                   onClick={() => { setShowReset(true); setAuthError(null) }}
                   style={{
                     background: 'none', border: 'none', color: '#777',
-                    fontFamily: 'DM Sans, sans-serif', fontSize: '12px',
+                    fontFamily: 'Inter, sans-serif', fontSize: '12px',
                     cursor: 'pointer', padding: '8px 0', // larger touch target
                   }}
                 >
@@ -229,7 +229,7 @@ export default function Login() {
                 <div style={{
                   background: '#1e0d0d', border: '0.5px solid #2e1515',
                   borderRadius: '8px', padding: '12px', marginBottom: '20px',
-                  color: '#c03535', fontSize: '13px', fontFamily: 'DM Sans, sans-serif',
+                  color: '#c03535', fontSize: '13px', fontFamily: 'Inter, sans-serif',
                 }}>
                   {authError}
                 </div>
@@ -239,24 +239,27 @@ export default function Login() {
                 type="submit"
                 disabled={loading}
                 style={{
-                  width: '100%', background: '#1db97b', border: 'none',
+                  width: '100%', background: 'oklch(0.72 0.17 152)', border: 'none',
                   borderRadius: '8px', padding: '13px', color: '#000',
-                  fontFamily: 'DM Sans, sans-serif', fontWeight: '600',
+                  fontFamily: 'Inter, sans-serif', fontWeight: '600',
                   fontSize: '15px', cursor: loading ? 'not-allowed' : 'pointer',
                   opacity: loading ? 0.7 : 1,
-                  minHeight: '44px', // minimum touch target
+                  minHeight: '44px',
+                  transition: 'background 0.15s',
                 }}
+                onMouseEnter={e => { if (!loading) e.currentTarget.style.background = 'oklch(0.78 0.17 152)' }}
+                onMouseLeave={e => { if (!loading) e.currentTarget.style.background = 'oklch(0.72 0.17 152)' }}
               >
                 {loading ? 'Signing in...' : 'Sign in'}
               </button>
             </form>
 
             <p style={{
-              color: '#999', fontFamily: 'DM Sans, sans-serif',
+              color: '#999', fontFamily: 'Inter, sans-serif',
               fontSize: '13px', textAlign: 'center', marginTop: '24px',
             }}>
               Don't have an account?{' '}
-              <Link to="/signup" style={{ color: '#1db97b', textDecoration: 'none' }}>
+              <Link to="/signup" style={{ color: 'oklch(0.72 0.17 152)', textDecoration: 'none' }}>
                 Sign up
               </Link>
             </p>
@@ -264,7 +267,7 @@ export default function Login() {
         ) : (
           <div>
             <p style={{
-              color: '#aaa', fontFamily: 'DM Sans, sans-serif',
+              color: '#aaa', fontFamily: 'Inter, sans-serif',
               fontSize: '13px', marginBottom: '20px',
             }}>
               Enter your email and we'll send you a reset link.
@@ -282,7 +285,7 @@ export default function Login() {
               <div style={{
                 background: '#0f2219', border: '0.5px solid #1a3826',
                 borderRadius: '8px', padding: '12px', marginBottom: '16px',
-                color: '#1db97b', fontSize: '13px', fontFamily: 'DM Sans, sans-serif',
+                color: 'oklch(0.72 0.17 152)', fontSize: '13px', fontFamily: 'Inter, sans-serif',
               }}>
                 Reset link sent — check your email.
               </div>
@@ -292,7 +295,7 @@ export default function Login() {
               <div style={{
                 background: '#1e0d0d', border: '0.5px solid #2e1515',
                 borderRadius: '8px', padding: '12px', marginBottom: '16px',
-                color: '#c03535', fontSize: '13px', fontFamily: 'DM Sans, sans-serif',
+                color: '#c03535', fontSize: '13px', fontFamily: 'Inter, sans-serif',
               }}>
                 {authError}
               </div>
@@ -302,13 +305,15 @@ export default function Login() {
               onClick={handleForgotPassword}
               disabled={resetLoading || resetSent}
               style={{
-                width: '100%', background: '#1db97b', border: 'none',
+                width: '100%', background: 'oklch(0.72 0.17 152)', border: 'none',
                 borderRadius: '8px', padding: '13px', color: '#000',
-                fontFamily: 'DM Sans, sans-serif', fontWeight: '600',
+                fontFamily: 'Inter, sans-serif', fontWeight: '600',
                 fontSize: '15px', cursor: resetLoading ? 'not-allowed' : 'pointer',
                 opacity: resetLoading || resetSent ? 0.7 : 1, marginBottom: '12px',
-                minHeight: '44px',
+                minHeight: '44px', transition: 'background 0.15s',
               }}
+              onMouseEnter={e => { if (!resetLoading && !resetSent) e.currentTarget.style.background = 'oklch(0.78 0.17 152)' }}
+              onMouseLeave={e => { if (!resetLoading && !resetSent) e.currentTarget.style.background = 'oklch(0.72 0.17 152)' }}
             >
               {resetLoading ? 'Sending...' : 'Send reset link'}
             </button>
@@ -319,7 +324,7 @@ export default function Login() {
                 width: '100%', background: 'transparent',
                 border: '0.5px solid #2a2a2a', borderRadius: '8px',
                 padding: '12px', color: '#999',
-                fontFamily: 'DM Sans, sans-serif', fontSize: '13px', cursor: 'pointer',
+                fontFamily: 'Inter, sans-serif', fontSize: '13px', cursor: 'pointer',
                 minHeight: '44px',
               }}
             >
