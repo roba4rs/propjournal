@@ -1662,6 +1662,7 @@ useEffect(() => {
           .from("accounts")
           .select("*")
           .eq("user_id", user.id)
+          .eq("is_archived", false)
           .order("created_at", { ascending: true });
         if (error) throw error;
         if (data && data.length > 0) {
@@ -2294,8 +2295,8 @@ useEffect(() => {
                 cursor: "pointer", whiteSpace: "nowrap",
               }}>↑ Import CSV</button>
               <button onClick={openNew} style={{
-                padding: "10px 18px", background: "#fff", border: "none",
-                borderRadius: "8px", color: "#000",
+                padding: "10px 18px", background: "#1db97b", border: "none",
+                borderRadius: "8px", color: "#0a0a0a",
                 fontFamily: "'Syne', sans-serif", fontSize: "13px", fontWeight: 600,
                 cursor: "pointer", whiteSpace: "nowrap",
               }}>+ Log Trade</button>
@@ -2318,25 +2319,25 @@ useEffect(() => {
           {["all", "long", "short"].map(d => (
             <button key={d} onClick={() => { setFilterDir(d); setCurrentPage(1); }} style={{
               padding: "6px 14px", borderRadius: "6px", border: "0.5px solid",
-              borderColor: filterDir === d ? "#555" : "#1a1a1a",
-              background: filterDir === d ? "#181818" : "transparent",
-              color: filterDir === d ? "#e0e0e0" : "#777",
+              borderColor: filterDir === d ? "#1a3826" : "#1a1a1a",
+              background: filterDir === d ? "#0f2219" : "transparent",
+              color: filterDir === d ? "#1db97b" : "#777",
               fontFamily: "'DM Mono', monospace", fontSize: "11px",
               textTransform: "uppercase", letterSpacing: "0.08em",
               cursor: "pointer", transition: "all 0.15s",
             }}>{d}</button>
           ))}
           <div style={{ width: "1px", background: "#1a1a1a", margin: "0 4px", alignSelf: "stretch" }} />
-          {["all", ...SESSIONS].map(s => (
-            <button key={s} onClick={() => { setFilterSession(s); setCurrentPage(1); }} style={{
+          {SESSIONS.map(s => (
+            <button key={s} onClick={() => { setFilterSession(filterSession === s ? "all" : s); setCurrentPage(1); }} style={{
               padding: "6px 14px", borderRadius: "6px", border: "0.5px solid",
-              borderColor: filterSession === s ? "#555" : "#1a1a1a",
-              background: filterSession === s ? "#181818" : "transparent",
-              color: filterSession === s ? "#e0e0e0" : "#777",
+              borderColor: filterSession === s ? "#1a3826" : "#1a1a1a",
+              background: filterSession === s ? "#0f2219" : "transparent",
+              color: filterSession === s ? "#1db97b" : "#777",
               fontFamily: "'DM Mono', monospace", fontSize: "11px",
               textTransform: "uppercase", letterSpacing: "0.08em",
               cursor: "pointer", transition: "all 0.15s",
-            }}>{s === "all" ? "All Sessions" : sessionLabel(s)}</button>
+            }}>{sessionLabel(s)}</button>
           ))}
           <div style={{ marginLeft: "auto" }}>
             <button onClick={() => {

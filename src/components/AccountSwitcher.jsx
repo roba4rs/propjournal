@@ -33,6 +33,7 @@ export default function AccountSwitcher({
           .from('accounts')
           .select('*')
           .eq('user_id', session.user.id)
+          .eq('is_archived', false)
           .order('created_at', { ascending: true })
 
         if (cancelled) return

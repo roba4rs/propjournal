@@ -5,7 +5,7 @@ import Sidebar from '../components/Sidebar'
 import NewChallengeModal from '../components/NewChallengeModal'
 import { useSidebar } from '../SidebarContext'
 
-const FILTERS = ['All', 'In Progress', 'Funded', 'Passed', 'Failed']
+const FILTERS = ['All', 'In Progress', 'Funded', 'Passed', 'Failed', 'Archived']
 const FIRMS = ['FTMO', 'MyForexFunds', 'The5ers', 'Funded Next', 'True Forex Funds', 'E8 Funding', 'Other']
 const PHASES = ['Phase 1', 'Phase 2', 'Funded']
 
@@ -15,6 +15,7 @@ function EditChallengeModal({ challenge, onClose, onSaved, onDeleted }) {
   const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [archiving, setArchiving] = useState(false)
 
   const initAccountSize = parseFloat(challenge.account_size) || 0
   const isKnownFirm = FIRMS.includes(challenge.firm_name)
@@ -146,6 +147,24 @@ function EditChallengeModal({ challenge, onClose, onSaved, onDeleted }) {
       setError(err.message)
     } finally {
       setDeleting(false)
+    }
+  }
+
+  const handleArchive = async () => {
+    setArchiving(true)
+    setError(null)
+    try {
+      const { error: err } = await supabase
+        .from('accounts')
+        .update({ is_archived: !challenge.is_archived })
+        .eq('id', challenge.id)
+      if (err) throw err
+      onSaved()
+      onClose()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setArchiving(false)
     }
   }
 
@@ -334,6 +353,35 @@ function EditChallengeModal({ challenge, onClose, onSaved, onDeleted }) {
           </div>
         )}
 
+        {/* Archive */}
+        <div style={{ border: '0.5px solid #1e1e1e', borderRadius: '8px', padding: '16px', marginBottom: '12px' }}>
+          <p style={{ color: '#777', fontFamily: 'DM Mono, monospace', fontSize: '10px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 6px 0' }}>
+            {challenge.is_archived ? 'Archived' : 'Archive Challenge'}
+          </p>
+          <p style={{ color: '#777', fontFamily: 'DM Sans, sans-serif', fontSize: '12px', margin: '0 0 12px 0' }}>
+            {challenge.is_archived
+              ? 'This challenge is archived and hidden from the tracker and account switcher.'
+              : 'Hide this challenge from the tracker and account switcher without deleting it.'}
+          </p>
+          <button
+            onClick={handleArchive}
+            disabled={archiving}
+            style={{
+              background: 'transparent',
+              border: `0.5px solid ${challenge.is_archived ? '#1a3826' : '#2a2a2a'}`,
+              borderRadius: '6px',
+              padding: '8px 16px',
+              color: challenge.is_archived ? '#1db97b' : '#999',
+              fontFamily: 'DM Sans, sans-serif',
+              fontSize: '12px',
+              cursor: archiving ? 'not-allowed' : 'pointer',
+              opacity: archiving ? 0.7 : 1,
+            }}
+          >
+            {archiving ? 'Saving...' : challenge.is_archived ? 'Unarchive Challenge' : 'Archive Challenge'}
+          </button>
+        </div>
+
         {/* Danger Zone */}
         <div style={{ background: '#0e0a0a', border: '0.5px solid #2e1515', borderRadius: '8px', padding: '16px' }}>
           <p style={{ color: '#c03535', fontFamily: 'DM Mono, monospace', fontSize: '10px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 6px 0' }}>Danger Zone</p>
@@ -515,6 +563,8 @@ export default function ChallengeTracker() {
         .eq('user_id', session.user.id)
         .eq('type', 'challenge')
         .order('created_at', { ascending: false })
+        // archived challenges are fetched too so the "Archived" filter works;
+        // they are excluded from the default view via the `filtered` logic below
       if (accErr) throw accErr
 
       setChallenges(accounts || [])
@@ -559,13 +609,15 @@ export default function ChallengeTracker() {
     return bLatest - aLatest
   })
 
-  const filtered = filter === 'All'
-    ? sortedChallenges
-    : sortedChallenges.filter(c => {
-        const status = computeStatus(tradesByAccount[c.id] || [], c)
-        if (filter === 'In Progress') return status === 'active'
-        return status === filter.toLowerCase()
-      })
+  const filtered = filter === 'Archived'
+    ? sortedChallenges.filter(c => c.is_archived)
+    : filter === 'All'
+      ? sortedChallenges.filter(c => !c.is_archived)
+      : sortedChallenges.filter(c => {
+          const status = computeStatus(tradesByAccount[c.id] || [], c)
+          if (filter === 'In Progress') return status === 'active'
+          return status === filter.toLowerCase()
+        })
 
   // ── MOBILE LAYOUT ────────────────────────────────────────────────────────────
   if (isMobile) {

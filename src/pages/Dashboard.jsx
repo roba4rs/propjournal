@@ -361,6 +361,17 @@ export default function Dashboard() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
   const [detailTrade, setDetailTrade] = useState(null)
   const [dayModal, setDayModal] = useState(null)
+  const [userName, setUserName] = useState('')
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      const meta = data?.user?.user_metadata
+      const full = meta?.full_name || meta?.name || data?.user?.email?.split('@')[0] || ''
+      setUserName(full.split(' ')[0])
+    })
+  }, [])
+
+  const todayLabel = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768)
@@ -431,6 +442,14 @@ export default function Dashboard() {
         </div>
 
         <main style={{ paddingTop: '52px', paddingBottom: '60px', flex: 1, overflowY: 'auto' }}>
+          <div style={{ padding: '12px 16px 0' }}>
+            <span style={{ color: '#fff', fontFamily: 'Syne, sans-serif', fontSize: '14px', fontWeight: '600' }}>
+              Hi{userName ? `, ${userName}` : ''}
+            </span>
+            <span style={{ color: '#999', fontFamily: 'DM Mono, monospace', fontSize: '11px', marginLeft: '8px' }}>
+              {todayLabel}
+            </span>
+          </div>
           {paymentToast && (
             <div style={{
               margin: '12px 14px 0',
@@ -502,15 +521,25 @@ export default function Dashboard() {
     <div style={{ display: 'flex', background: '#0a0a0a', minHeight: '100vh' }}>
       <Sidebar />
       <main style={{ marginLeft: collapsed ? '60px' : '220px', transition: 'margin-left 0.2s ease', flex: 1, padding: '32px', isolation: 'isolate' }}>
-        <div style={{ marginBottom: '24px' }}>
-          <h1 style={{ color: '#fff', fontFamily: 'Syne, sans-serif', fontSize: '22px', fontWeight: '600', margin: '0 0 16px 0' }}>Dashboard</h1>
-          <AccountSwitcher
-            onSwitch={(acc) => {
-              setActiveAccount(acc)
-              if (acc?.id) localStorage.setItem('activeAccountId', acc.id)
-            }}
-            defaultAccountId={defaultAccountId}
-          />
+        <div style={{ marginBottom: '12px' }}>
+          <div style={{ marginBottom: '4px' }}>
+            <span style={{ color: '#fff', fontFamily: 'Syne, sans-serif', fontSize: '15px', fontWeight: '600' }}>
+              Hi{userName ? `, ${userName}` : ''}
+            </span>
+            <span style={{ color: '#999', fontFamily: 'DM Mono, monospace', fontSize: '12px', marginLeft: '10px' }}>
+              {todayLabel}
+            </span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <h1 style={{ color: '#fff', fontFamily: 'Syne, sans-serif', fontSize: '22px', fontWeight: '600', margin: 0 }}>Dashboard</h1>
+            <AccountSwitcher
+              onSwitch={(acc) => {
+                setActiveAccount(acc)
+                if (acc?.id) localStorage.setItem('activeAccountId', acc.id)
+              }}
+              defaultAccountId={defaultAccountId}
+            />
+          </div>
         </div>
         {paymentToast && (
           <div style={{

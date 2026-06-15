@@ -834,6 +834,80 @@ export default function Settings() {
                     </div>
                   </div>
                 ))}
+
+                {showAddAccount && (
+                  <div style={{ paddingTop: '14px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <div>
+                        <label style={{ display: 'block', color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>
+                          Account name
+                        </label>
+                        <input
+                          style={inputBase}
+                          type="text"
+                          placeholder="e.g. Swing account"
+                          value={newAccountName}
+                          onChange={e => setNewAccountName(e.target.value)}
+                          autoFocus
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>
+                          Starting balance ($)
+                        </label>
+                        <input
+                          style={inputBase}
+                          type="number"
+                          min="0"
+                          placeholder="0.00"
+                          value={newAccountSize}
+                          onChange={e => setNewAccountSize(e.target.value)}
+                        />
+                      </div>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button
+                          onClick={handleAddAccount}
+                          disabled={addingAccount}
+                          style={{
+                            background: '#1db97b', color: '#000', border: 'none',
+                            borderRadius: '8px', padding: '10px 16px',
+                            fontFamily: 'DM Sans, sans-serif', fontSize: '12px',
+                            fontWeight: '600', cursor: addingAccount ? 'not-allowed' : 'pointer',
+                            opacity: addingAccount ? 0.6 : 1, flex: 1,
+                          }}
+                        >
+                          {addingAccount ? 'Creating...' : 'Create'}
+                        </button>
+                        <button
+                          onClick={() => setShowAddAccount(false)}
+                          style={{
+                            background: 'transparent', color: '#777',
+                            border: '0.5px solid #2a2a2a', borderRadius: '8px',
+                            padding: '10px 14px', fontFamily: 'DM Sans, sans-serif',
+                            fontSize: '12px', cursor: 'pointer', flex: 1,
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {!showAddAccount && (
+                  <button
+                    onClick={() => setShowAddAccount(true)}
+                    style={{
+                      marginTop: personalAccounts.length > 0 ? '14px' : '0',
+                      background: 'transparent', color: '#1db97b',
+                      border: '0.5px solid #1a3826', borderRadius: '8px',
+                      padding: '9px 14px', fontFamily: 'DM Sans, sans-serif',
+                      fontSize: '12px', cursor: 'pointer', width: '100%',
+                    }}
+                  >
+                    + Add Account
+                  </button>
+                )}
               </Card>
             )}
 
