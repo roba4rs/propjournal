@@ -1068,7 +1068,7 @@ function TradeRow({ trade, onViewDetail, onEdit, onDelete }) {
 
 // Normalize a header string: lowercase, remove spaces/underscores/dashes/dots
 function normalizeKey(str) {
-  return str.toLowerCase().replace(/[\s_\-\.\/\\]/g, "");
+  return str.toLowerCase().replace(/[\s_\-.\/\\]/g, "");
 }
 
 // Aliases for each target field (all pre-normalized)
@@ -1092,7 +1092,7 @@ function looksLikeDatetime(val) {
   const s = String(val).trim();
   if (!s) return false;
   return (
-    /^\d{4}[-.\/]\d{2}[-.\/]\d{2}([ T]\d{1,2}:\d{2}(:\d{2})?)?$/.test(s) ||
+    /^\d{4}[-./]\d{2}[-./]\d{2}([ T]\d{1,2}:\d{2}(:\d{2})?)?$/.test(s) ||
     /^\d{2}\/\d{2}\/\d{4}([ T]\d{1,2}:\d{2}(:\d{2})?)?$/.test(s)
   );
 }
