@@ -18,7 +18,7 @@ const plans = [
     label: 'Monthly',
     price: 12,
     perMonth: 12,
-    billed: 'Paid in USDT · cancel anytime',
+    billed: 'Billed monthly · cancel anytime',
     save: null,
     highlight: false,
   },
@@ -27,7 +27,7 @@ const plans = [
     label: '6 Months',
     price: 10,
     perMonth: 10,
-    billed: '$60 billed every 6 months · USDT',
+    billed: '$60 billed every 6 months',
     save: 'Save 17%',
     highlight: true,
   },
@@ -36,7 +36,7 @@ const plans = [
     label: 'Annual',
     price: 8,
     perMonth: 8,
-    billed: '$96 billed every year · USDT',
+    billed: '$96 billed every year',
     save: 'Save 33%',
     highlight: false,
   },
@@ -367,7 +367,7 @@ export default function Pricing() {
         )}
 
         <p style={{ marginTop: '20px', fontSize: '12px', color: '#555', textAlign: 'center' }}>
-          Payments processed securely via NOWPayments · Multiple currencies accepted
+          Payments processed securely · Cancel anytime
         </p>
       </main>
     </div>
