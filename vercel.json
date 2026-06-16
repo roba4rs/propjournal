@@ -5,6 +5,7 @@
     { "src": "/manifest.json", "dest": "/manifest.json" },
     { "src": "/service-worker.js", "dest": "/service-worker.js" },
     { "src": "/favicon.ico", "dest": "/favicon.ico" },
+    { "src": "/google8fa213d5557a6cb3.html", "dest": "/google8fa213d5557a6cb3.html" },
     { "src": "/logo192.png", "dest": "/logo192.png" },
     { "src": "/logo512.png", "dest": "/logo512.png" },
     { "src": "/", "dest": "/landing.html" },
