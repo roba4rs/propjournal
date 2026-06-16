@@ -11,6 +11,9 @@ import Pricing from './pages/Pricing'
 import AuthCallback from './pages/AuthCallback'
 import ProtectedRoute from './components/ProtectedRoute'
 import Notifications from './pages/Notifications'
+import Terms from './pages/Terms'
+import PrivacyPolicy from './pages/PrivacyPolicy'
+import RefundPolicy from './pages/RefundPolicy'
 import { supabase } from './supabaseClient'
 import { SidebarProvider } from './SidebarContext'
 
@@ -49,6 +52,9 @@ function App() {
           <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/refund-policy" element={<RefundPolicy />} />
         </Routes>
       </BrowserRouter>
     </SidebarProvider>
