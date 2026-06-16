@@ -402,6 +402,18 @@ export default function Settings() {
 
   useEffect(() => { loadSettings() }, [loadSettings])
 
+  // Auto-open add account form if redirected from AccountSwitcher
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('section') === 'personal-accounts') {
+      setShowAddAccount(true)
+      setNewAccountName('')
+      setNewAccountSize('')
+      // Clean up the URL
+      window.history.replaceState({}, '', '/settings')
+    }
+  }, [])
+
   useEffect(() => {
     function onResize() {
       setIsMobile(window.innerWidth <= 768)

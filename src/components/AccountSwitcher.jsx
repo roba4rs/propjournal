@@ -206,6 +206,22 @@ export default function AccountSwitcher({
                 <div style={{ height: '0.5px', background: '#1a1a1a', margin: '4px 0' }} />
               )}
 
+              {/* + New Account */}
+              <button
+                onClick={() => { setOpen(false); window.location.href = '/settings?section=personal-accounts' }}
+                style={{
+                  display: 'block', width: '100%', background: 'transparent', border: 'none',
+                  padding: '9px 12px', color: '#777', fontFamily: 'DM Sans, sans-serif',
+                  fontSize: '12px', cursor: 'pointer', textAlign: 'left', boxSizing: 'border-box',
+                }}
+              >
+                + New Account
+              </button>
+
+              {personal.length > 0 && challenges.length > 0 && (
+                <div style={{ height: '0.5px', background: '#1a1a1a', margin: '4px 0' }} />
+              )}
+
               {challenges.length > 0 && (
                 <>
                   <span style={groupLabelStyle}>Challenges</span>
