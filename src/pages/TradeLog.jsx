@@ -3,6 +3,7 @@ import Sidebar from "../components/Sidebar";
 import { supabase } from "../supabaseClient";
 import { useSidebar } from "../SidebarContext";
 import { useLocation } from 'react-router-dom';
+import { ChevronDown, ArrowUp, ArrowDown, Plus, Pencil, X } from "lucide-react";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const PAIRS = [
@@ -107,19 +108,22 @@ function PairCombobox({ value, onChange, inputStyle: customInputStyle }) {
     </div>
   );
 }
-const EMPTY_FORM = {
-  pair: "EURUSD",
-  direction: "long",
-  entry: "",
-  stop_loss: "",
-  take_profit: "",
-  rr: "",
-  session: "london",
-  date: new Date().toISOString().split("T")[0],
-  notes: "",
-  screenshot_url: null,
-  outcome: null,
-};
+function makeEmptyForm() {
+  return {
+    pair: localStorage.getItem("lastTradePair") || "EURUSD",
+    direction: "long",
+    entry: "",
+    stop_loss: "",
+    take_profit: "",
+    rr: "",
+    session: "london",
+    date: new Date().toISOString().split("T")[0],
+    notes: "",
+    screenshot_url: null,
+    outcome: null,
+  };
+}
+const EMPTY_FORM = makeEmptyForm();
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function calcRR(entry, sl, tp) {
@@ -149,7 +153,7 @@ function calcPnl(riskPct, accountSize, rr, outcome) {
 function resolveRiskPct(accId, accountRisks, accountRiskModes, accounts) {
   const val = parseFloat(accountRisks[accId]);
   if (isNaN(val) || val <= 0) return null;
-  const mode = accountRiskModes[accId] || "%";
+  const mode = accountRiskModes[accId] || "$";
   if (mode === "%") return val;
   const acc = accounts.find(a => a.id === accId);
   if (!acc?.account_size) return null;
@@ -234,13 +238,6 @@ const inputStyle = {
 
 const selectStyle = { ...inputStyle, appearance: "none", cursor: "pointer" };
 
-const iconBtn = {
-  background: "none", border: "0.5px solid #1e1e1e",
-  borderRadius: "6px", padding: "4px 8px",
-  color: "#777", cursor: "pointer", fontSize: "12px",
-  fontFamily: "'JetBrains Mono', monospace",
-};
-
 const td = {
   padding: "12px 14px", fontSize: "13px",
   color: "#ccc", verticalAlign: "middle",
@@ -274,7 +271,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
     notes: editTrade.notes || "",
     screenshot_url: editTrade.screenshot_url || null,
     outcome: editTrade.outcome ?? null,
-  } : EMPTY_FORM;
+  } : makeEmptyForm();
 
   // Pre-calculate risk % from pnl + rr for edit mode
   const initRisk = (() => {
@@ -298,10 +295,10 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
       })();
 
   const initRiskModes = editTrade
-    ? { [editTrade.account_id]: "%" }
+    ? { [editTrade.account_id]: "$" }
     : (() => {
         const personal = accounts.find(a => a.type === "personal");
-        return personal ? { [personal.id]: "%" } : {};
+        return personal ? { [personal.id]: "$" } : {};
       })();
 
   const [form, setForm] = useState(initForm);
@@ -353,7 +350,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
         next.stop_loss = "";
         next.take_profit = "";
         next.rr = "";
-      } else {
+      } else if (rrMode === "auto") {
         next.rr = calcRR(
           k === "entry" ? v : next.entry,
           k === "stop_loss" ? v : next.stop_loss,
@@ -378,7 +375,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
       } else {
         next.add(acc.id);
         setAccountRisks(r => ({ ...r, [acc.id]: "" }));
-        setAccountRiskModes(m => ({ ...m, [acc.id]: "%" }));
+        setAccountRiskModes(m => ({ ...m, [acc.id]: "$" }));
       }
       return next;
     });
@@ -389,7 +386,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
   }
 
   function switchMode(acc, newMode) {
-    const currentMode = accountRiskModes[acc.id] || "%";
+    const currentMode = accountRiskModes[acc.id] || "$";
     if (currentMode === newMode) return;
 
     const currentVal = accountRisks[acc.id];
@@ -429,6 +426,12 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
     if (result && result.error) {
       setFormError(result.error);
     } else {
+      localStorage.setItem("lastTradePair", form.pair);
+      if (!editTrade) {
+        setSelectedAccounts(new Set());
+        setAccountRisks({});
+        setAccountRiskModes({});
+      }
       setSuccessMsg(editTrade ? "Trade updated." : "Trade logged successfully.");
       setTimeout(onClose, 1200);
     }
@@ -701,7 +704,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
 
           {accounts.map(acc => {
             const isSelected = selectedAccounts.has(acc.id);
-            const mode = accountRiskModes[acc.id] || "%";
+            const mode = accountRiskModes[acc.id] || "$";
             const rawVal = accountRisks[acc.id] || "";
 
             // Resolve both % and $ for the preview
@@ -743,18 +746,16 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                     }}>
                       {isSelected && <span style={{ color: "#1bba7c", fontSize: "10px", lineHeight: 1 }}>✓</span>}
                     </div>
-                    <div>
-                      <div style={{ fontSize: "13px", fontFamily: "'Inter', sans-serif", fontWeight: 500, color: "#e0e0e0" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                      <span style={{ fontSize: "13px", fontFamily: "'Inter', sans-serif", fontWeight: 500, color: "#e0e0e0" }}>
                         {acc.name}
-                      </div>
-                      <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
-                        {accountTypeBadge(acc.type)}
-                        {acc.account_size && (
-                          <span style={{ fontSize: "10px", color: "#999", fontFamily: "'JetBrains Mono', monospace" }}>
-                            ${parseFloat(acc.account_size).toLocaleString()}
-                          </span>
-                        )}
-                      </div>
+                      </span>
+                      {accountTypeBadge(acc.type)}
+                      {acc.account_size && (
+                        <span style={{ fontSize: "10px", color: "#999", fontFamily: "'JetBrains Mono', monospace" }}>
+                          ${parseFloat(acc.account_size).toLocaleString()}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -777,7 +778,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                           display: "flex", borderRadius: "6px",
                           border: "0.5px solid #1e1e1e", overflow: "hidden", flexShrink: 0,
                         }}>
-                          {["%", "$"].map(m => {
+                          {["$", "%"].map(m => {
                             const active = mode === m;
                             return (
                               <button
@@ -869,7 +870,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                 Summary
               </div>
               {selectedAccountsList.map(acc => {
-                const mode = accountRiskModes[acc.id] || "%";
+                const mode = accountRiskModes[acc.id] || "$";
                 const rawVal = accountRisks[acc.id] || "";
                 const num = parseFloat(rawVal);
                 let resolvedPct = null;
@@ -1029,39 +1030,53 @@ function TradeDetailModal({ trade, onClose, onEdit, onDelete }) {
 
 // ─── Trade Row ────────────────────────────────────────────────────────────────
 function TradeRow({ trade, onViewDetail, onEdit, onDelete }) {
+  const [hovered, setHovered] = useState(false);
   return (
-    <tr onClick={() => onViewDetail(trade)} style={{
-      cursor: "pointer", borderBottom: "0.5px solid #161616", transition: "background 0.1s",
-    }}
-      onMouseEnter={e => e.currentTarget.style.background = "#0f0f0f"}
-      onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+    <tr
+      onClick={() => onViewDetail(trade)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        cursor: "pointer", borderBottom: "0.5px solid #161616", transition: "background 0.1s",
+        background: hovered ? "rgba(255,255,255,0.02)" : "transparent",
+      }}
     >
-      <td style={td}>{trade.date}</td>
-      <td style={{ ...td, fontFamily: "'JetBrains Mono', monospace", fontSize: "13px", color: "#e0e0e0" }}>{trade.pair}</td>
+      <td style={{ ...td, fontFamily: "'JetBrains Mono', monospace", color: "#999" }}>{trade.date}</td>
+      <td style={{ ...td, fontFamily: "'JetBrains Mono', monospace", fontSize: "13px", fontWeight: 700, color: "#e0e0e0" }}>{trade.pair}</td>
       <td style={td}>{outcomeBadge(trade.outcome) || <span style={{ color: "#555" }}>—</span>}</td>
       <td style={td}>{directionBadge(trade.direction)}</td>
-      <td style={{ ...td, fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", color: "#aaa" }}>{fmt(trade.entry)}</td>
-      <td style={{ ...td, fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", color: "#aaa" }}>{trade.rr ? `${trade.rr}R` : "—"}</td>
-      <td style={{ ...td, fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", color: trade.swap != null ? pnlColor(trade.swap) : "#555" }}>
+      <td style={{ ...td, textAlign: "right", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", color: "#aaa" }}>{fmt(trade.entry)}</td>
+      <td style={{ ...td, textAlign: "center", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", color: "#aaa" }}>{trade.rr ? `${trade.rr}R` : "—"}</td>
+      <td style={{ ...td, textAlign: "right", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", color: trade.swap != null ? pnlColor(trade.swap) : "#555" }}>
         {trade.swap != null ? `${parseFloat(trade.swap) >= 0 ? "+" : ""}${fmt(trade.swap)}` : "—"}
       </td>
-      <td style={{ ...td, fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", color: trade.commission != null ? pnlColor(trade.commission) : "#555" }}>
+      <td style={{ ...td, textAlign: "right", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", color: trade.commission != null ? pnlColor(trade.commission) : "#555" }}>
         {trade.commission != null ? `${parseFloat(trade.commission) >= 0 ? "+" : ""}${fmt(trade.commission)}` : "—"}
       </td>
-      <td style={{ ...td, fontFamily: "'JetBrains Mono', monospace", fontSize: "13px", fontWeight: 500, color: pnlColor(trade.pnl) }}>
+      <td style={{ ...td, textAlign: "right", fontFamily: "'JetBrains Mono', monospace", fontSize: "13px", fontWeight: 700, color: pnlColor(trade.pnl) }}>
         {trade.pnl != null ? `${parseFloat(trade.pnl) >= 0 ? "+" : ""}${fmt(trade.pnl)}` : "—"}
       </td>
-      <td style={{ ...td, color: "#777", fontSize: "12px" }}>{sessionLabel(trade.session)}</td>
-      <td style={td}>
-        <div style={{ display: "flex", gap: "6px", justifyContent: "flex-end" }} onClick={e => e.stopPropagation()}>
-          <button onClick={() => onEdit(trade)} style={iconBtn}>✏</button>
-          <button onClick={() => onDelete(trade.id)} style={{ ...iconBtn, color: "#c03535" }}>✕</button>
+      <td style={{ ...td, textAlign: "center", color: "#777", fontSize: "11px", fontWeight: 700, opacity: 0.7 }}>{sessionLabel(trade.session)}</td>
+      <td style={{ ...td, textAlign: "right" }}>
+        <div style={{
+          display: "flex", gap: "8px", justifyContent: "flex-end",
+          opacity: hovered ? 1 : 0, transition: "opacity 0.15s",
+        }} onClick={e => e.stopPropagation()}>
+          <button onClick={() => onEdit(trade)} style={{
+            width: "28px", height: "28px", borderRadius: "6px", border: "none",
+            background: "rgba(255,255,255,0.05)", color: "#ccc",
+            display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
+          }}><Pencil size={14} /></button>
+          <button onClick={() => onDelete(trade.id)} style={{
+            width: "28px", height: "28px", borderRadius: "6px", border: "none",
+            background: "rgba(192,53,53,0.1)", color: "#c03535",
+            display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
+          }}><X size={14} /></button>
         </div>
       </td>
     </tr>
   );
 }
-
 
 // ─── Mobile Account Dropdown Row ─────────────────────────────────────────────
 // ─── CSV Import Modal ─────────────────────────────────────────────────────────
@@ -1638,11 +1653,21 @@ export default function TradeLog() {
   const PAGE_SIZE = 20;
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [importOpen, setImportOpen] = useState(false);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const accountMenuRef = useRef(null);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    function handleOutside(e) {
+      if (accountMenuRef.current && !accountMenuRef.current.contains(e.target)) setAccountMenuOpen(false);
+    }
+    document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
   }, []);
 
   // Open Log Trade form when navigated here from the + button
@@ -2246,66 +2271,96 @@ useEffect(() => {
         `}</style>
 
         {/* Page Header */}
-        <div style={{ marginBottom: "20px" }}>
-          <h1 style={{ margin: "0 0 12px 0", fontFamily: "'Inter', sans-serif", fontSize: "22px", fontWeight: 700, color: "#fff" }}>Trade Log</h1>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            {/* Left: account selector + account meta */}
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <select
-                value={activeAccount?.id || ""}
-                onChange={e => {
-                  const acc = accounts.find(a => a.id === e.target.value);
-                  if (acc) { setActiveAccount(acc); localStorage.setItem("activeAccountId", acc.id); }
-                }}
-                style={{
-                  background: "#111", border: "0.5px solid #2a2a2a", borderRadius: "8px",
-                  padding: "7px 12px", color: "#e0e0e0",
-                  fontFamily: "'Inter', sans-serif", fontSize: "13px",
-                  cursor: "pointer", outline: "none", appearance: "none",
-                  paddingRight: "28px",
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")`,
-                  backgroundRepeat: "no-repeat", backgroundPosition: "right 10px center",
-                }}
-              >
-                {accounts.map(a => (
-                  <option key={a.id} value={a.id}>{a.name || a.firm_name || "Account"}</option>
-                ))}
-              </select>
+        <div style={{ marginBottom: "24px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "20px", minWidth: 0, flexWrap: "wrap" }}>
+              <h1 style={{ margin: 0, fontFamily: "'Inter', sans-serif", fontSize: "22px", fontWeight: 700, color: "#fff", flexShrink: 0 }}>Trade Log</h1>
+              <div style={{ width: "1px", height: "28px", background: "#1a1a1a", flexShrink: 0 }} />
+
+              {/* Account switcher */}
+              <div ref={accountMenuRef} style={{ position: "relative", flexShrink: 0 }}>
+                <button
+                  onClick={() => setAccountMenuOpen(o => !o)}
+                  style={{
+                    display: "flex", alignItems: "center", gap: "8px",
+                    padding: "7px 12px", borderRadius: "8px",
+                    border: "0.5px solid #1e1e1e", background: "#111",
+                    color: "#e0e0e0", fontFamily: "'Inter', sans-serif", fontSize: "13px",
+                    cursor: "pointer", whiteSpace: "nowrap",
+                  }}
+                >
+                  {activeAccount?.name || activeAccount?.firm_name || "Select Account"}
+                  <ChevronDown size={14} style={{ color: "#777" }} />
+                </button>
+                {accountMenuOpen && (
+                  <div style={{
+                    position: "absolute", top: "calc(100% + 6px)", left: 0, minWidth: "200px",
+                    background: "#111", border: "0.5px solid #1e1e1e", borderRadius: "10px",
+                    zIndex: 50, maxHeight: "260px", overflowY: "auto", padding: "4px",
+                  }}>
+                    {accounts.map(a => (
+                      <div
+                        key={a.id}
+                        onClick={() => {
+                          setActiveAccount(a);
+                          localStorage.setItem("activeAccountId", a.id);
+                          setAccountMenuOpen(false);
+                        }}
+                        style={{
+                          padding: "8px 10px", borderRadius: "6px", cursor: "pointer",
+                          fontSize: "13px", fontFamily: "'Inter', sans-serif",
+                          color: a.id === activeAccount?.id ? "#1bba7c" : "#ccc",
+                          background: a.id === activeAccount?.id ? "#0f2219" : "transparent",
+                        }}
+                        onMouseEnter={e => { if (a.id !== activeAccount?.id) e.currentTarget.style.background = "#161616"; }}
+                        onMouseLeave={e => { if (a.id !== activeAccount?.id) e.currentTarget.style.background = "transparent"; }}
+                      >
+                        {a.name || a.firm_name || "Account"}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               {activeAccount && (
-                <>
-                  <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "16px", fontWeight: 700, color: "#e8e8e8" }}>
-                    {activeAccount.name || activeAccount.firm_name || "Account"}
+                <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+                  <span style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, color: "#666" }}>
+                    Active Account
                   </span>
-                  {activeAccount.account_size && (
-                    <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", color: "#aaa" }}>
-                      ${Number(activeAccount.account_size).toLocaleString()}
-                    </span>
-                  )}
-                  {activeAccount.created_at && (
-                    <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", color: "#555" }}>
-                      Since {new Date(activeAccount.created_at).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
-                    </span>
-                  )}
-                </>
+                  <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "14px", fontWeight: 500, color: "#e8e8e8", whiteSpace: "nowrap" }}>
+                    {activeAccount.name || activeAccount.firm_name || "Account"}{" "}
+                    {activeAccount.account_size && (
+                      <span style={{ color: "#999" }}>${Number(activeAccount.account_size).toLocaleString()}</span>
+                    )}{" "}
+                    {activeAccount.created_at && (
+                      <span style={{ color: "#555", fontSize: "12px" }}>
+                        Since {new Date(activeAccount.created_at).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+                      </span>
+                    )}
+                  </span>
+                </div>
               )}
             </div>
+
             {/* Right: Import CSV + Log Trade buttons */}
-            <div style={{ display: "flex", gap: "8px" }}>
+            <div style={{ display: "flex", gap: "10px", flexShrink: 0 }}>
               <button onClick={() => setImportOpen(true)} style={{
-                padding: "10px 16px", background: "none",
-                border: "0.5px solid #1e1e1e", borderRadius: "8px", color: "#777",
-                fontFamily: "'JetBrains Mono', monospace", fontSize: "12px",
+                display: "flex", alignItems: "center", gap: "8px",
+                padding: "10px 16px", background: "transparent",
+                border: "0.5px solid #1e1e1e", borderRadius: "8px", color: "#ccc",
+                fontFamily: "'Inter', sans-serif", fontSize: "13px", fontWeight: 500,
                 cursor: "pointer", whiteSpace: "nowrap",
-              }}>↑ Import CSV</button>
+              }}><ArrowUp size={15} /> Import CSV</button>
               <button onClick={openNew} style={{
-                padding: "10px 18px", background: "oklch(0.72 0.17 152)", border: "none",
+                display: "flex", alignItems: "center", gap: "8px",
+                padding: "10px 18px", background: "#1bba7c", border: "none",
                 borderRadius: "8px", color: "#000",
-                fontFamily: "'Inter', sans-serif", fontSize: "13px", fontWeight: 600,
+                fontFamily: "'Inter', sans-serif", fontSize: "13px", fontWeight: 700,
                 cursor: "pointer", whiteSpace: "nowrap", transition: "background 0.15s",
               }}
-              onMouseEnter={e => e.currentTarget.style.background = "oklch(0.78 0.17 152)"}
-              onMouseLeave={e => e.currentTarget.style.background = "oklch(0.72 0.17 152)"}
-              >+ Log Trade</button>
+              onMouseEnter={e => e.currentTarget.style.background = "#22d394"}
+              onMouseLeave={e => e.currentTarget.style.background = "#1bba7c"}
+              ><Plus size={15} /> Log Trade</button>
             </div>
           </div>
         </div>
@@ -2319,73 +2374,77 @@ useEffect(() => {
           }}>{error}</div>
         )}
 
-
         {/* Filters + Export */}
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
-          {["all", "long", "short"].map(d => (
-            <button key={d} onClick={() => { setFilterDir(d); setCurrentPage(1); }} style={{
-              padding: "6px 14px", borderRadius: "6px", border: "0.5px solid",
-              borderColor: filterDir === d ? "#1a3826" : "#1a1a1a",
-              background: filterDir === d ? "#0f2219" : "transparent",
-              color: filterDir === d ? "#1bba7c" : "#777",
-              fontFamily: "'JetBrains Mono', monospace", fontSize: "11px",
-              textTransform: "uppercase", letterSpacing: "0.08em",
-              cursor: "pointer", transition: "all 0.15s",
-            }}>{d}</button>
-          ))}
-          <div style={{ width: "1px", background: "#1a1a1a", margin: "0 4px", alignSelf: "stretch" }} />
-          {SESSIONS.map(s => (
-            <button key={s} onClick={() => { setFilterSession(filterSession === s ? "all" : s); setCurrentPage(1); }} style={{
-              padding: "6px 14px", borderRadius: "6px", border: "0.5px solid",
-              borderColor: filterSession === s ? "#1a3826" : "#1a1a1a",
-              background: filterSession === s ? "#0f2219" : "transparent",
-              color: filterSession === s ? "#1bba7c" : "#777",
-              fontFamily: "'JetBrains Mono', monospace", fontSize: "11px",
-              textTransform: "uppercase", letterSpacing: "0.08em",
-              cursor: "pointer", transition: "all 0.15s",
-            }}>{sessionLabel(s)}</button>
-          ))}
-          <div style={{ marginLeft: "auto" }}>
-            <button onClick={() => {
-              const headers = ["Date", "Pair", "Outcome", "Direction", "Entry", "Stop Loss", "Take Profit", "R:R", "Swap", "Commission", "P&L", "Session", "Notes"];
-              const rows = filtered.map(t => [
-                t.date, t.pair, t.outcome ?? "", t.direction,
-                t.entry ?? "", t.stop_loss ?? "", t.take_profit ?? "",
-                t.rr ?? "", t.swap ?? "", t.commission ?? "", t.pnl ?? "",
-                t.session, (t.notes || "").replace(/,/g, " "),
-              ]);
-              const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
-              const blob = new Blob([csv], { type: "text/csv" });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement("a");
-              a.href = url;
-              a.download = `trades-${activeAccount?.name || "export"}-${new Date().toISOString().split("T")[0]}.csv`;
-              a.click();
-              URL.revokeObjectURL(url);
-            }} style={{
-              padding: "6px 14px", background: "transparent",
-              border: "0.5px solid #1e1e1e", borderRadius: "6px",
-              color: "#777", cursor: "pointer",
-              fontFamily: "'JetBrains Mono', monospace", fontSize: "11px",
-              textTransform: "uppercase", letterSpacing: "0.08em",
-              transition: "all 0.15s",
-            }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = "#555"; e.currentTarget.style.color = "#ccc"; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = "#1e1e1e"; e.currentTarget.style.color = "#777"; }}
-            >↓ Export CSV</button>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "16px", marginBottom: "16px" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
+            <div style={{ display: "flex", gap: "4px", padding: "4px", borderRadius: "10px", border: "0.5px solid #1a1a1a", background: "#121212" }}>
+              {["all", "long", "short"].map(d => (
+                <button key={d} onClick={() => { setFilterDir(d); setCurrentPage(1); }} style={{
+                  padding: "7px 18px", borderRadius: "8px", border: "none",
+                  background: filterDir === d ? "#0f2219" : "transparent",
+                  color: filterDir === d ? "#1bba7c" : "#777",
+                  fontFamily: "'Inter', sans-serif", fontSize: "13px", fontWeight: 600,
+                  textTransform: "capitalize",
+                  cursor: "pointer", transition: "all 0.15s",
+                }}>{d}</button>
+              ))}
+            </div>
+            <div style={{ display: "flex", gap: "8px" }}>
+              {SESSIONS.map(s => (
+                <button key={s} onClick={() => { setFilterSession(filterSession === s ? "all" : s); setCurrentPage(1); }} style={{
+                  padding: "7px 16px", borderRadius: "8px", border: "0.5px solid",
+                  borderColor: filterSession === s ? "#1a3826" : "#1a1a1a",
+                  background: filterSession === s ? "rgba(27,186,124,0.15)" : "#121212",
+                  color: filterSession === s ? "#1bba7c" : "#999",
+                  fontFamily: "'JetBrains Mono', monospace", fontSize: "11px",
+                  textTransform: "uppercase", letterSpacing: "0.05em",
+                  cursor: "pointer", transition: "all 0.15s",
+                }}>{sessionLabel(s)}</button>
+              ))}
+            </div>
           </div>
+          <button onClick={() => {
+            const headers = ["Date", "Pair", "Outcome", "Direction", "Entry", "Stop Loss", "Take Profit", "R:R", "Swap", "Commission", "P&L", "Session", "Notes"];
+            const rows = filtered.map(t => [
+              t.date, t.pair, t.outcome ?? "", t.direction,
+              t.entry ?? "", t.stop_loss ?? "", t.take_profit ?? "",
+              t.rr ?? "", t.swap ?? "", t.commission ?? "", t.pnl ?? "",
+              t.session, (t.notes || "").replace(/,/g, " "),
+            ]);
+            const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
+            const blob = new Blob([csv], { type: "text/csv" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `trades-${activeAccount?.name || "export"}-${new Date().toISOString().split("T")[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+          }} style={{
+            display: "flex", alignItems: "center", gap: "8px",
+            padding: "7px 14px", background: "#121212",
+            border: "0.5px solid #1a1a1a", borderRadius: "8px",
+            color: "#777", cursor: "pointer",
+            fontFamily: "'Inter', sans-serif", fontSize: "11px", fontWeight: 700,
+            textTransform: "uppercase", letterSpacing: "0.08em",
+            transition: "all 0.15s",
+          }}
+            onMouseEnter={e => { e.currentTarget.style.color = "#fff"; }}
+            onMouseLeave={e => { e.currentTarget.style.color = "#777"; }}
+          ><ArrowDown size={14} /> Export CSV</button>
         </div>
 
-        <div style={{ background: "#111", border: "0.5px solid #1e1e1e", borderRadius: "12px", overflow: "hidden" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        {/* Table */}
+        <div style={{ border: "0.5px solid #1a1a1a", borderRadius: "16px", overflow: "hidden", background: "#121212" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
             <thead>
-              <tr style={{ borderBottom: "0.5px solid #1a1a1a" }}>
+              <tr style={{ borderBottom: "0.5px solid #1a1a1a", background: "rgba(255,255,255,0.02)" }}>
                 {["Date", "Pair", "Outcome", "Dir", "Entry", "R:R", "Swap", "Commission", "P&L", "Session", ""].map((h, i) => (
                   <th key={i} style={{
-                    padding: "10px 14px", textAlign: i === 10 ? "right" : "left",
-                    fontSize: "10px", fontFamily: "'JetBrains Mono', monospace",
+                    padding: "14px 16px",
+                    textAlign: i === 0 || i === 1 ? "left" : i === 2 || i === 3 || i === 5 || i === 9 ? "center" : i === 10 ? "right" : "right",
+                    fontSize: "11px", fontFamily: "'JetBrains Mono', monospace",
                     letterSpacing: "0.1em", textTransform: "uppercase",
-                    color: "#999", fontWeight: 500, background: "#0d0d0d",
+                    color: "#999", fontWeight: 700,
                   }}>{h}</th>
                 ))}
               </tr>
@@ -2407,29 +2466,29 @@ useEffect(() => {
         </div>
 
         {!loading && filtered.length > 0 && (
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "12px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "16px" }}>
             <p style={{ fontSize: "12px", color: "#555", fontFamily: "'JetBrains Mono', monospace", margin: 0 }}>
               {((safePage - 1) * PAGE_SIZE) + 1}–{Math.min(safePage * PAGE_SIZE, filtered.length)} of {filtered.length} trade{filtered.length !== 1 ? "s" : ""}
             </p>
-            <div style={{ display: "flex", gap: "6px" }}>
+            <div style={{ display: "flex", gap: "8px" }}>
               <button
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={safePage === 1}
                 style={{
-                  padding: "6px 14px", borderRadius: "6px", border: "0.5px solid #1e1e1e",
-                  background: "transparent", color: safePage === 1 ? "#333" : "#777",
-                  fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", cursor: safePage === 1 ? "default" : "pointer",
-                  textTransform: "uppercase", letterSpacing: "0.08em",
+                  padding: "7px 16px", borderRadius: "8px", border: "0.5px solid #1a1a1a",
+                  background: "#121212", color: safePage === 1 ? "#333" : "#ccc",
+                  fontFamily: "'Inter', sans-serif", fontSize: "12px", fontWeight: 500,
+                  cursor: safePage === 1 ? "default" : "pointer",
                 }}
               >← Prev</button>
               <button
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={safePage === totalPages}
                 style={{
-                  padding: "6px 14px", borderRadius: "6px", border: "0.5px solid #1e1e1e",
-                  background: "transparent", color: safePage === totalPages ? "#333" : "#777",
-                  fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", cursor: safePage === totalPages ? "default" : "pointer",
-                  textTransform: "uppercase", letterSpacing: "0.08em",
+                  padding: "7px 16px", borderRadius: "8px", border: "0.5px solid #1a1a1a",
+                  background: "#121212", color: safePage === totalPages ? "#333" : "#ccc",
+                  fontFamily: "'Inter', sans-serif", fontSize: "12px", fontWeight: 500,
+                  cursor: safePage === totalPages ? "default" : "pointer",
                 }}
               >Next →</button>
             </div>
@@ -2483,7 +2542,7 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
     notes: editTrade.notes || "",
     screenshot_url: editTrade.screenshot_url || null,
     outcome: editTrade.outcome ?? null,
-  } : EMPTY_FORM;
+  } : makeEmptyForm();
 
   const initRisk = (() => {
     if (!editTrade) return {};
@@ -2502,8 +2561,8 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
     : (() => { const p = accounts.find(a => a.type === "personal"); return p ? new Set([p.id]) : new Set(); })();
 
   const initModes = editTrade
-    ? { [editTrade.account_id]: "%" }
-    : (() => { const p = accounts.find(a => a.type === "personal"); return p ? { [p.id]: "%" } : {}; })();
+    ? { [editTrade.account_id]: "$" }
+    : (() => { const p = accounts.find(a => a.type === "personal"); return p ? { [p.id]: "$" } : {}; })();
 
   const [form, setForm] = useState(initForm);
   const [accountRisks, setAccountRisks] = useState(initRisk);
@@ -2552,7 +2611,7 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
         next.stop_loss = "";
         next.take_profit = "";
         next.rr = "";
-      } else {
+      } else if (rrMode === "auto") {
         next.rr = calcRR(
           k === "entry" ? v : next.entry,
           k === "stop_loss" ? v : next.stop_loss,
@@ -2577,7 +2636,7 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
       } else {
         next.add(acc.id);
         setAccountRisks(r => ({ ...r, [acc.id]: "" }));
-        setAccountRiskModes(m => ({ ...m, [acc.id]: "%" }));
+        setAccountRiskModes(m => ({ ...m, [acc.id]: "$" }));
       }
       return next;
     });
@@ -2587,8 +2646,17 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
     setFormError(null);
     if (selectedAccounts.size === 0) { setFormError("Select at least one account."); return; }
     const result = await onSave(form, screenshotFile, selectedAccounts, accountRisks, accountRiskModes);
-    if (result && result.error) setFormError(result.error);
-    else onClose();
+    if (result && result.error) {
+      setFormError(result.error);
+    } else {
+      localStorage.setItem("lastTradePair", form.pair);
+      if (!editTrade) {
+        setSelectedAccounts(new Set());
+        setAccountRisks({});
+        setAccountRiskModes({});
+      }
+      onClose();
+    }
   }
 
   const mobileInput = {
@@ -2768,7 +2836,7 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
             <span style={{ ...formLbl, marginBottom: '8px' }}>Accounts — select &amp; set risk</span>
             {accounts.map(acc => {
               const isSelected = selectedAccounts.has(acc.id);
-              const mode = accountRiskModes[acc.id] || '%';
+              const mode = accountRiskModes[acc.id] || '$';
               const rawVal = accountRisks[acc.id] || '';
               const num = parseFloat(rawVal);
               let resolvedPct = null, resolvedDollar = null;
@@ -2812,7 +2880,7 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
                         {/* % / $ toggle */}
                         <div style={{ display: 'flex', border: '0.5px solid #222', borderRadius: '4px', overflow: 'hidden' }}>
-                          {['%', '$'].map(m => (
+                          {['$', '%'].map(m => (
                             <button key={m} onClick={() => {
                               const cur = mode;
                               if (cur === m) return;
