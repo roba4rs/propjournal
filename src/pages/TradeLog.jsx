@@ -123,7 +123,6 @@ function makeEmptyForm() {
     outcome: null,
   };
 }
-const EMPTY_FORM = makeEmptyForm();
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function calcRR(entry, sl, tp) {
