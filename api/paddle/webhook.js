@@ -1,8 +1,6 @@
 const crypto = require('crypto');
 const { createClient } = require('@supabase/supabase-js');
 
-// Disable Vercel's automatic body parsing — Paddle signature verification
-// requires the exact raw request body, not the parsed/re-stringified JSON.
 module.exports.config = {
   api: {
     bodyParser: false,
@@ -14,7 +12,6 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-// Maps Paddle price IDs back to your internal plan names
 const PRICE_TO_PLAN = {
   [process.env.REACT_APP_PADDLE_MONTHLY_PRICE_ID]: { plan: 'monthly', days: 30 },
   [process.env.REACT_APP_PADDLE_SIXMONTH_PRICE_ID]: { plan: 'biannual', days: 183 },
@@ -31,7 +28,6 @@ function getRawBody(req) {
 }
 
 function verifySignature(rawBody, signatureHeader, secret) {
-  // Paddle signature header format: "ts=<timestamp>;h1=<hash>"
   const parts = Object.fromEntries(
     signatureHeader.split(';').map((p) => p.split('='))
   );
@@ -43,6 +39,15 @@ function verifySignature(rawBody, signatureHeader, secret) {
     .createHmac('sha256', secret)
     .update(signedPayload)
     .digest('hex');
+
+  console.log('=== SIGNATURE DEBUG ===');
+  console.log('ts used:', ts);
+  console.log('rawBody length used:', rawBody.length);
+  console.log('secret used (full):', secret);
+  console.log('computed hash:', expectedHash);
+  console.log('paddle hash  :', h1);
+  console.log('MATCH:', expectedHash === h1);
+  console.log('=======================');
 
   return crypto.timingSafeEqual(
     Buffer.from(expectedHash, 'utf8'),
@@ -57,13 +62,6 @@ module.exports = async function handler(req, res) {
 
   const rawBody = await getRawBody(req);
   const signatureHeader = req.headers['paddle-signature'];
-
-  console.log('Raw body length:', rawBody.length);
-  console.log('Raw body preview:', rawBody.slice(0, 200));
-  console.log('Signature header:', signatureHeader);
-  console.log('Secret length:', process.env.PADDLE_WEBHOOK_SECRET?.length);
-  console.log('Secret first 8 chars:', process.env.PADDLE_WEBHOOK_SECRET?.slice(0, 8));
-  console.log('Secret last 4 chars:', process.env.PADDLE_WEBHOOK_SECRET?.slice(-4));
 
   if (!signatureHeader || !verifySignature(rawBody, signatureHeader, process.env.PADDLE_WEBHOOK_SECRET)) {
     console.error('paddle-webhook: signature verification failed');
