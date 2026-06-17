@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const { createClient } = require('@supabase/supabase-js');
+const getRawBody = require('raw-body');
 
 module.exports.config = {
   api: {
@@ -18,15 +19,6 @@ const PRICE_TO_PLAN = {
   [process.env.REACT_APP_PADDLE_YEARLY_PRICE_ID]: { plan: 'annual', days: 365 },
 };
 
-function getRawBody(req) {
-  return new Promise((resolve, reject) => {
-    let data = '';
-    req.on('data', (chunk) => { data += chunk; });
-    req.on('end', () => resolve(data));
-    req.on('error', reject);
-  });
-}
-
 function verifySignature(rawBody, signatureHeader, secret) {
   const parts = Object.fromEntries(
     signatureHeader.split(';').map((p) => p.split('='))
@@ -43,7 +35,6 @@ function verifySignature(rawBody, signatureHeader, secret) {
   console.log('=== SIGNATURE DEBUG ===');
   console.log('ts used:', ts);
   console.log('rawBody length used:', rawBody.length);
-  console.log('secret used (full):', secret);
   console.log('computed hash:', expectedHash);
   console.log('paddle hash  :', h1);
   console.log('MATCH:', expectedHash === h1);
@@ -60,7 +51,7 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const rawBody = await getRawBody(req);
+  const rawBody = await getRawBody(req, { encoding: 'utf-8' });
   const signatureHeader = req.headers['paddle-signature'];
 
   if (!signatureHeader || !verifySignature(rawBody, signatureHeader, process.env.PADDLE_WEBHOOK_SECRET)) {
