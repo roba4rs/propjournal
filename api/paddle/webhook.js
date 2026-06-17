@@ -44,6 +44,9 @@ function verifySignature(rawBody, signatureHeader, secret) {
     .update(signedPayload)
     .digest('hex');
 
+  console.log('Expected hash:', expectedHash);
+  console.log('Received hash:', h1);
+
   return crypto.timingSafeEqual(
     Buffer.from(expectedHash, 'utf8'),
     Buffer.from(h1, 'utf8')
@@ -61,6 +64,9 @@ export default async function handler(req, res) {
   console.log('Raw body length:', rawBody.length);
   console.log('Raw body preview:', rawBody.slice(0, 200));
   console.log('Signature header:', signatureHeader);
+  console.log('Secret length:', process.env.PADDLE_WEBHOOK_SECRET?.length);
+  console.log('Secret first 8 chars:', process.env.PADDLE_WEBHOOK_SECRET?.slice(0, 8));
+  console.log('Secret last 4 chars:', process.env.PADDLE_WEBHOOK_SECRET?.slice(-4));
 
   if (!signatureHeader || !verifySignature(rawBody, signatureHeader, process.env.PADDLE_WEBHOOK_SECRET)) {
     console.error('paddle-webhook: signature verification failed');
@@ -85,7 +91,7 @@ export default async function handler(req, res) {
 
       if (!userId) {
         console.error('paddle-webhook: missing user_id in custom_data', data);
-        return res.status(200).json({ received: true }); // ack so Paddle doesn't retry forever
+        return res.status(200).json({ received: true });
       }
 
       const planInfo = PRICE_TO_PLAN[priceId];
@@ -100,38 +106,3 @@ export default async function handler(req, res) {
           plan: planName,
           plan_expires_at: expiresAt,
         })
-        .eq('id', userId);
-
-      if (error) {
-        console.error('paddle-webhook: supabase update failed', error);
-        return res.status(500).json({ error: 'Database update failed' });
-      }
-
-      console.log(`paddle-webhook: activated ${planName} for user ${userId}`);
-    }
-
-    if (eventType === 'subscription.canceled') {
-      const userId = data.custom_data?.user_id;
-      if (userId) {
-        await supabase
-          .from('users')
-          .update({ plan: 'free_trial' })
-          .eq('id', userId);
-
-        console.log(`paddle-webhook: canceled subscription for user ${userId}`);
-      }
-    }
-
-    // transaction.completed is mainly useful for logging/analytics;
-    // subscription.activated already handles granting access.
-    if (eventType === 'transaction.completed') {
-      console.log('paddle-webhook: transaction completed', data.id);
-    }
-
-    return res.status(200).json({ received: true });
-
-  } catch (err) {
-    console.error('paddle-webhook error:', err);
-    return res.status(500).json({ error: 'Server error' });
-  }
-}
