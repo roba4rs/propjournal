@@ -520,7 +520,7 @@ function computeStatus(trades, account) {
 
 function ProgressBlock({ label, barPct, barColor, leftLabel, rightLabel }) {
   return (
-    <div style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '8px', padding: '14px' }}>
+    <div style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '10px', padding: '14px' }}>
       <p style={{ color: '#999', fontFamily: 'Inter, sans-serif', fontSize: '11px', textTransform: 'uppercase', margin: '0 0 8px 0', letterSpacing: '0.5px' }}>
         {label}
       </p>
@@ -1038,55 +1038,59 @@ export default function ChallengeTracker() {
               const pnlLabel = trades.length === 0 ? '$0.00' : `${s.netPnl >= 0 ? '+' : ''}$${Math.abs(s.netPnl).toFixed(2)}`
 
               return (
-                <div key={challenge.id} style={{ background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '10px', padding: '22px 18px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                <div key={challenge.id} style={{ background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '14px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
                   {/* Header: firm name + edit left, badge right — same row; meta below */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div style={{ minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        <p style={{ color: '#fff', fontFamily: 'Inter, sans-serif', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.4px', margin: '0 0 2px 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{challenge.firm_name}</p>
-                        <button onClick={() => setEditingChallenge(challenge)} style={{ background: 'transparent', border: 'none', color: '#555', cursor: 'pointer', fontSize: '10px', padding: '1px 2px', lineHeight: 1, flexShrink: 0, marginBottom: '2px' }}>✏️</button>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px' }}>
+                        <p style={{ color: '#fff', fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: '600', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{challenge.firm_name}</p>
+                        <button onClick={() => setEditingChallenge(challenge)} style={{ background: 'transparent', border: 'none', color: '#777', cursor: 'pointer', fontSize: '11px', padding: '1px 2px', lineHeight: 1, flexShrink: 0 }}>✏️</button>
                       </div>
-                      <span style={{ color: '#999', fontFamily: 'JetBrains Mono, monospace', fontSize: '10px' }}>{challenge.phase?.replace('_', ' ').toUpperCase()} · ${Number(challenge.account_size).toLocaleString()}</span>
+                      <span style={{ color: '#777', fontFamily: 'Inter, sans-serif', fontSize: '11px' }}>{challenge.phase?.replace('_', ' ').toUpperCase()} · ${Number(challenge.account_size).toLocaleString()}</span>
                     </div>
-                    <span style={{ background: badge.bg, border: `0.5px solid ${badge.border}`, borderRadius: '5px', padding: '3px 8px', color: badge.color, fontFamily: 'JetBrains Mono, monospace', fontSize: '10px', fontWeight: '600', whiteSpace: 'nowrap', flexShrink: 0 }}>{badge.label}</span>
+                    <span style={{ background: badge.bg, border: `0.5px solid ${badge.border}`, borderRadius: '20px', padding: '3px 10px', color: badge.color, fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: '500', whiteSpace: 'nowrap', flexShrink: 0 }}>{badge.label}</span>
                   </div>
 
-                  {/* 4-column stat strip with dividers */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderTop: '0.5px solid #1a1a1a', borderBottom: '0.5px solid #1a1a1a', padding: '8px 0' }}>
+                  {/* 4-column stat strip, centered */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', textAlign: 'center' }}>
                     {[
                       { value: pnlLabel, label: 'P&L', color: trades.length === 0 ? '#fff' : pnlColor },
-                      { value: s.total === 0 ? '0%' : `${s.winRate.toFixed(1)}%`, label: 'Win Rate', color: '#fff' },
+                      { value: s.total === 0 ? '0%' : `${s.winRate.toFixed(1)}%`, label: 'Win rate', color: '#fff' },
                       { value: String(s.total), label: 'Trades', color: '#fff' },
                       { value: `${s.wins}W·${s.losses}L·${s.be}BE`, label: 'W/L/BE', color: '#fff' },
-                    ].map((stat, i) => (
-                      <div key={stat.label} style={{ textAlign: 'center', borderRight: i < 3 ? '0.5px solid #1a1a1a' : 'none', padding: '0 4px' }}>
-                        <p style={{ color: stat.color, fontFamily: 'JetBrains Mono, monospace', fontSize: '15px', margin: '0 0 1px 0' }}>{stat.value}</p>
-                        <p style={{ color: '#555', fontFamily: 'JetBrains Mono, monospace', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.4px', margin: 0 }}>{stat.label}</p>
+                    ].map((stat) => (
+                      <div key={stat.label}>
+                        <p style={{ color: stat.color, fontFamily: 'Inter, sans-serif', fontSize: '15px', fontWeight: '600', margin: '0 0 2px 0' }}>{stat.value}</p>
+                        <p style={{ color: '#777', fontFamily: 'Inter, sans-serif', fontSize: '10px', margin: 0 }}>{stat.label}</p>
                       </div>
                     ))}
                   </div>
 
                   {/* Progress bars */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ color: '#555', fontFamily: 'JetBrains Mono, monospace', fontSize: '9px', width: '70px', flexShrink: 0 }}>Profit</span>
-                      <div style={{ flex: 1, height: '2px', background: '#1a1a1a', borderRadius: '2px' }}>
-                        <div style={{ height: '2px', width: `${Math.max(0, Math.min(p.profitPct, 100))}%`, background: 'oklch(0.72 0.17 152)', borderRadius: '2px' }} />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#777', marginBottom: '4px' }}>
+                        <span>Profit</span>
+                        <span>{`${p.netPnlPct >= 0 ? '+' : ''}${p.netPnlPct.toFixed(1)}% / ${p.accountSize > 0 ? (p.profitTarget / p.accountSize * 100).toFixed(1) : '—'}%`}</span>
                       </div>
-                      <span style={{ color: '#555', fontFamily: 'JetBrains Mono, monospace', fontSize: '9px', width: '54px', textAlign: 'right', flexShrink: 0 }}>{`${p.netPnlPct >= 0 ? '+' : ''}${p.netPnlPct.toFixed(1)}% / ${p.accountSize > 0 ? (p.profitTarget / p.accountSize * 100).toFixed(1) : '—'}%`}</span>
+                      <div style={{ height: '3px', background: '#181818', borderRadius: '2px' }}>
+                        <div style={{ height: '3px', width: `${Math.max(0, Math.min(p.profitPct, 100))}%`, background: 'oklch(0.72 0.17 152)', borderRadius: '2px' }} />
+                      </div>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ color: '#555', fontFamily: 'JetBrains Mono, monospace', fontSize: '9px', width: '70px', flexShrink: 0 }}>Max DD</span>
-                      <div style={{ flex: 1, height: '2px', background: '#1a1a1a', borderRadius: '2px' }}>
-                        <div style={{ height: '2px', width: `${Math.max(0, Math.min(p.maxDDBarPct, 100))}%`, background: '#c03535', borderRadius: '2px' }} />
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#777', marginBottom: '4px' }}>
+                        <span>Max DD</span>
+                        <span>{`${p.maxDDUsedPct.toFixed(1)}% / ${p.maxDDLimitPct.toFixed(1)}%`}</span>
                       </div>
-                      <span style={{ color: '#555', fontFamily: 'JetBrains Mono, monospace', fontSize: '9px', width: '54px', textAlign: 'right', flexShrink: 0 }}>{`${p.maxDDUsedPct.toFixed(1)}% / ${p.maxDDLimitPct.toFixed(1)}%`}</span>
+                      <div style={{ height: '3px', background: '#181818', borderRadius: '2px' }}>
+                        <div style={{ height: '3px', width: `${Math.max(0, Math.min(p.maxDDBarPct, 100))}%`, background: '#c03535', borderRadius: '2px' }} />
+                      </div>
                     </div>
                   </div>
 
                   {/* Go to Dashboard */}
-                  <button onClick={() => navigate(`/dashboard?account=${challenge.id}`)} style={{ background: 'transparent', border: '0.5px solid #1e1e1e', borderRadius: '6px', padding: '7px 14px', color: '#999', fontFamily: 'Inter, sans-serif', fontSize: '12px', cursor: 'pointer', width: '100%' }}>
+                  <button onClick={() => navigate(`/dashboard?account=${challenge.id}`)} style={{ background: 'transparent', border: '0.5px solid #1e1e1e', borderRadius: '8px', padding: '8px 14px', color: '#999', fontFamily: 'Inter, sans-serif', fontSize: '12px', cursor: 'pointer', width: '100%' }}>
                     Go to Dashboard →
                   </button>
 
@@ -1111,24 +1115,25 @@ export default function ChallengeTracker() {
                 : `${s.netPnl >= 0 ? '+' : ''}$${Math.abs(s.netPnl).toFixed(2)}`
 
               return (
-                <div key={challenge.id} style={{ background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '12px', padding: '24px' }}>
+                <div key={challenge.id} style={{ background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '14px', padding: '24px' }}>
 
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-                        <h2 style={{ color: '#fff', fontFamily: 'Inter, sans-serif', fontSize: '18px', fontWeight: '700', margin: 0, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                        <h2 style={{ color: '#fff', fontFamily: 'Inter, sans-serif', fontSize: '16px', fontWeight: '600', margin: 0 }}>
                           {challenge.firm_name}
                         </h2>
-                        <button onClick={() => setEditingChallenge(challenge)} style={{ background: 'transparent', border: 'none', color: '#999', cursor: 'pointer', fontSize: '13px', padding: '2px 4px', lineHeight: 1 }}>✏️</button>
+                        <button onClick={() => setEditingChallenge(challenge)} style={{ background: 'transparent', border: 'none', color: '#777', cursor: 'pointer', fontSize: '13px', padding: '2px 4px', lineHeight: 1 }}>✏️</button>
                       </div>
-                      <p style={{ color: '#999', fontFamily: 'Inter, sans-serif', fontSize: '12px', margin: 0 }}>
+                      <p style={{ color: '#777', fontFamily: 'Inter, sans-serif', fontSize: '12px', margin: 0 }}>
                         {challenge.phase?.replace('_', ' ').toUpperCase()} · ${Number(challenge.account_size).toLocaleString()} · Started {challenge.start_date} · {s.total} trade{s.total !== 1 ? 's' : ''}
                       </p>
                     </div>
-                    <span style={{ background: badge.bg, border: `0.5px solid ${badge.border}`, borderRadius: '6px', padding: '5px 12px', color: badge.color, fontFamily: 'JetBrains Mono, monospace', fontSize: '12px', fontWeight: '600' }}>
+                    <span style={{ background: badge.bg, border: `0.5px solid ${badge.border}`, borderRadius: '20px', padding: '4px 12px', color: badge.color, fontFamily: 'Inter, sans-serif', fontSize: '12px', fontWeight: '500' }}>
                       {badge.label}
                     </span>
                   </div>
+
 
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '20px' }}>
                     {[
@@ -1137,7 +1142,7 @@ export default function ChallengeTracker() {
                       { label: 'Trades', value: String(s.total), color: '#fff' },
                       { label: 'W / L / BE', value: `${s.wins}W · ${s.losses}L · ${s.be}BE`, color: '#fff' },
                     ].map(stat => (
-                      <div key={stat.label} style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '8px', padding: '14px' }}>
+                      <div key={stat.label} style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '10px', padding: '14px' }}>
                         <p style={{ color: '#999', fontFamily: 'Inter, sans-serif', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 6px 0' }}>{stat.label}</p>
                         <p style={{ color: stat.color, fontFamily: 'JetBrains Mono, monospace', fontSize: '15px', margin: 0 }}>{stat.value}</p>
                       </div>
