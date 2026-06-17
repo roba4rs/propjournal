@@ -1,9 +1,9 @@
-import crypto from 'crypto';
-import { createClient } from '@supabase/supabase-js';
+const crypto = require('crypto');
+const { createClient } = require('@supabase/supabase-js');
 
 // Disable Vercel's automatic body parsing — Paddle signature verification
 // requires the exact raw request body, not the parsed/re-stringified JSON.
-export const config = {
+module.exports.config = {
   api: {
     bodyParser: false,
   },
@@ -44,16 +44,13 @@ function verifySignature(rawBody, signatureHeader, secret) {
     .update(signedPayload)
     .digest('hex');
 
-  console.log('Expected hash:', expectedHash);
-  console.log('Received hash:', h1);
-
   return crypto.timingSafeEqual(
     Buffer.from(expectedHash, 'utf8'),
     Buffer.from(h1, 'utf8')
   );
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -106,3 +103,36 @@ export default async function handler(req, res) {
           plan: planName,
           plan_expires_at: expiresAt,
         })
+        .eq('id', userId);
+
+      if (error) {
+        console.error('paddle-webhook: supabase update failed', error);
+        return res.status(500).json({ error: 'Database update failed' });
+      }
+
+      console.log(`paddle-webhook: activated ${planName} for user ${userId}`);
+    }
+
+    if (eventType === 'subscription.canceled') {
+      const userId = data.custom_data?.user_id;
+      if (userId) {
+        await supabase
+          .from('users')
+          .update({ plan: 'free_trial' })
+          .eq('id', userId);
+
+        console.log(`paddle-webhook: canceled subscription for user ${userId}`);
+      }
+    }
+
+    if (eventType === 'transaction.completed') {
+      console.log('paddle-webhook: transaction completed', data.id);
+    }
+
+    return res.status(200).json({ received: true });
+
+  } catch (err) {
+    console.error('paddle-webhook error:', err);
+    return res.status(500).json({ error: 'Server error' });
+  }
+};
