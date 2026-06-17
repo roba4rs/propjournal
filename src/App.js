@@ -16,6 +16,7 @@ import PrivacyPolicy from './pages/PrivacyPolicy'
 import RefundPolicy from './pages/RefundPolicy'
 import { supabase } from './supabaseClient'
 import { SidebarProvider } from './SidebarContext'
+import { PaddleProvider } from './PaddleContext'
 
 function AuthListener() {
   const navigate = useNavigate()
@@ -38,26 +39,28 @@ function AuthListener() {
 
 function App() {
   return (
-    <SidebarProvider>
-      <BrowserRouter>
-        <AuthListener />
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/pricing" element={<Pricing />} />
-          <Route path="/auth/callback" element={<AuthCallback />} />
-          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/challenges" element={<ProtectedRoute><ChallengeTracker /></ProtectedRoute>} />
-          <Route path="/trades" element={<ProtectedRoute><TradeLog /></ProtectedRoute>} />
-          <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
-          <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-          <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/privacy" element={<PrivacyPolicy />} />
-          <Route path="/refund-policy" element={<RefundPolicy />} />
-        </Routes>
-      </BrowserRouter>
-    </SidebarProvider>
+    <PaddleProvider>
+      <SidebarProvider>
+        <BrowserRouter>
+          <AuthListener />
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/challenges" element={<ProtectedRoute><ChallengeTracker /></ProtectedRoute>} />
+            <Route path="/trades" element={<ProtectedRoute><TradeLog /></ProtectedRoute>} />
+            <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+            <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/refund-policy" element={<RefundPolicy />} />
+          </Routes>
+        </BrowserRouter>
+      </SidebarProvider>
+    </PaddleProvider>
   )
 }
 
