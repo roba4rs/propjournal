@@ -2,6 +2,8 @@ const crypto = require('crypto');
 const { createClient } = require('@supabase/supabase-js');
 const getRawBody = require('raw-body');
 
+// Disable Vercel's automatic body parsing — Paddle signature verification
+// requires the exact raw request body, not the parsed/re-stringified JSON.
 module.exports.config = {
   api: {
     bodyParser: false,
@@ -13,6 +15,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
+// Maps Paddle price IDs back to your internal plan names
 const PRICE_TO_PLAN = {
   [process.env.REACT_APP_PADDLE_MONTHLY_PRICE_ID]: { plan: 'monthly', days: 30 },
   [process.env.REACT_APP_PADDLE_SIXMONTH_PRICE_ID]: { plan: 'biannual', days: 183 },
@@ -20,6 +23,7 @@ const PRICE_TO_PLAN = {
 };
 
 function verifySignature(rawBody, signatureHeader, secret) {
+  // Paddle signature header format: "ts=<timestamp>;h1=<hash>"
   const parts = Object.fromEntries(
     signatureHeader.split(';').map((p) => p.split('='))
   );
@@ -31,14 +35,6 @@ function verifySignature(rawBody, signatureHeader, secret) {
     .createHmac('sha256', secret)
     .update(signedPayload)
     .digest('hex');
-
-  console.log('=== SIGNATURE DEBUG ===');
-  console.log('ts used:', ts);
-  console.log('rawBody length used:', rawBody.length);
-  console.log('computed hash:', expectedHash);
-  console.log('paddle hash  :', h1);
-  console.log('MATCH:', expectedHash === h1);
-  console.log('=======================');
 
   return crypto.timingSafeEqual(
     Buffer.from(expectedHash, 'utf8'),
@@ -77,7 +73,7 @@ module.exports = async function handler(req, res) {
 
       if (!userId) {
         console.error('paddle-webhook: missing user_id in custom_data', data);
-        return res.status(200).json({ received: true });
+        return res.status(200).json({ received: true }); // ack so Paddle doesn't retry forever
       }
 
       const planInfo = PRICE_TO_PLAN[priceId];
@@ -114,6 +110,8 @@ module.exports = async function handler(req, res) {
       }
     }
 
+    // transaction.completed is mainly useful for logging/analytics;
+    // subscription.activated already handles granting access.
     if (eventType === 'transaction.completed') {
       console.log('paddle-webhook: transaction completed', data.id);
     }
