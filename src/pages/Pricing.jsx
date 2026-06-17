@@ -2,11 +2,10 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import Sidebar from '../components/Sidebar'
-import { usePaddle } from '../PaddleContext'
 
 const features = [
   'Unlimited trades',
-  'Unlimited challenges accounts',
+  'Unlimited challenge accounts',
   'Screenshot uploads',
   'Full analytics + charts',
   'Calendar heatmap',
@@ -54,7 +53,6 @@ export default function Pricing() {
   const [error, setError] = useState('')
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const navigate = useNavigate()
-  const paddle = usePaddle()
 
   const expired = new URLSearchParams(window.location.search).get('expired') === 'true'
 
@@ -71,20 +69,14 @@ export default function Pricing() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { navigate('/login'); return }
 
-      const priceMap = {
-        monthly: process.env.REACT_APP_PADDLE_MONTHLY_PRICE_ID,
-        biannual: process.env.REACT_APP_PADDLE_SIXMONTH_PRICE_ID,
-        annual: process.env.REACT_APP_PADDLE_YEARLY_PRICE_ID,
-      }
-
-      console.log('Token:', process.env.REACT_APP_PADDLE_CLIENT_TOKEN)
-      console.log('Price ID:', priceMap[planId])
-
-      paddle.Checkout.open({
-        items: [{ priceId: priceMap[planId], quantity: 1 }],
-        customer: { email: user.email },
-        customData: { user_id: user.id },
+      const response = await fetch('/api/create-invoice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: planId, user_id: user.id, email: user.email }),
       })
+      const data = await response.json()
+      if (!response.ok) { setError('Failed to create invoice. Please try again.'); return }
+      window.open(data.payment_url, '_blank')
     } catch (err) {
       console.error(err)
       setError('Something went wrong. Please try again.')
@@ -153,6 +145,7 @@ export default function Pricing() {
 
               {isMobile ? (
                 <>
+                  {/* Left: label + billing info */}
                   <div style={{ flex: 1 }}>
                     {plan.highlight && (
                       <div style={{
@@ -193,6 +186,7 @@ export default function Pricing() {
                     )}
                   </div>
 
+                  {/* Right: price + button */}
                   <div style={{
                     display: 'flex',
                     flexDirection: 'column',
