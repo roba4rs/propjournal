@@ -58,6 +58,10 @@ export default async function handler(req, res) {
   const rawBody = await getRawBody(req);
   const signatureHeader = req.headers['paddle-signature'];
 
+  console.log('Raw body length:', rawBody.length);
+  console.log('Raw body preview:', rawBody.slice(0, 200));
+  console.log('Signature header:', signatureHeader);
+
   if (!signatureHeader || !verifySignature(rawBody, signatureHeader, process.env.PADDLE_WEBHOOK_SECRET)) {
     console.error('paddle-webhook: signature verification failed');
     return res.status(401).json({ error: 'Invalid signature' });
