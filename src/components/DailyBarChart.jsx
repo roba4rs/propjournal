@@ -8,15 +8,23 @@ function toLocalDateStr(d) {
   return `${yyyy}-${mm}-${dd}`
 }
 
+function getLastTradeDate(trades) {
+  const withPnl = trades.filter(t => t.pnl != null)
+  if (!withPnl.length) return new Date()
+  const maxDateStr = withPnl.reduce((max, t) => (t.date > max ? t.date : max), withPnl[0].date)
+  return new Date(maxDateStr)
+}
+
 function getLast7Data(trades) {
   const map = {}
   trades.filter(t => t.pnl != null).forEach(t => {
     if (!map[t.date]) map[t.date] = 0
     map[t.date] = parseFloat((map[t.date] + parseFloat(t.pnl)).toFixed(2))
   })
+  const anchor = getLastTradeDate(trades)
   const days = []
   for (let i = 6; i >= 0; i--) {
-    const d = new Date()
+    const d = new Date(anchor)
     d.setDate(d.getDate() - i)
     const dateStr = toLocalDateStr(d)
     if (dateStr in map) {
@@ -32,9 +40,10 @@ function getLast30Data(trades) {
     if (!map[t.date]) map[t.date] = 0
     map[t.date] = parseFloat((map[t.date] + parseFloat(t.pnl)).toFixed(2))
   })
+  const anchor = getLastTradeDate(trades)
   const days = []
   for (let i = 29; i >= 0; i--) {
-    const d = new Date()
+    const d = new Date(anchor)
     d.setDate(d.getDate() - i)
     const dateStr = toLocalDateStr(d)
     if (dateStr in map) {

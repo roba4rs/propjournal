@@ -14,17 +14,29 @@ function buildCumulativeData(trades) {
     })
 }
 
+function getLastTradeDate(withPnl) {
+  if (!withPnl.length) return new Date()
+  // trades are date strings like 'YYYY-MM-DD' — max string compare works for that format
+  const maxDateStr = withPnl.reduce((max, t) => (t.date > max ? t.date : max), withPnl[0].date)
+  return new Date(maxDateStr)
+}
+
 function filterTrades(trades, tab, account) {
   const withPnl = trades.filter(t => t.pnl != null)
   if (tab === 'All') return withPnl
+
+  // Anchor to the account's last trade date, not today — so old/inactive
+  // accounts still show their last real activity instead of an empty window.
+  const anchor = getLastTradeDate(withPnl)
+
   if (tab === '7D') {
-    const cutoff = new Date()
+    const cutoff = new Date(anchor)
     cutoff.setDate(cutoff.getDate() - 7)
     const cutoffStr = cutoff.toISOString().split('T')[0]
     return withPnl.filter(t => t.date >= cutoffStr)
   }
   if (tab === '30D') {
-    const cutoff = new Date()
+    const cutoff = new Date(anchor)
     cutoff.setDate(cutoff.getDate() - 30)
     const cutoffStr = cutoff.toISOString().split('T')[0]
     return withPnl.filter(t => t.date >= cutoffStr)
