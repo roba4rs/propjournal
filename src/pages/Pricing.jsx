@@ -426,7 +426,6 @@ export default function Pricing() {
                     </div>
                     <button
                       onClick={() => handleUpgradeClick(plan.id)}
-                      disabled={loading === plan.id}
                       style={{
                         padding: '9px 16px',
                         borderRadius: '8px',
