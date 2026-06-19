@@ -55,10 +55,137 @@ const CheckIcon = () => (
   </svg>
 )
 
+function PaymentModal({ plan, onClose, onCard, onCrypto, loading }) {
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(0,0,0,0.7)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000,
+        padding: '16px',
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          background: '#161616',
+          border: '0.5px solid rgba(255,255,255,0.1)',
+          borderRadius: '16px',
+          padding: '28px 24px',
+          width: '100%',
+          maxWidth: '360px',
+          fontFamily: 'DM Sans, sans-serif',
+        }}
+      >
+        {/* Header */}
+        <div style={{ marginBottom: '24px' }}>
+          <h2 style={{
+            fontFamily: 'Syne, sans-serif',
+            fontSize: '18px',
+            fontWeight: '700',
+            color: '#fff',
+            margin: '0 0 6px 0',
+          }}>
+            How would you like to pay?
+          </h2>
+          <p style={{ fontSize: '13px', color: '#666', margin: 0 }}>
+            {plan.label} plan · ${plan.price}{plan.id !== 'monthly' ? ' total' : '/mo'}
+          </p>
+        </div>
+
+        {/* Options */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {/* Card */}
+          <button
+            onClick={onCard}
+            disabled={!!loading}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '14px',
+              padding: '14px 16px',
+              borderRadius: '10px',
+              border: '0.5px solid rgba(255,255,255,0.12)',
+              background: loading === 'card' ? 'rgba(255,255,255,0.05)' : 'transparent',
+              color: '#fff',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              opacity: loading && loading !== 'card' ? 0.4 : 1,
+              textAlign: 'left',
+              transition: 'background 0.15s',
+            }}
+          >
+            <span style={{ fontSize: '22px', lineHeight: 1 }}>💳</span>
+            <div>
+              <div style={{ fontSize: '14px', fontWeight: '600', marginBottom: '2px' }}>
+                {loading === 'card' ? 'Opening checkout...' : 'Pay with Card'}
+              </div>
+              <div style={{ fontSize: '11px', color: '#666' }}>Visa, Mastercard, Amex via Paddle</div>
+            </div>
+          </button>
+
+          {/* Crypto */}
+          <button
+            onClick={onCrypto}
+            disabled={!!loading}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '14px',
+              padding: '14px 16px',
+              borderRadius: '10px',
+              border: '0.5px solid rgba(255,255,255,0.12)',
+              background: loading === 'crypto' ? 'rgba(255,255,255,0.05)' : 'transparent',
+              color: '#fff',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              opacity: loading && loading !== 'crypto' ? 0.4 : 1,
+              textAlign: 'left',
+              transition: 'background 0.15s',
+            }}
+          >
+            <span style={{ fontSize: '22px', lineHeight: 1 }}>₿</span>
+            <div>
+              <div style={{ fontSize: '14px', fontWeight: '600', marginBottom: '2px' }}>
+                {loading === 'crypto' ? 'Creating invoice...' : 'Pay with Crypto'}
+              </div>
+              <div style={{ fontSize: '11px', color: '#666' }}>BTC, ETH, USDT and more via NOWPayments</div>
+            </div>
+          </button>
+        </div>
+
+        {/* Cancel */}
+        <button
+          onClick={onClose}
+          disabled={!!loading}
+          style={{
+            marginTop: '20px',
+            width: '100%',
+            padding: '10px',
+            background: 'transparent',
+            border: 'none',
+            color: '#555',
+            fontSize: '13px',
+            cursor: loading ? 'not-allowed' : 'pointer',
+            fontFamily: 'DM Sans, sans-serif',
+          }}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export default function Pricing() {
   const [loading, setLoading] = useState(null)
   const [error, setError] = useState('')
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  const [selectedPlan, setSelectedPlan] = useState(null) // plan object for modal
+  const [modalLoading, setModalLoading] = useState(null) // 'card' | 'crypto' | null
   const navigate = useNavigate()
   const paddle = usePaddle()
 
@@ -70,21 +197,35 @@ export default function Pricing() {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  async function handleUpgrade(planId) {
-    setLoading(planId)
+  async function getUser() {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { navigate('/login'); return null }
+    return user
+  }
+
+  function handleUpgradeClick(planId) {
+    const plan = plans.find(p => p.id === planId)
+    setSelectedPlan(plan)
+    setError('')
+  }
+
+  async function handleCard() {
+    setModalLoading('card')
     setError('')
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { navigate('/login'); return }
+      const user = await getUser()
+      if (!user) return
 
       if (!paddle) {
         setError('Checkout is still loading. Please wait a moment and try again.')
+        setSelectedPlan(null)
         return
       }
 
-      const priceId = PRICE_IDS[planId]
+      const priceId = PRICE_IDS[selectedPlan.id]
       if (!priceId) {
         setError('This plan is not available right now.')
+        setSelectedPlan(null)
         return
       }
 
@@ -93,17 +234,66 @@ export default function Pricing() {
         customer: { email: user.email },
         customData: { user_id: user.id },
       })
+
+      setSelectedPlan(null)
     } catch (err) {
       console.error(err)
       setError('Something went wrong. Please try again.')
+      setSelectedPlan(null)
     } finally {
-      setLoading(null)
+      setModalLoading(null)
+    }
+  }
+
+  async function handleCrypto() {
+    setModalLoading('crypto')
+    setError('')
+    try {
+      const user = await getUser()
+      if (!user) return
+
+      const response = await fetch('/api/create-invoice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          plan: selectedPlan.id,
+          user_id: user.id,
+          email: user.email,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok || !data.payment_url) {
+        setError('Failed to create crypto invoice. Please try again.')
+        setSelectedPlan(null)
+        return
+      }
+
+      window.location.href = data.payment_url
+    } catch (err) {
+      console.error(err)
+      setError('Something went wrong. Please try again.')
+      setSelectedPlan(null)
+    } finally {
+      setModalLoading(null)
     }
   }
 
   return (
     <div style={{ display: 'flex', background: '#0a0a0a', minHeight: '100vh' }}>
       <Sidebar />
+
+      {/* Payment method modal */}
+      {selectedPlan && (
+        <PaymentModal
+          plan={selectedPlan}
+          loading={modalLoading}
+          onClose={() => { if (!modalLoading) setSelectedPlan(null) }}
+          onCard={handleCard}
+          onCrypto={handleCrypto}
+        />
+      )}
 
       <main style={{
         marginLeft: isMobile ? '0' : '220px',
@@ -236,7 +426,7 @@ export default function Pricing() {
                       <div style={{ fontSize: '10px', color: '#777' }}>/ month</div>
                     </div>
                     <button
-                      onClick={() => handleUpgrade(plan.id)}
+                      onClick={() => handleUpgradeClick(plan.id)}
                       disabled={loading === plan.id}
                       style={{
                         padding: '9px 16px',
@@ -247,12 +437,11 @@ export default function Pricing() {
                         fontSize: '12px',
                         fontWeight: '600',
                         fontFamily: 'DM Sans, sans-serif',
-                        cursor: loading === plan.id ? 'not-allowed' : 'pointer',
-                        opacity: loading === plan.id ? 0.6 : 1,
+                        cursor: 'pointer',
                         whiteSpace: 'nowrap',
                       }}
                     >
-                      {loading === plan.id ? '...' : 'Upgrade'}
+                      Upgrade
                     </button>
                   </div>
                 </>
@@ -350,8 +539,7 @@ export default function Pricing() {
                   </ul>
 
                   <button
-                    onClick={() => handleUpgrade(plan.id)}
-                    disabled={loading === plan.id}
+                    onClick={() => handleUpgradeClick(plan.id)}
                     style={{
                       display: 'block',
                       width: '100%',
@@ -363,12 +551,11 @@ export default function Pricing() {
                       fontSize: '13px',
                       fontWeight: '600',
                       fontFamily: 'DM Sans, sans-serif',
-                      cursor: loading === plan.id ? 'not-allowed' : 'pointer',
-                      opacity: loading === plan.id ? 0.6 : 1,
+                      cursor: 'pointer',
                       transition: 'opacity 0.2s',
                     }}
                   >
-                    {loading === plan.id ? 'Processing...' : 'Upgrade'}
+                    Upgrade
                   </button>
                 </>
               )}
