@@ -181,7 +181,6 @@ function PaymentModal({ plan, onClose, onCard, onCrypto, loading }) {
 }
 
 export default function Pricing() {
-  const [loading, setLoading] = useState(null)
   const [error, setError] = useState('')
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const [selectedPlan, setSelectedPlan] = useState(null) // plan object for modal
