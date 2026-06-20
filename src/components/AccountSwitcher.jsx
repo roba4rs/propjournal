@@ -98,7 +98,7 @@ export default function AccountSwitcher({
 
   const groupLabelStyle = {
     display: 'block',
-    color: '#3a3a3a',
+    color: 'var(--text-faint-2)',
     fontFamily: 'DM Mono, monospace',
     fontSize: '9px',
     fontWeight: '500',
@@ -112,10 +112,10 @@ export default function AccountSwitcher({
     alignItems: 'center',
     justifyContent: 'space-between',
     width: '100%',
-    background: isActive ? '#0f2219' : 'transparent',
+    background: isActive ? 'var(--green-bg)' : 'transparent',
     border: 'none',
     padding: '9px 12px',
-    color: isActive ? '#1db97b' : '#ccc',
+    color: isActive ? 'var(--brand)' : 'var(--text-soft)',
     fontFamily: 'DM Sans, sans-serif',
     fontSize: '13px',
     fontWeight: isActive ? '500' : '400',
@@ -142,11 +142,11 @@ export default function AccountSwitcher({
               display: 'flex',
               alignItems: 'center',
               gap: '10px',
-              background: '#111',
-              border: '0.5px solid #1e1e1e',
+              background: 'var(--bg-surface)',
+              border: '0.5px solid var(--border-color)',
               borderRadius: '10px',
               padding: compact ? '7px 10px' : mobile ? '10px 12px' : '9px 14px',
-              color: '#fff',
+              color: 'var(--text-primary)',
               fontFamily: 'DM Sans, sans-serif',
               fontSize: compact ? '12px' : '13px',
               fontWeight: '500',
@@ -168,7 +168,7 @@ export default function AccountSwitcher({
               width="10" height="6" viewBox="0 0 10 6" fill="none"
               style={{ flexShrink: 0, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }}
             >
-              <path d="M1 1l4 4 4-4" stroke="#777" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M1 1l4 4 4-4" stroke="var(--text-faint)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
 
@@ -179,8 +179,8 @@ export default function AccountSwitcher({
               left: 0,
               minWidth: mobile && !compact ? '100%' : '220px',
               width: mobile && !compact ? '100%' : 'auto',
-              background: '#111',
-              border: '0.5px solid #1e1e1e',
+              background: 'var(--bg-surface)',
+              border: '0.5px solid var(--border-color)',
               borderRadius: '10px',
               zIndex: 100,
               overflow: 'hidden',
@@ -194,7 +194,7 @@ export default function AccountSwitcher({
                       <span>{acc.name}</span>
                       {active?.id === acc.id && (
                         <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                          <path d="M2 6l3 3 5-5" stroke="#1db97b" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M2 6l3 3 5-5" stroke="var(--brand)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       )}
                     </button>
@@ -203,7 +203,7 @@ export default function AccountSwitcher({
               )}
 
               {personal.length > 0 && challenges.length > 0 && (
-                <div style={{ height: '0.5px', background: '#1a1a1a', margin: '4px 0' }} />
+                <div style={{ height: '0.5px', background: 'var(--border-color)', margin: '4px 0' }} />
               )}
 
               {/* + New Account */}
@@ -211,7 +211,7 @@ export default function AccountSwitcher({
                 onClick={() => { setOpen(false); window.location.href = '/settings?section=personal-accounts' }}
                 style={{
                   display: 'block', width: '100%', background: 'transparent', border: 'none',
-                  padding: '9px 12px', color: '#777', fontFamily: 'DM Sans, sans-serif',
+                  padding: '9px 12px', color: 'var(--text-faint)', fontFamily: 'DM Sans, sans-serif',
                   fontSize: '12px', cursor: 'pointer', textAlign: 'left', boxSizing: 'border-box',
                 }}
               >
@@ -219,7 +219,7 @@ export default function AccountSwitcher({
               </button>
 
               {personal.length > 0 && challenges.length > 0 && (
-                <div style={{ height: '0.5px', background: '#1a1a1a', margin: '4px 0' }} />
+                <div style={{ height: '0.5px', background: 'var(--border-color)', margin: '4px 0' }} />
               )}
 
               {challenges.length > 0 && (
@@ -230,7 +230,7 @@ export default function AccountSwitcher({
                       <span>{acc.name}</span>
                       {active?.id === acc.id && (
                         <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                          <path d="M2 6l3 3 5-5" stroke="#1db97b" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M2 6l3 3 5-5" stroke="var(--brand)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       )}
                     </button>
@@ -238,12 +238,12 @@ export default function AccountSwitcher({
                 </>
               )}
 
-              <div style={{ height: '0.5px', background: '#1a1a1a', margin: '4px 0' }} />
+              <div style={{ height: '0.5px', background: 'var(--border-color)', margin: '4px 0' }} />
               <button
                 onClick={() => { setOpen(false); window.location.href = '/challenges' }}
                 style={{
                   display: 'block', width: '100%', background: 'transparent', border: 'none',
-                  padding: '9px 12px', color: '#777', fontFamily: 'DM Sans, sans-serif',
+                  padding: '9px 12px', color: 'var(--text-faint)', fontFamily: 'DM Sans, sans-serif',
                   fontSize: '12px', cursor: 'pointer', textAlign: 'left', boxSizing: 'border-box',
                 }}
               >
@@ -259,18 +259,18 @@ export default function AccountSwitcher({
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            background: '#0f0f0f',
-            border: '0.5px solid #1a1a1a',
+            background: 'var(--bg-surface-2)',
+            border: '0.5px solid var(--border-color)',
             borderRadius: '10px',
             padding: mobile ? '10px 12px' : '9px 14px',
             width: mobile ? '100%' : 'auto',
             boxSizing: 'border-box',
           }}>
-            <span style={{ color: '#777', fontFamily: 'DM Sans, sans-serif', fontSize: '11px' }}>
+            <span style={{ color: 'var(--text-faint)', fontFamily: 'DM Sans, sans-serif', fontSize: '11px' }}>
               Balance
             </span>
             <span style={{
-              color: totalBalance >= (Number(active.account_size) || 0) ? '#1db97b' : '#c03535',
+              color: totalBalance >= (Number(active.account_size) || 0) ? 'var(--brand)' : 'var(--red)',
               fontFamily: 'DM Mono, monospace',
               fontSize: '13px',
               fontWeight: '500',
