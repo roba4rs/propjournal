@@ -69,18 +69,6 @@ function Row({ label, children, last }) {
   )
 }
 
-// Section header for mobile tables
-function SectionHeader({ cols }) {
-  return (
-    <div style={{
-      display: 'grid', gridTemplateColumns: cols,
-      padding: '7px 14px', borderBottom: '0.5px solid #1e1e1e',
-      background: '#0d0d0d',
-    }}>
-      {/* cols is just for layout — labels passed separately */}
-    </div>
-  )
-}
 
 export default function AdminUserDetail() {
   const { userId } = useParams()

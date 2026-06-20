@@ -36,15 +36,6 @@ function PlanBadge({ plan }) {
   )
 }
 
-// Mobile field row: label on left, value on right
-function Field({ label, children }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 14px', borderBottom: '0.5px solid #1a1a1a' }}>
-      <span style={{ fontSize: '11px', color: '#555', fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</span>
-      <span style={{ fontSize: '13px', color: '#ccc', fontFamily: 'Inter, sans-serif', textAlign: 'right' }}>{children}</span>
-    </div>
-  )
-}
 
 export default function AdminUsers() {
   const [users, setUsers] = useState([])
