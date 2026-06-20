@@ -555,7 +555,7 @@ function PreviewModal({ challenge, trades, onClose, navigate, isMobile }) {
 
   const recentTrades = [...trades]
     .sort((a, b) => new Date(b.date) - new Date(a.date))
-    .slice(0, 5)
+    .slice(0, 8)
 
   const statBlock = (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '18px' }}>
@@ -574,7 +574,7 @@ function PreviewModal({ challenge, trades, onClose, navigate, isMobile }) {
   )
 
   const progressBlock = (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: isMobile ? '20px' : 0 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: isMobile ? '20px' : 0, flex: isMobile ? 'none' : 1, justifyContent: isMobile ? 'flex-start' : 'space-between' }}>
       <ProgressBlock
         label="Profit Target"
         barPct={p.profitPct}
@@ -678,7 +678,7 @@ function PreviewModal({ challenge, trades, onClose, navigate, isMobile }) {
         onClick={e => e.stopPropagation()}
         style={isMobile
           ? { background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '14px', padding: '24px', width: '100%', maxWidth: '480px', maxHeight: '85vh', overflowY: 'auto', fontFamily: 'Inter, sans-serif' }
-          : { background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '14px', padding: '28px', width: '100%', maxWidth: '860px', maxHeight: '82vh', fontFamily: 'Inter, sans-serif', display: 'flex', flexDirection: 'column' }
+          : { background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '14px', padding: '28px 28px 32px', width: '100%', maxWidth: '860px', maxHeight: '82vh', fontFamily: 'Inter, sans-serif', display: 'flex', flexDirection: 'column' }
         }
       >
         {header}
@@ -692,8 +692,8 @@ function PreviewModal({ challenge, trades, onClose, navigate, isMobile }) {
           </>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '28px', flex: 1, minHeight: 0 }}>
-            {/* Left column: stats + progress bars */}
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
+            {/* Left column: stats + progress bars, stretched to match right column height */}
+            <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
               {statBlock}
               {progressBlock}
             </div>
