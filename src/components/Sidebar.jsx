@@ -1,11 +1,12 @@
 import { NavLink, useNavigate, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Flame, TrendingUp, Settings2, BookOpen, Plus, Bell } from 'lucide-react'
+import { LayoutDashboard, Flame, TrendingUp, Settings2, BookOpen, Plus, Bell, ShieldCheck } from 'lucide-react'
 
 import { supabase } from '../supabaseClient'
 import { useEffect, useState, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useSidebar } from '../SidebarContext'
 import NotificationPanel from './NotificationPanel'
+import { ADMIN_USER_ID } from '../constants/admin'
 
 const navItems = [
   { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
@@ -81,7 +82,7 @@ export default function Sidebar() {
       if (session) {
         supabase
           .from('users')
-          .select('name, plan')
+          .select('id, name, plan')
           .eq('id', session.user.id)
           .single()
           .then(({ data }) => setUser(data))
@@ -237,6 +238,34 @@ export default function Sidebar() {
               {!collapsed && item.label}
             </NavLink>
           ))}
+
+          {/* Admin — only visible to admin user */}
+          {user?.id === ADMIN_USER_ID && (
+            <NavLink
+              to="/admin/users"
+              title={collapsed ? 'Admin' : ''}
+              style={({ isActive }) => ({
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: collapsed ? 'center' : 'flex-start',
+                gap: collapsed ? '0' : '10px',
+                padding: '10px 12px',
+                borderRadius: '8px',
+                marginBottom: '4px',
+                textDecoration: 'none',
+                background: isActive ? '#0f2219' : 'transparent',
+                color: isActive ? '#1bba7c' : '#999',
+                fontFamily: 'Inter, sans-serif',
+                fontSize: '14px',
+                fontWeight: isActive ? '500' : '400',
+                transition: 'all 0.15s ease',
+                whiteSpace: 'nowrap',
+              })}
+            >
+              <ShieldCheck size={16} strokeWidth={1.8} style={{ flexShrink: 0 }} />
+              {!collapsed && 'Admin'}
+            </NavLink>
+          )}
 
           {/* Bell — Notifications */}
           <button
@@ -532,6 +561,30 @@ export default function Sidebar() {
               {item.label}
             </NavLink>
           ))}
+
+          {/* Admin — only visible to admin user */}
+          {user?.id === ADMIN_USER_ID && (
+            <NavLink
+              to="/admin/users"
+              style={({ isActive }) => ({
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '12px 14px',
+                borderRadius: '10px',
+                marginBottom: '4px',
+                textDecoration: 'none',
+                background: isActive ? '#0f2219' : 'transparent',
+                color: isActive ? '#1bba7c' : '#aaa',
+                fontFamily: 'Inter, sans-serif',
+                fontSize: '15px',
+                fontWeight: isActive ? '500' : '400',
+              })}
+            >
+              <ShieldCheck size={16} strokeWidth={1.8} style={{ flexShrink: 0 }} />
+              Admin
+            </NavLink>
+          )}
         </nav>
 
         {/* Drawer Footer — User info + Sign out */}
