@@ -1,15 +1,5 @@
 import { PieChart, Pie, Cell } from 'recharts'
-
-const T = {
-  card:      '#111',
-  cardBorder:'#1e1e1e',
-  green:     '#1db97b',
-  red:       '#c03535',
-  amber:     '#c97a00',
-  muted:     '#777',
-  sub:       '#aaa',
-  text:      '#e8e8e8',
-}
+import { useTheme } from '../ThemeContext'
 
 const font = {
   heading: "'Syne', sans-serif",
@@ -18,6 +8,22 @@ const font = {
 }
 
 export default function WinLossDonut({ trades = [], mobile = false }) {
+  const { isLight } = useTheme()
+
+  // T.green/red/amber feed Recharts Cell `fill` props directly (not CSS), so they
+  // need resolved literal hex per theme rather than var() strings.
+  const T = {
+    card:       'var(--bg-surface)',
+    cardBorder: 'var(--border-color-2)',
+    green:      isLight ? '#169c69' : '#1db97b',
+    red:        '#c03535',
+    amber:      '#c97a00',
+    muted:      'var(--text-faint)',
+    sub:        'var(--text-soft)',
+    text:       'var(--text-secondary)',
+  }
+  const ringTrack = isLight ? '#d8d8da' : '#1e1e1e'
+
   const tradesWithPnl = trades.filter(t => t.pnl != null)
   const wins   = tradesWithPnl.filter(t => t.pnl > 0).length
   const losses = tradesWithPnl.filter(t => t.pnl < 0).length
@@ -44,7 +50,7 @@ export default function WinLossDonut({ trades = [], mobile = false }) {
         <div style={{ position: 'relative', width: '64px', height: '64px', flexShrink: 0 }}>
           {isEmpty ? (
             <svg width="64" height="64" viewBox="0 0 64 64">
-              <circle cx="32" cy="32" r="24" fill="none" stroke="#1e1e1e" strokeWidth="10" />
+              <circle cx="32" cy="32" r="24" fill="none" stroke={ringTrack} strokeWidth="10" />
             </svg>
           ) : (
             <PieChart width={64} height={64}>
@@ -98,7 +104,7 @@ export default function WinLossDonut({ trades = [], mobile = false }) {
     }}>
       <div style={{
         fontFamily: font.heading, fontSize: '15px', fontWeight: '600',
-        color: '#fff', marginBottom: '16px',
+        color: 'var(--text-primary)', marginBottom: '16px',
       }}>
         Win / Loss
       </div>
