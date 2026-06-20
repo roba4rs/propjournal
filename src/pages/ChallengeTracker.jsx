@@ -627,14 +627,16 @@ function PreviewModal({ challenge, trades, onClose, navigate, isMobile }) {
                 borderBottom: i < recentTrades.length - 1 ? '0.5px solid #161616' : 'none',
               }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px' }}>
-                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '13px', fontWeight: '500', color: '#e0e0e0' }}>{t.pair}</span>
-                    {ob && <span style={{ fontSize: '9px', padding: '1px 5px', borderRadius: '3px', background: ob.bg, color: ob.color, border: `0.5px solid ${ob.border}`, fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase' }}>{ob.label}</span>}
-                    <span style={{ fontSize: '9px', padding: '1px 5px', borderRadius: '3px', background: isLong ? '#0f2219' : '#1e0d0d', color: isLong ? '#1bba7c' : '#c03535', border: `0.5px solid ${isLong ? '#1a3826' : '#2e1515'}`, fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase' }}>{isLong ? 'BUY' : 'SELL'}</span>
-                  </div>
-                  <div style={{ fontSize: '10px', color: '#777' }}>{t.date}</div>
+                  <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '13px', fontWeight: '500', color: '#e0e0e0' }}>{t.pair}</span>
+                  <div style={{ fontSize: '10px', color: '#777', marginTop: '3px' }}>{t.date}</div>
                 </div>
-                <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '13px', fontWeight: '500', color: pnlVal == null ? '#777' : pnlVal >= 0 ? '#1bba7c' : '#c03535', flexShrink: 0 }}>
+                <div style={{ width: '52px', flexShrink: 0, textAlign: 'center' }}>
+                  {ob && <span style={{ fontSize: '9px', padding: '1px 5px', borderRadius: '3px', background: ob.bg, color: ob.color, border: `0.5px solid ${ob.border}`, fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase' }}>{ob.label}</span>}
+                </div>
+                <div style={{ width: '52px', flexShrink: 0, textAlign: 'center' }}>
+                  <span style={{ fontSize: '9px', padding: '1px 5px', borderRadius: '3px', background: isLong ? '#0f2219' : '#1e0d0d', color: isLong ? '#1bba7c' : '#c03535', border: `0.5px solid ${isLong ? '#1a3826' : '#2e1515'}`, fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase' }}>{isLong ? 'BUY' : 'SELL'}</span>
+                </div>
+                <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '13px', fontWeight: '500', color: pnlVal == null ? '#777' : pnlVal >= 0 ? '#1bba7c' : '#c03535', flexShrink: 0, width: '70px', textAlign: 'right' }}>
                   {pnlVal != null ? `${pnlVal >= 0 ? '+' : ''}$${Math.abs(pnlVal).toFixed(2)}` : '—'}
                 </div>
               </div>
@@ -689,7 +691,7 @@ function PreviewModal({ challenge, trades, onClose, navigate, isMobile }) {
         onClick={e => e.stopPropagation()}
         style={isMobile
           ? { background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '14px', padding: '24px', width: '100%', maxWidth: '480px', maxHeight: '85vh', overflowY: 'auto', fontFamily: 'Inter, sans-serif' }
-          : { background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '14px', padding: '28px 28px 32px', width: '100%', maxWidth: '860px', height: '82vh', maxHeight: '720px', fontFamily: 'Inter, sans-serif', display: 'flex', flexDirection: 'column', overflow: 'hidden' }
+          : { background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '14px', padding: '28px 28px 32px', width: '100%', maxWidth: '860px', height: '88vh', maxHeight: '780px', fontFamily: 'Inter, sans-serif', display: 'flex', flexDirection: 'column', overflow: 'hidden' }
         }
       >
         {header}
