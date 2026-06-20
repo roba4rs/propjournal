@@ -1,10 +1,11 @@
 import { NavLink, useNavigate, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Flame, TrendingUp, Settings2, BookOpen, Plus, Bell, ShieldCheck } from 'lucide-react'
+import { LayoutDashboard, Flame, TrendingUp, Settings2, BookOpen, Plus, Bell, ShieldCheck, Sun, Moon } from 'lucide-react'
 
 import { supabase } from '../supabaseClient'
 import { useEffect, useState, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useSidebar } from '../SidebarContext'
+import { useTheme } from '../ThemeContext'
 import NotificationPanel from './NotificationPanel'
 import { ADMIN_USER_ID } from '../constants/admin'
 
@@ -29,6 +30,7 @@ export default function Sidebar() {
   const navigate = useNavigate()
   const location = useLocation()
   const { collapsed, toggle } = useSidebar()
+  const { isLight, toggle: toggleTheme } = useTheme()
   const [user, setUser] = useState(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
@@ -153,8 +155,8 @@ export default function Sidebar() {
       <div style={{
         width: w,
         minHeight: '100vh',
-        background: '#0d0d0d',
-        borderRight: '0.5px solid #1a1a1a',
+        background: 'var(--bg-page)',
+        borderRight: '0.5px solid var(--border-color)',
         display: 'flex',
         flexDirection: 'column',
         position: 'fixed',
@@ -166,7 +168,7 @@ export default function Sidebar() {
         {/* Logo + Chevron */}
         <div style={{
           padding: '24px 20px',
-          borderBottom: '0.5px solid #1a1a1a',
+          borderBottom: '0.5px solid var(--border-color)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: collapsed ? 'center' : 'space-between',
@@ -176,13 +178,13 @@ export default function Sidebar() {
         }}>
           {!collapsed && (
             <span style={{
-              color: '#fff',
+              color: 'var(--text-primary)',
               fontFamily: 'Inter, sans-serif',
               fontWeight: '700',
               fontSize: '18px',
               letterSpacing: '-0.3px',
               whiteSpace: 'nowrap',
-            }}>Prop<span style={{ color: '#1bba7c' }}>Journal</span></span>
+            }}>Prop<span style={{ color: 'var(--brand)' }}>Journal</span></span>
           )}
           <button
             onClick={toggle}
@@ -190,7 +192,7 @@ export default function Sidebar() {
             style={{
               background: 'transparent',
               border: 'none',
-              color: '#999',
+              color: 'var(--text-muted)',
               cursor: 'pointer',
               fontSize: '16px',
               padding: '4px',
@@ -201,8 +203,8 @@ export default function Sidebar() {
               borderRadius: '4px',
               transition: 'color 0.15s ease',
             }}
-            onMouseEnter={e => e.currentTarget.style.color = '#fff'}
-            onMouseLeave={e => e.currentTarget.style.color = '#999'}
+            onMouseEnter={e => e.currentTarget.style.color = 'var(--text-primary)'}
+            onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
           >
             {collapsed ? '›' : '‹'}
           </button>
@@ -225,8 +227,8 @@ export default function Sidebar() {
                 borderRadius: '8px',
                 marginBottom: '4px',
                 textDecoration: 'none',
-                background: isActive ? '#0f2219' : 'transparent',
-                color: isActive ? '#1bba7c' : '#999',
+                background: isActive ? 'var(--green-bg)' : 'transparent',
+                color: isActive ? 'var(--brand)' : 'var(--text-muted)',
                 fontFamily: 'Inter, sans-serif',
                 fontSize: '14px',
                 fontWeight: isActive ? '500' : '400',
@@ -253,8 +255,8 @@ export default function Sidebar() {
                 borderRadius: '8px',
                 marginBottom: '4px',
                 textDecoration: 'none',
-                background: isActive ? '#0f2219' : 'transparent',
-                color: isActive ? '#1bba7c' : '#999',
+                background: isActive ? 'var(--green-bg)' : 'transparent',
+                color: isActive ? 'var(--brand)' : 'var(--text-muted)',
                 fontFamily: 'Inter, sans-serif',
                 fontSize: '14px',
                 fontWeight: isActive ? '500' : '400',
@@ -280,8 +282,8 @@ export default function Sidebar() {
               padding: '10px 12px',
               borderRadius: '8px',
               marginTop: '4px',
-              background: panelOpen ? '#0f2219' : 'transparent',
-              color: panelOpen ? '#1bba7c' : '#999',
+              background: panelOpen ? 'var(--green-bg)' : 'transparent',
+              color: panelOpen ? 'var(--brand)' : 'var(--text-muted)',
               fontFamily: 'Inter, sans-serif',
               fontSize: '14px',
               fontWeight: '400',
@@ -292,8 +294,8 @@ export default function Sidebar() {
               transition: 'all 0.15s ease',
               position: 'relative',
             }}
-            onMouseEnter={e => { if (!panelOpen) e.currentTarget.style.color = '#aaa' }}
-            onMouseLeave={e => { if (!panelOpen) e.currentTarget.style.color = '#999' }}
+            onMouseEnter={e => { if (!panelOpen) e.currentTarget.style.color = 'var(--text-soft)' }}
+            onMouseLeave={e => { if (!panelOpen) e.currentTarget.style.color = 'var(--text-muted)' }}
           >
             {/* Bell icon + badge */}
             <div style={{ position: 'relative', flexShrink: 0, display: 'flex' }}>
@@ -303,8 +305,8 @@ export default function Sidebar() {
                   position: 'absolute',
                   top: '-5px',
                   right: '-6px',
-                  background: '#c03535',
-                  color: '#fff',
+                  background: 'var(--red)',
+                  color: 'var(--text-primary)',
                   borderRadius: '50%',
                   fontSize: '9px',
                   fontWeight: '700',
@@ -323,6 +325,39 @@ export default function Sidebar() {
             </div>
             {!collapsed && 'Notifications'}
           </button>
+
+          {/* Theme Toggle */}
+          <button
+            onClick={toggleTheme}
+            title={isLight ? 'Switch to dark mode' : 'Switch to light mode'}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: collapsed ? 'center' : 'flex-start',
+              gap: collapsed ? '0' : '10px',
+              padding: '10px 12px',
+              borderRadius: '8px',
+              marginTop: '4px',
+              background: 'transparent',
+              color: 'var(--text-muted)',
+              fontFamily: 'Inter, sans-serif',
+              fontSize: '14px',
+              fontWeight: '400',
+              border: 'none',
+              cursor: 'pointer',
+              width: '100%',
+              whiteSpace: 'nowrap',
+              transition: 'all 0.15s ease',
+            }}
+            onMouseEnter={e => e.currentTarget.style.color = 'var(--text-soft)'}
+            onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
+          >
+            {isLight
+              ? <Moon size={16} strokeWidth={1.8} style={{ flexShrink: 0 }} />
+              : <Sun size={16} strokeWidth={1.8} style={{ flexShrink: 0 }} />
+            }
+            {!collapsed && (isLight ? 'Dark mode' : 'Light mode')}
+          </button>
         </nav>
 
         {/* Notification Panel */}
@@ -337,13 +372,13 @@ export default function Sidebar() {
         {/* User Info + Logout */}
         <div style={{
           padding: collapsed ? '16px 8px' : '16px 20px',
-          borderTop: '0.5px solid #1a1a1a',
+          borderTop: '0.5px solid var(--border-color)',
         }}>
           {user && !collapsed && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
               <div style={{ minWidth: 0 }}>
                 <p style={{
-                  color: '#fff',
+                  color: 'var(--text-primary)',
                   fontFamily: 'Inter, sans-serif',
                   fontSize: '13px',
                   fontWeight: '500',
@@ -356,10 +391,10 @@ export default function Sidebar() {
                   display: 'inline-block',
                   marginTop: '4px',
                   padding: '2px 8px',
-                  background: '#0f2219',
-                  border: '0.5px solid #1a3826',
+                  background: 'var(--green-bg)',
+                  border: '0.5px solid var(--green-bg-2)',
                   borderRadius: '4px',
-                  color: '#1bba7c',
+                  color: 'var(--brand)',
                   fontFamily: 'JetBrains Mono, monospace',
                   fontSize: '11px',
                 }}>{user.plan}</span>
@@ -371,15 +406,15 @@ export default function Sidebar() {
                   flexShrink: 0,
                   width: '32px', height: '32px',
                   background: 'transparent',
-                  border: '0.5px solid #1e1e1e',
+                  border: '0.5px solid var(--border-color-2)',
                   borderRadius: '8px',
-                  color: '#999',
+                  color: 'var(--text-muted)',
                   cursor: 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: '15px',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = '#c03535'; e.currentTarget.style.color = '#c03535'; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = '#1e1e1e'; e.currentTarget.style.color = '#999'; }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--red)'; e.currentTarget.style.color = 'var(--red)'; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-color-2)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
               >⏻</button>
             </div>
           )}
@@ -390,10 +425,10 @@ export default function Sidebar() {
               style={{
                 width: '100%',
                 background: 'transparent',
-                border: '0.5px solid #1e1e1e',
+                border: '0.5px solid var(--border-color-2)',
                 borderRadius: '8px',
                 padding: '9px',
-                color: '#999',
+                color: 'var(--text-muted)',
                 fontSize: '16px',
                 cursor: 'pointer',
                 textAlign: 'center',
@@ -412,23 +447,23 @@ export default function Sidebar() {
           onClick={cancelLogout}
         >
           <div style={{
-            background: '#111', border: '0.5px solid #1e1e1e',
+            background: 'var(--bg-surface)', border: '0.5px solid var(--border-color-2)',
             borderRadius: '12px', padding: '24px 28px', width: '280px',
           }}
             onClick={e => e.stopPropagation()}
           >
-            <p style={{ color: '#fff', fontFamily: 'Inter, sans-serif', fontSize: '15px', fontWeight: '600', margin: '0 0 8px' }}>Sign out?</p>
-            <p style={{ color: '#777', fontFamily: 'Inter, sans-serif', fontSize: '13px', margin: '0 0 20px' }}>You'll need to sign back in to access your trades.</p>
+            <p style={{ color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontSize: '15px', fontWeight: '600', margin: '0 0 8px' }}>Sign out?</p>
+            <p style={{ color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '13px', margin: '0 0 20px' }}>You'll need to sign back in to access your trades.</p>
             <div style={{ display: 'flex', gap: '8px' }}>
               <button onClick={handleLogout} style={{
-                flex: 1, padding: '9px', background: '#c03535', border: 'none',
-                borderRadius: '8px', color: '#fff', fontFamily: 'Inter, sans-serif',
+                flex: 1, padding: '9px', background: 'var(--red)', border: 'none',
+                borderRadius: '8px', color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif',
                 fontSize: '13px', fontWeight: '600', cursor: 'pointer',
               }}>Sign out</button>
               <button onClick={cancelLogout} style={{
                 flex: 1, padding: '9px', background: 'transparent',
-                border: '0.5px solid #2a2a2a', borderRadius: '8px',
-                color: '#aaa', fontFamily: 'Inter, sans-serif',
+                border: '0.5px solid var(--border-color-2)', borderRadius: '8px',
+                color: 'var(--text-soft)', fontFamily: 'Inter, sans-serif',
                 fontSize: '13px', cursor: 'pointer',
               }}>Cancel</button>
             </div>
@@ -450,8 +485,8 @@ export default function Sidebar() {
         left: 0,
         right: 0,
         height: '52px',
-        background: '#0d0d0d',
-        borderBottom: '0.5px solid #1a1a1a',
+        background: 'var(--bg-page)',
+        borderBottom: '0.5px solid var(--border-color)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -464,7 +499,7 @@ export default function Sidebar() {
           style={{
             background: 'transparent',
             border: 'none',
-            color: '#aaa',
+            color: 'var(--text-soft)',
             cursor: 'pointer',
             padding: '6px',
             display: 'flex',
@@ -474,9 +509,9 @@ export default function Sidebar() {
           }}
           aria-label="Open menu"
         >
-          <span style={{ display: 'block', width: '20px', height: '1.5px', background: '#aaa', borderRadius: '2px' }} />
-          <span style={{ display: 'block', width: '20px', height: '1.5px', background: '#aaa', borderRadius: '2px' }} />
-          <span style={{ display: 'block', width: '20px', height: '1.5px', background: '#aaa', borderRadius: '2px' }} />
+          <span style={{ display: 'block', width: '20px', height: '1.5px', background: 'var(--text-soft)', borderRadius: '2px' }} />
+          <span style={{ display: 'block', width: '20px', height: '1.5px', background: 'var(--text-soft)', borderRadius: '2px' }} />
+          <span style={{ display: 'block', width: '20px', height: '1.5px', background: 'var(--text-soft)', borderRadius: '2px' }} />
         </button>
 
         {/* Center intentionally blank (no brand text on mobile header) */}
@@ -505,8 +540,8 @@ export default function Sidebar() {
           left: 0,
           bottom: 0,
           width: '200px',
-          background: '#0d0d0d',
-          borderRight: '0.5px solid #1a1a1a',
+          background: 'var(--bg-page)',
+          borderRight: '0.5px solid var(--border-color)',
           display: 'flex',
           flexDirection: 'column',
           zIndex: 400,
@@ -518,19 +553,39 @@ export default function Sidebar() {
         <div style={{
           padding: '0 20px',
           height: '64px',
-          borderBottom: '0.5px solid #1a1a1a',
+          borderBottom: '0.5px solid var(--border-color)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           flexShrink: 0,
         }}>
           <span style={{
-            color: '#fff',
+            color: 'var(--text-primary)',
             fontFamily: 'Inter, sans-serif',
             fontWeight: '700',
             fontSize: '18px',
             letterSpacing: '-0.3px',
-          }}>Prop<span style={{ color: '#1bba7c' }}>Journal</span></span>
+          }}>Prop<span style={{ color: 'var(--brand)' }}>Journal</span></span>
+          <button
+            onClick={toggleTheme}
+            title={isLight ? 'Switch to dark mode' : 'Switch to light mode'}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: 'var(--text-muted)',
+              cursor: 'pointer',
+              padding: '6px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: '6px',
+            }}
+          >
+            {isLight
+              ? <Moon size={18} strokeWidth={1.8} />
+              : <Sun size={18} strokeWidth={1.8} />
+            }
+          </button>
         </div>
 
 
@@ -550,8 +605,8 @@ export default function Sidebar() {
                 borderRadius: '10px',
                 marginBottom: '4px',
                 textDecoration: 'none',
-                background: isActive ? '#0f2219' : 'transparent',
-                color: isActive ? '#1bba7c' : '#aaa',
+                background: isActive ? 'var(--green-bg)' : 'transparent',
+                color: isActive ? 'var(--brand)' : 'var(--text-soft)',
                 fontFamily: 'Inter, sans-serif',
                 fontSize: '15px',
                 fontWeight: isActive ? '500' : '400',
@@ -574,8 +629,8 @@ export default function Sidebar() {
                 borderRadius: '10px',
                 marginBottom: '4px',
                 textDecoration: 'none',
-                background: isActive ? '#0f2219' : 'transparent',
-                color: isActive ? '#1bba7c' : '#aaa',
+                background: isActive ? 'var(--green-bg)' : 'transparent',
+                color: isActive ? 'var(--brand)' : 'var(--text-soft)',
                 fontFamily: 'Inter, sans-serif',
                 fontSize: '15px',
                 fontWeight: isActive ? '500' : '400',
@@ -591,7 +646,7 @@ export default function Sidebar() {
         <div style={{
           padding: '16px 20px',
           paddingBottom: 'calc(60px + env(safe-area-inset-bottom) + 16px)',
-          borderTop: '0.5px solid #1a1a1a',
+          borderTop: '0.5px solid var(--border-color)',
         }}>
           {user && (
             <div
@@ -603,30 +658,30 @@ export default function Sidebar() {
                 padding: '8px 10px',
                 borderRadius: '10px',
                 cursor: 'pointer',
-                border: '0.5px solid #1a1a1a',
+                border: '0.5px solid var(--border-color)',
                 transition: 'background 0.15s ease',
               }}
-              onMouseEnter={e => e.currentTarget.style.background = '#111'}
+              onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-surface)'}
               onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
             >
               <div style={{
                 width: '32px',
                 height: '32px',
                 borderRadius: '50%',
-                background: '#0f2219',
-                border: '0.5px solid #1a3826',
+                background: 'var(--green-bg)',
+                border: '0.5px solid var(--green-bg-2)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 flexShrink: 0,
               }}>
-                <span style={{ color: '#1bba7c', fontFamily: 'Inter, sans-serif', fontWeight: '700', fontSize: '13px' }}>
+                <span style={{ color: 'var(--brand)', fontFamily: 'Inter, sans-serif', fontWeight: '700', fontSize: '13px' }}>
                   {user.name ? user.name.charAt(0).toUpperCase() : '?'}
                 </span>
               </div>
               <div style={{ minWidth: 0, flex: 1 }}>
                 <p style={{
-                  color: '#fff',
+                  color: 'var(--text-primary)',
                   fontFamily: 'Inter, sans-serif',
                   fontSize: '13px',
                   fontWeight: '500',
@@ -638,15 +693,15 @@ export default function Sidebar() {
                 <span style={{
                   display: 'inline-block',
                   padding: '1px 6px',
-                  background: '#0f2219',
-                  border: '0.5px solid #1a3826',
+                  background: 'var(--green-bg)',
+                  border: '0.5px solid var(--green-bg-2)',
                   borderRadius: '4px',
-                  color: '#1bba7c',
+                  color: 'var(--brand)',
                   fontFamily: 'JetBrains Mono, monospace',
                   fontSize: '10px',
                 }}>{user.plan}</span>
               </div>
-              <span style={{ color: '#999', fontSize: '15px', flexShrink: 0 }}>⏻</span>
+              <span style={{ color: 'var(--text-muted)', fontSize: '15px', flexShrink: 0 }}>⏻</span>
             </div>
           )}
         </div>
@@ -659,8 +714,8 @@ export default function Sidebar() {
         left: 0,
         right: 0,
         height: '60px',
-        background: '#0d0d0d',
-        borderTop: '0.5px solid #1a1a1a',
+        background: 'var(--bg-page)',
+        borderTop: '0.5px solid var(--border-color)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-around',
@@ -693,13 +748,13 @@ export default function Sidebar() {
                   width: '40px',
                   height: '40px',
                   borderRadius: '50%',
-                  background: '#1bba7c',
+                  background: 'var(--brand)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   boxShadow: '0 2px 12px rgba(29,185,123,0.35)',
                 }}>
-                  <Plus size={22} strokeWidth={2.5} color="#0a0a0a" />
+                  <Plus size={22} strokeWidth={2.5} color="var(--bg-page)" />
                 </div>
               </button>
             )
@@ -720,7 +775,7 @@ export default function Sidebar() {
                 flex: 1,
                 height: '100%',
                 textDecoration: 'none',
-                color: isActive ? '#1bba7c' : '#777',
+                color: isActive ? 'var(--brand)' : 'var(--text-faint)',
                 transition: 'color 0.15s ease',
                 position: 'relative',
               }}
@@ -732,8 +787,8 @@ export default function Sidebar() {
                     position: 'absolute',
                     top: '-5px',
                     right: '-7px',
-                    background: '#c03535',
-                    color: '#fff',
+                    background: 'var(--red)',
+                    color: 'var(--text-primary)',
                     borderRadius: '50%',
                     fontSize: '9px',
                     fontWeight: '700',
@@ -764,7 +819,7 @@ export default function Sidebar() {
                   transform: 'translateX(-50%)',
                   width: '28px',
                   height: '2px',
-                  background: '#1bba7c',
+                  background: 'var(--brand)',
                   borderRadius: '0 0 2px 2px',
                 }} />
               )}
@@ -786,14 +841,14 @@ export default function Sidebar() {
           backdropFilter: 'blur(3px)',
         }}>
           <div style={{
-            background: '#111',
-            border: '0.5px solid #222',
+            background: 'var(--bg-surface)',
+            border: '0.5px solid var(--border-color-2)',
             borderRadius: '16px',
             padding: '20px 20px 16px',
             width: '260px',
           }}>
             <p style={{
-              color: '#fff',
+              color: 'var(--text-primary)',
               fontFamily: 'Inter, sans-serif',
               fontSize: '14px',
               fontWeight: '500',
@@ -801,7 +856,7 @@ export default function Sidebar() {
               textAlign: 'center',
             }}>Sign out?</p>
             <p style={{
-              color: '#777',
+              color: 'var(--text-faint)',
               fontFamily: 'Inter, sans-serif',
               fontSize: '12px',
               margin: '0 0 16px 0',
@@ -813,10 +868,10 @@ export default function Sidebar() {
                 style={{
                   flex: 1,
                   background: 'transparent',
-                  border: '0.5px solid #2a2a2a',
+                  border: '0.5px solid var(--border-color-2)',
                   borderRadius: '8px',
                   padding: '9px',
-                  color: '#aaa',
+                  color: 'var(--text-soft)',
                   fontFamily: 'Inter, sans-serif',
                   fontSize: '13px',
                   cursor: 'pointer',
@@ -826,11 +881,11 @@ export default function Sidebar() {
                 onClick={handleLogout}
                 style={{
                   flex: 1,
-                  background: '#1a0a0a',
-                  border: '0.5px solid #3a1a1a',
+                  background: 'var(--red-bg)',
+                  border: '0.5px solid var(--red-bg-2)',
                   borderRadius: '8px',
                   padding: '9px',
-                  color: '#c03535',
+                  color: 'var(--red)',
                   fontFamily: 'Inter, sans-serif',
                   fontSize: '13px',
                   fontWeight: '500',
