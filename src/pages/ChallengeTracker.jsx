@@ -543,7 +543,7 @@ const previewOutcomeMap = {
   in_progress: { label: 'IN PROG', bg: '#0f1a2e', color: '#4d9fff', border: '#1a3050' },
 }
 
-function PreviewModal({ challenge, trades, onClose, navigate }) {
+function PreviewModal({ challenge, trades, onClose, navigate, isMobile }) {
   const s = computeStats(trades)
   const p = computeProgress(trades, challenge)
   const computedStatus = computeStatus(trades, challenge)
@@ -557,6 +557,118 @@ function PreviewModal({ challenge, trades, onClose, navigate }) {
     .sort((a, b) => new Date(b.date) - new Date(a.date))
     .slice(0, 5)
 
+  const statBlock = (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '18px' }}>
+      {[
+        { label: 'P&L', value: pnlLabel, color: trades.length === 0 ? '#fff' : pnlColor },
+        { label: 'Win Rate', value: s.total === 0 ? '0%' : `${s.winRate.toFixed(1)}%`, color: '#fff' },
+        { label: 'Trades', value: String(s.total), color: '#fff' },
+        { label: 'W/L/BE', value: `${s.wins}/${s.losses}/${s.be}`, color: '#fff' },
+      ].map(stat => (
+        <div key={stat.label} style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
+          <p style={{ color: stat.color, fontFamily: 'JetBrains Mono, monospace', fontSize: '13px', margin: '0 0 4px 0' }}>{stat.value}</p>
+          <p style={{ color: '#777', fontSize: '10px', margin: 0, textTransform: 'uppercase', letterSpacing: '0.4px' }}>{stat.label}</p>
+        </div>
+      ))}
+    </div>
+  )
+
+  const progressBlock = (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: isMobile ? '20px' : 0 }}>
+      <ProgressBlock
+        label="Profit Target"
+        barPct={p.profitPct}
+        barColor="#1bba7c"
+        leftLabel={`${p.netPnlPct >= 0 ? '+' : ''}${p.netPnlPct.toFixed(2)}%`}
+        rightLabel={`target ${p.accountSize > 0 ? (p.profitTarget / p.accountSize * 100).toFixed(1) : '—'}%`}
+      />
+      <ProgressBlock
+        label="Max Drawdown"
+        barPct={p.maxDDBarPct}
+        barColor="#c03535"
+        leftLabel={`${p.maxDDUsedPct.toFixed(2)}%`}
+        rightLabel={`max ${p.maxDDLimitPct.toFixed(1)}%`}
+      />
+      <ProgressBlock
+        label="Daily Drawdown"
+        barPct={p.dailyDDBarPct}
+        barColor="#c97a00"
+        leftLabel={`${p.dailyDDUsedPct.toFixed(2)}%`}
+        rightLabel={`max ${p.dailyDDLimitPct.toFixed(1)}%`}
+      />
+      <ProgressBlock
+        label="Min Trading Days"
+        barPct={p.minDaysBarPct}
+        barColor="#4d9fff"
+        leftLabel={String(p.tradingDays)}
+        rightLabel={`need ${p.minDays || '—'}`}
+      />
+    </div>
+  )
+
+  const tradesBlock = (
+    <div style={{ marginBottom: isMobile ? '20px' : 0, flex: isMobile ? 'none' : 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+      <p style={{ color: '#777', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 10px 0' }}>Recent Trades</p>
+      {recentTrades.length === 0 ? (
+        <div style={{ padding: '20px', textAlign: 'center', color: '#555', fontSize: '12px', background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '8px' }}>
+          No trades logged yet
+        </div>
+      ) : (
+        <div style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '8px', overflow: isMobile ? 'hidden' : 'auto', flex: isMobile ? 'none' : 1 }}>
+          {recentTrades.map((t, i) => {
+            const pnlVal = t.pnl != null ? parseFloat(t.pnl) : null
+            const ob = previewOutcomeMap[t.outcome]
+            const isLong = t.direction === 'long'
+            return (
+              <div key={t.id} style={{
+                display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px',
+                borderBottom: i < recentTrades.length - 1 ? '0.5px solid #161616' : 'none',
+              }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px' }}>
+                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '13px', fontWeight: '500', color: '#e0e0e0' }}>{t.pair}</span>
+                    {ob && <span style={{ fontSize: '9px', padding: '1px 5px', borderRadius: '3px', background: ob.bg, color: ob.color, border: `0.5px solid ${ob.border}`, fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase' }}>{ob.label}</span>}
+                    <span style={{ fontSize: '9px', padding: '1px 5px', borderRadius: '3px', background: isLong ? '#0f2219' : '#1e0d0d', color: isLong ? '#1bba7c' : '#c03535', border: `0.5px solid ${isLong ? '#1a3826' : '#2e1515'}`, fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase' }}>{isLong ? 'BUY' : 'SELL'}</span>
+                  </div>
+                  <div style={{ fontSize: '10px', color: '#777' }}>{t.date}</div>
+                </div>
+                <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '13px', fontWeight: '500', color: pnlVal == null ? '#777' : pnlVal >= 0 ? '#1bba7c' : '#c03535', flexShrink: 0 }}>
+                  {pnlVal != null ? `${pnlVal >= 0 ? '+' : ''}$${Math.abs(pnlVal).toFixed(2)}` : '—'}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+
+  const dashboardButton = (
+    <button
+      onClick={() => navigate(`/dashboard?account=${challenge.id}`)}
+      style={{ background: 'oklch(0.72 0.17 152)', border: 'none', borderRadius: '8px', padding: '10px 14px', color: '#000', fontWeight: '600', fontSize: '12px', cursor: 'pointer', width: '100%', marginTop: isMobile ? 0 : '16px' }}
+    >
+      Go to Full Dashboard →
+    </button>
+  )
+
+  const header = (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '18px' }}>
+      <div>
+        <h2 style={{ color: '#fff', fontSize: '16px', fontWeight: '600', margin: '0 0 4px 0' }}>{challenge.firm_name}</h2>
+        <p style={{ color: '#777', fontSize: '12px', margin: 0 }}>
+          {challenge.phase?.replace('_', ' ').toUpperCase()} · ${Number(challenge.account_size).toLocaleString()}
+        </p>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <span style={{ background: badge.bg, border: `0.5px solid ${badge.border}`, borderRadius: '20px', padding: '4px 12px', color: badge.color, fontSize: '11px', fontWeight: '500', whiteSpace: 'nowrap' }}>
+          {badge.label}
+        </span>
+        <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: '#777', fontSize: '20px', cursor: 'pointer', lineHeight: 1, padding: 0 }}>×</button>
+      </div>
+    </div>
+  )
+
   return (
     <div
       onClick={onClose}
@@ -564,114 +676,34 @@ function PreviewModal({ challenge, trades, onClose, navigate }) {
     >
       <div
         onClick={e => e.stopPropagation()}
-        style={{ background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '14px', padding: '24px', width: '100%', maxWidth: '480px', maxHeight: '85vh', overflowY: 'auto', fontFamily: 'Inter, sans-serif' }}
+        style={isMobile
+          ? { background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '14px', padding: '24px', width: '100%', maxWidth: '480px', maxHeight: '85vh', overflowY: 'auto', fontFamily: 'Inter, sans-serif' }
+          : { background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '14px', padding: '28px', width: '100%', maxWidth: '860px', maxHeight: '82vh', fontFamily: 'Inter, sans-serif', display: 'flex', flexDirection: 'column' }
+        }
       >
-        {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '18px' }}>
-          <div>
-            <h2 style={{ color: '#fff', fontSize: '16px', fontWeight: '600', margin: '0 0 4px 0' }}>{challenge.firm_name}</h2>
-            <p style={{ color: '#777', fontSize: '12px', margin: 0 }}>
-              {challenge.phase?.replace('_', ' ').toUpperCase()} · ${Number(challenge.account_size).toLocaleString()}
-            </p>
+        {header}
+
+        {isMobile ? (
+          <>
+            {statBlock}
+            {progressBlock}
+            {tradesBlock}
+            {dashboardButton}
+          </>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '28px', flex: 1, minHeight: 0 }}>
+            {/* Left column: stats + progress bars */}
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {statBlock}
+              {progressBlock}
+            </div>
+            {/* Right column: recent trades + dashboard button */}
+            <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+              {tradesBlock}
+              {dashboardButton}
+            </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ background: badge.bg, border: `0.5px solid ${badge.border}`, borderRadius: '20px', padding: '4px 12px', color: badge.color, fontSize: '11px', fontWeight: '500', whiteSpace: 'nowrap' }}>
-              {badge.label}
-            </span>
-            <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: '#777', fontSize: '20px', cursor: 'pointer', lineHeight: 1, padding: 0 }}>×</button>
-          </div>
-        </div>
-
-        {/* Stat strip */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '18px' }}>
-          {[
-            { label: 'P&L', value: pnlLabel, color: trades.length === 0 ? '#fff' : pnlColor },
-            { label: 'Win Rate', value: s.total === 0 ? '0%' : `${s.winRate.toFixed(1)}%`, color: '#fff' },
-            { label: 'Trades', value: String(s.total), color: '#fff' },
-            { label: 'W/L/BE', value: `${s.wins}/${s.losses}/${s.be}`, color: '#fff' },
-          ].map(stat => (
-            <div key={stat.label} style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
-              <p style={{ color: stat.color, fontFamily: 'JetBrains Mono, monospace', fontSize: '13px', margin: '0 0 4px 0' }}>{stat.value}</p>
-              <p style={{ color: '#777', fontSize: '10px', margin: 0, textTransform: 'uppercase', letterSpacing: '0.4px' }}>{stat.label}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Progress bars — all four, simple */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
-          <ProgressBlock
-            label="Profit Target"
-            barPct={p.profitPct}
-            barColor="#1bba7c"
-            leftLabel={`${p.netPnlPct >= 0 ? '+' : ''}${p.netPnlPct.toFixed(2)}%`}
-            rightLabel={`target ${p.accountSize > 0 ? (p.profitTarget / p.accountSize * 100).toFixed(1) : '—'}%`}
-          />
-          <ProgressBlock
-            label="Max Drawdown"
-            barPct={p.maxDDBarPct}
-            barColor="#c03535"
-            leftLabel={`${p.maxDDUsedPct.toFixed(2)}%`}
-            rightLabel={`max ${p.maxDDLimitPct.toFixed(1)}%`}
-          />
-          <ProgressBlock
-            label="Daily Drawdown"
-            barPct={p.dailyDDBarPct}
-            barColor="#c97a00"
-            leftLabel={`${p.dailyDDUsedPct.toFixed(2)}%`}
-            rightLabel={`max ${p.dailyDDLimitPct.toFixed(1)}%`}
-          />
-          <ProgressBlock
-            label="Min Trading Days"
-            barPct={p.minDaysBarPct}
-            barColor="#4d9fff"
-            leftLabel={String(p.tradingDays)}
-            rightLabel={`need ${p.minDays || '—'}`}
-          />
-        </div>
-
-        {/* Recent trades */}
-        <div style={{ marginBottom: '20px' }}>
-          <p style={{ color: '#777', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 10px 0' }}>Recent Trades</p>
-          {recentTrades.length === 0 ? (
-            <div style={{ padding: '20px', textAlign: 'center', color: '#555', fontSize: '12px', background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '8px' }}>
-              No trades logged yet
-            </div>
-          ) : (
-            <div style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '8px', overflow: 'hidden' }}>
-              {recentTrades.map((t, i) => {
-                const pnlVal = t.pnl != null ? parseFloat(t.pnl) : null
-                const ob = previewOutcomeMap[t.outcome]
-                const isLong = t.direction === 'long'
-                return (
-                  <div key={t.id} style={{
-                    display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px',
-                    borderBottom: i < recentTrades.length - 1 ? '0.5px solid #161616' : 'none',
-                  }}>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px' }}>
-                        <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '13px', fontWeight: '500', color: '#e0e0e0' }}>{t.pair}</span>
-                        {ob && <span style={{ fontSize: '9px', padding: '1px 5px', borderRadius: '3px', background: ob.bg, color: ob.color, border: `0.5px solid ${ob.border}`, fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase' }}>{ob.label}</span>}
-                        <span style={{ fontSize: '9px', padding: '1px 5px', borderRadius: '3px', background: isLong ? '#0f2219' : '#1e0d0d', color: isLong ? '#1bba7c' : '#c03535', border: `0.5px solid ${isLong ? '#1a3826' : '#2e1515'}`, fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase' }}>{isLong ? 'BUY' : 'SELL'}</span>
-                      </div>
-                      <div style={{ fontSize: '10px', color: '#777' }}>{t.date}</div>
-                    </div>
-                    <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '13px', fontWeight: '500', color: pnlVal == null ? '#777' : pnlVal >= 0 ? '#1bba7c' : '#c03535', flexShrink: 0 }}>
-                      {pnlVal != null ? `${pnlVal >= 0 ? '+' : ''}$${Math.abs(pnlVal).toFixed(2)}` : '—'}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Go to Dashboard */}
-        <button
-          onClick={() => navigate(`/dashboard?account=${challenge.id}`)}
-          style={{ background: 'oklch(0.72 0.17 152)', border: 'none', borderRadius: '8px', padding: '10px 14px', color: '#000', fontWeight: '600', fontSize: '12px', cursor: 'pointer', width: '100%' }}
-        >
-          Go to Full Dashboard →
-        </button>
+        )}
       </div>
     </div>
   )
@@ -1099,6 +1131,7 @@ export default function ChallengeTracker() {
             trades={tradesByAccount[previewChallenge.id] || []}
             onClose={() => setPreviewChallenge(null)}
             navigate={navigate}
+            isMobile={true}
           />
         )}
       </div>
@@ -1381,6 +1414,7 @@ export default function ChallengeTracker() {
           trades={tradesByAccount[previewChallenge.id] || []}
           onClose={() => setPreviewChallenge(null)}
           navigate={navigate}
+          isMobile={false}
         />
       )}
     </div>
