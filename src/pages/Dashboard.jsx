@@ -429,6 +429,18 @@ export default function Dashboard() {
               {todayLabel}
             </span>
           </div>
+          <div style={{ padding: '10px 16px 0' }}>
+            <AccountSwitcher
+              mobile
+              compact
+              showSelectedNameOnMobile
+              onSwitch={(acc) => {
+                setActiveAccount(acc)
+                if (acc?.id) localStorage.setItem('activeAccountId', acc.id)
+              }}
+              defaultAccountId={defaultAccountId}
+            />
+          </div>
           {paymentToast && (
             <div style={{
               margin: '12px 14px 0',
