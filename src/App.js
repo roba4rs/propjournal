@@ -19,6 +19,7 @@ import AdminUserDetail from './pages/admin/AdminUserDetail'
 import { supabase } from './supabaseClient'
 import { SidebarProvider } from './SidebarContext'
 import { PaddleProvider } from './PaddleContext'
+import { ThemeProvider } from './ThemeContext'
 import { ADMIN_USER_ID } from './constants/admin'
 
 function RequireAdmin({ children }) {
@@ -56,30 +57,32 @@ function AuthListener() {
 
 function App() {
   return (
-    <PaddleProvider>
-      <SidebarProvider>
-        <BrowserRouter>
-          <AuthListener />
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/auth/callback" element={<AuthCallback />} />
-            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/challenges" element={<ProtectedRoute><ChallengeTracker /></ProtectedRoute>} />
-            <Route path="/trades" element={<ProtectedRoute><TradeLog /></ProtectedRoute>} />
-            <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
-            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-            <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
-            <Route path="/admin/users" element={<ProtectedRoute><RequireAdmin><AdminUsers /></RequireAdmin></ProtectedRoute>} />
-            <Route path="/admin/users/:userId" element={<ProtectedRoute><RequireAdmin><AdminUserDetail /></RequireAdmin></ProtectedRoute>} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/privacy" element={<PrivacyPolicy />} />
-            <Route path="/refund-policy" element={<RefundPolicy />} />
-          </Routes>
-        </BrowserRouter>
-      </SidebarProvider>
-    </PaddleProvider>
+    <ThemeProvider>
+      <PaddleProvider>
+        <SidebarProvider>
+          <BrowserRouter>
+            <AuthListener />
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
+              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/challenges" element={<ProtectedRoute><ChallengeTracker /></ProtectedRoute>} />
+              <Route path="/trades" element={<ProtectedRoute><TradeLog /></ProtectedRoute>} />
+              <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+              <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+              <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+              <Route path="/admin/users" element={<ProtectedRoute><RequireAdmin><AdminUsers /></RequireAdmin></ProtectedRoute>} />
+              <Route path="/admin/users/:userId" element={<ProtectedRoute><RequireAdmin><AdminUserDetail /></RequireAdmin></ProtectedRoute>} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/refund-policy" element={<RefundPolicy />} />
+            </Routes>
+          </BrowserRouter>
+        </SidebarProvider>
+      </PaddleProvider>
+    </ThemeProvider>
   )
 }
 
