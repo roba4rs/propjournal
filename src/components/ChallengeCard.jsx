@@ -32,22 +32,22 @@ function fmt$(n) {
 }
 
 function pnlColor(n) {
-  if (n == null) return '#fff'
-  if (n > 0) return '#1db97b'
-  if (n < 0) return '#c03535'
-  return '#fff'
+  if (n == null) return 'var(--text-primary)'
+  if (n > 0) return 'var(--brand)'
+  if (n < 0) return 'var(--red)'
+  return 'var(--text-primary)'
 }
 
 function StatCell({ label, value, color }) {
   return (
     <div style={{
-      background: '#0f0f0f',
-      border: '0.5px solid #1a1a1a',
+      background: 'var(--bg-surface)',
+      border: '0.5px solid var(--border-color)',
       borderRadius: '10px',
       padding: '16px',
     }}>
       <p style={{
-        color: '#999',
+        color: 'var(--text-muted)',
         fontFamily: 'DM Sans, sans-serif',
         fontSize: '11px',
         textTransform: 'uppercase',
@@ -55,7 +55,7 @@ function StatCell({ label, value, color }) {
         margin: '0 0 6px 0',
       }}>{label}</p>
       <p style={{
-        color: color || '#fff',
+        color: color || 'var(--text-primary)',
         fontFamily: 'DM Mono, monospace',
         fontSize: '18px',
         margin: 0,
@@ -69,15 +69,15 @@ function ProgressBar({ label, pct, color, rightLabel }) {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-        <span style={{ color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '11px' }}>{label}</span>
-        <span style={{ color: '#999', fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>{clamped.toFixed(1)}%</span>
+        <span style={{ color: 'var(--text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: '11px' }}>{label}</span>
+        <span style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>{clamped.toFixed(1)}%</span>
       </div>
-      <div style={{ height: '3px', background: '#181818', borderRadius: '2px' }}>
+      <div style={{ height: '3px', background: 'var(--bg-surface-2)', borderRadius: '2px' }}>
         <div style={{ height: '3px', width: `${clamped}%`, background: color, borderRadius: '2px', transition: 'width 0.4s ease' }} />
       </div>
       {rightLabel && (
         <div style={{ marginTop: '3px', textAlign: 'right' }}>
-          <span style={{ color: '#555', fontFamily: 'DM Mono, monospace', fontSize: '10px' }}>{rightLabel}</span>
+          <span style={{ color: 'var(--text-faint-2)', fontFamily: 'DM Mono, monospace', fontSize: '10px' }}>{rightLabel}</span>
         </div>
       )}
     </div>
@@ -131,7 +131,7 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
   const accountType = account?.type || 'personal'
 
   const Skeleton = ({ w = '60px', h = '22px' }) => (
-    <div style={{ width: w, height: h, background: '#1a1a1a', borderRadius: '4px', animation: 'pulse 1.5s ease-in-out infinite' }} />
+    <div style={{ width: w, height: h, background: 'var(--border-color)', borderRadius: '4px', animation: 'pulse 1.5s ease-in-out infinite' }} />
   )
 
   // ── Personal ──
@@ -140,46 +140,46 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
 
     return (
       <div style={{
-        background: '#111', border: '0.5px solid #1e1e1e',
+        background: 'var(--bg-surface)', border: '0.5px solid var(--border-color-2)',
         borderRadius: '12px', padding: '24px',
         flex: 1, display: 'flex', flexDirection: 'column',
       }}>
         <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }`}</style>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
           <div>
-            <h2 style={{ color: '#fff', fontFamily: 'Syne, sans-serif', fontSize: '15px', fontWeight: '600', margin: '0 0 4px 0' }}>{account?.name || 'Personal Account'}</h2>
+            <h2 style={{ color: 'var(--text-primary)', fontFamily: 'Syne, sans-serif', fontSize: '15px', fontWeight: '600', margin: '0 0 4px 0' }}>{account?.name || 'Personal Account'}</h2>
             {mobile ? (
-              <p style={{ color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '12px', margin: 0 }}>{s.total} trades · {new Set(trades.map(t => t.date)).size} days</p>
+              <p style={{ color: 'var(--text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: '12px', margin: 0 }}>{s.total} trades · {new Set(trades.map(t => t.date)).size} days</p>
             ) : (
-              <p style={{ color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '13px', margin: 0 }}>Your personal trading account — no prop firm rules apply</p>
+              <p style={{ color: 'var(--text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: '13px', margin: 0 }}>Your personal trading account — no prop firm rules apply</p>
             )}
           </div>
-          {!mobile && <span style={{ background: '#0f2219', border: '0.5px solid #1a3826', borderRadius: '6px', padding: '4px 10px', color: '#1db97b', fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>Personal</span>}
+          {!mobile && <span style={{ background: 'var(--green-bg)', border: '0.5px solid var(--green-bg-2)', borderRadius: '6px', padding: '4px 10px', color: 'var(--brand)', fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>Personal</span>}
         </div>
 
         {/* Mobile stats — single row */}
         {mobile && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px', marginBottom: '12px' }}>
           {loading ? (
-            [1,2,3,4].map(i => <div key={i} style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '8px', padding: '10px 8px' }}><div style={{background:'#1a1a1a',height:'8px',width:'30px',borderRadius:'4px'}}/><div style={{background:'#1a1a1a',height:'16px',width:'50px',borderRadius:'4px',marginTop:'8px'}}/></div>)
+            [1,2,3,4].map(i => <div key={i} style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '8px', padding: '10px 8px' }}><div style={{background:'var(--border-color)',height:'8px',width:'30px',borderRadius:'4px'}}/><div style={{background:'var(--border-color)',height:'16px',width:'50px',borderRadius:'4px',marginTop:'8px'}}/></div>)
           ) : (<>
-            <div style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '8px', padding: '10px 8px', textAlign: 'center' }}>
-              <p style={{ color: '#999', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 4px 0' }}>Win%</p>
-              <p style={{ color: s.total === 0 ? '#fff' : s.winRate >= 50 ? '#1db97b' : '#c03535', fontFamily: 'DM Mono, monospace', fontSize: '13px', fontWeight: '600', margin: 0 }}>{s.total === 0 ? '0%' : `${s.winRate.toFixed(1)}%`}</p>
+            <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '8px', padding: '10px 8px', textAlign: 'center' }}>
+              <p style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 4px 0' }}>Win%</p>
+              <p style={{ color: s.total === 0 ? 'var(--text-primary)' : s.winRate >= 50 ? 'var(--brand)' : 'var(--red)', fontFamily: 'DM Mono, monospace', fontSize: '13px', fontWeight: '600', margin: 0 }}>{s.total === 0 ? '0%' : `${s.winRate.toFixed(1)}%`}</p>
             </div>
-            <div style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '8px', padding: '10px 8px', textAlign: 'center' }}>
-              <p style={{ color: '#999', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 4px 0' }}>P.Factor</p>
-              <p style={{ color: s.total === 0 ? '#fff' : s.profitFactor >= 1 ? '#1db97b' : '#c03535', fontFamily: 'DM Mono, monospace', fontSize: '13px', fontWeight: '600', margin: 0 }}>{s.total === 0 ? '0.00' : isFinite(s.profitFactor) ? s.profitFactor.toFixed(2) : '∞'}</p>
+            <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '8px', padding: '10px 8px', textAlign: 'center' }}>
+              <p style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 4px 0' }}>P.Factor</p>
+              <p style={{ color: s.total === 0 ? 'var(--text-primary)' : s.profitFactor >= 1 ? 'var(--brand)' : 'var(--red)', fontFamily: 'DM Mono, monospace', fontSize: '13px', fontWeight: '600', margin: 0 }}>{s.total === 0 ? '0.00' : isFinite(s.profitFactor) ? s.profitFactor.toFixed(2) : '∞'}</p>
             </div>
-            <div style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '8px', padding: '10px 8px', textAlign: 'center' }}>
-              <p style={{ color: '#999', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 4px 0' }}>Trades</p>
-              <p style={{ color: '#fff', fontFamily: 'DM Mono, monospace', fontSize: '13px', fontWeight: '600', margin: 0 }}>{String(s.total)}</p>
+            <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '8px', padding: '10px 8px', textAlign: 'center' }}>
+              <p style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 4px 0' }}>Trades</p>
+              <p style={{ color: 'var(--text-primary)', fontFamily: 'DM Mono, monospace', fontSize: '13px', fontWeight: '600', margin: 0 }}>{String(s.total)}</p>
             </div>
-            <div style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '8px', padding: '10px 8px', textAlign: 'center' }}>
-              <p style={{ color: '#999', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 4px 0' }}>W/L</p>
+            <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '8px', padding: '10px 8px', textAlign: 'center' }}>
+              <p style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 4px 0' }}>W/L</p>
               <p style={{ fontFamily: 'DM Mono, monospace', fontSize: '13px', fontWeight: '600', margin: 0 }}>
-                <span style={{ color: '#1db97b' }}>{s.wins}</span>
-                <span style={{ color: '#555' }}>/</span>
-                <span style={{ color: '#c03535' }}>{s.losses}</span>
+                <span style={{ color: 'var(--brand)' }}>{s.wins}</span>
+                <span style={{ color: 'var(--text-faint-2)' }}>/</span>
+                <span style={{ color: 'var(--red)' }}>{s.losses}</span>
               </p>
             </div>
           </>)}
@@ -188,9 +188,9 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
         {/* Row 1 */}
         {!mobile && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '16px' }}>
           {loading ? (
-            [1,2,3,4].map(i => <div key={i} style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '10px', padding: '16px' }}><Skeleton w="40px" h="10px" /><div style={{marginTop:'10px'}}><Skeleton w="80px" h="22px" /></div></div>)
+            [1,2,3,4].map(i => <div key={i} style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px', padding: '16px' }}><Skeleton w="40px" h="10px" /><div style={{marginTop:'10px'}}><Skeleton w="80px" h="22px" /></div></div>)
           ) : (<>
-            <StatCell label="Net P&L" value={s.total === 0 ? '$0.00' : fmt$(s.netPnl)} color={s.total === 0 ? '#fff' : pnlColor(s.netPnl)} />
+            <StatCell label="Net P&L" value={s.total === 0 ? '$0.00' : fmt$(s.netPnl)} color={s.total === 0 ? 'var(--text-primary)' : pnlColor(s.netPnl)} />
             <StatCell label="Win Rate" value={s.total === 0 ? '0%' : `${s.winRate.toFixed(1)}%`} />
             <StatCell label="Total Trades" value={String(s.total)} />
             <StatCell label="Avg RR" value={s.total === 0 ? '0.00' : `${s.avgRR.toFixed(2)}R`} />
@@ -200,11 +200,11 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
         {/* Row 2 */}
         {!mobile && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '20px' }}>
           {loading ? (
-            [1,2,3,4].map(i => <div key={i} style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '10px', padding: '16px' }}><Skeleton w="40px" h="10px" /><div style={{marginTop:'10px'}}><Skeleton w="80px" h="22px" /></div></div>)
+            [1,2,3,4].map(i => <div key={i} style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px', padding: '16px' }}><Skeleton w="40px" h="10px" /><div style={{marginTop:'10px'}}><Skeleton w="80px" h="22px" /></div></div>)
           ) : (<>
             <StatCell label="Profit Factor" value={s.total === 0 ? '0.00' : isFinite(s.profitFactor) ? s.profitFactor.toFixed(2) : '∞'} />
-            <StatCell label="Best Trade" value={s.bestTrade != null ? `+$${s.bestTrade.toFixed(2)}` : '—'} color={s.bestTrade != null ? '#1db97b' : '#777'} />
-            <StatCell label="Worst Trade" value={s.worstTrade != null ? `-$${Math.abs(s.worstTrade).toFixed(2)}` : '—'} color={s.worstTrade != null ? '#c03535' : '#777'} />
+            <StatCell label="Best Trade" value={s.bestTrade != null ? `+$${s.bestTrade.toFixed(2)}` : '—'} color={s.bestTrade != null ? 'var(--brand)' : 'var(--text-faint)'} />
+            <StatCell label="Worst Trade" value={s.worstTrade != null ? `-$${Math.abs(s.worstTrade).toFixed(2)}` : '—'} color={s.worstTrade != null ? 'var(--red)' : 'var(--text-faint)'} />
             <StatCell label="Avg Win / Loss" value={s.total === 0 ? '— / —' : `$${s.avgWin.toFixed(0)} / $${s.avgLoss.toFixed(0)}`} />
           </>)}
         </div>}
@@ -225,13 +225,13 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
               <ProgressBar
                 label={`Consistency — ${profitableDays} of ${totalDays} days profitable`}
                 pct={consistency}
-                color="#1db97b"
+                color="var(--brand)"
                 rightLabel={`${consistency.toFixed(1)}% profitable days`}
               />
               <ProgressBar
                 label={`Account Growth`}
                 pct={growth}
-                color="#4d9fff"
+                color="var(--blue)"
                 rightLabel={accountSize > 0 ? `${growthRaw >= 0 ? '+' : ''}${growthRaw.toFixed(2)}% on $${accountSize.toLocaleString()}` : 'Set account size to track'}
               />
             </div>
@@ -293,10 +293,10 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
   const computedStatus = computeStatus()
 
   const statusStyles = {
-    active:  { bg: '#0f1a2e', color: '#4d9fff', border: '#1a3050', label: 'In Progress' },
-    passed:  { bg: '#0f2219', color: '#1db97b', border: '#1a3826', label: 'Passed' },
-    failed:  { bg: '#1e0d0d', color: '#c03535', border: '#2e1515', label: 'Failed' },
-    funded:  { bg: '#141f0d', color: '#7dc93f', border: '#1e2e10', label: 'Funded' },
+    active:  { bg: 'var(--blue-bg-2)', color: 'var(--blue)', border: 'var(--blue-bg)', label: 'In Progress' },
+    passed:  { bg: 'var(--green-bg)', color: 'var(--brand)', border: 'var(--green-bg-2)', label: 'Passed' },
+    failed:  { bg: 'var(--red-bg-2)', color: 'var(--red)', border: 'var(--red-bg)', label: 'Failed' },
+    funded:  { bg: 'var(--funded-bg)', color: 'var(--funded)', border: 'var(--funded-bg-2)', label: 'Funded' },
   }
   const badge = statusStyles[computedStatus] || statusStyles.active
 
@@ -309,14 +309,14 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
   const floorLabel = `Floor $${ddFloor.toLocaleString(undefined, { maximumFractionDigits: 0 })}`
 
   return (
-    <div style={{ background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '12px', padding: mobile ? '16px' : '24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+    <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color-2)', borderRadius: '12px', padding: mobile ? '16px' : '24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
       <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }`}</style>
 
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
         <div>
-          <h2 style={{ color: '#fff', fontFamily: 'Syne, sans-serif', fontSize: '15px', fontWeight: '600', margin: '0 0 4px 0' }}>{account.name}</h2>
-          <p style={{ color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '13px', margin: 0 }}>
+          <h2 style={{ color: 'var(--text-primary)', fontFamily: 'Syne, sans-serif', fontSize: '15px', fontWeight: '600', margin: '0 0 4px 0' }}>{account.name}</h2>
+          <p style={{ color: 'var(--text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: '13px', margin: 0 }}>
             {account.firm_name} · {account.phase?.replace('_', ' ')} · ${accountSize.toLocaleString()}
           </p>
         </div>
@@ -326,9 +326,9 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
       {/* Stats row 1 — desktop only */}
       {!mobile && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '16px' }}>
         {loading ? (
-          [1,2,3,4].map(i => <div key={i} style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '10px', padding: '16px' }}><div style={{background:'#1a1a1a',height:'10px',width:'40px',borderRadius:'4px'}}/><div style={{background:'#1a1a1a',height:'22px',width:'80px',borderRadius:'4px',marginTop:'10px'}}/></div>)
+          [1,2,3,4].map(i => <div key={i} style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px', padding: '16px' }}><div style={{background:'var(--border-color)',height:'10px',width:'40px',borderRadius:'4px'}}/><div style={{background:'var(--border-color)',height:'22px',width:'80px',borderRadius:'4px',marginTop:'10px'}}/></div>)
         ) : (<>
-          <StatCell label="Net P&L" value={s.total === 0 ? '$0.00' : fmt$(netPnl)} color={s.total === 0 ? '#fff' : pnlColor(netPnl)} />
+          <StatCell label="Net P&L" value={s.total === 0 ? '$0.00' : fmt$(netPnl)} color={s.total === 0 ? 'var(--text-primary)' : pnlColor(netPnl)} />
           <StatCell label="Win Rate" value={s.total === 0 ? '0%' : `${s.winRate.toFixed(1)}%`} />
           <StatCell label="Trades" value={String(s.total)} />
           <StatCell label="W / L" value={`${s.wins} / ${s.losses}`} />
@@ -338,11 +338,11 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
       {/* Stats row 2 — desktop only */}
       {!mobile && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '20px' }}>
         {loading ? (
-          [1,2,3,4].map(i => <div key={i} style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '10px', padding: '16px' }}><div style={{background:'#1a1a1a',height:'10px',width:'40px',borderRadius:'4px'}}/><div style={{background:'#1a1a1a',height:'22px',width:'80px',borderRadius:'4px',marginTop:'10px'}}/></div>)
+          [1,2,3,4].map(i => <div key={i} style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px', padding: '16px' }}><div style={{background:'var(--border-color)',height:'10px',width:'40px',borderRadius:'4px'}}/><div style={{background:'var(--border-color)',height:'22px',width:'80px',borderRadius:'4px',marginTop:'10px'}}/></div>)
         ) : (<>
           <StatCell label="Profit Factor" value={s.total === 0 ? '0.00' : isFinite(s.profitFactor) ? s.profitFactor.toFixed(2) : '∞'} />
-          <StatCell label="Best Trade" value={s.bestTrade != null ? `+$${s.bestTrade.toFixed(2)}` : '—'} color={s.bestTrade != null ? '#1db97b' : '#777'} />
-          <StatCell label="Worst Trade" value={s.worstTrade != null ? `-$${Math.abs(s.worstTrade).toFixed(2)}` : '—'} color={s.worstTrade != null ? '#c03535' : '#777'} />
+          <StatCell label="Best Trade" value={s.bestTrade != null ? `+$${s.bestTrade.toFixed(2)}` : '—'} color={s.bestTrade != null ? 'var(--brand)' : 'var(--text-faint)'} />
+          <StatCell label="Worst Trade" value={s.worstTrade != null ? `-$${Math.abs(s.worstTrade).toFixed(2)}` : '—'} color={s.worstTrade != null ? 'var(--red)' : 'var(--text-faint)'} />
           <StatCell label="Avg Win / Loss" value={s.total === 0 ? '— / —' : `$${s.avgWin.toFixed(0)} / $${s.avgLoss.toFixed(0)}`} />
         </>)}
       </div>}
@@ -350,44 +350,44 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
       {/* Mobile stats — single row */}
       {mobile && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px', marginBottom: '10px' }}>
         {loading ? (
-          [1,2,3,4].map(i => <div key={i} style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '8px', padding: '10px 8px' }}><div style={{background:'#1a1a1a',height:'8px',width:'30px',borderRadius:'4px'}}/><div style={{background:'#1a1a1a',height:'16px',width:'50px',borderRadius:'4px',marginTop:'8px'}}/></div>)
+          [1,2,3,4].map(i => <div key={i} style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '8px', padding: '10px 8px' }}><div style={{background:'var(--border-color)',height:'8px',width:'30px',borderRadius:'4px'}}/><div style={{background:'var(--border-color)',height:'16px',width:'50px',borderRadius:'4px',marginTop:'8px'}}/></div>)
         ) : (<>
-          <div style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '8px', padding: '10px 8px', textAlign: 'center' }}>
-            <p style={{ color: '#999', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 4px 0' }}>P&L</p>
-            <p style={{ color: s.total === 0 ? '#fff' : pnlColor(netPnl), fontFamily: 'DM Mono, monospace', fontSize: '13px', fontWeight: '600', margin: 0 }}>{s.total === 0 ? '$0' : fmt$(netPnl)}</p>
+          <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '8px', padding: '10px 8px', textAlign: 'center' }}>
+            <p style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 4px 0' }}>P&L</p>
+            <p style={{ color: s.total === 0 ? 'var(--text-primary)' : pnlColor(netPnl), fontFamily: 'DM Mono, monospace', fontSize: '13px', fontWeight: '600', margin: 0 }}>{s.total === 0 ? '$0' : fmt$(netPnl)}</p>
           </div>
-          <div style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '8px', padding: '10px 8px', textAlign: 'center' }}>
-            <p style={{ color: '#999', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 4px 0' }}>Win%</p>
-            <p style={{ color: '#fff', fontFamily: 'DM Mono, monospace', fontSize: '13px', fontWeight: '600', margin: 0 }}>{s.total === 0 ? '0%' : `${s.winRate.toFixed(1)}%`}</p>
+          <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '8px', padding: '10px 8px', textAlign: 'center' }}>
+            <p style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 4px 0' }}>Win%</p>
+            <p style={{ color: 'var(--text-primary)', fontFamily: 'DM Mono, monospace', fontSize: '13px', fontWeight: '600', margin: 0 }}>{s.total === 0 ? '0%' : `${s.winRate.toFixed(1)}%`}</p>
           </div>
-          <div style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '8px', padding: '10px 8px', textAlign: 'center' }}>
-            <p style={{ color: '#999', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 4px 0' }}>Trades</p>
-            <p style={{ color: '#fff', fontFamily: 'DM Mono, monospace', fontSize: '13px', fontWeight: '600', margin: 0 }}>{String(s.total)}</p>
+          <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '8px', padding: '10px 8px', textAlign: 'center' }}>
+            <p style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 4px 0' }}>Trades</p>
+            <p style={{ color: 'var(--text-primary)', fontFamily: 'DM Mono, monospace', fontSize: '13px', fontWeight: '600', margin: 0 }}>{String(s.total)}</p>
           </div>
-          <div style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '8px', padding: '10px 8px', textAlign: 'center' }}>
-            <p style={{ color: '#999', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 4px 0' }}>W/L</p>
-            <p style={{ color: '#fff', fontFamily: 'DM Mono, monospace', fontSize: '13px', fontWeight: '600', margin: 0 }}>{`${s.wins}/${s.losses}`}</p>
+          <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '8px', padding: '10px 8px', textAlign: 'center' }}>
+            <p style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 4px 0' }}>W/L</p>
+            <p style={{ color: 'var(--text-primary)', fontFamily: 'DM Mono, monospace', fontSize: '13px', fontWeight: '600', margin: 0 }}>{`${s.wins}/${s.losses}`}</p>
           </div>
         </>)}
       </div>}
 
       {/* Mobile rules strip */}
       {mobile && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px', marginBottom: '12px' }}>
-        <div style={{ background: '#0a0a0a', border: '0.5px solid #1a1a1a', borderRadius: '6px', padding: '7px 8px', textAlign: 'center' }}>
-          <p style={{ color: '#555', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', margin: '0 0 3px 0' }}>Target</p>
-          <p style={{ color: '#1db97b', fontFamily: 'DM Mono, monospace', fontSize: '12px', margin: 0 }}>{profitTarget > 0 ? `${(profitTarget / accountSize * 100).toFixed(0)}%` : '—'}</p>
+        <div style={{ background: 'var(--bg-page)', border: '0.5px solid var(--border-color)', borderRadius: '6px', padding: '7px 8px', textAlign: 'center' }}>
+          <p style={{ color: 'var(--text-faint-2)', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', margin: '0 0 3px 0' }}>Target</p>
+          <p style={{ color: 'var(--brand)', fontFamily: 'DM Mono, monospace', fontSize: '12px', margin: 0 }}>{profitTarget > 0 ? `${(profitTarget / accountSize * 100).toFixed(0)}%` : '—'}</p>
         </div>
-        <div style={{ background: '#0a0a0a', border: '0.5px solid #1a1a1a', borderRadius: '6px', padding: '7px 8px', textAlign: 'center' }}>
-          <p style={{ color: '#555', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', margin: '0 0 3px 0' }}>Max DD</p>
-          <p style={{ color: '#c03535', fontFamily: 'DM Mono, monospace', fontSize: '12px', margin: 0 }}>{maxDD > 0 ? `${(maxDD / accountSize * 100).toFixed(0)}%` : '—'}</p>
+        <div style={{ background: 'var(--bg-page)', border: '0.5px solid var(--border-color)', borderRadius: '6px', padding: '7px 8px', textAlign: 'center' }}>
+          <p style={{ color: 'var(--text-faint-2)', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', margin: '0 0 3px 0' }}>Max DD</p>
+          <p style={{ color: 'var(--red)', fontFamily: 'DM Mono, monospace', fontSize: '12px', margin: 0 }}>{maxDD > 0 ? `${(maxDD / accountSize * 100).toFixed(0)}%` : '—'}</p>
         </div>
-        <div style={{ background: '#0a0a0a', border: '0.5px solid #1a1a1a', borderRadius: '6px', padding: '7px 8px', textAlign: 'center' }}>
-          <p style={{ color: '#555', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', margin: '0 0 3px 0' }}>Daily DD</p>
-          <p style={{ color: '#c97a00', fontFamily: 'DM Mono, monospace', fontSize: '12px', margin: 0 }}>{dailyDD > 0 ? `${(dailyDD / accountSize * 100).toFixed(0)}%` : '—'}</p>
+        <div style={{ background: 'var(--bg-page)', border: '0.5px solid var(--border-color)', borderRadius: '6px', padding: '7px 8px', textAlign: 'center' }}>
+          <p style={{ color: 'var(--text-faint-2)', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', margin: '0 0 3px 0' }}>Daily DD</p>
+          <p style={{ color: 'var(--amber)', fontFamily: 'DM Mono, monospace', fontSize: '12px', margin: 0 }}>{dailyDD > 0 ? `${(dailyDD / accountSize * 100).toFixed(0)}%` : '—'}</p>
         </div>
-        <div style={{ background: '#0a0a0a', border: '0.5px solid #1a1a1a', borderRadius: '6px', padding: '7px 8px', textAlign: 'center' }}>
-          <p style={{ color: '#555', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', margin: '0 0 3px 0' }}>Min Days</p>
-          <p style={{ color: '#fff', fontFamily: 'DM Mono, monospace', fontSize: '12px', margin: 0 }}>{minDays > 0 ? minDays : '—'}</p>
+        <div style={{ background: 'var(--bg-page)', border: '0.5px solid var(--border-color)', borderRadius: '6px', padding: '7px 8px', textAlign: 'center' }}>
+          <p style={{ color: 'var(--text-faint-2)', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', margin: '0 0 3px 0' }}>Min Days</p>
+          <p style={{ color: 'var(--text-primary)', fontFamily: 'DM Mono, monospace', fontSize: '12px', margin: 0 }}>{minDays > 0 ? minDays : '—'}</p>
         </div>
       </div>}
 
@@ -396,13 +396,13 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
         <ProgressBar
           label={`Profit Target — ${profitTarget > 0 ? (profitTarget / accountSize * 100).toFixed(1) : '—'}%`}
           pct={profitPct}
-          color="#1db97b"
+          color="var(--brand)"
           rightLabel={`${(netPnl / accountSize * 100 >= 0 ? '+' : '')}${(netPnl / accountSize * 100).toFixed(2)}% of ${profitTarget > 0 ? (profitTarget / accountSize * 100).toFixed(1) : '—'}% target`}
         />
         <ProgressBar
           label={`Max Drawdown (${ddTypeLabel}) — ${maxDDUsedPct.toFixed(2)}% / ${maxDDLimitPct.toFixed(1)}%`}
           pct={maxDDPct}
-          color="#c03535"
+          color="var(--red)"
           rightLabel={`${maxDDUsedPct.toFixed(2)}% used · ${floorLabel}`}
         />
       </div>

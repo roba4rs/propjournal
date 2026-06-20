@@ -38,6 +38,10 @@
   --amber-bg: #2a2000;
   --amber-bg-2: #1a1400;
 
+  --funded: #7dc93f;
+  --funded-bg: #141f0d;
+  --funded-bg-2: #1e2e10;
+
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 }
@@ -73,6 +77,10 @@
   --blue-bg-2: #d9e9ff;
   --amber-bg: #fdf3e3;
   --amber-bg-2: #faeac9;
+
+  --funded: #5a9c2a;
+  --funded-bg: #eef6e3;
+  --funded-bg-2: #ddedc5;
 }
 
 body {
