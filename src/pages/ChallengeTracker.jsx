@@ -616,7 +616,7 @@ function PreviewModal({ challenge, trades, onClose, navigate, isMobile }) {
           No trades logged yet
         </div>
       ) : (
-        <div style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '8px', overflow: isMobile ? 'hidden' : 'auto', flex: isMobile ? 'none' : 1, marginBottom: isMobile ? 0 : '4px' }}>
+        <div style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '8px', overflow: isMobile ? 'hidden' : 'auto', flex: isMobile ? 'none' : 1, minHeight: 0, marginBottom: isMobile ? 0 : '4px' }}>
           {recentTrades.map((t, i) => {
             const pnlVal = t.pnl != null ? parseFloat(t.pnl) : null
             const ob = previewOutcomeMap[t.outcome]
