@@ -436,7 +436,7 @@ export default function Dashboard() {
           }
         />
         <main style={{ flex: 1, display: 'flex', flexDirection: 'column', paddingTop: '52px', paddingBottom: 'calc(60px + env(safe-area-inset-bottom))' }}>
-          <div style={{ padding: '16px 16px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ padding: '16px 16px 0', display: 'flex', alignItems: 'center' }}>
             <span style={{ color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: '600' }}>
               Hi{userName ? `, ${userName}` : ''}
             </span>
