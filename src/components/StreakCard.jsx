@@ -1,13 +1,13 @@
 const T = {
-  card:       '#111',
-  cardBorder: '#1e1e1e',
-  green:      '#1db97b',
-  red:        '#c03535',
-  amber:      '#c97a00',
-  muted:      '#777',
-  sub:        '#aaa',
-  text:       '#e8e8e8',
-  bg:         '#0a0a0a',
+  card:       'var(--bg-surface)',
+  cardBorder: 'var(--border-color)',
+  green:      'var(--brand)',
+  red:        'var(--red)',
+  amber:      'var(--amber)',
+  muted:      'var(--text-faint)',
+  sub:        'var(--text-soft)',
+  text:       'var(--text-secondary)',
+  bg:         'var(--bg-page)',
 }
 
 const font = {
@@ -72,8 +72,8 @@ function Dot({ type, fill }) {
 function StatBox({ label, value, color }) {
   return (
     <div style={{
-      flex: 1, background: '#0f0f0f',
-      border: `0.5px solid #1a1a1a`, borderRadius: '10px',
+      flex: 1, background: 'var(--bg-surface-2)',
+      border: `0.5px solid var(--border-color)`, borderRadius: '10px',
       padding: '12px 14px',
       display: 'flex', flexDirection: 'column', gap: '8px',
     }}>
@@ -108,7 +108,7 @@ export default function StreakCard({ trades = [], mobile = false }) {
       <div style={{ padding: '12px 14px 14px' }}>
         <div style={{
           fontFamily: font.heading, fontSize: '13px', fontWeight: '600',
-          color: '#fff', marginBottom: '12px',
+          color: 'var(--text-primary)', marginBottom: '12px',
         }}>
           Streaks
         </div>
@@ -141,8 +141,8 @@ export default function StreakCard({ trades = [], mobile = false }) {
                 { label: 'Best Loss', value: worstLoss > 0 ? `${worstLoss}L` : '—',       color: worstLoss > 0 ? T.red   : T.muted },
               ].map(s => (
                 <div key={s.label} style={{
-                  flex: 1, background: '#0f0f0f',
-                  border: '0.5px solid #1a1a1a', borderRadius: '8px',
+                  flex: 1, background: 'var(--bg-surface-2)',
+                  border: '0.5px solid var(--border-color)', borderRadius: '8px',
                   padding: '8px 6px', textAlign: 'center',
                 }}>
                   <div style={{
@@ -176,7 +176,7 @@ export default function StreakCard({ trades = [], mobile = false }) {
     }}>
       <div style={{
         fontFamily: font.heading, fontSize: '15px', fontWeight: '600',
-        color: '#fff', marginBottom: '14px',
+        color: 'var(--text-primary)', marginBottom: '14px',
       }}>
         Streaks
       </div>

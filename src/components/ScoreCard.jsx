@@ -137,14 +137,14 @@ function InfoTooltip({ show }) {
   return (
     <div style={{
       position: 'absolute', top: '22px', left: 0,
-      background: '#161616', border: '0.5px solid #2a2a2a',
+      background: 'var(--bg-surface)', border: '0.5px solid var(--border-color-2)',
       borderRadius: '10px', padding: '12px 14px', width: '230px',
       zIndex: 50, boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
     }}>
       {DICT.map(d => (
         <div key={d.key} style={{ marginBottom: '9px' }}>
-          <div style={{ fontSize: '11px', fontFamily: 'DM Sans, sans-serif', color: '#1db97b', fontWeight: '600', marginBottom: '2px' }}>{d.key}</div>
-          <div style={{ fontSize: '11px', fontFamily: 'DM Sans, sans-serif', color: '#777', lineHeight: '1.5' }}>{d.def}</div>
+          <div style={{ fontSize: '11px', fontFamily: 'DM Sans, sans-serif', color: 'var(--brand)', fontWeight: '600', marginBottom: '2px' }}>{d.key}</div>
+          <div style={{ fontSize: '11px', fontFamily: 'DM Sans, sans-serif', color: 'var(--text-faint)', lineHeight: '1.5' }}>{d.def}</div>
         </div>
       ))}
     </div>
@@ -169,8 +169,8 @@ export default function ScoreCard({ trades, mobile }) {
   ]
 
   const card = {
-    background: '#111',
-    border: '0.5px solid #1e1e1e',
+    background: 'var(--bg-surface)',
+    border: '0.5px solid var(--border-color)',
     borderRadius: '12px',
     padding: mobile ? '14px' : '20px',
     fontFamily: 'DM Sans, sans-serif',
@@ -185,14 +185,14 @@ export default function ScoreCard({ trades, mobile }) {
     <div style={card}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px', position: 'relative' }}>
-        <span style={{ fontFamily: 'Syne, sans-serif', fontSize: '13px', fontWeight: '600', color: '#aaa' }}>Score</span>
+        <span style={{ fontFamily: 'Syne, sans-serif', fontSize: '13px', fontWeight: '600', color: 'var(--text-soft)' }}>Score</span>
         <button
           onMouseEnter={() => setShowTooltip(true)}
           onMouseLeave={() => setShowTooltip(false)}
           onClick={() => setShowTooltip(v => !v)}
           style={{
-            background: 'none', border: '0.5px solid #2a2a2a', borderRadius: '50%',
-            width: '16px', height: '16px', color: '#777', fontSize: '9px',
+            background: 'none', border: '0.5px solid var(--border-color-2)', borderRadius: '50%',
+            width: '16px', height: '16px', color: 'var(--text-faint)', fontSize: '9px',
             cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
             padding: 0, lineHeight: 1, position: 'relative',
           }}
@@ -206,8 +206,8 @@ export default function ScoreCard({ trades, mobile }) {
       <svg viewBox={`0 0 ${CX * 2} ${CY * 2 + 20}`} width="100%" style={{ flex: 1, minHeight: 0 }} xmlns="http://www.w3.org/2000/svg">
         <defs>
           <radialGradient id="scoreFill" cx="50%" cy="50%" r="50%">
-            <stop offset="0%"   stopColor="#1db97b" stopOpacity="0.38"/>
-            <stop offset="100%" stopColor="#1db97b" stopOpacity="0.08"/>
+            <stop offset="0%"   stopColor="var(--brand)" stopOpacity="0.38"/>
+            <stop offset="100%" stopColor="var(--brand)" stopOpacity="0.08"/>
           </radialGradient>
         </defs>
 
@@ -217,7 +217,7 @@ export default function ScoreCard({ trades, mobile }) {
             key={i}
             points={toPolyStr(hexPoints(R * pct))}
             fill="none"
-            stroke={pct === 1.0 ? '#282828' : '#1e1e1e'}
+            stroke={pct === 1.0 ? 'var(--border-color-2)' : 'var(--border-color)'}
             strokeWidth="0.7"
           />
         ))}
@@ -225,7 +225,7 @@ export default function ScoreCard({ trades, mobile }) {
         {/* Axis lines */}
         {Array.from({ length: 6 }, (_, i) => {
           const pt = axisPoint(i, R)
-          return <line key={i} x1={CX} y1={CY} x2={pt.x.toFixed(1)} y2={pt.y.toFixed(1)} stroke="#1e1e1e" strokeWidth="0.7" />
+          return <line key={i} x1={CX} y1={CY} x2={pt.x.toFixed(1)} y2={pt.y.toFixed(1)} stroke="var(--border-color)" strokeWidth="0.7" />
         })}
 
         {/* Axis labels */}
@@ -240,7 +240,7 @@ export default function ScoreCard({ trades, mobile }) {
               x={x}
               y={baseY}
               textAnchor={lbl.anchor}
-              fill="#999"
+              fill="var(--text-muted)"
               fontSize="9"
               fontFamily="DM Sans, sans-serif"
             >
@@ -257,34 +257,34 @@ export default function ScoreCard({ trades, mobile }) {
         <polygon
           points={toPolyStr(dataPts)}
           fill="url(#scoreFill)"
-          stroke="#1db97b"
+          stroke="var(--brand)"
           strokeWidth="1.5"
           strokeLinejoin="round"
         />
 
         {/* Data dots */}
         {dataPts.map((pt, i) => (
-          <circle key={i} cx={pt.x.toFixed(1)} cy={pt.y.toFixed(1)} r="3.5" fill="#1db97b" />
+          <circle key={i} cx={pt.x.toFixed(1)} cy={pt.y.toFixed(1)} r="3.5" fill="var(--brand)" />
         ))}
       </svg>
 
       {/* Score bar */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginTop: '8px' }}>
         <div style={{ flexShrink: 0 }}>
-          <div style={{ fontSize: '10px', color: '#777', marginBottom: '2px' }}>Your Score</div>
-          <div style={{ fontFamily: 'Syne, sans-serif', fontSize: '26px', fontWeight: '700', color: '#f0f0f0', lineHeight: 1 }}>
+          <div style={{ fontSize: '10px', color: 'var(--text-faint)', marginBottom: '2px' }}>Your Score</div>
+          <div style={{ fontFamily: 'Syne, sans-serif', fontSize: '26px', fontWeight: '700', color: 'var(--text-primary)', lineHeight: 1 }}>
             {scores.overall}
           </div>
         </div>
         <div style={{ flex: 1 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '9px', color: '#999', marginBottom: '4px', fontFamily: 'DM Mono, monospace' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '9px', color: 'var(--text-muted)', marginBottom: '4px', fontFamily: 'DM Mono, monospace' }}>
             {[0, 20, 40, 60, 80, 100].map(n => <span key={n}>{n}</span>)}
           </div>
-          <div style={{ height: '5px', background: '#181818', borderRadius: '3px', overflow: 'hidden' }}>
+          <div style={{ height: '5px', background: 'var(--bg-surface-2)', borderRadius: '3px', overflow: 'hidden' }}>
             <div style={{
               height: '100%',
               width: `${scores.overall}%`,
-              background: 'linear-gradient(to right, #c03535, #c97a00, #e8d44d, #1db97b)',
+              background: 'linear-gradient(to right, var(--red), var(--amber), var(--yellow), var(--brand))',
               borderRadius: '3px',
               transition: 'width 0.6s ease',
             }} />

@@ -14,6 +14,7 @@
   --bg-page: #0a0a0a;
   --bg-surface: #111111;
   --bg-surface-2: #1a1a1a;
+  --bg-hover: #0f0f0f;
   --border-color: #1a1a1a;
   --border-color-2: #2a2a2a;
 
@@ -28,6 +29,7 @@
   --red: #c03535;
   --blue: #4d9fff;
   --amber: #c97a00;
+  --yellow: #e8d44d;
 
   --green-bg: #0f2219;
   --green-bg-2: #1a3826;
@@ -54,6 +56,7 @@
   --bg-page: #f7f7f8;
   --bg-surface: #ffffff;
   --bg-surface-2: #f0f0f1;
+  --bg-hover: #ececed;
   --border-color: #e5e5e7;
   --border-color-2: #d8d8da;
 
@@ -68,6 +71,7 @@
   --red: #c03535;
   --blue: #2b7fe0;
   --amber: #c97a00;
+  --yellow: #c9a300;
 
   --green-bg: #e7f6ee;
   --green-bg-2: #d7f0e3;

@@ -61,11 +61,11 @@ function SplitGradient({ id, zeroPercent }) {
     <defs>
       <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
         {/* Green zone — above zero */}
-        <stop offset="0%"               stopColor="#1db97b" stopOpacity={0.25} />
-        <stop offset={`${zeroPercent * 100}%`} stopColor="#1db97b" stopOpacity={0.04} />
+        <stop offset="0%"               stopColor="var(--brand)" stopOpacity={0.25} />
+        <stop offset={`${zeroPercent * 100}%`} stopColor="var(--brand)" stopOpacity={0.04} />
         {/* Red zone — below zero */}
-        <stop offset={`${zeroPercent * 100}%`} stopColor="#c03535" stopOpacity={0.04} />
-        <stop offset="100%"             stopColor="#c03535" stopOpacity={0.25} />
+        <stop offset={`${zeroPercent * 100}%`} stopColor="var(--red)" stopOpacity={0.04} />
+        <stop offset="100%"             stopColor="var(--red)" stopOpacity={0.25} />
       </linearGradient>
     </defs>
   )
@@ -85,7 +85,7 @@ export default function PnLChart({ trades = [], account, noMargin, mobile }) {
   const totalPnl = data.length > 0 ? data[data.length - 1].pnl : 0
   const isPositive = totalPnl >= 0
   const zeroPercent = getZeroPercent(data)
-  const lineColor = isPositive ? '#1db97b' : '#c03535'
+  const lineColor = isPositive ? 'var(--brand)' : 'var(--red)'
 
   // ── MOBILE ────────────────────────────────────────────────────────────────
   if (mobile) {
@@ -96,11 +96,11 @@ export default function PnLChart({ trades = [], account, noMargin, mobile }) {
           padding: '10px 12px 8px',
         }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-            <span style={{ color: '#fff', fontFamily: 'Syne, sans-serif', fontSize: '12px', fontWeight: '600', whiteSpace: 'nowrap' }}>
+            <span style={{ color: 'var(--text-primary)', fontFamily: 'Syne, sans-serif', fontSize: '12px', fontWeight: '600', whiteSpace: 'nowrap' }}>
               Cumulative P&L
             </span>
             {!isEmpty && (
-              <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', color: isPositive ? '#1db97b' : '#c03535', whiteSpace: 'nowrap' }}>
+              <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', color: isPositive ? 'var(--brand)' : 'var(--red)', whiteSpace: 'nowrap' }}>
                 {isPositive ? '+' : ''}${totalPnl.toFixed(2)}
               </span>
             )}
@@ -108,11 +108,11 @@ export default function PnLChart({ trades = [], account, noMargin, mobile }) {
           <div style={{ display: 'flex', gap: '3px' }}>
             {tabs.map(tab => (
               <button key={tab} onClick={() => setActiveTab(tab)} style={{
-                background: activeTab === tab ? '#0f2219' : 'transparent',
+                background: activeTab === tab ? 'var(--green-bg)' : 'transparent',
                 border: '0.5px solid',
-                borderColor: activeTab === tab ? '#1a3826' : '#1e1e1e',
+                borderColor: activeTab === tab ? 'var(--green-bg-2)' : 'var(--border-color)',
                 borderRadius: '5px', padding: '3px 8px',
-                color: activeTab === tab ? '#1db97b' : '#777',
+                color: activeTab === tab ? 'var(--brand)' : 'var(--text-faint)',
                 fontFamily: 'DM Sans, sans-serif', fontSize: '10px', cursor: 'pointer', WebkitTapHighlightColor: 'transparent', outline: 'none',
               }}>{tab}</button>
             ))}
@@ -120,16 +120,16 @@ export default function PnLChart({ trades = [], account, noMargin, mobile }) {
         </div>
 
         {isEmpty ? (
-          <div style={{ height: '130px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#555', fontFamily: 'DM Mono, monospace', fontSize: '12px' }}>
+          <div style={{ height: '130px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-faint-2)', fontFamily: 'DM Mono, monospace', fontSize: '12px' }}>
             No trades in this range
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={130} style={{ WebkitTapHighlightColor: "transparent", outline: "none" }}>
             <AreaChart data={chartData} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
               <SplitGradient id="splitGradMobile" zeroPercent={zeroPercent} />
-              <XAxis dataKey="date" stroke="#555" tick={{ fill: '#777', fontSize: 9, fontFamily: 'DM Mono, monospace' }} tickLine={false} axisLine={false} tickFormatter={d => d && d.length >= 10 ? String(parseInt(d.slice(8, 10), 10)) : d} />
-              <YAxis stroke="#555" tick={{ fill: '#777', fontSize: 9, fontFamily: 'DM Mono, monospace' }} tickFormatter={v => `$${v}`} tickLine={false} axisLine={false} width={38} />
-              <ReferenceLine y={0} stroke="#555" strokeDasharray="3 3" />
+              <XAxis dataKey="date" stroke="var(--text-faint-2)" tick={{ fill: 'var(--text-faint)', fontSize: 9, fontFamily: 'DM Mono, monospace' }} tickLine={false} axisLine={false} tickFormatter={d => d && d.length >= 10 ? String(parseInt(d.slice(8, 10), 10)) : d} />
+              <YAxis stroke="var(--text-faint-2)" tick={{ fill: 'var(--text-faint)', fontSize: 9, fontFamily: 'DM Mono, monospace' }} tickFormatter={v => `$${v}`} tickLine={false} axisLine={false} width={38} />
+              <ReferenceLine y={0} stroke="var(--text-faint-2)" strokeDasharray="3 3" />
               <Area type="monotone" dataKey="pnl" stroke={lineColor} strokeWidth={2} fill="url(#splitGradMobile)" dot={false} isAnimationActive={false} />
             </AreaChart>
           </ResponsiveContainer>
@@ -141,16 +141,16 @@ export default function PnLChart({ trades = [], account, noMargin, mobile }) {
   // ── DESKTOP ───────────────────────────────────────────────────────────────
   return (
     <div style={{
-      background: '#111', border: '0.5px solid #1e1e1e',
+      background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)',
       borderRadius: '12px', padding: '24px',
       marginBottom: noMargin ? 0 : '24px',
       flex: noMargin ? 1 : undefined,
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <div>
-          <h2 style={{ color: '#fff', fontFamily: 'Syne, sans-serif', fontSize: '15px', fontWeight: '600', margin: '0 0 4px 0' }}>Cumulative P&L</h2>
+          <h2 style={{ color: 'var(--text-primary)', fontFamily: 'Syne, sans-serif', fontSize: '15px', fontWeight: '600', margin: '0 0 4px 0' }}>Cumulative P&L</h2>
           {!isEmpty && (
-            <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '13px', color: isPositive ? '#1db97b' : '#c03535' }}>
+            <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '13px', color: isPositive ? 'var(--brand)' : 'var(--red)' }}>
               {isPositive ? '+' : ''}${totalPnl.toFixed(2)}
             </span>
           )}
@@ -158,11 +158,11 @@ export default function PnLChart({ trades = [], account, noMargin, mobile }) {
         <div style={{ display: 'flex', gap: '4px' }}>
           {tabs.map(tab => (
             <button key={tab} onClick={() => setActiveTab(tab)} style={{
-              background: activeTab === tab ? '#0f2219' : 'transparent',
+              background: activeTab === tab ? 'var(--green-bg)' : 'transparent',
               border: '0.5px solid',
-              borderColor: activeTab === tab ? '#1a3826' : '#1e1e1e',
+              borderColor: activeTab === tab ? 'var(--green-bg-2)' : 'var(--border-color)',
               borderRadius: '6px', padding: '5px 12px',
-              color: activeTab === tab ? '#1db97b' : '#777',
+              color: activeTab === tab ? 'var(--brand)' : 'var(--text-faint)',
               fontFamily: 'DM Sans, sans-serif', fontSize: '12px', cursor: 'pointer', WebkitTapHighlightColor: 'transparent', outline: 'none',
             }}>{tab}</button>
           ))}
@@ -170,20 +170,20 @@ export default function PnLChart({ trades = [], account, noMargin, mobile }) {
       </div>
 
       {isEmpty ? (
-        <div style={{ height: '160px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#555', fontFamily: 'DM Mono, monospace', fontSize: '13px' }}>
+        <div style={{ height: '160px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-faint-2)', fontFamily: 'DM Mono, monospace', fontSize: '13px' }}>
           No trades in this range
         </div>
       ) : (
         <ResponsiveContainer width="100%" height={160} style={{ WebkitTapHighlightColor: "transparent", outline: "none" }}>
           <AreaChart data={chartData}>
             <SplitGradient id="splitGradDesktop" zeroPercent={zeroPercent} />
-            <XAxis dataKey="date" stroke="#555" tick={{ fill: '#777', fontSize: 11, fontFamily: 'DM Mono, monospace' }} />
-            <YAxis stroke="#555" tick={{ fill: '#777', fontSize: 11, fontFamily: 'DM Mono, monospace' }} tickFormatter={v => `$${v}`} />
+            <XAxis dataKey="date" stroke="var(--text-faint-2)" tick={{ fill: 'var(--text-faint)', fontSize: 11, fontFamily: 'DM Mono, monospace' }} />
+            <YAxis stroke="var(--text-faint-2)" tick={{ fill: 'var(--text-faint)', fontSize: 11, fontFamily: 'DM Mono, monospace' }} tickFormatter={v => `$${v}`} />
             <Tooltip
-              contentStyle={{ background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '8px', color: '#fff', fontFamily: 'DM Mono, monospace', fontSize: '12px' }}
+              contentStyle={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '8px', color: 'var(--text-primary)', fontFamily: 'DM Mono, monospace', fontSize: '12px' }}
               formatter={v => [`$${v}`, 'P&L']}
             />
-            <ReferenceLine y={0} stroke="#555" strokeDasharray="3 3" />
+            <ReferenceLine y={0} stroke="var(--text-faint-2)" strokeDasharray="3 3" />
             <Area type="monotone" dataKey="pnl" stroke={lineColor} strokeWidth={2} fill="url(#splitGradDesktop)" dot={false} />
           </AreaChart>
         </ResponsiveContainer>
