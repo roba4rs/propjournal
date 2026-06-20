@@ -608,7 +608,9 @@ function PreviewModal({ challenge, trades, onClose, navigate, isMobile }) {
 
   const tradesBlock = (
     <div style={{ marginBottom: isMobile ? '20px' : 0, flex: isMobile ? 'none' : 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-      <p style={{ color: '#777', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 10px 0' }}>Recent Trades</p>
+      {isMobile && (
+        <p style={{ color: '#777', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 10px 0' }}>Recent Trades</p>
+      )}
       {recentTrades.length === 0 ? (
         <div style={{ padding: '20px', textAlign: 'center', color: '#555', fontSize: '12px', background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '8px' }}>
           No trades logged yet
@@ -646,26 +648,35 @@ function PreviewModal({ challenge, trades, onClose, navigate, isMobile }) {
   const dashboardButton = (
     <button
       onClick={() => navigate(`/dashboard?account=${challenge.id}`)}
-      style={{ background: 'oklch(0.72 0.17 152)', border: 'none', borderRadius: '8px', padding: '10px 14px', color: '#000', fontWeight: '600', fontSize: '12px', cursor: 'pointer', width: '100%', marginTop: isMobile ? 0 : '16px' }}
+      style={{ background: 'oklch(0.72 0.17 152)', border: 'none', borderRadius: '8px', padding: '10px 14px', color: '#000', fontWeight: '600', fontSize: '12px', cursor: 'pointer', width: '100%', marginTop: isMobile ? 0 : '20px', flexShrink: 0 }}
     >
       Go to Full Dashboard →
     </button>
   )
 
   const header = (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '18px' }}>
-      <div>
-        <h2 style={{ color: '#fff', fontSize: '16px', fontWeight: '600', margin: '0 0 4px 0' }}>{challenge.firm_name}</h2>
-        <p style={{ color: '#777', fontSize: '12px', margin: 0 }}>
+    <div style={{ marginBottom: '18px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <h2 style={{ color: '#fff', fontSize: '16px', fontWeight: '600', margin: 0 }}>{challenge.firm_name}</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ background: badge.bg, border: `0.5px solid ${badge.border}`, borderRadius: '20px', padding: '4px 12px', color: badge.color, fontSize: '11px', fontWeight: '500', whiteSpace: 'nowrap' }}>
+            {badge.label}
+          </span>
+          <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: '#777', fontSize: '20px', cursor: 'pointer', lineHeight: 1, padding: 0 }}>×</button>
+        </div>
+      </div>
+      {isMobile ? (
+        <p style={{ color: '#777', fontSize: '12px', margin: '4px 0 0 0' }}>
           {challenge.phase?.replace('_', ' ').toUpperCase()} · ${Number(challenge.account_size).toLocaleString()}
         </p>
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <span style={{ background: badge.bg, border: `0.5px solid ${badge.border}`, borderRadius: '20px', padding: '4px 12px', color: badge.color, fontSize: '11px', fontWeight: '500', whiteSpace: 'nowrap' }}>
-          {badge.label}
-        </span>
-        <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: '#777', fontSize: '20px', cursor: 'pointer', lineHeight: 1, padding: 0 }}>×</button>
-      </div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '28px', marginTop: '4px' }}>
+          <p style={{ color: '#777', fontSize: '12px', margin: 0 }}>
+            {challenge.phase?.replace('_', ' ').toUpperCase()} · ${Number(challenge.account_size).toLocaleString()}
+          </p>
+          <p style={{ color: '#777', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: 0 }}>Recent Trades</p>
+        </div>
+      )}
     </div>
   )
 
