@@ -420,16 +420,8 @@ export default function Dashboard() {
 
     return (
       <div style={{ background: 'var(--bg-page)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-        <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-          <div style={{ padding: '16px 16px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: '600' }}>
-              Hi{userName ? `, ${userName}` : ''}
-            </span>
-            <span style={{ color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', marginLeft: '8px' }}>
-              {todayLabel}
-            </span>
-          </div>
-          <div style={{ padding: '10px 16px 0' }}>
+        <Sidebar
+          mobileTopBarRight={
             <AccountSwitcher
               mobile
               compact
@@ -440,6 +432,16 @@ export default function Dashboard() {
               }}
               defaultAccountId={defaultAccountId}
             />
+          }
+        />
+        <main style={{ flex: 1, display: 'flex', flexDirection: 'column', paddingTop: '52px', paddingBottom: 'calc(60px + env(safe-area-inset-bottom))' }}>
+          <div style={{ padding: '16px 16px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: '600' }}>
+              Hi{userName ? `, ${userName}` : ''}
+            </span>
+            <span style={{ color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', marginLeft: '8px' }}>
+              {todayLabel}
+            </span>
           </div>
           {paymentToast && (
             <div style={{

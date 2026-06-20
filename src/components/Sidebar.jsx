@@ -26,7 +26,7 @@ const tabItems = [
   { label: 'Alerts', path: '/notifications', icon: Bell },
 ]
 
-export default function Sidebar() {
+export default function Sidebar({ mobileTopBarRight = null }) {
   const navigate = useNavigate()
   const location = useLocation()
   const { collapsed, toggle } = useSidebar()
@@ -516,8 +516,10 @@ export default function Sidebar() {
 
         {/* Center intentionally blank (no brand text on mobile header) */}
 
-        {/* Right side — reserved for account switcher pill (added per page) */}
-        <div style={{ width: '32px' }} />
+        {/* Right side — account switcher pill, passed in per page */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', minWidth: '32px' }}>
+          {mobileTopBarRight}
+        </div>
       </div>
 
       {/* Drawer Overlay */}
