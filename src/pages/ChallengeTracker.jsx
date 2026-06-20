@@ -555,7 +555,7 @@ function PreviewModal({ challenge, trades, onClose, navigate, isMobile }) {
 
   const recentTrades = [...trades]
     .sort((a, b) => new Date(b.date) - new Date(a.date))
-    .slice(0, 8)
+    .slice(0, 6)
 
   const statBlock = (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '18px' }}>
@@ -614,7 +614,7 @@ function PreviewModal({ challenge, trades, onClose, navigate, isMobile }) {
           No trades logged yet
         </div>
       ) : (
-        <div style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '8px', overflow: isMobile ? 'hidden' : 'auto', flex: isMobile ? 'none' : 1 }}>
+        <div style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '8px', overflow: isMobile ? 'hidden' : 'auto', flex: isMobile ? 'none' : 1, marginBottom: isMobile ? 0 : '4px' }}>
           {recentTrades.map((t, i) => {
             const pnlVal = t.pnl != null ? parseFloat(t.pnl) : null
             const ob = previewOutcomeMap[t.outcome]
@@ -678,7 +678,7 @@ function PreviewModal({ challenge, trades, onClose, navigate, isMobile }) {
         onClick={e => e.stopPropagation()}
         style={isMobile
           ? { background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '14px', padding: '24px', width: '100%', maxWidth: '480px', maxHeight: '85vh', overflowY: 'auto', fontFamily: 'Inter, sans-serif' }
-          : { background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '14px', padding: '28px 28px 32px', width: '100%', maxWidth: '860px', maxHeight: '82vh', fontFamily: 'Inter, sans-serif', display: 'flex', flexDirection: 'column' }
+          : { background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '14px', padding: '28px 28px 32px', width: '100%', maxWidth: '860px', height: '82vh', maxHeight: '720px', fontFamily: 'Inter, sans-serif', display: 'flex', flexDirection: 'column', overflow: 'hidden' }
         }
       >
         {header}
