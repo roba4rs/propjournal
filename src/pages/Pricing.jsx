@@ -43,10 +43,18 @@ const plans = [
   },
 ]
 
+const IS_SANDBOX = process.env.REACT_APP_PADDLE_ENV === 'sandbox'
+
 const PRICE_IDS = {
-  monthly: process.env.REACT_APP_PADDLE_MONTHLY_PRICE_ID,
-  biannual: process.env.REACT_APP_PADDLE_SIXMONTH_PRICE_ID,
-  annual: process.env.REACT_APP_PADDLE_YEARLY_PRICE_ID,
+  monthly: IS_SANDBOX
+    ? process.env.REACT_APP_PADDLE_MONTHLY_PRICE_ID_SANDBOX
+    : process.env.REACT_APP_PADDLE_MONTHLY_PRICE_ID,
+  biannual: IS_SANDBOX
+    ? process.env.REACT_APP_PADDLE_SIXMONTH_PRICE_ID_SANDBOX
+    : process.env.REACT_APP_PADDLE_SIXMONTH_PRICE_ID,
+  annual: IS_SANDBOX
+    ? process.env.REACT_APP_PADDLE_YEARLY_PRICE_ID_SANDBOX
+    : process.env.REACT_APP_PADDLE_YEARLY_PRICE_ID,
 }
 
 const CheckIcon = () => (
