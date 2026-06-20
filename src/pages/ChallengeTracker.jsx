@@ -884,17 +884,18 @@ export default function ChallengeTracker() {
                   }}>
                     {/* Header */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <div style={{ minWidth: 0 }}>
+                      <div style={{ minWidth: 0, display: 'flex', alignItems: 'center', gap: '5px' }}>
                         <div style={{ fontSize: '12px', fontWeight: '700', color: '#fff', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {challenge.firm_name}
                         </div>
-                        <div style={{ fontSize: '9px', color: '#999', fontFamily: "'Inter', sans-serif", marginTop: '2px' }}>
-                          {phaseLabel} · ${Number(challenge.account_size).toLocaleString()}
-                        </div>
+                        <button onClick={() => setEditingChallenge(challenge)} style={{ background: 'transparent', border: 'none', color: '#777', cursor: 'pointer', fontSize: '10px', padding: '1px 2px', lineHeight: 1, flexShrink: 0 }}>✏️</button>
                       </div>
                       <span style={{ background: badge.bg, border: `0.5px solid ${badge.border}`, borderRadius: '4px', padding: '2px 6px', fontSize: '8px', color: badge.color, fontFamily: "'JetBrains Mono', monospace", whiteSpace: 'nowrap', flexShrink: 0, marginLeft: '4px' }}>
                         {badge.label}
                       </span>
+                    </div>
+                    <div style={{ fontSize: '9px', color: '#999', fontFamily: "'Inter', sans-serif", marginTop: '-6px' }}>
+                      {phaseLabel} · ${Number(challenge.account_size).toLocaleString()}
                     </div>
 
                     {/* P&L */}
@@ -937,7 +938,7 @@ export default function ChallengeTracker() {
 
                     {/* Actions */}
                     <div style={{ display: 'flex', gap: '4px', marginTop: 'auto' }}>
-                      <button onClick={() => setEditingChallenge(challenge)} style={{ background: 'transparent', border: '0.5px solid #1e1e1e', borderRadius: '4px', padding: '5px 7px', fontSize: '11px', color: '#999', cursor: 'pointer', flexShrink: 0 }}>✏️</button>
+                      <button onClick={() => setPreviewChallenge(challenge)} style={{ background: 'transparent', border: '0.5px solid #1e1e1e', borderRadius: '4px', padding: '5px 7px', fontSize: '11px', color: '#999', cursor: 'pointer', flexShrink: 0 }}>👁</button>
                       <button onClick={() => navigate(`/dashboard?account=${challenge.id}`)} style={{ flex: 1, background: 'transparent', border: `0.5px solid ${isFailed ? '#2e1515' : '#1e1e1e'}`, borderRadius: '4px', padding: '5px', fontSize: '10px', color: '#999', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Dashboard →</button>
                     </div>
                   </div>
