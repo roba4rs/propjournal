@@ -29,12 +29,6 @@ const font = {
 // ─── Helpers ───────────────────────────────────────────────────────
 function pnlColor(v) { return v > 0 ? T.green : v < 0 ? T.red : T.muted }
 
-function fmtPnl(v) {
-  if (v == null) return '—'
-  const abs = Math.abs(v).toFixed(2)
-  return (v >= 0 ? '+$' : '-$') + abs
-}
-
 function fmtPct(v) {
   if (v == null) return '—'
   return (v >= 0 ? '+' : '') + v.toFixed(1) + '%'
