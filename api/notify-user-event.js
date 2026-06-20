@@ -67,6 +67,7 @@ module.exports = async function handler(req, res) {
   
   async function sendPaymentConfirmedNotification(record) {
     const email = record?.email || 'unknown'
+    const name = record?.name || null
     const plan = record?.plan || 'unknown'
     const expiresAt = record?.plan_expires_at
       ? new Date(record.plan_expires_at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })
@@ -77,14 +78,20 @@ module.exports = async function handler(req, res) {
       biannual: '6 Months',
       annual: 'Annual',
     }
-    const planLabel = planLabels[plan] || plan
+    // A confirmed payment should never leave `plan` as free_trial — if it does,
+    // the two columns were updated separately (e.g. a manual edit) rather than
+    // together by the Paddle webhook, so flag it instead of mislabeling it.
+    const planLabel = plan === 'free_trial'
+      ? '⚠️ plan not set (check users.plan)'
+      : (planLabels[plan] || plan)
   
     const lines = [
       '💰 *Payment confirmed*',
       `Email: ${escapeMarkdown(email)}`,
-      `Plan: ${escapeMarkdown(planLabel)}`,
-      `Renews/expires: ${escapeMarkdown(expiresAt)}`,
     ]
+    if (name) lines.push(`Name: ${escapeMarkdown(name)}`)
+    lines.push(`Plan: ${escapeMarkdown(planLabel)}`)
+    lines.push(`Renews/expires: ${escapeMarkdown(expiresAt)}`)
   
     await sendTelegramMessage(lines.join('\n'))
   }
