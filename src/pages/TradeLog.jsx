@@ -475,13 +475,16 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
           }}>Cancel</button>
           <button onClick={handleSave} disabled={saving} style={{
             padding: "8px 22px",
-            background: saving ? "#555" : "#fff",
+            background: saving ? "#555" : "oklch(0.72 0.17 152)",
             border: "none", borderRadius: "8px",
             color: saving ? "#777" : "#000",
             cursor: saving ? "not-allowed" : "pointer",
             fontFamily: "'Inter', sans-serif", fontSize: "13px", fontWeight: 600,
             transition: "background 0.15s",
-          }}>
+          }}
+          onMouseEnter={e => { if (!saving) e.currentTarget.style.background = "oklch(0.78 0.17 152)" }}
+          onMouseLeave={e => { if (!saving) e.currentTarget.style.background = "oklch(0.72 0.17 152)" }}
+          >
             {saving ? "Saving…" : "Save Trade"}
           </button>
         </div>
@@ -1527,7 +1530,10 @@ function CSVImportModal({ open, onClose, activeAccount, onImported }) {
               </>
             )}
             {stage === "done" && (
-              <button onClick={handleClose} style={{ padding: "9px 22px", background: "#fff", border: "none", borderRadius: "8px", color: "#000", cursor: "pointer", fontFamily: "'Inter', sans-serif", fontSize: "13px", fontWeight: 600 }}>
+              <button onClick={handleClose} style={{ padding: "9px 22px", background: "oklch(0.72 0.17 152)", border: "none", borderRadius: "8px", color: "#000", cursor: "pointer", fontFamily: "'Inter', sans-serif", fontSize: "13px", fontWeight: 600, transition: "background 0.15s" }}
+                onMouseEnter={e => e.currentTarget.style.background = "oklch(0.78 0.17 152)"}
+                onMouseLeave={e => e.currentTarget.style.background = "oklch(0.72 0.17 152)"}
+              >
                 Done
               </button>
             )}
@@ -2352,13 +2358,13 @@ useEffect(() => {
               }}><ArrowUp size={15} /> Import CSV</button>
               <button onClick={openNew} style={{
                 display: "flex", alignItems: "center", gap: "8px",
-                padding: "10px 18px", background: "#1bba7c", border: "none",
+                padding: "10px 18px", background: "oklch(0.72 0.17 152)", border: "none",
                 borderRadius: "8px", color: "#000",
                 fontFamily: "'Inter', sans-serif", fontSize: "13px", fontWeight: 700,
                 cursor: "pointer", whiteSpace: "nowrap", transition: "background 0.15s",
               }}
-              onMouseEnter={e => e.currentTarget.style.background = "#22d394"}
-              onMouseLeave={e => e.currentTarget.style.background = "#1bba7c"}
+              onMouseEnter={e => e.currentTarget.style.background = "oklch(0.78 0.17 152)"}
+              onMouseLeave={e => e.currentTarget.style.background = "oklch(0.72 0.17 152)"}
               ><Plus size={15} /> Log Trade</button>
             </div>
           </div>

@@ -847,11 +847,13 @@ export default function ChallengeTracker() {
           <button
             onClick={() => setShowModal(true)}
             style={{
-              background: '#fff', border: 'none', borderRadius: '5px',
+              background: 'oklch(0.72 0.17 152)', border: 'none', borderRadius: '5px',
               padding: '5px 11px', fontSize: '12px', fontWeight: '600',
               color: '#000', cursor: 'pointer', fontFamily: "'Inter', sans-serif",
-              pointerEvents: 'auto',
+              pointerEvents: 'auto', transition: 'background 0.15s',
             }}
+            onMouseEnter={e => e.currentTarget.style.background = 'oklch(0.78 0.17 152)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'oklch(0.72 0.17 152)'}
           >+ New</button>
         </div>
 
