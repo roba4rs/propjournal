@@ -59,6 +59,13 @@ export default function AdminUserDetail() {
   const [accounts, setAccounts] = useState([])
   const [recentTrades, setRecentTrades] = useState([])
   const [loading, setLoading] = useState(true)
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   useEffect(() => {
     const load = async () => {
@@ -89,28 +96,127 @@ export default function AdminUserDetail() {
     load()
   }, [userId])
 
-  if (loading) {
+  const loadingScreen = (msg) => (
+    <div style={{ background: '#0a0a0a', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <Sidebar />
+      <main style={isMobile
+        ? { paddingTop: '52px', flex: 1, padding: '52px 14px 60px', color: '#777', fontFamily: 'Inter, sans-serif', fontSize: '13px' }
+        : { marginLeft: collapsed ? '60px' : '220px', flex: 1, padding: '32px', color: '#777', fontFamily: 'Inter, sans-serif', fontSize: '13px' }
+      }>{msg}</main>
+    </div>
+  )
+
+  if (loading) return loadingScreen('Loading...')
+  if (!user) return loadingScreen('User not found.')
+
+  // ─── MOBILE ──────────────────────────────────────────────────────────────────
+  if (isMobile) {
     return (
-      <div style={{ display: 'flex', background: '#0a0a0a', minHeight: '100vh' }}>
+      <div style={{ background: '#0a0a0a', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <Sidebar />
-        <main style={{ marginLeft: collapsed ? '60px' : '220px', flex: 1, padding: '32px', color: '#777', fontFamily: 'Inter, sans-serif', fontSize: '13px' }}>
-          Loading...
+        <main style={{ paddingTop: '52px', paddingBottom: '60px', flex: 1, overflowY: 'auto' }}>
+
+          {/* Back + header */}
+          <div style={{ padding: '12px 14px 0' }}>
+            <button
+              onClick={() => navigate('/admin/users')}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '6px',
+                background: 'transparent', border: 'none',
+                padding: '0 0 10px', color: '#777', fontFamily: 'Inter, sans-serif', fontSize: '13px',
+                cursor: 'pointer',
+              }}
+            >
+              <ArrowLeft size={13} strokeWidth={2} /> Back
+            </button>
+            <h1 style={{ color: '#fff', fontFamily: 'Inter, sans-serif', fontSize: '18px', fontWeight: '600', margin: '0 0 2px' }}>
+              {user.name || user.email}
+            </h1>
+            <p style={{ color: '#555', fontFamily: 'Inter, sans-serif', fontSize: '12px', margin: 0 }}>{user.email}</p>
+          </div>
+
+          {/* Stat cards — 2×2 grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', margin: '12px 14px 0' }}>
+            {[
+              { label: 'Plan',         value: user.plan || '—' },
+              { label: 'Signed Up',    value: fmtDate(user.created_at) },
+              { label: 'Trial Start',  value: fmtDate(user.trial_start) },
+              { label: 'Plan Expires', value: fmtDate(user.plan_expires_at) },
+            ].map((s) => (
+              <div key={s.label} style={{
+                background: '#111', border: '0.5px solid #1a1a1a', borderRadius: '10px', padding: '12px 14px',
+              }}>
+                <div style={{ fontSize: '10px', color: '#777', fontFamily: 'Inter, sans-serif', marginBottom: '4px' }}>{s.label}</div>
+                <div style={{ fontSize: '14px', color: '#fff', fontFamily: 'Inter, sans-serif', fontWeight: '500' }}>{s.value}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Accounts */}
+          <div style={{ margin: '16px 14px 0' }}>
+            <h2 style={{ color: '#fff', fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: '600', margin: '0 0 8px' }}>
+              Accounts ({accounts.length})
+            </h2>
+            <div style={{ background: '#111', border: '0.5px solid #1a1a1a', borderRadius: '10px', overflow: 'hidden' }}>
+              {accounts.length === 0 ? (
+                <div style={{ padding: '14px', color: '#777', fontFamily: 'Inter, sans-serif', fontSize: '13px' }}>No accounts created yet.</div>
+              ) : accounts.map((acc, i) => (
+                <div key={acc.id} style={{
+                  padding: '12px 14px',
+                  borderBottom: i < accounts.length - 1 ? '0.5px solid #1a1a1a' : 'none',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                    <span style={{ fontSize: '14px', color: '#fff', fontFamily: 'Inter, sans-serif', fontWeight: '500' }}>{acc.name}</span>
+                    <StatusBadge status={acc.status} />
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#555', fontFamily: 'JetBrains Mono, monospace' }}>
+                    {acc.firm_name || '—'} · {acc.type}{acc.phase ? ` · ${acc.phase}` : ''} · {fmtDate(acc.created_at)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Recent Trades */}
+          <div style={{ margin: '16px 14px 0' }}>
+            <h2 style={{ color: '#fff', fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: '600', margin: '0 0 8px' }}>
+              Recent Trades
+            </h2>
+            <div style={{ background: '#111', border: '0.5px solid #1a1a1a', borderRadius: '10px', overflow: 'hidden' }}>
+              {recentTrades.length === 0 ? (
+                <div style={{ padding: '14px', color: '#777', fontFamily: 'Inter, sans-serif', fontSize: '13px' }}>No trades logged yet.</div>
+              ) : recentTrades.map((t, i) => {
+                const pnlVal = t.pnl != null ? parseFloat(t.pnl) : null
+                return (
+                  <div key={t.id} style={{
+                    padding: '12px 14px',
+                    borderBottom: i < recentTrades.length - 1 ? '0.5px solid #1a1a1a' : 'none',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  }}>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px' }}>
+                        <span style={{ fontSize: '14px', color: '#fff', fontFamily: 'Inter, sans-serif', fontWeight: '500' }}>{t.pair || '—'}</span>
+                        <OutcomeBadge outcome={t.outcome} />
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#555', fontFamily: 'JetBrains Mono, monospace' }}>
+                        {t.direction || '—'} · {t.date || fmtDate(t.created_at)}
+                      </div>
+                    </div>
+                    <div style={{ fontSize: '13px', fontFamily: 'JetBrains Mono, monospace', color: pnlColor(t.pnl), flexShrink: 0 }}>
+                      {pnlVal != null ? `${pnlVal >= 0 ? '+' : ''}$${Math.abs(pnlVal).toFixed(2)}` : '—'}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
         </main>
       </div>
     )
   }
 
-  if (!user) {
-    return (
-      <div style={{ display: 'flex', background: '#0a0a0a', minHeight: '100vh' }}>
-        <Sidebar />
-        <main style={{ marginLeft: collapsed ? '60px' : '220px', flex: 1, padding: '32px', color: '#777', fontFamily: 'Inter, sans-serif', fontSize: '13px' }}>
-          User not found.
-        </main>
-      </div>
-    )
-  }
-
+  // ─── DESKTOP ─────────────────────────────────────────────────────────────────
   return (
     <div style={{ display: 'flex', background: '#0a0a0a', minHeight: '100vh' }}>
       <Sidebar />
@@ -139,9 +245,9 @@ export default function AdminUserDetail() {
         {/* Stat cards */}
         <div style={{ display: 'flex', gap: '16px', marginBottom: '28px', flexWrap: 'wrap' }}>
           {[
-            { label: 'Plan', value: user.plan || '—' },
-            { label: 'Signed Up', value: fmtDate(user.created_at) },
-            { label: 'Trial Start', value: fmtDate(user.trial_start) },
+            { label: 'Plan',         value: user.plan || '—' },
+            { label: 'Signed Up',    value: fmtDate(user.created_at) },
+            { label: 'Trial Start',  value: fmtDate(user.trial_start) },
             { label: 'Plan Expires', value: fmtDate(user.plan_expires_at) },
           ].map((s) => (
             <div key={s.label} style={{

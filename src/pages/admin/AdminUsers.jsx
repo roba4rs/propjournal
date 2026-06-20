@@ -5,7 +5,7 @@ import Sidebar from '../../components/Sidebar'
 import { supabase } from '../../supabaseClient'
 import { useSidebar } from '../../SidebarContext'
 
-const PAID_PLANS = ['monthly', 'sixmonth', 'yearly', 'pro'] // adjust if your plan values differ
+const PAID_PLANS = ['monthly', 'sixmonth', 'yearly', 'pro']
 
 function StatCard({ icon: Icon, label, value, accent }) {
   return (
@@ -45,6 +45,13 @@ export default function AdminUsers() {
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
   const { collapsed } = useSidebar()
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   useEffect(() => {
     const load = async () => {
@@ -64,6 +71,66 @@ export default function AdminUsers() {
   const trialUsers = totalUsers - paidUsers
   const newToday = users.filter(u => u.created_at?.slice(0, 10) === today).length
 
+  // ─── MOBILE ──────────────────────────────────────────────────────────────────
+  if (isMobile) {
+    return (
+      <div style={{ background: '#0a0a0a', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <Sidebar />
+        <main style={{ paddingTop: '52px', paddingBottom: '60px', flex: 1, overflowY: 'auto' }}>
+
+          <div style={{ padding: '12px 14px 0' }}>
+            <h1 style={{ color: '#fff', fontFamily: 'Inter, sans-serif', fontSize: '18px', fontWeight: '600', margin: 0 }}>Admin · Users</h1>
+          </div>
+
+          {/* Stat cards — 2×2 grid on mobile */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', margin: '12px 14px 0' }}>
+            <StatCard icon={Users}    label="Total Users" value={totalUsers} />
+            <StatCard icon={CreditCard} label="Paid"      value={paidUsers}  accent="#1bba7c" />
+            <StatCard icon={Clock}    label="Trial"       value={trialUsers} accent="#c97a00" />
+            <StatCard icon={UserPlus} label="New Today"   value={newToday}   accent="#4d9fff" />
+          </div>
+
+          {/* Users list — card rows */}
+          <div style={{ margin: '12px 14px 0', background: '#111', border: '0.5px solid #1a1a1a', borderRadius: '10px', overflow: 'hidden' }}>
+            {loading ? (
+              <div style={{ padding: '18px', color: '#777', fontFamily: 'Inter, sans-serif', fontSize: '13px' }}>Loading users...</div>
+            ) : users.length === 0 ? (
+              <div style={{ padding: '18px', color: '#777', fontFamily: 'Inter, sans-serif', fontSize: '13px' }}>No users yet.</div>
+            ) : users.map((u, i) => (
+              <div
+                key={u.id}
+                onClick={() => navigate(`/admin/users/${u.id}`)}
+                style={{
+                  padding: '12px 14px',
+                  borderBottom: i < users.length - 1 ? '0.5px solid #1a1a1a' : 'none',
+                  cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                }}
+                onTouchStart={(e) => (e.currentTarget.style.background = '#161616')}
+                onTouchEnd={(e) => (e.currentTarget.style.background = 'transparent')}
+              >
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <div style={{ fontSize: '14px', color: '#fff', fontFamily: 'Inter, sans-serif', fontWeight: '500', marginBottom: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {u.name || u.email}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <PlanBadge plan={u.plan} />
+                    <span style={{ fontSize: '11px', color: '#555', fontFamily: 'JetBrains Mono, monospace' }}>
+                      {u.created_at ? new Date(u.created_at).toLocaleDateString() : '—'}
+                    </span>
+                  </div>
+                </div>
+                <span style={{ color: '#555', fontSize: '16px', flexShrink: 0, marginLeft: '10px' }}>›</span>
+              </div>
+            ))}
+          </div>
+
+        </main>
+      </div>
+    )
+  }
+
+  // ─── DESKTOP ─────────────────────────────────────────────────────────────────
   return (
     <div style={{ display: 'flex', background: '#0a0a0a', minHeight: '100vh' }}>
       <Sidebar />
@@ -72,10 +139,10 @@ export default function AdminUsers() {
 
         {/* Stat cards */}
         <div style={{ display: 'flex', gap: '16px', marginBottom: '28px' }}>
-          <StatCard icon={Users} label="Total Users" value={totalUsers} />
-          <StatCard icon={CreditCard} label="Paid" value={paidUsers} accent="#1bba7c" />
-          <StatCard icon={Clock} label="Trial" value={trialUsers} accent="#c97a00" />
-          <StatCard icon={UserPlus} label="New Today" value={newToday} accent="#4d9fff" />
+          <StatCard icon={Users}      label="Total Users" value={totalUsers} />
+          <StatCard icon={CreditCard} label="Paid"        value={paidUsers}  accent="#1bba7c" />
+          <StatCard icon={Clock}      label="Trial"       value={trialUsers} accent="#c97a00" />
+          <StatCard icon={UserPlus}   label="New Today"   value={newToday}   accent="#4d9fff" />
         </div>
 
         {/* Users table */}
