@@ -425,6 +425,7 @@ export default function Dashboard() {
             <AccountSwitcher
               mobile
               compact
+              showBalance={false}
               showSelectedNameOnMobile
               onSwitch={(acc) => {
                 setActiveAccount(acc)
