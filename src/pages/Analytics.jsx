@@ -268,9 +268,54 @@ export default function Analytics() {
                 <SectionTitle mobile={isMobile}>Account Comparison</SectionTitle>
                 {activeMetrics.length === 0 ? (
                   <EmptyState message="No active accounts right now." />
+                ) : isMobile ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {activeMetrics.map(m => {
+                      const health = HEALTH[m.healthStatus]
+                      return (
+                        <div key={m.accountId} style={{
+                          background: 'var(--bg-hover)', border: `0.5px solid ${T.statBorder}`,
+                          borderRadius: 10, padding: '12px 14px',
+                        }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
+                            <div>
+                              <div style={{ fontFamily: font.body, fontSize: 13, color: T.text, fontWeight: 500 }}>{m.name}</div>
+                              <div style={{ fontFamily: font.mono, fontSize: 10, color: T.muted, marginTop: 2 }}>{m.firmName || '—'}</div>
+                            </div>
+                            <span style={{
+                              fontFamily: font.mono, fontSize: 11, color: health.color,
+                              whiteSpace: 'nowrap', flexShrink: 0, marginLeft: 8,
+                            }}>
+                              {health.emoji} {health.label}
+                            </span>
+                          </div>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 16px' }}>
+                            <div>
+                              <div style={{ fontFamily: font.mono, fontSize: 9, color: T.muted, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 3 }}>P&L</div>
+                              <div style={{ fontFamily: font.mono, fontSize: 13, fontWeight: 500, color: pnlColor(m.netPnl) }}>{fmtPct(m.netPnlPct)}</div>
+                            </div>
+                            <div>
+                              <div style={{ fontFamily: font.mono, fontSize: 9, color: T.muted, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 3 }}>Win Rate</div>
+                              <div style={{ fontFamily: font.mono, fontSize: 13, color: m.winRate >= 50 ? T.green : T.amber }}>{m.winRate.toFixed(0)}%</div>
+                            </div>
+                            <div>
+                              <div style={{ fontFamily: font.mono, fontSize: 9, color: T.muted, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 3 }}>Profit Factor</div>
+                              <div style={{ fontFamily: font.mono, fontSize: 13, color: m.profitFactor >= 1 ? T.green : T.red }}>{isFinite(m.profitFactor) ? m.profitFactor.toFixed(2) : '∞'}</div>
+                            </div>
+                            <div>
+                              <div style={{ fontFamily: font.mono, fontSize: 9, color: T.muted, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 3 }}>Drawdown</div>
+                              <div style={{ fontFamily: font.mono, fontSize: 13, fontWeight: 500, color: m.ddConsumedPct >= 60 ? T.red : T.sub }}>
+                                {m.ddConsumedPct.toFixed(0)}% <span style={{ color: T.muted, fontWeight: 400 }}>of limit</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
                 ) : (
-                  <div style={{ width: '100%', overflowX: isMobile ? 'auto' : 'visible', WebkitOverflowScrolling: 'touch' }}>
-                    <table style={{ width: '100%', minWidth: isMobile ? 560 : '100%', borderCollapse: 'collapse' }}>
+                  <div style={{ width: '100%', overflowX: 'visible' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                       <thead>
                         <tr>
                           {['Account', 'P&L', 'Win Rate', 'Profit Factor', 'Drawdown', 'Status'].map(h => (
