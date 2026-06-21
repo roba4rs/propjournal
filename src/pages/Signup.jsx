@@ -39,11 +39,11 @@ export default function Signup() {
   }
   const inputStyle = {
     width: '100%',
-    background: '#0a0a0a',
-    border: '0.5px solid #1e1e1e',
+    background: 'var(--bg-page)',
+    border: '0.5px solid var(--border-color)',
     borderRadius: '8px',
     padding: '12px 14px',
-    color: '#fff',
+    color: 'var(--text-primary)',
     fontFamily: 'Inter, sans-serif',
     fontSize: '14px',
     outline: 'none',
@@ -53,27 +53,27 @@ export default function Signup() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: '#0a0a0a',
+      background: 'var(--bg-page)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
     }}>
       <div style={{
-        background: '#111',
-        border: '0.5px solid #1e1e1e',
+        background: 'var(--bg-surface)',
+        border: '0.5px solid var(--border-color)',
         borderRadius: '12px',
         padding: '40px',
         width: '100%',
         maxWidth: '400px',
       }}>
         <h1 style={{
-          color: '#fff',
+          color: 'var(--text-primary)',
           fontFamily: 'Inter, sans-serif',
           fontSize: '24px',
           marginBottom: '8px',
         }}>Create account</h1>
         <p style={{
-          color: '#999',
+          color: 'var(--text-muted)',
           fontFamily: 'Inter, sans-serif',
           fontSize: '14px',
           marginBottom: '32px',
@@ -85,10 +85,10 @@ export default function Signup() {
           style={{
             width: '100%',
             background: 'transparent',
-            border: '0.5px solid #2a2a2a',
+            border: '0.5px solid var(--border-color-2)',
             borderRadius: '8px',
             padding: '12px',
-            color: '#fff',
+            color: 'var(--text-primary)',
             fontFamily: 'Inter, sans-serif',
             fontSize: '14px',
             cursor: 'pointer',
@@ -99,7 +99,7 @@ export default function Signup() {
             marginBottom: '24px',
             transition: 'background 0.2s',
           }}
-          onMouseEnter={e => e.currentTarget.style.background = '#161616'}
+          onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover-2)'}
           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
         >
           <svg width="18" height="18" viewBox="0 0 48 48">
@@ -118,16 +118,16 @@ export default function Signup() {
           gap: '12px',
           marginBottom: '24px',
         }}>
-          <div style={{ flex: 1, height: '0.5px', background: '#1e1e1e' }} />
-          <span style={{ color: '#999', fontSize: '12px', fontFamily: 'Inter, sans-serif' }}>or</span>
-          <div style={{ flex: 1, height: '0.5px', background: '#1e1e1e' }} />
+          <div style={{ flex: 1, height: '0.5px', background: 'var(--border-color)' }} />
+          <span style={{ color: 'var(--text-muted)', fontSize: '12px', fontFamily: 'Inter, sans-serif' }}>or</span>
+          <div style={{ flex: 1, height: '0.5px', background: 'var(--border-color)' }} />
         </div>
 
         {/* EMAIL/PASSWORD FORM */}
         <form onSubmit={handleSubmit(onSubmit)}>
           <div style={{ marginBottom: '20px' }}>
             <label style={{
-              display: 'block', color: '#aaa',
+              display: 'block', color: 'var(--text-soft)',
               fontFamily: 'Inter, sans-serif', fontSize: '13px', marginBottom: '8px',
             }}>Full name</label>
             <input
@@ -137,7 +137,7 @@ export default function Signup() {
               style={inputStyle}
             />
             {errors.name && (
-              <p style={{ color: '#c03535', fontSize: '12px', marginTop: '6px' }}>
+              <p style={{ color: 'var(--red)', fontSize: '12px', marginTop: '6px' }}>
                 {errors.name.message}
               </p>
             )}
@@ -145,7 +145,7 @@ export default function Signup() {
 
           <div style={{ marginBottom: '20px' }}>
             <label style={{
-              display: 'block', color: '#aaa',
+              display: 'block', color: 'var(--text-soft)',
               fontFamily: 'Inter, sans-serif', fontSize: '13px', marginBottom: '8px',
             }}>Email</label>
             <input
@@ -158,7 +158,7 @@ export default function Signup() {
               style={inputStyle}
             />
             {errors.email && (
-              <p style={{ color: '#c03535', fontSize: '12px', marginTop: '6px' }}>
+              <p style={{ color: 'var(--red)', fontSize: '12px', marginTop: '6px' }}>
                 {errors.email.message}
               </p>
             )}
@@ -166,7 +166,7 @@ export default function Signup() {
 
           <div style={{ marginBottom: '20px' }}>
             <label style={{
-              display: 'block', color: '#aaa',
+              display: 'block', color: 'var(--text-soft)',
               fontFamily: 'Inter, sans-serif', fontSize: '13px', marginBottom: '8px',
             }}>Password</label>
             <input
@@ -179,7 +179,7 @@ export default function Signup() {
               style={inputStyle}
             />
             {errors.password && (
-              <p style={{ color: '#c03535', fontSize: '12px', marginTop: '6px' }}>
+              <p style={{ color: 'var(--red)', fontSize: '12px', marginTop: '6px' }}>
                 {errors.password.message}
               </p>
             )}
@@ -187,7 +187,7 @@ export default function Signup() {
 
           <div style={{ marginBottom: '28px' }}>
             <label style={{
-              display: 'block', color: '#aaa',
+              display: 'block', color: 'var(--text-soft)',
               fontFamily: 'Inter, sans-serif', fontSize: '13px', marginBottom: '8px',
             }}>Confirm password</label>
             <input
@@ -200,7 +200,7 @@ export default function Signup() {
               style={inputStyle}
             />
             {errors.confirmPassword && (
-              <p style={{ color: '#c03535', fontSize: '12px', marginTop: '6px' }}>
+              <p style={{ color: 'var(--red)', fontSize: '12px', marginTop: '6px' }}>
                 {errors.confirmPassword.message}
               </p>
             )}
@@ -208,9 +208,9 @@ export default function Signup() {
 
           {authError && (
             <div style={{
-              background: '#1e0d0d', border: '0.5px solid #2e1515',
+              background: 'var(--red-bg-2)', border: '0.5px solid var(--red-bg)',
               borderRadius: '8px', padding: '12px', marginBottom: '20px',
-              color: '#c03535', fontSize: '13px', fontFamily: 'Inter, sans-serif',
+              color: 'var(--red)', fontSize: '13px', fontFamily: 'Inter, sans-serif',
             }}>
               {authError}
             </div>
@@ -220,25 +220,25 @@ export default function Signup() {
             type="submit"
             disabled={loading}
             style={{
-              width: '100%', background: 'oklch(0.72 0.17 152)', border: 'none',
-              borderRadius: '8px', padding: '13px', color: '#000',
+              width: '100%', background: 'var(--brand)', border: 'none',
+              borderRadius: '8px', padding: '13px', color: 'var(--brand-fg)',
               fontFamily: 'Inter, sans-serif', fontWeight: '600',
               fontSize: '14px', cursor: loading ? 'not-allowed' : 'pointer',
               opacity: loading ? 0.7 : 1, transition: 'background 0.15s',
             }}
-            onMouseEnter={e => { if (!loading) e.currentTarget.style.background = 'oklch(0.78 0.17 152)' }}
-            onMouseLeave={e => { if (!loading) e.currentTarget.style.background = 'oklch(0.72 0.17 152)' }}
+            onMouseEnter={e => { if (!loading) e.currentTarget.style.background = 'var(--brand-hover)' }}
+            onMouseLeave={e => { if (!loading) e.currentTarget.style.background = 'var(--brand)' }}
           >
             {loading ? 'Creating account...' : 'Create account'}
           </button>
         </form>
 
         <p style={{
-          color: '#999', fontFamily: 'Inter, sans-serif',
+          color: 'var(--text-muted)', fontFamily: 'Inter, sans-serif',
           fontSize: '13px', textAlign: 'center', marginTop: '24px',
         }}>
           Already have an account?{' '}
-          <Link to="/login" style={{ color: 'oklch(0.72 0.17 152)', textDecoration: 'none' }}>
+          <Link to="/login" style={{ color: 'var(--brand)', textDecoration: 'none' }}>
             Sign in
           </Link>
         </p>
