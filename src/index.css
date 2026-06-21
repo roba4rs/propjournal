@@ -91,15 +91,15 @@
   --yellow: #a07800;
   --warning: #924700;
 
-  /* Bold semantic backgrounds */
-  --green-bg: #6dd4a4;
-  --green-bg-2: #4ec993;
-  --red-bg: #f08080;
-  --red-bg-2: #e86060;
-  --blue-bg: #6aaff5;
-  --blue-bg-2: #4d9aef;
-  --amber-bg: #f5b840;
-  --amber-bg-2: #f0a820;
+  /* Pale semantic background tints — saturated text carries the color, not the fill */
+  --green-bg: #e7f6ee;
+  --green-bg-2: #d7f0e3;
+  --red-bg: #fdecec;
+  --red-bg-2: #fbdada;
+  --blue-bg: #eaf2ff;
+  --blue-bg-2: #d9e9ff;
+  --amber-bg: #fdf3e3;
+  --amber-bg-2: #faeac9;
 
   --funded: #1e4a08;
   --funded-bg: #8ecc6a;
