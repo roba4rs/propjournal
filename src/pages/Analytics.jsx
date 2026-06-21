@@ -235,8 +235,9 @@ function Divider({ label, mobile }) {
 }
 
 // ── Period Comparison (8-stat grid, week/month toggle) ───────────────
-function PeriodComparison({ trades, accountsById, mobile, periodLabel = 'vs last' }) {
-  const [period, setPeriod] = useState('week')
+// `period` / `onPeriodChange` are controlled by the parent so By Pair / By
+// Session (rendered separately) can share the same week/month window.
+function PeriodComparison({ trades, accountsById, mobile, period, onPeriodChange, periodLabel = 'vs last' }) {
   const { curStart, curEnd, prevStart, prevEnd } = useMemo(() => getRanges(period), [period])
 
   const curStats = useMemo(() => computeStats(tradesInRange(trades, curStart, curEnd), accountsById), [trades, accountsById, curStart, curEnd])
@@ -249,7 +250,7 @@ function PeriodComparison({ trades, accountsById, mobile, periodLabel = 'vs last
 
   const Toggle = ({ value, children }) => (
     <div
-      onClick={() => setPeriod(value)}
+      onClick={() => onPeriodChange(value)}
       style={{
         padding: '6px 16px', cursor: 'pointer', fontFamily: font.mono, fontSize: 12,
         color: period === value ? T.blue : T.sub,
@@ -331,10 +332,11 @@ function PeriodComparison({ trades, accountsById, mobile, periodLabel = 'vs last
 }
 
 // ── By Pair / By Session table ───────────────────────────────────────
-function GroupTable({ title, breakdown, mobile, footnote }) {
+function GroupTable({ title, breakdown, mobile, footnote, scopeLabel }) {
   return (
     <Card mobile={mobile}>
-      <SectionTitle mobile={mobile}>{title}</SectionTitle>
+      <SectionTitle mobile={mobile} style={{ marginBottom: scopeLabel ? 4 : undefined }}>{title}</SectionTitle>
+      {scopeLabel && <div style={{ fontFamily: font.mono, fontSize: 11, color: T.muted, marginBottom: 14 }}>{scopeLabel}</div>}
       {breakdown.length === 0 ? (
         <EmptyState message={`No ${title.toLowerCase()} data yet.`} />
       ) : mobile ? (
@@ -583,13 +585,29 @@ export default function Analytics() {
   const bestAccTrades = useMemo(() => best ? challengeTrades.filter(t => t.account_id === best.accountId) : [], [best, challengeTrades])
   const worstAccTrades = useMemo(() => worst ? challengeTrades.filter(t => t.account_id === worst.accountId) : [], [worst, challengeTrades])
 
-  // ── By Pair / By Session — pooled across all active challenge accounts ──
-  const byPair = useMemo(() => computeGroupBreakdown(challengeTrades, accountsById, t => t.pair ? t.pair.toUpperCase() : null), [challengeTrades, accountsById])
-  const bySession = useMemo(() => computeGroupBreakdown(challengeTrades, accountsById, t => t.session || null), [challengeTrades, accountsById])
+  // ── Period state — one toggle per section, shared between Period
+  // Comparison and By Pair / By Session so they always show the same window ──
+  const [challengePeriod, setChallengePeriod] = useState('week')
+  const [personalPeriod, setPersonalPeriod] = useState('week')
 
-  // ── Personal account breakdowns (isolated, no drawdown framing) ────
-  const personalByPair = useMemo(() => computeGroupBreakdown(personalTrades, accountsById, t => t.pair ? t.pair.toUpperCase() : null), [personalTrades, accountsById])
-  const personalBySession = useMemo(() => computeGroupBreakdown(personalTrades, accountsById, t => t.session || null), [personalTrades, accountsById])
+  const challengeRange = useMemo(() => getRanges(challengePeriod), [challengePeriod])
+  const personalRange = useMemo(() => getRanges(personalPeriod), [personalPeriod])
+
+  const scopeLabel = (period, range) => period === 'week'
+    ? `This week (Mon–Sun, ${range.curStart.getMonth() + 1}/${range.curStart.getDate()}\u2013${range.curEnd.getMonth() + 1}/${range.curEnd.getDate()})`
+    : `This month (${range.curStart.toLocaleDateString('en-US', { month: 'short' })} ${range.curStart.getDate()}\u2013${range.curEnd.getDate()})`
+
+  // ── By Pair / By Session — pooled across all active challenge accounts,
+  // scoped to the same week/month window as Period Comparison above ──
+  const challengePeriodTrades = useMemo(() => tradesInRange(challengeTrades, challengeRange.curStart, challengeRange.curEnd), [challengeTrades, challengeRange])
+  const byPair = useMemo(() => computeGroupBreakdown(challengePeriodTrades, accountsById, t => t.pair ? t.pair.toUpperCase() : null), [challengePeriodTrades, accountsById])
+  const bySession = useMemo(() => computeGroupBreakdown(challengePeriodTrades, accountsById, t => t.session || null), [challengePeriodTrades, accountsById])
+
+  // ── Personal account breakdowns (isolated, no drawdown framing), same
+  // period-scoping treatment ──
+  const personalPeriodTrades = useMemo(() => tradesInRange(personalTrades, personalRange.curStart, personalRange.curEnd), [personalTrades, personalRange])
+  const personalByPair = useMemo(() => computeGroupBreakdown(personalPeriodTrades, accountsById, t => t.pair ? t.pair.toUpperCase() : null), [personalPeriodTrades, accountsById])
+  const personalBySession = useMemo(() => computeGroupBreakdown(personalPeriodTrades, accountsById, t => t.session || null), [personalPeriodTrades, accountsById])
 
   const lowSampleFootnote = `Low sample sizes (under ~${LOW_SAMPLE_THRESHOLD} trades) shown in amber — too early to call a trend.`
 
@@ -638,8 +656,14 @@ export default function Analytics() {
 
               {challengeAccounts.length > 0 && (
                 <>
+                  {personalAccounts.length > 0 && (
+                    <div style={{ fontFamily: font.heading, fontSize: isMobile ? 12 : 13, fontWeight: 600, color: T.sub, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                      Challenge Accounts
+                    </div>
+                  )}
+
                   {/* ── 1. Period Comparison ── */}
-                  <PeriodComparison trades={challengeTrades} accountsById={accountsById} mobile={isMobile} />
+                  <PeriodComparison trades={challengeTrades} accountsById={accountsById} mobile={isMobile} period={challengePeriod} onPeriodChange={setChallengePeriod} />
 
                   {/* ── 2. Best / Needs Attention ── */}
                   <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? 16 : 24 }}>
@@ -647,11 +671,11 @@ export default function Analytics() {
                     <HighlightCard label="Needs Attention" metrics={worstExtended} accountTrades={worstAccTrades} accent={T.red} pairLabel="Worst Pair" mobile={isMobile} />
                   </div>
 
-                  {/* ── 3. By Pair ── */}
-                  <GroupTable title="By Pair" breakdown={byPair} mobile={isMobile} footnote={lowSampleFootnote} />
+                  {/* ── 3. By Pair (same week/month window as Period Comparison above) ── */}
+                  <GroupTable title="By Pair" breakdown={byPair} mobile={isMobile} footnote={lowSampleFootnote} scopeLabel={scopeLabel(challengePeriod, challengeRange)} />
 
                   {/* ── 4. By Session ── */}
-                  <GroupTable title="By Session" breakdown={bySession} mobile={isMobile} footnote={lowSampleFootnote} />
+                  <GroupTable title="By Session" breakdown={bySession} mobile={isMobile} footnote={lowSampleFootnote} scopeLabel={scopeLabel(challengePeriod, challengeRange)} />
 
                   {/* ── 5. Account Comparison ── */}
                   <Card mobile={isMobile}>
@@ -749,10 +773,10 @@ export default function Analytics() {
               {personalAccounts.length > 0 && (
                 <>
                   <Divider label="Personal account — no challenge rules" mobile={isMobile} />
-                  <PeriodComparison trades={personalTrades} accountsById={accountsById} mobile={isMobile} />
+                  <PeriodComparison trades={personalTrades} accountsById={accountsById} mobile={isMobile} period={personalPeriod} onPeriodChange={setPersonalPeriod} />
                   <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? 16 : 24 }}>
-                    <GroupTable title="By Pair" breakdown={personalByPair} mobile={isMobile} footnote={lowSampleFootnote} />
-                    <GroupTable title="By Session" breakdown={personalBySession} mobile={isMobile} footnote={lowSampleFootnote} />
+                    <GroupTable title="By Pair" breakdown={personalByPair} mobile={isMobile} footnote={lowSampleFootnote} scopeLabel={scopeLabel(personalPeriod, personalRange)} />
+                    <GroupTable title="By Session" breakdown={personalBySession} mobile={isMobile} footnote={lowSampleFootnote} scopeLabel={scopeLabel(personalPeriod, personalRange)} />
                   </div>
                 </>
               )}
