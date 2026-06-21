@@ -1114,9 +1114,9 @@ export default function ChallengeTracker() {
                       onClick={() => navigate(`/dashboard?account=${challenge.id}`)}
                       style={{
                         flex: 1, background: 'transparent',
-                        border: `0.5px solid ${isFailed ? 'var(--red-bg)' : 'var(--border-color)'}`,
+                        border: `1px solid ${isFailed ? 'var(--red-bg)' : 'var(--border-color)'}`,
                         borderRadius: '5px', padding: '6px',
-                        fontSize: '11px', color: 'var(--text-muted)', cursor: 'pointer',
+                        fontSize: '11px', color: 'var(--text-secondary)', cursor: 'pointer',
                         fontFamily: "'Inter', sans-serif",
                       }}
                     >Go to Dashboard →</button>
@@ -1304,7 +1304,7 @@ export default function ChallengeTracker() {
                     <button onClick={() => setPreviewChallenge(challenge)} style={{ background: 'transparent', border: '0.5px solid var(--border-color)', borderRadius: '8px', padding: '8px 14px', color: 'var(--text-muted)', fontFamily: 'Inter, sans-serif', fontSize: '12px', cursor: 'pointer', flex: 1 }}>
                       Preview
                     </button>
-                    <button onClick={() => navigate(`/dashboard?account=${challenge.id}`)} style={{ background: 'transparent', border: '0.5px solid var(--border-color)', borderRadius: '8px', padding: '8px 14px', color: 'var(--text-muted)', fontFamily: 'Inter, sans-serif', fontSize: '12px', cursor: 'pointer', flex: 1 }}>
+                    <button onClick={() => navigate(`/dashboard?account=${challenge.id}`)} style={{ background: 'transparent', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '8px 14px', color: 'var(--text-secondary)', fontFamily: 'Inter, sans-serif', fontSize: '12px', cursor: 'pointer', flex: 1 }}>
                       Go to Dashboard →
                     </button>
                   </div>
@@ -1399,7 +1399,7 @@ export default function ChallengeTracker() {
                     <button onClick={() => setPreviewChallenge(challenge)} style={{ background: 'transparent', border: '0.5px solid var(--border-color)', borderRadius: '6px', padding: '7px 14px', color: 'var(--text-muted)', fontFamily: 'Inter, sans-serif', fontSize: '12px', cursor: 'pointer' }}>
                       Preview
                     </button>
-                    <button onClick={() => navigate(`/dashboard?account=${challenge.id}`)} style={{ background: 'transparent', border: '0.5px solid var(--border-color)', borderRadius: '6px', padding: '7px 14px', color: 'var(--text-muted)', fontFamily: 'Inter, sans-serif', fontSize: '12px', cursor: 'pointer' }}>
+                    <button onClick={() => navigate(`/dashboard?account=${challenge.id}`)} style={{ background: 'transparent', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '7px 14px', color: 'var(--text-secondary)', fontFamily: 'Inter, sans-serif', fontSize: '12px', cursor: 'pointer' }}>
                       Go to Dashboard →
                     </button>
                   </div>
