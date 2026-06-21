@@ -2,6 +2,7 @@
   "routes": [
     { "src": "/static/(.*)", "dest": "/static/$1" },
     { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/images/(.*)", "dest": "/images/$1" },
     { "src": "/manifest.json", "dest": "/manifest.json" },
     { "src": "/service-worker.js", "dest": "/service-worker.js" },
     { "src": "/favicon.ico", "dest": "/favicon.ico" },
