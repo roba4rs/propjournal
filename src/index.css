@@ -91,19 +91,19 @@
   --yellow: #a07800;
   --warning: #924700;
 
-  /* More saturated semantic backgrounds so they read clearly on white */
-  --green-bg: #d4f0e2;
-  --green-bg-2: #bde8d3;
-  --red-bg: #fbd8d8;
-  --red-bg-2: #f7c2c2;
-  --blue-bg: #d6e8ff;
-  --blue-bg-2: #c0daff;
-  --amber-bg: #fce8c4;
-  --amber-bg-2: #f8d9a0;
+  /* Pumped semantic backgrounds — visible tints on light bg */
+  --green-bg: #b6e8ce;
+  --green-bg-2: #9adcbe;
+  --red-bg: #f5b8b8;
+  --red-bg-2: #ef9f9f;
+  --blue-bg: #b8d4f8;
+  --blue-bg-2: #9ec3f5;
+  --amber-bg: #f8d49a;
+  --amber-bg-2: #f5c478;
 
-  --funded: #4a8a1e;
-  --funded-bg: #d8edca;
-  --funded-bg-2: #c4e0ae;
+  --funded: #3d7a16;
+  --funded-bg: #c4e0ae;
+  --funded-bg-2: #afd496;
 }
 
 body {
