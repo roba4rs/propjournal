@@ -3,13 +3,13 @@ import { supabase } from '../supabaseClient'
 
 // ── Dot color by notification type ──────────────────────────────────────────
 const DOT_COLOR = {
-  daily_dd_warning: '#f59e0b',
-  daily_dd_hit:     '#c03535',
-  max_dd_warning:   '#f59e0b',
-  max_dd_hit:       '#c03535',
-  profit_target:    '#1db97b',
-  challenge_passed: '#1db97b',
-  challenge_failed: '#c03535',
+  daily_dd_warning: 'var(--warning)',
+  daily_dd_hit:     'var(--red)',
+  max_dd_warning:   'var(--warning)',
+  max_dd_hit:       'var(--red)',
+  profit_target:    'var(--brand)',
+  challenge_passed: 'var(--brand)',
+  challenge_failed: 'var(--red)',
 }
 
 function timeAgo(dateStr) {
@@ -134,8 +134,8 @@ export default function NotificationPanel({ onClose, onRead, anchorRef }) {
         top: `${panelTop}px`,
         width: '320px',
         maxHeight: '420px',
-        background: '#0d0d0d',
-        border: '0.5px solid #1e1e1e',
+        background: 'var(--bg-hover)',
+        border: '0.5px solid var(--border-color)',
         borderRadius: '12px',
         boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
         display: 'flex',
@@ -150,29 +150,29 @@ export default function NotificationPanel({ onClose, onRead, anchorRef }) {
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '14px 16px',
-        borderBottom: '0.5px solid #1a1a1a',
+        borderBottom: '0.5px solid var(--border-color)',
         flexShrink: 0,
       }}>
         <span style={{
           fontFamily: 'Syne, sans-serif',
           fontWeight: '700',
           fontSize: '14px',
-          color: '#fff',
+          color: 'var(--text-primary)',
         }}>Notifications</span>
         <button
           onClick={markAllRead}
           style={{
             background: 'none',
             border: 'none',
-            color: '#777',
+            color: 'var(--text-faint)',
             fontFamily: 'DM Sans, sans-serif',
             fontSize: '12px',
             cursor: 'pointer',
             padding: '2px 4px',
             transition: 'color 0.15s',
           }}
-          onMouseEnter={e => e.currentTarget.style.color = '#1db97b'}
-          onMouseLeave={e => e.currentTarget.style.color = '#777'}
+          onMouseEnter={e => e.currentTarget.style.color = 'var(--brand)'}
+          onMouseLeave={e => e.currentTarget.style.color = 'var(--text-faint)'}
         >
           Mark all read
         </button>
@@ -184,7 +184,7 @@ export default function NotificationPanel({ onClose, onRead, anchorRef }) {
           <div style={{
             padding: '32px 16px',
             textAlign: 'center',
-            color: '#999',
+            color: 'var(--text-muted)',
             fontFamily: 'DM Mono, monospace',
             fontSize: '12px',
           }}>Loading…</div>
@@ -194,7 +194,7 @@ export default function NotificationPanel({ onClose, onRead, anchorRef }) {
           <div style={{
             padding: '40px 16px',
             textAlign: 'center',
-            color: '#999',
+            color: 'var(--text-muted)',
             fontFamily: 'DM Sans, sans-serif',
             fontSize: '13px',
           }}>No notifications yet</div>
@@ -209,20 +209,20 @@ export default function NotificationPanel({ onClose, onRead, anchorRef }) {
               alignItems: 'flex-start',
               gap: '10px',
               padding: '12px 16px',
-              borderBottom: '0.5px solid #111',
-              background: n.read ? 'transparent' : '#0f1410',
+              borderBottom: '0.5px solid var(--bg-surface)',
+              background: n.read ? 'transparent' : 'var(--green-bg)',
               cursor: n.read ? 'default' : 'pointer',
               transition: 'background 0.15s',
             }}
-            onMouseEnter={e => { if (!n.read) e.currentTarget.style.background = '#111' }}
-            onMouseLeave={e => { if (!n.read) e.currentTarget.style.background = '#0f1410' }}
+            onMouseEnter={e => { if (!n.read) e.currentTarget.style.background = 'var(--bg-surface)' }}
+            onMouseLeave={e => { if (!n.read) e.currentTarget.style.background = 'var(--green-bg)' }}
           >
             {/* Colored dot */}
             <div style={{
               width: '7px',
               height: '7px',
               borderRadius: '50%',
-              background: DOT_COLOR[n.type] || '#777',
+              background: DOT_COLOR[n.type] || 'var(--text-faint)',
               flexShrink: 0,
               marginTop: '5px',
             }} />
@@ -233,13 +233,13 @@ export default function NotificationPanel({ onClose, onRead, anchorRef }) {
                 margin: '0 0 4px 0',
                 fontFamily: 'DM Sans, sans-serif',
                 fontSize: '13px',
-                color: n.read ? '#999' : '#ccc',
+                color: n.read ? 'var(--text-muted)' : 'var(--text-soft)',
                 lineHeight: '1.45',
               }}>{n.message}</p>
               <span style={{
                 fontFamily: 'DM Mono, monospace',
                 fontSize: '10px',
-                color: '#999',
+                color: 'var(--text-muted)',
               }}>{timeAgo(n.created_at)}</span>
             </div>
 
@@ -249,7 +249,7 @@ export default function NotificationPanel({ onClose, onRead, anchorRef }) {
                 width: '6px',
                 height: '6px',
                 borderRadius: '50%',
-                background: '#1db97b',
+                background: 'var(--brand)',
                 flexShrink: 0,
                 marginTop: '6px',
               }} />

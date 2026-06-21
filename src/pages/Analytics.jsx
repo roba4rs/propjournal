@@ -6,18 +6,18 @@ import { computeAccountMetrics } from '../lib/accountMetrics'
 
 // ─── Design tokens (matches rest of app) ────────────────────────────
 const T = {
-  bg:         '#0a0a0a',
-  card:       '#111',
-  cardBorder: '#1e1e1e',
-  stat:       '#0f0f0f',
-  statBorder: '#1a1a1a',
-  green:      '#1db97b',
-  red:        '#c03535',
-  amber:      '#c97a00',
-  blue:       '#4d9fff',
-  muted:      '#777',
-  sub:        '#aaa',
-  text:       '#e8e8e8',
+  bg:         'var(--bg-page)',
+  card:       'var(--bg-surface)',
+  cardBorder: 'var(--border-color)',
+  stat:       'var(--bg-hover)',
+  statBorder: 'var(--border-color)',
+  green:      'var(--brand)',
+  red:        'var(--red)',
+  amber:      'var(--amber)',
+  blue:       'var(--blue)',
+  muted:      'var(--text-faint)',
+  sub:        'var(--text-muted)',
+  text:       'var(--text-secondary)',
 }
 
 const font = {
@@ -79,7 +79,7 @@ function Skeleton({ h = 20, w = '100%', r = 8, mb = 0 }) {
   return (
     <div style={{
       height: h, width: w, borderRadius: r, marginBottom: mb,
-      background: 'linear-gradient(90deg, #161616 25%, #1c1c1c 50%, #161616 75%)',
+      background: 'linear-gradient(90deg, var(--border-color) 25%, var(--bg-surface-2) 50%, var(--border-color) 75%)',
       backgroundSize: '200% 100%', animation: 'shimmer 1.4s infinite',
     }} />
   )
@@ -109,7 +109,7 @@ function HighlightCard({ label, metrics, accent, mobile }) {
           </div>
         </div>
         <span style={{
-          background: '#0f0f0f', border: `0.5px solid ${T.statBorder}`, borderRadius: 6,
+          background: 'var(--bg-hover)', border: `0.5px solid ${T.statBorder}`, borderRadius: 6,
           padding: '4px 10px', fontFamily: font.mono, fontSize: 11, color: health.color,
         }}>
           {health.emoji} {health.label}

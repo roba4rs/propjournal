@@ -39,6 +39,10 @@
   --blue: #4d9fff;
   --amber: #c97a00;
   --yellow: #e8d44d;
+  --warning: #f59e0b;          /* NEW — added during Notifications migration. Distinct
+                                   from --amber (brighter/more saturated, Tailwind-style
+                                   amber-500), used consistently as the notification-type
+                                   accent for daily_dd_warning/max_dd_warning events. */
 
   --green-bg: #0f2219;
   --green-bg-2: #1a3826;
@@ -83,6 +87,7 @@
   --blue: #2b7fe0;
   --amber: #c97a00;
   --yellow: #c9a300;
+  --warning: #b45309;          /* darker amber-700 equivalent for contrast on white */
 
   --green-bg: #e7f6ee;
   --green-bg-2: #d7f0e3;

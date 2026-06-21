@@ -4,13 +4,13 @@ import { supabase } from '../supabaseClient'
 
 // ── Dot color by type ────────────────────────────────────────────────────────
 const DOT_COLOR = {
-  daily_dd_warning: '#f59e0b',
-  daily_dd_hit:     '#c03535',
-  max_dd_warning:   '#f59e0b',
-  max_dd_hit:       '#c03535',
-  profit_target:    '#1db97b',
-  challenge_passed: '#1db97b',
-  challenge_failed: '#c03535',
+  daily_dd_warning: 'var(--warning)',
+  daily_dd_hit:     'var(--red)',
+  max_dd_warning:   'var(--warning)',
+  max_dd_hit:       'var(--red)',
+  profit_target:    'var(--brand)',
+  challenge_passed: 'var(--brand)',
+  challenge_failed: 'var(--red)',
 }
 
 function timeAgo(dateStr) {
@@ -104,7 +104,7 @@ export default function Notifications() {
   const unread = notifications.filter(n => !n.read).length
 
   return (
-    <div style={{ background: '#0a0a0a', minHeight: '100vh' }}>
+    <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
       <Sidebar />
 
       {/* Top bar */}
@@ -116,7 +116,7 @@ export default function Notifications() {
       }}>
         <span style={{
           fontFamily: "'DM Sans', sans-serif",
-          fontSize: '15px', fontWeight: '500', color: '#e0e0e0',
+          fontSize: '15px', fontWeight: '500', color: 'var(--text-secondary)',
           pointerEvents: 'auto',
         }}>Notifications</span>
         {unread > 0 && (
@@ -124,7 +124,7 @@ export default function Notifications() {
             onClick={markAllRead}
             style={{
               background: 'none', border: 'none',
-              color: '#1db97b', fontFamily: "'DM Sans', sans-serif",
+              color: 'var(--brand)', fontFamily: "'DM Sans', sans-serif",
               fontSize: '12px', cursor: 'pointer', pointerEvents: 'auto',
             }}
           >
@@ -141,7 +141,7 @@ export default function Notifications() {
         {loading && (
           <div style={{
             padding: '60px 24px', textAlign: 'center',
-            color: '#999', fontFamily: "'DM Mono', monospace", fontSize: '12px',
+            color: 'var(--text-muted)', fontFamily: "'DM Mono', monospace", fontSize: '12px',
           }}>Loading…</div>
         )}
 
@@ -152,11 +152,11 @@ export default function Notifications() {
           }}>
             <div style={{ fontSize: '32px' }}>🔔</div>
             <p style={{
-              color: '#999', fontFamily: "'DM Sans', sans-serif",
+              color: 'var(--text-muted)', fontFamily: "'DM Sans', sans-serif",
               fontSize: '14px', margin: 0,
             }}>No notifications yet</p>
             <p style={{
-              color: '#555', fontFamily: "'DM Sans', sans-serif",
+              color: 'var(--text-faint-2)', fontFamily: "'DM Sans', sans-serif",
               fontSize: '12px', margin: 0,
             }}>You'll be alerted when drawdown or profit thresholds are hit.</p>
           </div>
@@ -170,14 +170,14 @@ export default function Notifications() {
               alignItems: 'flex-start',
               gap: '12px',
               padding: '14px 16px',
-              borderBottom: '0.5px solid #111',
-              background: n.read ? 'transparent' : '#0f1410',
+              borderBottom: '0.5px solid var(--bg-surface)',
+              background: n.read ? 'transparent' : 'var(--green-bg)',
             }}
           >
             {/* Colored dot */}
             <div style={{
               width: '8px', height: '8px', borderRadius: '50%',
-              background: DOT_COLOR[n.type] || '#777',
+              background: DOT_COLOR[n.type] || 'var(--text-faint)',
               flexShrink: 0, marginTop: '5px',
             }} />
 
@@ -187,11 +187,11 @@ export default function Notifications() {
                 margin: '0 0 5px 0',
                 fontFamily: "'DM Sans', sans-serif",
                 fontSize: '13px', lineHeight: '1.5',
-                color: n.read ? '#777' : '#ccc',
+                color: n.read ? 'var(--text-faint)' : 'var(--text-soft)',
               }}>{n.message}</p>
               <span style={{
                 fontFamily: "'DM Mono', monospace",
-                fontSize: '10px', color: '#999',
+                fontSize: '10px', color: 'var(--text-muted)',
               }}>{timeAgo(n.created_at)}</span>
             </div>
           </div>
