@@ -86,7 +86,7 @@ function PairCombobox({ value, onChange, inputStyle: customInputStyle }) {
       {showList && matches.length > 0 && (
         <div style={{
           position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0,
-          background: "#111", border: "0.5px solid #1e1e1e", borderRadius: "8px",
+          background: "var(--bg-surface)", border: "0.5px solid var(--border-color)", borderRadius: "8px",
           zIndex: 9999, maxHeight: "200px", overflowY: "auto",
         }}>
           {matches.map(p => (
@@ -95,12 +95,12 @@ function PairCombobox({ value, onChange, inputStyle: customInputStyle }) {
               onTouchEnd={e => { e.preventDefault(); select(p); }}
               style={{
               padding: "8px 12px", cursor: "pointer", fontFamily: "'JetBrains Mono', monospace",
-              fontSize: "12px", color: p === value ? "#1bba7c" : "#ccc",
-              background: p === value ? "#0f2219" : "transparent",
+              fontSize: "12px", color: p === value ? "var(--brand)" : "var(--text-soft)",
+              background: p === value ? "var(--green-bg)" : "transparent",
               transition: "background 0.1s",
             }}
-              onMouseEnter={e => e.currentTarget.style.background = p === value ? "#0f2219" : "#181818"}
-              onMouseLeave={e => e.currentTarget.style.background = p === value ? "#0f2219" : "transparent"}
+              onMouseEnter={e => e.currentTarget.style.background = p === value ? "var(--green-bg)" : "var(--bg-hover)"}
+              onMouseLeave={e => e.currentTarget.style.background = p === value ? "var(--green-bg)" : "transparent"}
             >{p}</div>
           ))}
         </div>
@@ -166,9 +166,9 @@ function fmt(n) {
 
 function pnlColor(pnl) {
   const v = parseFloat(pnl);
-  if (v > 0) return "#1bba7c";
-  if (v < 0) return "#c03535";
-  return "#999";
+  if (v > 0) return "var(--brand)";
+  if (v < 0) return "var(--red)";
+  return "var(--text-muted)";
 }
 
 function directionBadge(dir) {
@@ -178,19 +178,19 @@ function directionBadge(dir) {
       fontSize: "10px", fontFamily: "'JetBrains Mono', monospace",
       letterSpacing: "0.08em", textTransform: "uppercase",
       padding: "2px 8px", borderRadius: "4px",
-      background: isLong ? "#0f2219" : "#1e0d0d",
-      color: isLong ? "#1bba7c" : "#c03535",
-      border: `0.5px solid ${isLong ? "#1a3826" : "#2e1515"}`,
+      background: isLong ? "var(--green-bg)" : "var(--red-bg-2)",
+      color: isLong ? "var(--brand)" : "var(--red)",
+      border: `0.5px solid ${isLong ? "var(--green-bg-2)" : "var(--red-bg)"}`,
     }}>{dir}</span>
   );
 }
 
 function outcomeBadge(outcome) {
   const map = {
-    win:         { label: "WIN",         bg: "#0f2219", color: "#1bba7c", border: "#1a3826" },
-    loss:        { label: "LOSS",        bg: "#1e0d0d", color: "#c03535", border: "#2e1515" },
-    be:          { label: "BE",          bg: "#141414", color: "#aaa",    border: "#2a2a2a" },
-    in_progress: { label: "IN PROGRESS", bg: "#0f1a2e", color: "#4d9fff", border: "#1a3050" },
+    win:         { label: "WIN",         bg: "var(--green-bg)", color: "var(--brand)", border: "var(--green-bg-2)" },
+    loss:        { label: "LOSS",        bg: "var(--red-bg-2)", color: "var(--red)", border: "var(--red-bg)" },
+    be:          { label: "BE",          bg: "var(--bg-surface)", color: "var(--text-muted)",    border: "var(--border-color-2)" },
+    in_progress: { label: "IN PROGRESS", bg: "var(--blue-bg-2)", color: "var(--blue)", border: "var(--blue-bg)" },
   };
   const s = map[outcome];
   if (!s) return null;
@@ -213,24 +213,24 @@ function accountTypeBadge(type) {
     <span style={{
       fontSize: "9px", fontFamily: "'JetBrains Mono', monospace",
       padding: "1px 6px", borderRadius: "3px",
-      background: "#111", border: "0.5px solid #222",
-      color: "#777", textTransform: "uppercase", letterSpacing: "0.06em",
+      background: "var(--bg-surface)", border: "0.5px solid var(--border-color-2)",
+      color: "var(--text-faint)", textTransform: "uppercase", letterSpacing: "0.06em",
     }}>Personal</span>
   );
   return (
     <span style={{
       fontSize: "9px", fontFamily: "'JetBrains Mono', monospace",
       padding: "1px 6px", borderRadius: "3px",
-      background: "#0f1a2e", border: "0.5px solid #1a3050",
-      color: "#4d9fff", textTransform: "uppercase", letterSpacing: "0.06em",
+      background: "var(--blue-bg-2)", border: "0.5px solid var(--blue-bg)",
+      color: "var(--blue)", textTransform: "uppercase", letterSpacing: "0.06em",
     }}>Challenge</span>
   );
 }
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 const inputStyle = {
-  width: "100%", background: "#111", border: "0.5px solid #1e1e1e",
-  borderRadius: "8px", padding: "8px 10px", color: "#ccc",
+  width: "100%", background: "var(--bg-surface)", border: "0.5px solid var(--border-color)",
+  borderRadius: "8px", padding: "8px 10px", color: "var(--text-soft)",
   fontFamily: "'JetBrains Mono', monospace", fontSize: "13px",
   outline: "none", boxSizing: "border-box",
 };
@@ -239,7 +239,7 @@ const selectStyle = { ...inputStyle, appearance: "none", cursor: "pointer" };
 
 const td = {
   padding: "12px 14px", fontSize: "13px",
-  color: "#ccc", verticalAlign: "middle",
+  color: "var(--text-soft)", verticalAlign: "middle",
 };
 
 function Field({ label, children, hint }) {
@@ -247,10 +247,10 @@ function Field({ label, children, hint }) {
     <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
       <label style={{
         fontSize: "10px", fontFamily: "'JetBrains Mono', monospace",
-        letterSpacing: "0.1em", textTransform: "uppercase", color: "#777",
+        letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-faint)",
       }}>{label}</label>
       {children}
-      {hint && <span style={{ fontSize: "11px", color: "#999", fontFamily: "'JetBrains Mono', monospace" }}>{hint}</span>}
+      {hint && <span style={{ fontSize: "11px", color: "var(--text-muted)", fontFamily: "'JetBrains Mono', monospace" }}>{hint}</span>}
     </div>
   );
 }
@@ -443,41 +443,41 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
   return (
     <div style={{
       position: "fixed", inset: 0, zIndex: 200,
-      background: "#0a0a0a", display: "flex", flexDirection: "column",
+      background: "var(--bg-page)", display: "flex", flexDirection: "column",
       overflowY: "auto",
     }}>
       {/* Top bar */}
       <div style={{
         position: "sticky", top: 0, zIndex: 10,
-        background: "#0a0a0a", borderBottom: "0.5px solid #1a1a1a",
+        background: "var(--bg-page)", borderBottom: "0.5px solid var(--border-color)",
         padding: "0 40px", height: "60px",
         display: "flex", alignItems: "center", justifyContent: "space-between",
       }}>
-        <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "16px", fontWeight: 700, color: "#fff" }}>
+        <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "16px", fontWeight: 700, color: "var(--text-primary)" }}>
           {editTrade ? "Edit Trade" : "Log Trade"}
         </span>
         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
           {successMsg && (
-            <span style={{ color: "#1bba7c", fontSize: "13px", fontFamily: "'Inter', sans-serif" }}>
+            <span style={{ color: "var(--brand)", fontSize: "13px", fontFamily: "'Inter', sans-serif" }}>
               ✓ {successMsg}
             </span>
           )}
           {formError && (
-            <span style={{ color: "#c03535", fontSize: "13px", fontFamily: "'Inter', sans-serif" }}>
+            <span style={{ color: "var(--red)", fontSize: "13px", fontFamily: "'Inter', sans-serif" }}>
               {formError}
             </span>
           )}
           <button onClick={onClose} style={{
             padding: "8px 16px", background: "none",
-            border: "0.5px solid #1e1e1e", borderRadius: "8px",
-            color: "#777", cursor: "pointer",
+            border: "0.5px solid var(--border-color)", borderRadius: "8px",
+            color: "var(--text-faint)", cursor: "pointer",
             fontFamily: "'Inter', sans-serif", fontSize: "13px",
           }}>Cancel</button>
           <button onClick={handleSave} disabled={saving} style={{
             padding: "8px 22px",
-            background: saving ? "#555" : "oklch(0.72 0.17 152)",
+            background: saving ? "var(--text-faint-2)" : "oklch(0.72 0.17 152)",
             border: "none", borderRadius: "8px",
-            color: saving ? "#777" : "#000",
+            color: saving ? "var(--text-faint)" : "var(--brand-fg)",
             cursor: saving ? "not-allowed" : "pointer",
             fontFamily: "'Inter', sans-serif", fontSize: "13px", fontWeight: 600,
             transition: "background 0.15s",
@@ -503,7 +503,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
         {/* ── Left: trade details ── */}
         <div style={{ paddingRight: "48px", display: "flex", flexDirection: "column", gap: "28px" }}>
           <div>
-            <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "#999", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "18px" }}>
+            <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "18px" }}>
               Trade Details
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
@@ -522,12 +522,12 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                       <button key={d} onClick={() => set("direction", d)} style={{
                         flex: 1, padding: "8px", borderRadius: "8px",
                         border: form.direction === d
-                          ? `0.5px solid ${d === "long" ? "#1a3826" : "#2e1515"}`
-                          : "0.5px solid #1e1e1e",
+                          ? `0.5px solid ${d === "long" ? "var(--green-bg-2)" : "var(--red-bg)"}`
+                          : "0.5px solid var(--border-color)",
                         background: form.direction === d
-                          ? (d === "long" ? "#0f2219" : "#1e0d0d") : "#111",
+                          ? (d === "long" ? "var(--green-bg)" : "var(--red-bg-2)") : "var(--bg-surface)",
                         color: form.direction === d
-                          ? (d === "long" ? "#1bba7c" : "#c03535") : "#777",
+                          ? (d === "long" ? "var(--brand)" : "var(--red)") : "var(--text-faint)",
                         cursor: "pointer", fontFamily: "'JetBrains Mono', monospace",
                         fontSize: "11px", textTransform: "uppercase",
                         letterSpacing: "0.08em", transition: "all 0.15s",
@@ -541,16 +541,16 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
               <div>
                 {/* Mode toggle header */}
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
-                  <span style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "#777", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+                  <span style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "var(--text-faint)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
                     {rrMode === "manual" ? "Risk:Reward" : "Entry / SL / TP"}
                   </span>
-                  <div style={{ display: "flex", border: "0.5px solid #1e1e1e", borderRadius: "6px", overflow: "hidden" }}>
+                  <div style={{ display: "flex", border: "0.5px solid var(--border-color)", borderRadius: "6px", overflow: "hidden" }}>
                     {[["manual", "R:R Select"], ["auto", "Price Mode"]].map(([mode, label]) => (
                       <button key={mode} onClick={() => setRrMode(mode)} style={{
                         padding: "5px 12px", border: "none", cursor: "pointer", fontSize: "10px",
                         fontFamily: "'JetBrains Mono', monospace", textTransform: "uppercase", letterSpacing: "0.06em",
-                        background: rrMode === mode ? "#1bba7c22" : "#111",
-                        color: rrMode === mode ? "#1bba7c" : "#555",
+                        background: rrMode === mode ? "rgba(var(--brand-rgb), 0.15)" : "var(--bg-surface)",
+                        color: rrMode === mode ? "var(--brand)" : "var(--text-faint-2)",
                         transition: "all 0.15s",
                       }}>{label}</button>
                     ))}
@@ -567,9 +567,9 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                         return (
                           <button key={n} onClick={() => setForm(prev => ({ ...prev, rr: active ? "" : val }))} style={{
                             flex: 1, padding: "10px 4px", borderRadius: "8px", cursor: "pointer",
-                            border: `0.5px solid ${active ? "#1a3826" : "#1e1e1e"}`,
-                            background: active ? "#0f2219" : "#111",
-                            color: active ? "#1bba7c" : "#666",
+                            border: `0.5px solid ${active ? "var(--green-bg-2)" : "var(--border-color)"}`,
+                            background: active ? "var(--green-bg)" : "var(--bg-surface)",
+                            color: active ? "var(--brand)" : "var(--text-faint)",
                             fontFamily: "'JetBrains Mono', monospace", fontSize: "12px",
                             transition: "all 0.15s",
                           }}>1:{n}</button>
@@ -579,7 +579,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
                       <Field label="Custom R:R">
                         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                          <span style={{ color: "#555", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", flexShrink: 0 }}>1:</span>
+                          <span style={{ color: "var(--text-faint-2)", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", flexShrink: 0 }}>1:</span>
                           <input type="number" step="0.1" min="0.1" placeholder="2.5"
                             value={form.rr} onChange={e => setForm(prev => ({ ...prev, rr: e.target.value }))}
                             style={{ ...inputStyle }} />
@@ -613,7 +613,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                       <Field label="R:R (auto-calculated)">
                         <input type="text" readOnly
                           value={form.rr ? `1:${form.rr}` : "—"}
-                          style={{ ...inputStyle, color: form.rr ? "#1bba7c" : "#999", cursor: "default" }} />
+                          style={{ ...inputStyle, color: form.rr ? "var(--brand)" : "var(--text-muted)", cursor: "default" }} />
                       </Field>
                       <Field label="Session">
                         <select value={form.session} onChange={e => set("session", e.target.value)} style={selectStyle}>
@@ -635,18 +635,18 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
               <Field label="Outcome">
                 <div style={{ display: "flex", gap: "8px" }}>
                   {[
-                    { value: "win",         label: "WIN",         active: "#0f2219", activeText: "#1bba7c", activeBorder: "#1a3826" },
-                    { value: "loss",        label: "LOSS",        active: "#1e0d0d", activeText: "#c03535", activeBorder: "#2e1515" },
-                    { value: "be",          label: "BE",          active: "#141414", activeText: "#aaa",    activeBorder: "#2a2a2a" },
-                    { value: "in_progress", label: "IN PROGRESS", active: "#0f1a2e", activeText: "#4d9fff", activeBorder: "#1a3050" },
+                    { value: "win",         label: "WIN",         active: "var(--green-bg)", activeText: "var(--brand)", activeBorder: "var(--green-bg-2)" },
+                    { value: "loss",        label: "LOSS",        active: "var(--red-bg-2)", activeText: "var(--red)", activeBorder: "var(--red-bg)" },
+                    { value: "be",          label: "BE",          active: "var(--bg-surface)", activeText: "var(--text-muted)",    activeBorder: "var(--border-color-2)" },
+                    { value: "in_progress", label: "IN PROGRESS", active: "var(--blue-bg-2)", activeText: "var(--blue)", activeBorder: "var(--blue-bg)" },
                   ].map(({ value, label, active, activeText, activeBorder }) => {
                     const isActive = form.outcome === value;
                     return (
                       <button key={value} onClick={() => set("outcome", isActive ? null : value)} style={{
                         flex: 1, padding: "8px 4px", borderRadius: "8px",
-                        border: `0.5px solid ${isActive ? activeBorder : "#1e1e1e"}`,
-                        background: isActive ? active : "#111",
-                        color: isActive ? activeText : "#777",
+                        border: `0.5px solid ${isActive ? activeBorder : "var(--border-color)"}`,
+                        background: isActive ? active : "var(--bg-surface)",
+                        color: isActive ? activeText : "var(--text-faint)",
                         cursor: "pointer", fontFamily: "'JetBrains Mono', monospace",
                         fontSize: "10px", textTransform: "uppercase",
                         letterSpacing: "0.08em", transition: "all 0.15s",
@@ -666,22 +666,22 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
               {/* Screenshot */}
               <Field label="Chart Screenshot">
                 <div onClick={() => fileRef.current.click()} style={{
-                  border: "0.5px dashed #2a2a2a", borderRadius: "10px", padding: "28px 20px",
+                  border: "0.5px dashed var(--border-color-2)", borderRadius: "10px", padding: "28px 20px",
                   cursor: "pointer", textAlign: "center",
-                  color: "#999", fontSize: "13px", transition: "border-color 0.15s",
+                  color: "var(--text-muted)", fontSize: "13px", transition: "border-color 0.15s",
                   fontFamily: "'Inter', sans-serif",
                 }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = "#3a3a3a"}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = "#2a2a2a"}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = "var(--border-hover)"}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = "var(--border-color-2)"}
                 >
                   {screenshotFile
-                    ? <span style={{ color: "#1bba7c", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px" }}>📎 {screenshotFile.name}</span>
+                    ? <span style={{ color: "var(--brand)", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px" }}>📎 {screenshotFile.name}</span>
                     : form.screenshot_url
-                      ? <span style={{ color: "#4d9fff", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px" }}>📎 Screenshot attached — click to replace</span>
+                      ? <span style={{ color: "var(--blue)", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px" }}>📎 Screenshot attached — click to replace</span>
                       : <>
                           <div style={{ fontSize: "22px", marginBottom: "8px" }}>📷</div>
-                          <div style={{ color: "#777" }}>Click to upload chart screenshot</div>
-                          <div style={{ color: "#555", fontSize: "11px", marginTop: "4px" }}>PNG, JPG, WEBP</div>
+                          <div style={{ color: "var(--text-faint)" }}>Click to upload chart screenshot</div>
+                          <div style={{ color: "var(--text-faint-2)", fontSize: "11px", marginTop: "4px" }}>PNG, JPG, WEBP</div>
                         </>
                   }
                 </div>
@@ -693,14 +693,14 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
 
         {/* ── Right: account selector ── */}
         <div style={{
-          borderLeft: "0.5px solid #1a1a1a", paddingLeft: "40px",
+          borderLeft: "0.5px solid var(--border-color)", paddingLeft: "40px",
           display: "flex", flexDirection: "column", gap: "20px",
           position: "sticky", top: "80px",
         }}>
-          <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "#999", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+          <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
             Accounts
           </div>
-          <div style={{ fontSize: "12px", color: "#999", fontFamily: "'Inter', sans-serif", marginTop: "-10px" }}>
+          <div style={{ fontSize: "12px", color: "var(--text-muted)", fontFamily: "'Inter', sans-serif", marginTop: "-10px" }}>
             Select which accounts took this trade. Each account uses its own risk sizing.
           </div>
 
@@ -727,8 +727,8 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
 
             return (
               <div key={acc.id} style={{
-                background: isSelected ? "#0f0f0f" : "#080808",
-                border: `0.5px solid ${isSelected ? "#2a2a2a" : "#141414"}`,
+                background: isSelected ? "var(--bg-hover)" : "var(--bg-page)",
+                border: `0.5px solid ${isSelected ? "var(--border-color-2)" : "var(--bg-surface)"}`,
                 borderRadius: "12px", padding: "16px",
                 transition: "all 0.15s", cursor: "pointer",
                 opacity: isSelected ? 1 : 0.5,
@@ -741,20 +741,20 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                     {/* Checkbox */}
                     <div style={{
                       width: "16px", height: "16px", borderRadius: "4px",
-                      border: `0.5px solid ${isSelected ? "#1bba7c" : "#2a2a2a"}`,
-                      background: isSelected ? "#0f2219" : "transparent",
+                      border: `0.5px solid ${isSelected ? "var(--brand)" : "var(--border-color-2)"}`,
+                      background: isSelected ? "var(--green-bg)" : "transparent",
                       display: "flex", alignItems: "center", justifyContent: "center",
                       flexShrink: 0, transition: "all 0.15s",
                     }}>
-                      {isSelected && <span style={{ color: "#1bba7c", fontSize: "10px", lineHeight: 1 }}>✓</span>}
+                      {isSelected && <span style={{ color: "var(--brand)", fontSize: "10px", lineHeight: 1 }}>✓</span>}
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                      <span style={{ fontSize: "13px", fontFamily: "'Inter', sans-serif", fontWeight: 500, color: "#e0e0e0" }}>
+                      <span style={{ fontSize: "13px", fontFamily: "'Inter', sans-serif", fontWeight: 500, color: "var(--text-secondary)" }}>
                         {acc.name}
                       </span>
                       {accountTypeBadge(acc.type)}
                       {acc.account_size && (
-                        <span style={{ fontSize: "10px", color: "#999", fontFamily: "'JetBrains Mono', monospace" }}>
+                        <span style={{ fontSize: "10px", color: "var(--text-muted)", fontFamily: "'JetBrains Mono', monospace" }}>
                           ${parseFloat(acc.account_size).toLocaleString()}
                         </span>
                       )}
@@ -770,7 +770,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                     <div>
                       <label style={{
                         fontSize: "10px", fontFamily: "'JetBrains Mono', monospace",
-                        letterSpacing: "0.1em", textTransform: "uppercase", color: "#777",
+                        letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-faint)",
                         display: "block", marginBottom: "6px",
                       }}>Risk</label>
 
@@ -778,7 +778,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                         {/* Mode toggle pill */}
                         <div style={{
                           display: "flex", borderRadius: "6px",
-                          border: "0.5px solid #1e1e1e", overflow: "hidden", flexShrink: 0,
+                          border: "0.5px solid var(--border-color)", overflow: "hidden", flexShrink: 0,
                         }}>
                           {["$", "%"].map(m => {
                             const active = mode === m;
@@ -788,8 +788,8 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                                 onClick={() => switchMode(acc, m)}
                                 style={{
                                   padding: "7px 13px", border: "none", cursor: "pointer",
-                                  background: active ? "#1e1e1e" : "transparent",
-                                  color: active ? "#e0e0e0" : "#777",
+                                  background: active ? "var(--border-color)" : "transparent",
+                                  color: active ? "var(--text-secondary)" : "var(--text-faint)",
                                   fontFamily: "'JetBrains Mono', monospace", fontSize: "12px",
                                   transition: "all 0.15s", lineHeight: 1,
                                 }}
@@ -812,7 +812,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                           <span style={{
                             position: "absolute", right: "10px", top: "50%",
                             transform: "translateY(-50%)",
-                            color: "#777", fontSize: "12px",
+                            color: "var(--text-faint)", fontSize: "12px",
                             fontFamily: "'JetBrains Mono', monospace", pointerEvents: "none",
                           }}>{mode}</span>
                         </div>
@@ -821,38 +821,38 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
 
                     {/* Live preview: Risk % + Risk $ + Est. P&L */}
                     <div style={{
-                      background: "#0a0a0a", border: "0.5px solid #1a1a1a",
+                      background: "var(--bg-page)", border: "0.5px solid var(--border-color)",
                       borderRadius: "8px", padding: "10px 12px",
                       display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px",
                     }}>
                       <div>
-                        <div style={{ fontSize: "9px", fontFamily: "'JetBrains Mono', monospace", color: "#999", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "4px" }}>
+                        <div style={{ fontSize: "9px", fontFamily: "'JetBrains Mono', monospace", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "4px" }}>
                           Risk %
                         </div>
-                        <div style={{ fontSize: "14px", fontFamily: "'Inter', sans-serif", fontWeight: 600, color: resolvedPct ? "#e0e0e0" : "#555" }}>
+                        <div style={{ fontSize: "14px", fontFamily: "'Inter', sans-serif", fontWeight: 600, color: resolvedPct ? "var(--text-secondary)" : "var(--text-faint-2)" }}>
                           {resolvedPct ? `${parseFloat(resolvedPct).toFixed(2)}%` : "—"}
                         </div>
                       </div>
                       <div>
-                        <div style={{ fontSize: "9px", fontFamily: "'JetBrains Mono', monospace", color: "#999", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "4px" }}>
+                        <div style={{ fontSize: "9px", fontFamily: "'JetBrains Mono', monospace", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "4px" }}>
                           Risk $
                         </div>
-                        <div style={{ fontSize: "14px", fontFamily: "'Inter', sans-serif", fontWeight: 600, color: resolvedDollar ? "#e0e0e0" : "#555" }}>
+                        <div style={{ fontSize: "14px", fontFamily: "'Inter', sans-serif", fontWeight: 600, color: resolvedDollar ? "var(--text-secondary)" : "var(--text-faint-2)" }}>
                           {resolvedDollar ? `$${resolvedDollar}` : "—"}
                         </div>
                       </div>
                       <div>
-                        <div style={{ fontSize: "9px", fontFamily: "'JetBrains Mono', monospace", color: "#999", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "4px" }}>
+                        <div style={{ fontSize: "9px", fontFamily: "'JetBrains Mono', monospace", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "4px" }}>
                           Est. P&L
                         </div>
-                        <div style={{ fontSize: "14px", fontFamily: "'Inter', sans-serif", fontWeight: 600, color: pnlNum !== null ? pnlColor(pnlNum) : "#555" }}>
+                        <div style={{ fontSize: "14px", fontFamily: "'Inter', sans-serif", fontWeight: 600, color: pnlNum !== null ? pnlColor(pnlNum) : "var(--text-faint-2)" }}>
                           {pnlNum !== null ? `${pnlNum >= 0 ? "+" : ""}$${Math.abs(pnlNum).toFixed(2)}` : "—"}
                         </div>
                       </div>
                     </div>
 
                     {!form.rr && rawVal && (
-                      <div style={{ fontSize: "11px", color: "#999", fontFamily: "'JetBrains Mono', monospace" }}>
+                      <div style={{ fontSize: "11px", color: "var(--text-muted)", fontFamily: "'JetBrains Mono', monospace" }}>
                         Fill Entry, SL, TP to calculate P&L
                       </div>
                     )}
@@ -865,10 +865,10 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
           {/* Summary of selected accounts */}
           {selectedAccounts.size > 1 && (
             <div style={{
-              background: "#0a0a0a", border: "0.5px solid #1a1a1a",
+              background: "var(--bg-page)", border: "0.5px solid var(--border-color)",
               borderRadius: "10px", padding: "14px 16px",
             }}>
-              <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "#999", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "10px" }}>
+              <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "10px" }}>
                 Summary
               </div>
               {selectedAccountsList.map(acc => {
@@ -883,8 +883,8 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                 const pnlNum = pnl !== null ? parseFloat(pnl) : null;
                 return (
                   <div key={acc.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-                    <span style={{ fontSize: "12px", fontFamily: "'Inter', sans-serif", color: "#aaa" }}>{acc.name}</span>
-                    <span style={{ fontSize: "12px", fontFamily: "'JetBrains Mono', monospace", color: pnlNum !== null ? pnlColor(pnlNum) : "#555" }}>
+                    <span style={{ fontSize: "12px", fontFamily: "'Inter', sans-serif", color: "var(--text-muted)" }}>{acc.name}</span>
+                    <span style={{ fontSize: "12px", fontFamily: "'JetBrains Mono', monospace", color: pnlNum !== null ? pnlColor(pnlNum) : "var(--text-faint-2)" }}>
                       {pnlNum !== null ? `${pnlNum >= 0 ? "+" : ""}$${Math.abs(pnlNum).toFixed(2)}` : "—"}
                     </span>
                   </div>
@@ -911,39 +911,39 @@ function TradeDetailModal({ trade, onClose, onEdit, onDelete }) {
         position: "fixed", top: "50%", left: "50%",
         transform: "translate(-50%, -50%)",
         width: "min(860px, 92vw)", maxHeight: "88vh",
-        background: "#0d0d0d", border: "0.5px solid #1e1e1e",
+        background: "var(--bg-hover)", border: "0.5px solid var(--border-color)",
         borderRadius: "16px", zIndex: 301,
         display: "flex", flexDirection: "column", overflowY: "auto",
       }}>
         {/* Header */}
         <div style={{
-          padding: "24px 28px 20px", borderBottom: "0.5px solid #1a1a1a",
+          padding: "24px 28px 20px", borderBottom: "0.5px solid var(--border-color)",
           display: "flex", alignItems: "center", justifyContent: "space-between",
-          position: "sticky", top: 0, background: "#0d0d0d", zIndex: 1,
+          position: "sticky", top: 0, background: "var(--bg-hover)", zIndex: 1,
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "18px", fontWeight: 700, color: "#fff" }}>
+            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "18px", fontWeight: 700, color: "var(--text-primary)" }}>
               {trade.pair}
             </span>
             {directionBadge(trade.direction)}
             {outcomeBadge(trade.outcome)}
-            <span style={{ fontSize: "12px", fontFamily: "'JetBrains Mono', monospace", color: "#777" }}>{trade.date}</span>
+            <span style={{ fontSize: "12px", fontFamily: "'JetBrains Mono', monospace", color: "var(--text-faint)" }}>{trade.date}</span>
           </div>
           <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
             <button onClick={() => { onClose(); onEdit(trade); }} style={{
               padding: "7px 14px", borderRadius: "7px",
-              border: "0.5px solid #1e1e1e", background: "none",
-              color: "#aaa", cursor: "pointer",
+              border: "0.5px solid var(--border-color)", background: "none",
+              color: "var(--text-muted)", cursor: "pointer",
               fontFamily: "'Inter', sans-serif", fontSize: "13px",
             }}>Edit</button>
             <button onClick={() => { onClose(); onDelete(trade.id); }} style={{
               padding: "7px 14px", borderRadius: "7px",
-              border: "0.5px solid #2e1515", background: "#1e0d0d",
-              color: "#c03535", cursor: "pointer",
+              border: "0.5px solid var(--red-bg)", background: "var(--red-bg-2)",
+              color: "var(--red)", cursor: "pointer",
               fontFamily: "'Inter', sans-serif", fontSize: "13px",
             }}>Delete</button>
             <button onClick={onClose} style={{
-              background: "none", border: "none", color: "#777",
+              background: "none", border: "none", color: "var(--text-faint)",
               cursor: "pointer", fontSize: "22px", lineHeight: 1, padding: "2px 6px",
             }}>×</button>
           </div>
@@ -953,36 +953,36 @@ function TradeDetailModal({ trade, onClose, onEdit, onDelete }) {
         <div style={{ padding: "28px", display: "flex", flexDirection: "column", gap: "28px" }}>
           {/* Stats row */}
           <div style={{
-            display: "flex", gap: "1px", background: "#1a1a1a",
-            borderRadius: "10px", overflow: "hidden", border: "0.5px solid #1a1a1a",
+            display: "flex", gap: "1px", background: "var(--border-color)",
+            borderRadius: "10px", overflow: "hidden", border: "0.5px solid var(--border-color)",
           }}>
             {[
               { label: "P&L", value: trade.pnl != null ? `${parseFloat(trade.pnl) >= 0 ? "+" : ""}${fmt(trade.pnl)}` : "—", color: pnlColor(trade.pnl) },
               { label: "R:R", value: trade.rr ? `${trade.rr}R` : "—" },
-              { label: "Swap", value: trade.swap != null ? `${parseFloat(trade.swap) >= 0 ? "+" : ""}${fmt(trade.swap)}` : "—", color: trade.swap != null ? pnlColor(trade.swap) : "#777" },
-              { label: "Commission", value: trade.commission != null ? `${parseFloat(trade.commission) >= 0 ? "+" : ""}${fmt(trade.commission)}` : "—", color: trade.commission != null ? pnlColor(trade.commission) : "#777" },
+              { label: "Swap", value: trade.swap != null ? `${parseFloat(trade.swap) >= 0 ? "+" : ""}${fmt(trade.swap)}` : "—", color: trade.swap != null ? pnlColor(trade.swap) : "var(--text-faint)" },
+              { label: "Commission", value: trade.commission != null ? `${parseFloat(trade.commission) >= 0 ? "+" : ""}${fmt(trade.commission)}` : "—", color: trade.commission != null ? pnlColor(trade.commission) : "var(--text-faint)" },
               { label: "Session", value: sessionLabel(trade.session) },
               { label: "Entry", value: fmt(trade.entry) },
             ].map(s => (
-              <div key={s.label} style={{ flex: 1, padding: "16px 20px", background: "#0f0f0f" }}>
-                <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "#777", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>{s.label}</div>
-                <div style={{ fontSize: "20px", fontFamily: "'Inter', sans-serif", fontWeight: 600, color: s.color || "#e0e0e0" }}>{s.value}</div>
+              <div key={s.label} style={{ flex: 1, padding: "16px 20px", background: "var(--bg-hover)" }}>
+                <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "var(--text-faint)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>{s.label}</div>
+                <div style={{ fontSize: "20px", fontFamily: "'Inter', sans-serif", fontWeight: 600, color: s.color || "var(--text-secondary)" }}>{s.value}</div>
               </div>
             ))}
           </div>
 
           {/* Price levels */}
           <div>
-            <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "#999", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "14px" }}>Price Levels</div>
+            <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "14px" }}>Price Levels</div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px" }}>
               {[
                 { label: "Entry", value: fmt(trade.entry) },
                 { label: "Stop Loss", value: fmt(trade.stop_loss) },
                 { label: "Take Profit", value: fmt(trade.take_profit) },
               ].map(item => (
-                <div key={item.label} style={{ background: "#111", border: "0.5px solid #1e1e1e", borderRadius: "10px", padding: "14px 16px" }}>
-                  <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "#777", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "6px" }}>{item.label}</div>
-                  <div style={{ fontSize: "15px", fontFamily: "'JetBrains Mono', monospace", color: "#ccc" }}>{item.value}</div>
+                <div key={item.label} style={{ background: "var(--bg-surface)", border: "0.5px solid var(--border-color)", borderRadius: "10px", padding: "14px 16px" }}>
+                  <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "var(--text-faint)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "6px" }}>{item.label}</div>
+                  <div style={{ fontSize: "15px", fontFamily: "'JetBrains Mono', monospace", color: "var(--text-soft)" }}>{item.value}</div>
                 </div>
               ))}
             </div>
@@ -991,14 +991,14 @@ function TradeDetailModal({ trade, onClose, onEdit, onDelete }) {
           {/* Screenshot */}
           {trade.screenshot_url && (
             <div>
-              <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "#999", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "14px" }}>Chart Screenshot</div>
-              <div style={{ borderRadius: "10px", overflow: "hidden", border: "0.5px solid #1e1e1e", background: "#111", position: "relative" }}>
-                <img src={trade.screenshot_url} alt="Trade screenshot" style={{ width: "100%", display: "block", maxHeight: "460px", objectFit: "contain", background: "#0a0a0a" }} />
+              <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "14px" }}>Chart Screenshot</div>
+              <div style={{ borderRadius: "10px", overflow: "hidden", border: "0.5px solid var(--border-color)", background: "var(--bg-surface)", position: "relative" }}>
+                <img src={trade.screenshot_url} alt="Trade screenshot" style={{ width: "100%", display: "block", maxHeight: "460px", objectFit: "contain", background: "var(--bg-page)" }} />
                 <a href={trade.screenshot_url} target="_blank" rel="noreferrer" style={{
                   position: "absolute", bottom: "12px", right: "12px",
-                  background: "rgba(0,0,0,0.7)", border: "0.5px solid #2a2a2a",
+                  background: "rgba(0,0,0,0.7)", border: "0.5px solid var(--border-color-2)",
                   borderRadius: "6px", padding: "5px 10px",
-                  color: "#4d9fff", fontSize: "11px",
+                  color: "var(--blue)", fontSize: "11px",
                   fontFamily: "'JetBrains Mono', monospace", textDecoration: "none",
                 }}>Open full size ↗</a>
               </div>
@@ -1008,11 +1008,11 @@ function TradeDetailModal({ trade, onClose, onEdit, onDelete }) {
           {/* Notes */}
           {trade.notes && (
             <div>
-              <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "#999", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "12px" }}>Notes</div>
+              <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "12px" }}>Notes</div>
               <div style={{
-                background: "#111", border: "0.5px solid #1e1e1e",
+                background: "var(--bg-surface)", border: "0.5px solid var(--border-color)",
                 borderRadius: "10px", padding: "16px 18px",
-                color: "#999", fontSize: "14px",
+                color: "var(--text-muted)", fontSize: "14px",
                 fontFamily: "'Inter', sans-serif", lineHeight: "1.65",
                 whiteSpace: "pre-wrap",
               }}>{trade.notes}</div>
@@ -1020,7 +1020,7 @@ function TradeDetailModal({ trade, onClose, onEdit, onDelete }) {
           )}
 
           {!trade.screenshot_url && !trade.notes && (
-            <div style={{ textAlign: "center", color: "#555", fontSize: "13px", fontFamily: "'JetBrains Mono', monospace", padding: "16px" }}>
+            <div style={{ textAlign: "center", color: "var(--text-faint-2)", fontSize: "13px", fontFamily: "'JetBrains Mono', monospace", padding: "16px" }}>
               No screenshot or notes attached to this trade.
             </div>
           )}
@@ -1039,26 +1039,26 @@ function TradeRow({ trade, onViewDetail, onEdit, onDelete }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        cursor: "pointer", borderBottom: "0.5px solid #161616", transition: "background 0.1s",
+        cursor: "pointer", borderBottom: "0.5px solid var(--border-color)", transition: "background 0.1s",
         background: hovered ? "rgba(255,255,255,0.02)" : "transparent",
       }}
     >
-      <td style={{ ...td, fontFamily: "'JetBrains Mono', monospace", color: "#999" }}>{trade.date}</td>
-      <td style={{ ...td, fontFamily: "'JetBrains Mono', monospace", fontSize: "13px", fontWeight: 700, color: "#e0e0e0" }}>{trade.pair}</td>
-      <td style={td}>{outcomeBadge(trade.outcome) || <span style={{ color: "#555" }}>—</span>}</td>
+      <td style={{ ...td, fontFamily: "'JetBrains Mono', monospace", color: "var(--text-muted)" }}>{trade.date}</td>
+      <td style={{ ...td, fontFamily: "'JetBrains Mono', monospace", fontSize: "13px", fontWeight: 700, color: "var(--text-secondary)" }}>{trade.pair}</td>
+      <td style={td}>{outcomeBadge(trade.outcome) || <span style={{ color: "var(--text-faint-2)" }}>—</span>}</td>
       <td style={td}>{directionBadge(trade.direction)}</td>
-      <td style={{ ...td, textAlign: "right", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", color: "#aaa" }}>{fmt(trade.entry)}</td>
-      <td style={{ ...td, textAlign: "center", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", color: "#aaa" }}>{trade.rr ? `${trade.rr}R` : "—"}</td>
-      <td style={{ ...td, textAlign: "right", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", color: trade.swap != null ? pnlColor(trade.swap) : "#555" }}>
+      <td style={{ ...td, textAlign: "right", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", color: "var(--text-muted)" }}>{fmt(trade.entry)}</td>
+      <td style={{ ...td, textAlign: "center", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", color: "var(--text-muted)" }}>{trade.rr ? `${trade.rr}R` : "—"}</td>
+      <td style={{ ...td, textAlign: "right", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", color: trade.swap != null ? pnlColor(trade.swap) : "var(--text-faint-2)" }}>
         {trade.swap != null ? `${parseFloat(trade.swap) >= 0 ? "+" : ""}${fmt(trade.swap)}` : "—"}
       </td>
-      <td style={{ ...td, textAlign: "right", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", color: trade.commission != null ? pnlColor(trade.commission) : "#555" }}>
+      <td style={{ ...td, textAlign: "right", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", color: trade.commission != null ? pnlColor(trade.commission) : "var(--text-faint-2)" }}>
         {trade.commission != null ? `${parseFloat(trade.commission) >= 0 ? "+" : ""}${fmt(trade.commission)}` : "—"}
       </td>
       <td style={{ ...td, textAlign: "right", fontFamily: "'JetBrains Mono', monospace", fontSize: "13px", fontWeight: 700, color: pnlColor(trade.pnl) }}>
         {trade.pnl != null ? `${parseFloat(trade.pnl) >= 0 ? "+" : ""}${fmt(trade.pnl)}` : "—"}
       </td>
-      <td style={{ ...td, textAlign: "center", color: "#777", fontSize: "11px", fontWeight: 700, opacity: 0.7 }}>{sessionLabel(trade.session)}</td>
+      <td style={{ ...td, textAlign: "center", color: "var(--text-faint)", fontSize: "11px", fontWeight: 700, opacity: 0.7 }}>{sessionLabel(trade.session)}</td>
       <td style={{ ...td, textAlign: "right" }}>
         <div style={{
           display: "flex", gap: "8px", justifyContent: "flex-end",
@@ -1066,12 +1066,12 @@ function TradeRow({ trade, onViewDetail, onEdit, onDelete }) {
         }} onClick={e => e.stopPropagation()}>
           <button onClick={() => onEdit(trade)} style={{
             width: "28px", height: "28px", borderRadius: "6px", border: "none",
-            background: "rgba(255,255,255,0.05)", color: "#ccc",
+            background: "rgba(255,255,255,0.05)", color: "var(--text-soft)",
             display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
           }}><Pencil size={14} /></button>
           <button onClick={() => onDelete(trade.id)} style={{
             width: "28px", height: "28px", borderRadius: "6px", border: "none",
-            background: "rgba(192,53,53,0.1)", color: "#c03535",
+            background: "rgba(192,53,53,0.1)", color: "var(--red)",
             display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
           }}><X size={14} /></button>
         </div>
@@ -1353,31 +1353,31 @@ function CSVImportModal({ open, onClose, activeAccount, onImported }) {
     padding: "20px",
   };
   const modalStyle = {
-    background: "#0d0d0d", border: "0.5px solid #1e1e1e",
+    background: "var(--bg-hover)", border: "0.5px solid var(--border-color)",
     borderRadius: "12px", width: "100%", maxWidth: "760px",
     maxHeight: "85vh", display: "flex", flexDirection: "column",
     overflow: "hidden",
   };
 
-  const tdStyle = { padding: "7px 10px", color: "#aaa", whiteSpace: "nowrap", fontSize: "11px" };
+  const tdStyle = { padding: "7px 10px", color: "var(--text-muted)", whiteSpace: "nowrap", fontSize: "11px" };
 
   return (
     <div style={overlayStyle} onClick={handleClose}>
       <div style={modalStyle} onClick={e => e.stopPropagation()}>
 
         {/* Header */}
-        <div style={{ padding: "18px 24px", borderBottom: "0.5px solid #1a1a1a", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+        <div style={{ padding: "18px 24px", borderBottom: "0.5px solid var(--border-color)", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
           <div>
-            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "16px", fontWeight: 700, color: "#fff" }}>
+            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "16px", fontWeight: 700, color: "var(--text-primary)" }}>
               Import CSV
             </span>
             {activeAccount && (
-              <div style={{ fontSize: "11px", color: "#555", fontFamily: "'JetBrains Mono', monospace", marginTop: "3px" }}>
+              <div style={{ fontSize: "11px", color: "var(--text-faint-2)", fontFamily: "'JetBrains Mono', monospace", marginTop: "3px" }}>
                 → {activeAccount.name}
               </div>
             )}
           </div>
-          <button onClick={handleClose} style={{ background: "none", border: "0.5px solid #1e1e1e", borderRadius: "6px", padding: "6px 14px", color: "#777", cursor: "pointer", fontFamily: "'Inter', sans-serif", fontSize: "13px" }}>
+          <button onClick={handleClose} style={{ background: "none", border: "0.5px solid var(--border-color)", borderRadius: "6px", padding: "6px 14px", color: "var(--text-faint)", cursor: "pointer", fontFamily: "'Inter', sans-serif", fontSize: "13px" }}>
             Close
           </button>
         </div>
@@ -1388,22 +1388,22 @@ function CSVImportModal({ open, onClose, activeAccount, onImported }) {
           {/* UPLOAD stage */}
           {stage === "upload" && (
             <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-              <p style={{ margin: 0, fontSize: "13px", color: "#777", fontFamily: "'Inter', sans-serif", lineHeight: "1.6" }}>
+              <p style={{ margin: 0, fontSize: "13px", color: "var(--text-faint)", fontFamily: "'Inter', sans-serif", lineHeight: "1.6" }}>
                 Upload a trade history CSV from any broker platform — MT4, MT5, cTrader, DXtrade, Match Trader, or any custom export. PropJournal will automatically detect the columns.
               </p>
               <div
                 onClick={() => fileRef.current.click()}
-                style={{ border: "0.5px dashed #2a2a2a", borderRadius: "10px", padding: "40px 20px", textAlign: "center", cursor: "pointer", transition: "border-color 0.15s" }}
-                onMouseEnter={e => e.currentTarget.style.borderColor = "#3a3a3a"}
-                onMouseLeave={e => e.currentTarget.style.borderColor = "#2a2a2a"}
+                style={{ border: "0.5px dashed var(--border-color-2)", borderRadius: "10px", padding: "40px 20px", textAlign: "center", cursor: "pointer", transition: "border-color 0.15s" }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = "var(--border-hover)"}
+                onMouseLeave={e => e.currentTarget.style.borderColor = "var(--border-color-2)"}
               >
                 <div style={{ fontSize: "28px", marginBottom: "10px" }}>📂</div>
-                <div style={{ fontSize: "14px", color: "#aaa", fontFamily: "'Inter', sans-serif" }}>Click to select CSV file</div>
-                <div style={{ fontSize: "11px", color: "#555", fontFamily: "'JetBrains Mono', monospace", marginTop: "6px" }}>.csv files only</div>
+                <div style={{ fontSize: "14px", color: "var(--text-muted)", fontFamily: "'Inter', sans-serif" }}>Click to select CSV file</div>
+                <div style={{ fontSize: "11px", color: "var(--text-faint-2)", fontFamily: "'JetBrains Mono', monospace", marginTop: "6px" }}>.csv files only</div>
               </div>
               <input ref={fileRef} type="file" accept=".csv" style={{ display: "none" }} onChange={handleFile} />
               {error && (
-                <div style={{ background: "#1e0d0d", border: "0.5px solid #2e1515", borderRadius: "8px", padding: "12px 14px", color: "#c03535", fontSize: "12px", fontFamily: "'Inter', sans-serif" }}>
+                <div style={{ background: "var(--red-bg-2)", border: "0.5px solid var(--red-bg)", borderRadius: "8px", padding: "12px 14px", color: "var(--red)", fontSize: "12px", fontFamily: "'Inter', sans-serif" }}>
                   {error}
                 </div>
               )}
@@ -1416,7 +1416,7 @@ function CSVImportModal({ open, onClose, activeAccount, onImported }) {
 
               {/* Summary row */}
               <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
-                <span style={{ fontSize: "12px", color: "#777", fontFamily: "'JetBrains Mono', monospace" }}>
+                <span style={{ fontSize: "12px", color: "var(--text-faint)", fontFamily: "'JetBrains Mono', monospace" }}>
                   {preview.length} of {totalRows} row{totalRows !== 1 ? "s" : ""} mapped
                 </span>
                 {/* Field coverage pills */}
@@ -1424,9 +1424,9 @@ function CSVImportModal({ open, onClose, activeAccount, onImported }) {
                   <span key={field} style={{
                     fontSize: "9px", fontFamily: "'JetBrains Mono', monospace", textTransform: "uppercase",
                     padding: "2px 7px", borderRadius: "4px", letterSpacing: "0.06em",
-                    background: found ? "#0f2219" : "#1e0d0d",
-                    color: found ? "#1bba7c" : "#c03535",
-                    border: `0.5px solid ${found ? "#1a3826" : "#2e1515"}`,
+                    background: found ? "var(--green-bg)" : "var(--red-bg-2)",
+                    color: found ? "var(--brand)" : "var(--red)",
+                    border: `0.5px solid ${found ? "var(--green-bg-2)" : "var(--red-bg)"}`,
                   }}>
                     {found ? "✓" : "✗"} {field.replace("_", " ")}
                   </span>
@@ -1435,13 +1435,13 @@ function CSVImportModal({ open, onClose, activeAccount, onImported }) {
 
               {/* Warning if important fields missing */}
               {missingImportant.length > 0 && (
-                <div style={{ background: "#1a1200", border: "0.5px solid #2a1e00", borderRadius: "8px", padding: "10px 14px", color: "#c97a00", fontSize: "12px", fontFamily: "'Inter', sans-serif" }}>
+                <div style={{ background: "var(--amber-bg-2)", border: "0.5px solid var(--amber-bg)", borderRadius: "8px", padding: "10px 14px", color: "var(--amber)", fontSize: "12px", fontFamily: "'Inter', sans-serif" }}>
                   ⚠ Could not detect: <strong>{missingImportant.join(", ")}</strong>. These fields will be empty. You can edit individual trades after importing.
                 </div>
               )}
 
               {error && (
-                <div style={{ background: "#1e0d0d", border: "0.5px solid #2e1515", borderRadius: "8px", padding: "10px 14px", color: "#c03535", fontSize: "12px", fontFamily: "'Inter', sans-serif" }}>
+                <div style={{ background: "var(--red-bg-2)", border: "0.5px solid var(--red-bg)", borderRadius: "8px", padding: "10px 14px", color: "var(--red)", fontSize: "12px", fontFamily: "'Inter', sans-serif" }}>
                   {error}
                 </div>
               )}
@@ -1451,7 +1451,7 @@ function CSVImportModal({ open, onClose, activeAccount, onImported }) {
                   <thead>
                     <tr>
                       {["Date", "Pair", "Dir", "Entry", "SL", "TP", "P&L", "Comm", "Swap", "Outcome"].map(h => (
-                        <th key={h} style={{ padding: "7px 10px", textAlign: "left", color: "#555", fontWeight: 500, borderBottom: "0.5px solid #1a1a1a", whiteSpace: "nowrap", fontSize: "9px", textTransform: "uppercase", letterSpacing: "0.08em" }}>{h}</th>
+                        <th key={h} style={{ padding: "7px 10px", textAlign: "left", color: "var(--text-faint-2)", fontWeight: 500, borderBottom: "0.5px solid var(--border-color)", whiteSpace: "nowrap", fontSize: "9px", textTransform: "uppercase", letterSpacing: "0.08em" }}>{h}</th>
                       ))}
                     </tr>
                   </thead>
@@ -1461,24 +1461,24 @@ function CSVImportModal({ open, onClose, activeAccount, onImported }) {
                       const commNum = t.commission !== null ? parseFloat(t.commission) : null;
                       const swapNum = t.swap !== null ? parseFloat(t.swap) : null;
                       return (
-                        <tr key={i} style={{ borderBottom: "0.5px solid #111" }}>
-                          <td style={{ ...tdStyle, color: "#777" }}>{t.date || "—"}</td>
-                          <td style={{ ...tdStyle, color: "#ccc" }}>{t.pair || "—"}</td>
+                        <tr key={i} style={{ borderBottom: "0.5px solid var(--bg-surface)" }}>
+                          <td style={{ ...tdStyle, color: "var(--text-faint)" }}>{t.date || "—"}</td>
+                          <td style={{ ...tdStyle, color: "var(--text-soft)" }}>{t.pair || "—"}</td>
                           <td style={tdStyle}>
                             {t.direction
-                              ? <span style={{ color: t.direction === "long" ? "#1bba7c" : "#c03535", textTransform: "uppercase" }}>{t.direction}</span>
+                              ? <span style={{ color: t.direction === "long" ? "var(--brand)" : "var(--red)", textTransform: "uppercase" }}>{t.direction}</span>
                               : "—"}
                           </td>
                           <td style={tdStyle}>{t.entry ?? "—"}</td>
                           <td style={tdStyle}>{t.stop_loss ?? "—"}</td>
                           <td style={tdStyle}>{t.take_profit ?? "—"}</td>
-                          <td style={{ ...tdStyle, color: pnlNum !== null ? pnlColor(pnlNum) : "#555" }}>
+                          <td style={{ ...tdStyle, color: pnlNum !== null ? pnlColor(pnlNum) : "var(--text-faint-2)" }}>
                             {pnlNum !== null ? `${pnlNum >= 0 ? "+" : ""}$${Math.abs(pnlNum).toFixed(2)}` : "—"}
                           </td>
-                          <td style={{ ...tdStyle, color: commNum !== null ? "#c97a00" : "#555" }}>
+                          <td style={{ ...tdStyle, color: commNum !== null ? "var(--amber)" : "var(--text-faint-2)" }}>
                             {commNum !== null ? `$${commNum.toFixed(2)}` : "—"}
                           </td>
-                          <td style={{ ...tdStyle, color: swapNum !== null ? "#4d9fff" : "#555" }}>
+                          <td style={{ ...tdStyle, color: swapNum !== null ? "var(--blue)" : "var(--text-faint-2)" }}>
                             {swapNum !== null ? `$${swapNum.toFixed(2)}` : "—"}
                           </td>
                           <td style={tdStyle}>{t.outcome ? outcomeBadge(t.outcome) : "—"}</td>
@@ -1495,7 +1495,7 @@ function CSVImportModal({ open, onClose, activeAccount, onImported }) {
           {stage === "importing" && (
             <div style={{ textAlign: "center", padding: "40px 20px" }}>
               <div style={{ fontSize: "28px", marginBottom: "14px" }}>⏳</div>
-              <div style={{ fontSize: "14px", color: "#aaa", fontFamily: "'Inter', sans-serif" }}>Importing trades…</div>
+              <div style={{ fontSize: "14px", color: "var(--text-muted)", fontFamily: "'Inter', sans-serif" }}>Importing trades…</div>
             </div>
           )}
 
@@ -1503,11 +1503,11 @@ function CSVImportModal({ open, onClose, activeAccount, onImported }) {
           {stage === "done" && (
             <div style={{ textAlign: "center", padding: "40px 20px" }}>
               <div style={{ fontSize: "36px", marginBottom: "14px" }}>✅</div>
-              <div style={{ fontSize: "16px", color: "#1bba7c", fontFamily: "'Inter', sans-serif", fontWeight: 700, marginBottom: "8px" }}>
+              <div style={{ fontSize: "16px", color: "var(--brand)", fontFamily: "'Inter', sans-serif", fontWeight: 700, marginBottom: "8px" }}>
                 {importCount} trade{importCount !== 1 ? "s" : ""} imported
               </div>
-              <div style={{ fontSize: "13px", color: "#777", fontFamily: "'Inter', sans-serif" }}>
-                All trades logged under <span style={{ color: "#ccc" }}>{activeAccount?.name}</span>
+              <div style={{ fontSize: "13px", color: "var(--text-faint)", fontFamily: "'Inter', sans-serif" }}>
+                All trades logged under <span style={{ color: "var(--text-soft)" }}>{activeAccount?.name}</span>
               </div>
             </div>
           )}
@@ -1515,13 +1515,13 @@ function CSVImportModal({ open, onClose, activeAccount, onImported }) {
 
         {/* Footer */}
         {(stage === "preview" || stage === "done") && (
-          <div style={{ padding: "16px 24px", borderTop: "0.5px solid #1a1a1a", display: "flex", justifyContent: "flex-end", gap: "10px", flexShrink: 0 }}>
+          <div style={{ padding: "16px 24px", borderTop: "0.5px solid var(--border-color)", display: "flex", justifyContent: "flex-end", gap: "10px", flexShrink: 0 }}>
             {stage === "preview" && (
               <>
-                <button onClick={reset} style={{ padding: "9px 18px", background: "none", border: "0.5px solid #1e1e1e", borderRadius: "8px", color: "#777", cursor: "pointer", fontFamily: "'Inter', sans-serif", fontSize: "13px" }}>
+                <button onClick={reset} style={{ padding: "9px 18px", background: "none", border: "0.5px solid var(--border-color)", borderRadius: "8px", color: "var(--text-faint)", cursor: "pointer", fontFamily: "'Inter', sans-serif", fontSize: "13px" }}>
                   Back
                 </button>
-                <button onClick={handleConfirm} style={{ padding: "9px 22px", background: "oklch(0.72 0.17 152)", border: "none", borderRadius: "8px", color: "#000", cursor: "pointer", fontFamily: "'Inter', sans-serif", fontSize: "13px", fontWeight: 600, transition: "background 0.15s" }}
+                <button onClick={handleConfirm} style={{ padding: "9px 22px", background: "oklch(0.72 0.17 152)", border: "none", borderRadius: "8px", color: "var(--brand-fg)", cursor: "pointer", fontFamily: "'Inter', sans-serif", fontSize: "13px", fontWeight: 600, transition: "background 0.15s" }}
                   onMouseEnter={e => e.currentTarget.style.background = "oklch(0.78 0.17 152)"}
                   onMouseLeave={e => e.currentTarget.style.background = "oklch(0.72 0.17 152)"}
                 >
@@ -1530,7 +1530,7 @@ function CSVImportModal({ open, onClose, activeAccount, onImported }) {
               </>
             )}
             {stage === "done" && (
-              <button onClick={handleClose} style={{ padding: "9px 22px", background: "oklch(0.72 0.17 152)", border: "none", borderRadius: "8px", color: "#000", cursor: "pointer", fontFamily: "'Inter', sans-serif", fontSize: "13px", fontWeight: 600, transition: "background 0.15s" }}
+              <button onClick={handleClose} style={{ padding: "9px 22px", background: "oklch(0.72 0.17 152)", border: "none", borderRadius: "8px", color: "var(--brand-fg)", cursor: "pointer", fontFamily: "'Inter', sans-serif", fontSize: "13px", fontWeight: 600, transition: "background 0.15s" }}
                 onMouseEnter={e => e.currentTarget.style.background = "oklch(0.78 0.17 152)"}
                 onMouseLeave={e => e.currentTarget.style.background = "oklch(0.72 0.17 152)"}
               >
@@ -1559,7 +1559,7 @@ function MobileAccountRow({ accounts, activeAccount, onSwitch, onImport }) {
   return (
     <div style={{
       position: 'fixed', top: '52px', left: 0, right: 0,
-      background: '#0a0a0a', borderBottom: '0.5px solid #111',
+      background: 'var(--bg-page)', borderBottom: '0.5px solid var(--bg-surface)',
       padding: '7px 14px', zIndex: 199, height: '48px', boxSizing: 'border-box',
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
     }}>
@@ -1569,13 +1569,13 @@ function MobileAccountRow({ accounts, activeAccount, onSwitch, onImport }) {
           onClick={() => setOpen(o => !o)}
           style={{
             display: 'flex', alignItems: 'center', gap: '6px',
-            background: '#141414', border: '0.5px solid #222',
+            background: 'var(--bg-surface)', border: '0.5px solid var(--border-color-2)',
             borderRadius: '6px', padding: '5px 9px', cursor: 'pointer',
           }}
         >
-          <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#1bba7c', flexShrink: 0 }} />
+          <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--brand)', flexShrink: 0 }} />
           <span style={{
-            fontSize: '12px', fontWeight: '500', color: '#ccc',
+            fontSize: '12px', fontWeight: '500', color: 'var(--text-soft)',
             fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap',
             maxWidth: '160px', overflow: 'hidden', textOverflow: 'ellipsis',
           }}>
@@ -1583,7 +1583,7 @@ function MobileAccountRow({ accounts, activeAccount, onSwitch, onImport }) {
           </span>
           {/* Chevron */}
           <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style={{ flexShrink: 0, transition: 'transform 0.15s', transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}>
-            <path d="M2 3.5L5 6.5L8 3.5" stroke="#777" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M2 3.5L5 6.5L8 3.5" stroke="var(--text-faint)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
 
@@ -1591,7 +1591,7 @@ function MobileAccountRow({ accounts, activeAccount, onSwitch, onImport }) {
         {open && accounts.length > 0 && (
           <div style={{
             position: 'absolute', top: 'calc(100% + 6px)', left: 0,
-            background: '#111', border: '0.5px solid #1e1e1e',
+            background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)',
             borderRadius: '8px', overflow: 'hidden', zIndex: 300,
             minWidth: '180px', boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
           }}>
@@ -1603,20 +1603,20 @@ function MobileAccountRow({ accounts, activeAccount, onSwitch, onImport }) {
                   onClick={() => { onSwitch(acc); setOpen(false); }}
                   style={{
                     width: '100%', display: 'flex', alignItems: 'center', gap: '8px',
-                    padding: '9px 12px', background: isActive ? '#0f2219' : 'transparent',
-                    border: 'none', borderBottom: '0.5px solid #161616',
+                    padding: '9px 12px', background: isActive ? 'var(--green-bg)' : 'transparent',
+                    border: 'none', borderBottom: '0.5px solid var(--border-color)',
                     cursor: 'pointer', textAlign: 'left',
                   }}
                 >
-                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: isActive ? '#1bba7c' : '#555', flexShrink: 0 }} />
+                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: isActive ? 'var(--brand)' : 'var(--text-faint-2)', flexShrink: 0 }} />
                   <span style={{
                     flex: 1, fontSize: '12px', fontWeight: '500',
-                    color: isActive ? '#1bba7c' : '#aaa',
+                    color: isActive ? 'var(--brand)' : 'var(--text-muted)',
                     fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap',
                   }}>{acc.name}</span>
                   {isActive && (
                     <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                      <path d="M2 5L4 7L8 3" stroke="#1bba7c" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M2 5L4 7L8 3" stroke="var(--brand)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   )}
                 </button>
@@ -1629,9 +1629,9 @@ function MobileAccountRow({ accounts, activeAccount, onSwitch, onImport }) {
       {/* Import CSV button */}
       {onImport && (
         <button onClick={onImport} style={{
-          background: "none", border: "0.5px solid #1e1e1e",
+          background: "none", border: "0.5px solid var(--border-color)",
           borderRadius: "6px", padding: "5px 10px", cursor: "pointer",
-          color: "#777", fontFamily: "'JetBrains Mono', monospace", fontSize: "11px",
+          color: "var(--text-faint)", fontFamily: "'JetBrains Mono', monospace", fontSize: "11px",
           whiteSpace: "nowrap",
         }}>↑ CSV</button>
       )}
@@ -2042,9 +2042,9 @@ useEffect(() => {
       fontSize: '11px',
       padding: '4px 10px',
       borderRadius: '5px',
-      border: `0.5px solid ${active ? '#555' : '#1e1e1e'}`,
-      background: active ? '#1e1e1e' : '#111',
-      color: active ? '#e0e0e0' : '#777',
+      border: `0.5px solid ${active ? 'var(--text-faint-2)' : 'var(--border-color)'}`,
+      background: active ? 'var(--border-color)' : 'var(--bg-surface)',
+      color: active ? 'var(--text-secondary)' : 'var(--text-faint)',
       fontFamily: "'JetBrains Mono', monospace",
       whiteSpace: 'nowrap',
       flexShrink: 0,
@@ -2055,7 +2055,7 @@ useEffect(() => {
 
     const colTemplate = '36px 1fr 46px 38px 52px 48px';
     const headerCellStyle = {
-      fontSize: '9px', color: '#555', fontFamily: "'JetBrains Mono', monospace",
+      fontSize: '9px', color: 'var(--text-faint-2)', fontFamily: "'JetBrains Mono', monospace",
       textTransform: 'uppercase', letterSpacing: '0.08em',
     };
 
@@ -2069,7 +2069,7 @@ useEffect(() => {
     );
 
     return (
-      <div style={{ background: '#0a0a0a', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ background: 'var(--bg-page)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
 
         {/* Sidebar renders the top bar (hamburger) + drawer + bottom tabs — same as Dashboard */}
         <Sidebar />
@@ -2083,7 +2083,7 @@ useEffect(() => {
         }}>
           <span style={{
             fontFamily: "'Inter', sans-serif", fontSize: '15px',
-            fontWeight: '500', color: '#e0e0e0',
+            fontWeight: '500', color: 'var(--text-secondary)',
           }}>Trade Log</span>
         </div>
 
@@ -2097,7 +2097,7 @@ useEffect(() => {
         {/* ── ROW 3: Filter bar — All / Win / Loss / Long / Short ── */}
         <div style={{
           position: 'fixed', top: '100px', left: 0, right: 0,
-          background: '#0a0a0a', borderBottom: '0.5px solid #111',
+          background: 'var(--bg-page)', borderBottom: '0.5px solid var(--bg-surface)',
           padding: '6px 14px', zIndex: 198,
           display: 'flex', gap: '5px', overflowX: 'auto',
           scrollbarWidth: 'none',
@@ -2118,7 +2118,7 @@ useEffect(() => {
         {/* ── ROW 4: Column headers ── */}
         <div style={{
           position: 'fixed', top: '134px', left: 0, right: 0,
-          background: '#0a0a0a', borderBottom: '0.5px solid #161616',
+          background: 'var(--bg-page)', borderBottom: '0.5px solid var(--border-color)',
           padding: '8px 14px', zIndex: 197,
           display: 'grid', gridTemplateColumns: colTemplate, gap: '6px', alignItems: 'center',
         }}>
@@ -2133,28 +2133,28 @@ useEffect(() => {
         {/* Scrollable trade list */}
         <main style={{ paddingTop: '166px', paddingBottom: '68px', flex: 1, overflowY: 'auto' }}>
           {error && (
-            <div style={{ margin: '10px 14px', background: '#1e0d0d', border: '0.5px solid #2e1515', borderRadius: '8px', padding: '10px 14px', color: '#c03535', fontSize: '12px' }}>
+            <div style={{ margin: '10px 14px', background: 'var(--red-bg-2)', border: '0.5px solid var(--red-bg)', borderRadius: '8px', padding: '10px 14px', color: 'var(--red)', fontSize: '12px' }}>
               {error}
             </div>
           )}
 
           {loading ? (
-            <div style={{ padding: '48px', textAlign: 'center', color: '#999', fontSize: '13px', fontFamily: "'JetBrains Mono', monospace" }}>
+            <div style={{ padding: '48px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px', fontFamily: "'JetBrains Mono', monospace" }}>
               Loading trades…
             </div>
           ) : filtered.length === 0 ? (
-            <div style={{ padding: '48px', textAlign: 'center', color: '#999', fontSize: '13px', fontFamily: "'JetBrains Mono', monospace" }}>
+            <div style={{ padding: '48px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px', fontFamily: "'JetBrains Mono', monospace" }}>
               No trades yet.
             </div>
           ) : (
             filtered.map(t => {
               const pnlVal = t.pnl != null ? parseFloat(t.pnl) : null;
-              const pnlClr = pnlVal > 0 ? '#1bba7c' : pnlVal < 0 ? '#c03535' : '#c97a00';
+              const pnlClr = pnlVal > 0 ? 'var(--brand)' : pnlVal < 0 ? 'var(--red)' : 'var(--amber)';
               const outcomeMap = {
-                win: { label: 'WIN', bg: '#0f2219', color: '#1bba7c', border: '#1a3826' },
-                loss: { label: 'LOSS', bg: '#1e0d0d', color: '#c03535', border: '#2e1515' },
-                be: { label: 'BE', bg: '#1a1400', color: '#c97a00', border: '#2a2000' },
-                in_progress: { label: 'IN PROG', bg: '#0f1a2e', color: '#4d9fff', border: '#1a3050' },
+                win: { label: 'WIN', bg: 'var(--green-bg)', color: 'var(--brand)', border: 'var(--green-bg-2)' },
+                loss: { label: 'LOSS', bg: 'var(--red-bg-2)', color: 'var(--red)', border: 'var(--red-bg)' },
+                be: { label: 'BE', bg: 'var(--amber-bg-2)', color: 'var(--amber)', border: 'var(--amber-bg)' },
+                in_progress: { label: 'IN PROG', bg: 'var(--blue-bg-2)', color: 'var(--blue)', border: 'var(--blue-bg)' },
               };
               const ob = outcomeMap[t.outcome];
               const isLong = t.direction === 'long';
@@ -2162,16 +2162,16 @@ useEffect(() => {
               return (
                 <div key={t.id} style={{
                   display: 'grid', gridTemplateColumns: colTemplate, gap: '6px', alignItems: 'center',
-                  padding: '10px 14px', borderBottom: '0.5px solid #111',
+                  padding: '10px 14px', borderBottom: '0.5px solid var(--bg-surface)',
                 }} onClick={() => setDetailTrade(t)}>
                   {/* Date */}
-                  <div style={{ fontSize: '10px', color: '#999', fontFamily: "'JetBrains Mono', monospace" }}>
+                  <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: "'JetBrains Mono', monospace" }}>
                     {t.date ? new Date(t.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'}
                   </div>
 
                   {/* Pair */}
                   <div style={{
-                    fontSize: '12px', fontWeight: '500', color: '#ccc', fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: '12px', fontWeight: '500', color: 'var(--text-soft)', fontFamily: "'JetBrains Mono', monospace",
                     whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                   }}>
                     {t.pair}
@@ -2179,15 +2179,15 @@ useEffect(() => {
 
                   {/* Result */}
                   <div style={{ display: 'flex', justifyContent: 'center' }}>
-                    {ob ? mobileBadge(ob.label, ob.bg, ob.color, ob.border) : <span style={{ color: '#555', fontSize: '11px' }}>—</span>}
+                    {ob ? mobileBadge(ob.label, ob.bg, ob.color, ob.border) : <span style={{ color: 'var(--text-faint-2)', fontSize: '11px' }}>—</span>}
                   </div>
 
                   {/* Side */}
                   <div style={{ display: 'flex', justifyContent: 'center' }}>
                     {mobileBadge(isLong ? 'BUY' : 'SELL',
-                      isLong ? '#0f2219' : '#1e0d0d',
-                      isLong ? '#1bba7c' : '#c03535',
-                      isLong ? '#1a3826' : '#2e1515'
+                      isLong ? 'var(--green-bg)' : 'var(--red-bg-2)',
+                      isLong ? 'var(--brand)' : 'var(--red)',
+                      isLong ? 'var(--green-bg-2)' : 'var(--red-bg)'
                     )}
                   </div>
 
@@ -2196,7 +2196,7 @@ useEffect(() => {
                     <div style={{ fontSize: '13px', fontWeight: '500', color: pnlClr, fontFamily: "'JetBrains Mono', monospace" }}>
                       {pnlVal != null ? `${pnlVal >= 0 ? '+' : ''}$${Math.abs(pnlVal).toFixed(0)}` : '—'}
                     </div>
-                    <div style={{ fontSize: '9px', color: '#777', fontFamily: "'JetBrains Mono', monospace" }}>
+                    <div style={{ fontSize: '9px', color: 'var(--text-faint)', fontFamily: "'JetBrains Mono', monospace" }}>
                       {t.rr ? `${t.rr}R` : ''}
                     </div>
                   </div>
@@ -2204,15 +2204,15 @@ useEffect(() => {
                   {/* Actions */}
                   <div style={{ display: 'flex', gap: '4px', justifyContent: 'flex-end' }} onClick={e => e.stopPropagation()}>
                     <button onClick={() => { setEditTrade(t); setFormOpen(true); }} style={{
-                      width: '22px', height: '22px', background: '#1a1a1a',
-                      border: '0.5px solid #222', borderRadius: '5px',
-                      color: '#999', cursor: 'pointer', fontSize: '10px', padding: 0,
+                      width: '22px', height: '22px', background: 'var(--bg-surface-2)',
+                      border: '0.5px solid var(--border-color-2)', borderRadius: '5px',
+                      color: 'var(--text-muted)', cursor: 'pointer', fontSize: '10px', padding: 0,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>✏</button>
                     <button onClick={() => handleDelete(t.id)} style={{
-                      width: '22px', height: '22px', background: '#1e0d0d',
-                      border: '0.5px solid #2e1515', borderRadius: '5px',
-                      color: '#c03535', cursor: 'pointer', fontSize: '10px', padding: 0,
+                      width: '22px', height: '22px', background: 'var(--red-bg-2)',
+                      border: '0.5px solid var(--red-bg)', borderRadius: '5px',
+                      color: 'var(--red)', cursor: 'pointer', fontSize: '10px', padding: 0,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>✕</button>
                   </div>
@@ -2257,11 +2257,11 @@ useEffect(() => {
   const paginated = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   return (
-    <div style={{ display: "flex", background: "#0a0a0a", minHeight: "100vh" }}>
+    <div style={{ display: "flex", background: "var(--bg-page)", minHeight: "100vh" }}>
       <Sidebar />
       <div style={{
         marginLeft: collapsed ? "60px" : "220px", transition: "margin-left 0.2s ease", flex: 1, minHeight: "100vh",
-        background: "#0a0a0a", color: "#e0e0e0",
+        background: "var(--bg-page)", color: "var(--text-secondary)",
         fontFamily: "'Inter', sans-serif", padding: "32px",
       }}>
         <style>{`
@@ -2270,17 +2270,17 @@ useEffect(() => {
           input[type=number]::-webkit-outer-spin-button,
           input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
           input[type=date]::-webkit-calendar-picker-indicator { filter: invert(0.3); }
-          select option { background: #111; }
-          ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: #0a0a0a; }
-          ::-webkit-scrollbar-thumb { background: #1e1e1e; border-radius: 2px; }
+          select option { background: var(--bg-surface); }
+          ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: var(--bg-page); }
+          ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
         `}</style>
 
         {/* Page Header */}
         <div style={{ marginBottom: "24px" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px", flexWrap: "wrap" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "20px", minWidth: 0, flexWrap: "wrap" }}>
-              <h1 style={{ margin: 0, fontFamily: "'Inter', sans-serif", fontSize: "22px", fontWeight: 700, color: "#fff", flexShrink: 0 }}>Trade Log</h1>
-              <div style={{ width: "1px", height: "28px", background: "#1a1a1a", flexShrink: 0 }} />
+              <h1 style={{ margin: 0, fontFamily: "'Inter', sans-serif", fontSize: "22px", fontWeight: 700, color: "var(--text-primary)", flexShrink: 0 }}>Trade Log</h1>
+              <div style={{ width: "1px", height: "28px", background: "var(--border-color)", flexShrink: 0 }} />
 
               {/* Account switcher */}
               <div ref={accountMenuRef} style={{ position: "relative", flexShrink: 0 }}>
@@ -2289,18 +2289,18 @@ useEffect(() => {
                   style={{
                     display: "flex", alignItems: "center", gap: "8px",
                     padding: "7px 12px", borderRadius: "8px",
-                    border: "0.5px solid #1e1e1e", background: "#111",
-                    color: "#e0e0e0", fontFamily: "'Inter', sans-serif", fontSize: "13px",
+                    border: "0.5px solid var(--border-color)", background: "var(--bg-surface)",
+                    color: "var(--text-secondary)", fontFamily: "'Inter', sans-serif", fontSize: "13px",
                     cursor: "pointer", whiteSpace: "nowrap",
                   }}
                 >
                   {activeAccount?.name || activeAccount?.firm_name || "Select Account"}
-                  <ChevronDown size={14} style={{ color: "#777" }} />
+                  <ChevronDown size={14} style={{ color: "var(--text-faint)" }} />
                 </button>
                 {accountMenuOpen && (
                   <div style={{
                     position: "absolute", top: "calc(100% + 6px)", left: 0, minWidth: "200px",
-                    background: "#111", border: "0.5px solid #1e1e1e", borderRadius: "10px",
+                    background: "var(--bg-surface)", border: "0.5px solid var(--border-color)", borderRadius: "10px",
                     zIndex: 50, maxHeight: "260px", overflowY: "auto", padding: "4px",
                   }}>
                     {accounts.map(a => (
@@ -2314,10 +2314,10 @@ useEffect(() => {
                         style={{
                           padding: "8px 10px", borderRadius: "6px", cursor: "pointer",
                           fontSize: "13px", fontFamily: "'Inter', sans-serif",
-                          color: a.id === activeAccount?.id ? "#1bba7c" : "#ccc",
-                          background: a.id === activeAccount?.id ? "#0f2219" : "transparent",
+                          color: a.id === activeAccount?.id ? "var(--brand)" : "var(--text-soft)",
+                          background: a.id === activeAccount?.id ? "var(--green-bg)" : "transparent",
                         }}
-                        onMouseEnter={e => { if (a.id !== activeAccount?.id) e.currentTarget.style.background = "#161616"; }}
+                        onMouseEnter={e => { if (a.id !== activeAccount?.id) e.currentTarget.style.background = "var(--bg-hover)"; }}
                         onMouseLeave={e => { if (a.id !== activeAccount?.id) e.currentTarget.style.background = "transparent"; }}
                       >
                         {a.name || a.firm_name || "Account"}
@@ -2329,16 +2329,16 @@ useEffect(() => {
 
               {activeAccount && (
                 <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
-                  <span style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, color: "#666" }}>
+                  <span style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, color: "var(--text-faint)" }}>
                     Active Account
                   </span>
-                  <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "14px", fontWeight: 500, color: "#e8e8e8", whiteSpace: "nowrap" }}>
+                  <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "14px", fontWeight: 500, color: "var(--text-secondary)", whiteSpace: "nowrap" }}>
                     {activeAccount.name || activeAccount.firm_name || "Account"}{" "}
                     {activeAccount.account_size && (
-                      <span style={{ color: "#999" }}>${Number(activeAccount.account_size).toLocaleString()}</span>
+                      <span style={{ color: "var(--text-muted)" }}>${Number(activeAccount.account_size).toLocaleString()}</span>
                     )}{" "}
                     {activeAccount.created_at && (
-                      <span style={{ color: "#555", fontSize: "12px" }}>
+                      <span style={{ color: "var(--text-faint-2)", fontSize: "12px" }}>
                         Since {new Date(activeAccount.created_at).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
                       </span>
                     )}
@@ -2352,14 +2352,14 @@ useEffect(() => {
               <button onClick={() => setImportOpen(true)} style={{
                 display: "flex", alignItems: "center", gap: "8px",
                 padding: "10px 16px", background: "transparent",
-                border: "0.5px solid #1e1e1e", borderRadius: "8px", color: "#ccc",
+                border: "0.5px solid var(--border-color)", borderRadius: "8px", color: "var(--text-soft)",
                 fontFamily: "'Inter', sans-serif", fontSize: "13px", fontWeight: 500,
                 cursor: "pointer", whiteSpace: "nowrap",
               }}><ArrowUp size={15} /> Import CSV</button>
               <button onClick={openNew} style={{
                 display: "flex", alignItems: "center", gap: "8px",
                 padding: "10px 18px", background: "oklch(0.72 0.17 152)", border: "none",
-                borderRadius: "8px", color: "#000",
+                borderRadius: "8px", color: "var(--brand-fg)",
                 fontFamily: "'Inter', sans-serif", fontSize: "13px", fontWeight: 700,
                 cursor: "pointer", whiteSpace: "nowrap", transition: "background 0.15s",
               }}
@@ -2373,21 +2373,21 @@ useEffect(() => {
         {/* Page-level error */}
         {error && (
           <div style={{
-            background: "#1e0d0d", border: "0.5px solid #2e1515",
+            background: "var(--red-bg-2)", border: "0.5px solid var(--red-bg)",
             borderRadius: "8px", padding: "12px 16px",
-            color: "#c03535", fontSize: "13px", marginBottom: "16px",
+            color: "var(--red)", fontSize: "13px", marginBottom: "16px",
           }}>{error}</div>
         )}
 
         {/* Filters + Export */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "16px", marginBottom: "16px" }}>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
-            <div style={{ display: "flex", gap: "4px", padding: "4px", borderRadius: "10px", border: "0.5px solid #1a1a1a", background: "#121212" }}>
+            <div style={{ display: "flex", gap: "4px", padding: "4px", borderRadius: "10px", border: "0.5px solid var(--border-color)", background: "var(--bg-surface)" }}>
               {["all", "long", "short"].map(d => (
                 <button key={d} onClick={() => { setFilterDir(d); setCurrentPage(1); }} style={{
                   padding: "7px 18px", borderRadius: "8px", border: "none",
-                  background: filterDir === d ? "#0f2219" : "transparent",
-                  color: filterDir === d ? "#1bba7c" : "#777",
+                  background: filterDir === d ? "var(--green-bg)" : "transparent",
+                  color: filterDir === d ? "var(--brand)" : "var(--text-faint)",
                   fontFamily: "'Inter', sans-serif", fontSize: "13px", fontWeight: 600,
                   textTransform: "capitalize",
                   cursor: "pointer", transition: "all 0.15s",
@@ -2398,9 +2398,9 @@ useEffect(() => {
               {SESSIONS.map(s => (
                 <button key={s} onClick={() => { setFilterSession(filterSession === s ? "all" : s); setCurrentPage(1); }} style={{
                   padding: "7px 16px", borderRadius: "8px", border: "0.5px solid",
-                  borderColor: filterSession === s ? "#1a3826" : "#1a1a1a",
-                  background: filterSession === s ? "rgba(27,186,124,0.15)" : "#121212",
-                  color: filterSession === s ? "#1bba7c" : "#999",
+                  borderColor: filterSession === s ? "var(--green-bg-2)" : "var(--border-color)",
+                  background: filterSession === s ? "rgba(var(--brand-rgb), 0.15)" : "var(--bg-surface)",
+                  color: filterSession === s ? "var(--brand)" : "var(--text-muted)",
                   fontFamily: "'JetBrains Mono', monospace", fontSize: "11px",
                   textTransform: "uppercase", letterSpacing: "0.05em",
                   cursor: "pointer", transition: "all 0.15s",
@@ -2426,40 +2426,40 @@ useEffect(() => {
             URL.revokeObjectURL(url);
           }} style={{
             display: "flex", alignItems: "center", gap: "8px",
-            padding: "7px 14px", background: "#121212",
-            border: "0.5px solid #1a1a1a", borderRadius: "8px",
-            color: "#777", cursor: "pointer",
+            padding: "7px 14px", background: "var(--bg-surface)",
+            border: "0.5px solid var(--border-color)", borderRadius: "8px",
+            color: "var(--text-faint)", cursor: "pointer",
             fontFamily: "'Inter', sans-serif", fontSize: "11px", fontWeight: 700,
             textTransform: "uppercase", letterSpacing: "0.08em",
             transition: "all 0.15s",
           }}
-            onMouseEnter={e => { e.currentTarget.style.color = "#fff"; }}
-            onMouseLeave={e => { e.currentTarget.style.color = "#777"; }}
+            onMouseEnter={e => { e.currentTarget.style.color = "var(--text-primary)"; }}
+            onMouseLeave={e => { e.currentTarget.style.color = "var(--text-faint)"; }}
           ><ArrowDown size={14} /> Export CSV</button>
         </div>
 
         {/* Table */}
-        <div style={{ border: "0.5px solid #1a1a1a", borderRadius: "16px", overflow: "hidden", background: "#121212" }}>
+        <div style={{ border: "0.5px solid var(--border-color)", borderRadius: "16px", overflow: "hidden", background: "var(--bg-surface)" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
             <thead>
-              <tr style={{ borderBottom: "0.5px solid #1a1a1a", background: "rgba(255,255,255,0.02)" }}>
+              <tr style={{ borderBottom: "0.5px solid var(--border-color)", background: "rgba(255,255,255,0.02)" }}>
                 {["Date", "Pair", "Outcome", "Dir", "Entry", "R:R", "Swap", "Commission", "P&L", "Session", ""].map((h, i) => (
                   <th key={i} style={{
                     padding: "14px 16px",
                     textAlign: i === 0 || i === 1 ? "left" : i === 2 || i === 3 || i === 5 || i === 9 ? "center" : i === 10 ? "right" : "right",
                     fontSize: "11px", fontFamily: "'JetBrains Mono', monospace",
                     letterSpacing: "0.1em", textTransform: "uppercase",
-                    color: "#999", fontWeight: 700,
+                    color: "var(--text-muted)", fontWeight: 700,
                   }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={11} style={{ padding: "48px", textAlign: "center", color: "#999", fontSize: "13px" }}>Loading trades…</td></tr>
+                <tr><td colSpan={11} style={{ padding: "48px", textAlign: "center", color: "var(--text-muted)", fontSize: "13px" }}>Loading trades…</td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={11} style={{ padding: "48px", textAlign: "center", color: "#999", fontSize: "13px" }}>
-                  No trades yet. Click <strong style={{ color: "#999" }}>+ Log Trade</strong> to get started.
+                <tr><td colSpan={11} style={{ padding: "48px", textAlign: "center", color: "var(--text-muted)", fontSize: "13px" }}>
+                  No trades yet. Click <strong style={{ color: "var(--text-muted)" }}>+ Log Trade</strong> to get started.
                 </td></tr>
               ) : (
                 paginated.map(t => (
@@ -2472,7 +2472,7 @@ useEffect(() => {
 
         {!loading && filtered.length > 0 && (
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "16px" }}>
-            <p style={{ fontSize: "12px", color: "#555", fontFamily: "'JetBrains Mono', monospace", margin: 0 }}>
+            <p style={{ fontSize: "12px", color: "var(--text-faint-2)", fontFamily: "'JetBrains Mono', monospace", margin: 0 }}>
               {((safePage - 1) * PAGE_SIZE) + 1}–{Math.min(safePage * PAGE_SIZE, filtered.length)} of {filtered.length} trade{filtered.length !== 1 ? "s" : ""}
             </p>
             <div style={{ display: "flex", gap: "8px" }}>
@@ -2480,8 +2480,8 @@ useEffect(() => {
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={safePage === 1}
                 style={{
-                  padding: "7px 16px", borderRadius: "8px", border: "0.5px solid #1a1a1a",
-                  background: "#121212", color: safePage === 1 ? "#333" : "#ccc",
+                  padding: "7px 16px", borderRadius: "8px", border: "0.5px solid var(--border-color)",
+                  background: "var(--bg-surface)", color: safePage === 1 ? "var(--text-faint-2)" : "var(--text-soft)",
                   fontFamily: "'Inter', sans-serif", fontSize: "12px", fontWeight: 500,
                   cursor: safePage === 1 ? "default" : "pointer",
                 }}
@@ -2490,8 +2490,8 @@ useEffect(() => {
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={safePage === totalPages}
                 style={{
-                  padding: "7px 16px", borderRadius: "8px", border: "0.5px solid #1a1a1a",
-                  background: "#121212", color: safePage === totalPages ? "#333" : "#ccc",
+                  padding: "7px 16px", borderRadius: "8px", border: "0.5px solid var(--border-color)",
+                  background: "var(--bg-surface)", color: safePage === totalPages ? "var(--text-faint-2)" : "var(--text-soft)",
                   fontFamily: "'Inter', sans-serif", fontSize: "12px", fontWeight: 500,
                   cursor: safePage === totalPages ? "default" : "pointer",
                 }}
@@ -2665,13 +2665,13 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
   }
 
   const mobileInput = {
-    width: '100%', background: '#111', border: '0.5px solid #1e1e1e',
-    borderRadius: '6px', padding: '8px 10px', color: '#ccc',
+    width: '100%', background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)',
+    borderRadius: '6px', padding: '8px 10px', color: 'var(--text-soft)',
     fontFamily: "'JetBrains Mono', monospace", fontSize: '13px',
     outline: 'none', boxSizing: 'border-box',
   };
 
-  const formLbl = { fontSize: '10px', color: '#777', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.4px', fontFamily: "'JetBrains Mono', monospace", display: 'block' };
+  const formLbl = { fontSize: '10px', color: 'var(--text-faint)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.4px', fontFamily: "'JetBrains Mono', monospace", display: 'block' };
 
   return (
     <>
@@ -2679,21 +2679,21 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
       <div style={{
         position: 'fixed', top: 0, left: 0, right: 0,
         bottom: 'calc(env(safe-area-inset-bottom, 0px) + 56px)',
-        background: '#0a0a0a',
+        background: 'var(--bg-page)',
         zIndex: 500, display: 'flex', flexDirection: 'column',
         overflowY: 'hidden',
       }}>
         {/* Sticky top bar */}
         <div style={{
           position: 'sticky', top: 0, zIndex: 10,
-          background: '#0d0d0d', borderBottom: '0.5px solid #1a1a1a',
+          background: 'var(--bg-hover)', borderBottom: '0.5px solid var(--border-color)',
           padding: '0 16px', height: '52px',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           flexShrink: 0,
         }}>
           <span style={{
             fontFamily: "'Inter', sans-serif", fontSize: '15px',
-            fontWeight: '600', color: '#e0e0e0',
+            fontWeight: '600', color: 'var(--text-secondary)',
           }}>
             {editTrade ? 'Edit Trade' : 'Log Trade'}
           </span>
@@ -2702,10 +2702,10 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
         </div>
 
         {/* Scrollable form body */}
-        <div style={{ flex: 1, overflowY: 'auto', paddingBottom: '0px', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'thin', scrollbarColor: '#1e1e1e #0a0a0a' }}>
+        <div style={{ flex: 1, overflowY: 'auto', paddingBottom: '0px', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'thin', scrollbarColor: 'var(--border-color) var(--bg-page)' }}>
 
           {/* Pair + Direction */}
-          <div style={{ padding: '10px 16px', borderBottom: '0.5px solid #111' }}>
+          <div style={{ padding: '10px 16px', borderBottom: '0.5px solid var(--bg-surface)' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
               <div>
                 <span style={formLbl}>Pair</span>
@@ -2722,10 +2722,10 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
                     <button key={d} onClick={() => set('direction', d)} style={{
                       flex: 1, padding: '8px 4px', borderRadius: '6px', cursor: 'pointer',
                       border: form.direction === d
-                        ? `0.5px solid ${d === 'long' ? '#1a3826' : '#2e1515'}`
-                        : '0.5px solid #1e1e1e',
-                      background: form.direction === d ? (d === 'long' ? '#0f2219' : '#1e0d0d') : '#111',
-                      color: form.direction === d ? (d === 'long' ? '#1bba7c' : '#c03535') : '#777',
+                        ? `0.5px solid ${d === 'long' ? 'var(--green-bg-2)' : 'var(--red-bg)'}`
+                        : '0.5px solid var(--border-color)',
+                      background: form.direction === d ? (d === 'long' ? 'var(--green-bg)' : 'var(--red-bg-2)') : 'var(--bg-surface)',
+                      color: form.direction === d ? (d === 'long' ? 'var(--brand)' : 'var(--red)') : 'var(--text-faint)',
                       fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', textTransform: 'uppercase',
                     }}>{d === 'long' ? 'LONG' : 'SHORT'}</button>
                   ))}
@@ -2735,17 +2735,17 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
           </div>
 
           {/* R:R Section — mode toggle */}
-          <div style={{ padding: '10px 16px', borderBottom: '0.5px solid #111' }}>
+          <div style={{ padding: '10px 16px', borderBottom: '0.5px solid var(--bg-surface)' }}>
             {/* Mode toggle */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
               <span style={formLbl}>{rrMode === 'manual' ? 'Risk:Reward' : 'Entry / SL / TP'}</span>
-              <div style={{ display: 'flex', border: '0.5px solid #1e1e1e', borderRadius: '5px', overflow: 'hidden' }}>
+              <div style={{ display: 'flex', border: '0.5px solid var(--border-color)', borderRadius: '5px', overflow: 'hidden' }}>
                 {[['manual', 'R:R'], ['auto', 'Price']].map(([mode, label]) => (
                   <button key={mode} onClick={() => setRrMode(mode)} style={{
                     padding: '4px 10px', border: 'none', cursor: 'pointer', fontSize: '10px',
                     fontFamily: "'JetBrains Mono', monospace", textTransform: 'uppercase',
-                    background: rrMode === mode ? '#1bba7c22' : '#111',
-                    color: rrMode === mode ? '#1bba7c' : '#555',
+                    background: rrMode === mode ? 'rgba(var(--brand-rgb), 0.15)' : 'var(--bg-surface)',
+                    color: rrMode === mode ? 'var(--brand)' : 'var(--text-faint-2)',
                   }}>{label}</button>
                 ))}
               </div>
@@ -2760,16 +2760,16 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
                     return (
                       <button key={n} onClick={() => setForm(prev => ({ ...prev, rr: active ? '' : n }))} style={{
                         flex: 1, padding: '9px 2px', borderRadius: '6px', cursor: 'pointer',
-                        border: `0.5px solid ${active ? '#1a3826' : '#1e1e1e'}`,
-                        background: active ? '#0f2219' : '#111',
-                        color: active ? '#1bba7c' : '#666',
+                        border: `0.5px solid ${active ? 'var(--green-bg-2)' : 'var(--border-color)'}`,
+                        background: active ? 'var(--green-bg)' : 'var(--bg-surface)',
+                        color: active ? 'var(--brand)' : 'var(--text-faint)',
                         fontFamily: "'JetBrains Mono', monospace", fontSize: '11px',
                       }}>1:{n}</button>
                     );
                   })}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ color: '#555', fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', flexShrink: 0 }}>1:</span>
+                  <span style={{ color: 'var(--text-faint-2)', fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', flexShrink: 0 }}>1:</span>
                   <input type="number" step="0.1" min="0.1" placeholder="Custom (e.g. 2.5)"
                     value={form.rr} onChange={e => setForm(prev => ({ ...prev, rr: e.target.value }))}
                     style={mobileInput} />
@@ -2789,11 +2789,11 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
                   ))}
                 </div>
                 <div style={{
-                  background: '#111', border: `0.5px solid ${form.rr ? '#1a3826' : '#1e1e1e'}`,
+                  background: 'var(--bg-surface)', border: `0.5px solid ${form.rr ? 'var(--green-bg-2)' : 'var(--border-color)'}`,
                   borderRadius: '6px', height: '36px', display: 'flex', alignItems: 'center', padding: '0 10px',
                 }}>
-                  <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', color: '#777', marginRight: '6px' }}>R:R</span>
-                  <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '13px', color: form.rr ? '#1bba7c' : '#555' }}>
+                  <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', color: 'var(--text-faint)', marginRight: '6px' }}>R:R</span>
+                  <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '13px', color: form.rr ? 'var(--brand)' : 'var(--text-faint-2)' }}>
                     {form.rr ? `1:${form.rr}` : '—'}
                   </span>
                 </div>
@@ -2802,7 +2802,7 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
           </div>
 
           {/* Session */}
-          <div style={{ padding: '10px 16px', borderBottom: '0.5px solid #111' }}>
+          <div style={{ padding: '10px 16px', borderBottom: '0.5px solid var(--bg-surface)' }}>
             <span style={formLbl}>Session</span>
             <select value={form.session} onChange={e => set('session', e.target.value)} style={{ ...mobileInput, appearance: 'none', cursor: 'pointer' }}>
               {SESSIONS.map(s => <option key={s} value={s}>{sessionLabel(s)}</option>)}
@@ -2810,25 +2810,25 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
           </div>
 
           {/* Date + Outcome */}
-          <div style={{ padding: '10px 16px', borderBottom: '0.5px solid #111' }}>
+          <div style={{ padding: '10px 16px', borderBottom: '0.5px solid var(--bg-surface)' }}>
             <span style={formLbl}>Date</span>
             <input type="date" value={form.date} onChange={e => set('date', e.target.value)}
               style={{ ...mobileInput, marginBottom: '10px' }} />
             <span style={formLbl}>Outcome</span>
             <div style={{ display: 'flex', gap: '5px' }}>
               {[
-                { value: 'win', label: 'WIN', bg: '#0f2219', color: '#1bba7c', border: '#1a3826' },
-                { value: 'loss', label: 'LOSS', bg: '#1e0d0d', color: '#c03535', border: '#2e1515' },
-                { value: 'be', label: 'BE', bg: '#1a1400', color: '#c97a00', border: '#2a2000' },
-                { value: 'in_progress', label: 'IN PROG', bg: '#0f1a2e', color: '#4d9fff', border: '#1a3050' },
+                { value: 'win', label: 'WIN', bg: 'var(--green-bg)', color: 'var(--brand)', border: 'var(--green-bg-2)' },
+                { value: 'loss', label: 'LOSS', bg: 'var(--red-bg-2)', color: 'var(--red)', border: 'var(--red-bg)' },
+                { value: 'be', label: 'BE', bg: 'var(--amber-bg-2)', color: 'var(--amber)', border: 'var(--amber-bg)' },
+                { value: 'in_progress', label: 'IN PROG', bg: 'var(--blue-bg-2)', color: 'var(--blue)', border: 'var(--blue-bg)' },
               ].map(({ value, label, bg, color, border }) => {
                 const active = form.outcome === value;
                 return (
                   <button key={value} onClick={() => set('outcome', active ? null : value)} style={{
                     flex: 1, padding: '7px 2px', borderRadius: '6px', cursor: 'pointer',
-                    border: `0.5px solid ${active ? border : '#1e1e1e'}`,
-                    background: active ? bg : '#111',
-                    color: active ? color : '#777',
+                    border: `0.5px solid ${active ? border : 'var(--border-color)'}`,
+                    background: active ? bg : 'var(--bg-surface)',
+                    color: active ? color : 'var(--text-faint)',
                     fontFamily: "'JetBrains Mono', monospace", fontSize: '9px', textTransform: 'uppercase',
                   }}>{label}</button>
                 );
@@ -2837,7 +2837,7 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
           </div>
 
           {/* Accounts */}
-          <div style={{ padding: '10px 16px', borderBottom: '0.5px solid #111' }}>
+          <div style={{ padding: '10px 16px', borderBottom: '0.5px solid var(--bg-surface)' }}>
             <span style={{ ...formLbl, marginBottom: '8px' }}>Accounts — select &amp; set risk</span>
             {accounts.map(acc => {
               const isSelected = selectedAccounts.has(acc.id);
@@ -2855,28 +2855,28 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
 
               return (
                 <div key={acc.id} onClick={() => toggleAccount(acc)} style={{
-                  background: '#111', border: `0.5px solid ${isSelected ? '#1a3826' : '#1e1e1e'}`,
+                  background: 'var(--bg-surface)', border: `0.5px solid ${isSelected ? 'var(--green-bg-2)' : 'var(--border-color)'}`,
                   borderRadius: '8px', padding: '10px 12px', marginBottom: '8px', cursor: 'pointer',
                 }}>
                   {/* Header */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: isSelected ? '10px' : 0 }}>
                     <div style={{
                       width: '14px', height: '14px', borderRadius: '3px', flexShrink: 0,
-                      border: `0.5px solid ${isSelected ? '#1bba7c' : '#555'}`,
-                      background: isSelected ? '#0f2219' : '#1a1a1a',
+                      border: `0.5px solid ${isSelected ? 'var(--brand)' : 'var(--text-faint-2)'}`,
+                      background: isSelected ? 'var(--green-bg)' : 'var(--bg-surface-2)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>
-                      {isSelected && <span style={{ color: '#1bba7c', fontSize: '9px', lineHeight: 1 }}>✓</span>}
+                      {isSelected && <span style={{ color: 'var(--brand)', fontSize: '9px', lineHeight: 1 }}>✓</span>}
                     </div>
-                    <span style={{ flex: 1, fontSize: '12px', fontWeight: '500', color: isSelected ? '#ccc' : '#777', fontFamily: "'Inter', sans-serif" }}>{acc.name}</span>
+                    <span style={{ flex: 1, fontSize: '12px', fontWeight: '500', color: isSelected ? 'var(--text-soft)' : 'var(--text-faint)', fontFamily: "'Inter', sans-serif" }}>{acc.name}</span>
                     <span style={{
                       fontSize: '9px', padding: '1px 5px', borderRadius: '3px',
-                      background: isChallenge ? '#0f1a2e' : '#1a1a1a',
-                      color: isChallenge ? '#4d9fff' : '#777',
-                      border: `0.5px solid ${isChallenge ? '#1a3050' : '#222'}`,
+                      background: isChallenge ? 'var(--blue-bg-2)' : 'var(--bg-surface-2)',
+                      color: isChallenge ? 'var(--blue)' : 'var(--text-faint)',
+                      border: `0.5px solid ${isChallenge ? 'var(--blue-bg)' : 'var(--border-color-2)'}`,
                       fontFamily: "'JetBrains Mono', monospace", textTransform: 'uppercase',
                     }}>{isChallenge ? 'CHALLENGE' : 'PERSONAL'}</span>
-                    {acc.account_size && <span style={{ fontSize: '10px', color: '#777', fontFamily: "'JetBrains Mono', monospace" }}>${(parseFloat(acc.account_size) / 1000).toFixed(0)}k</span>}
+                    {acc.account_size && <span style={{ fontSize: '10px', color: 'var(--text-faint)', fontFamily: "'JetBrains Mono', monospace" }}>${(parseFloat(acc.account_size) / 1000).toFixed(0)}k</span>}
                   </div>
 
                   {/* Risk inputs — only when selected */}
@@ -2884,7 +2884,7 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
                     <div onClick={e => e.stopPropagation()}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
                         {/* % / $ toggle */}
-                        <div style={{ display: 'flex', border: '0.5px solid #222', borderRadius: '4px', overflow: 'hidden' }}>
+                        <div style={{ display: 'flex', border: '0.5px solid var(--border-color-2)', borderRadius: '4px', overflow: 'hidden' }}>
                           {['$', '%'].map(m => (
                             <button key={m} onClick={() => {
                               const cur = mode;
@@ -2898,17 +2898,17 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
                               if (converted) setAccountRisks(prev => ({ ...prev, [acc.id]: converted }));
                             }} style={{
                               fontSize: '10px', padding: '3px 8px', cursor: 'pointer', border: 'none',
-                              background: mode === m ? '#1bba7c22' : '#1a1a1a',
-                              color: mode === m ? '#1bba7c' : '#777',
+                              background: mode === m ? 'rgba(var(--brand-rgb), 0.15)' : 'var(--bg-surface-2)',
+                              color: mode === m ? 'var(--brand)' : 'var(--text-faint)',
                             }}>{m}</button>
                           ))}
                         </div>
                         <input type="number" step="0.01" placeholder="1.0"
                           value={rawVal}
                           onChange={e => setAccountRisks(prev => ({ ...prev, [acc.id]: e.target.value }))}
-                          style={{ flex: 1, background: '#0f0f0f', border: '0.5px solid #1e1e1e', borderRadius: '4px', padding: '4px 8px', color: '#ccc', fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', outline: 'none' }}
+                          style={{ flex: 1, background: 'var(--bg-hover)', border: '0.5px solid var(--border-color)', borderRadius: '4px', padding: '4px 8px', color: 'var(--text-soft)', fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', outline: 'none' }}
                         />
-                        <span style={{ fontSize: '10px', color: '#777', fontFamily: "'JetBrains Mono', monospace", whiteSpace: 'nowrap' }}>
+                        <span style={{ fontSize: '10px', color: 'var(--text-faint)', fontFamily: "'JetBrains Mono', monospace", whiteSpace: 'nowrap' }}>
                           {mode === '%' && rawVal ? `${rawVal}%` : mode === '$' && rawVal ? `$${rawVal}` : ''}
                         </span>
                       </div>
@@ -2917,11 +2917,11 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
                         {[
                           { label: 'Risk %', value: resolvedPct ? `${parseFloat(resolvedPct).toFixed(2)}%` : '—' },
                           { label: 'Risk $', value: resolvedDollar ? `$${resolvedDollar}` : '—' },
-                          { label: 'Est. P&L', value: pnlNum !== null ? `${pnlNum >= 0 ? '+' : ''}$${Math.abs(pnlNum).toFixed(2)}` : '—', color: pnlNum !== null ? pnlColor(pnlNum) : '#999' },
+                          { label: 'Est. P&L', value: pnlNum !== null ? `${pnlNum >= 0 ? '+' : ''}$${Math.abs(pnlNum).toFixed(2)}` : '—', color: pnlNum !== null ? pnlColor(pnlNum) : 'var(--text-muted)' },
                         ].map(s => (
                           <div key={s.label}>
-                            <div style={{ fontSize: '9px', color: '#999', fontFamily: "'JetBrains Mono', monospace" }}>{s.label}</div>
-                            <div style={{ fontSize: '11px', fontWeight: '500', color: s.color || '#aaa', fontFamily: "'JetBrains Mono', monospace" }}>{s.value}</div>
+                            <div style={{ fontSize: '9px', color: 'var(--text-muted)', fontFamily: "'JetBrains Mono', monospace" }}>{s.label}</div>
+                            <div style={{ fontSize: '11px', fontWeight: '500', color: s.color || 'var(--text-muted)', fontFamily: "'JetBrains Mono', monospace" }}>{s.value}</div>
                           </div>
                         ))}
                       </div>
@@ -2933,7 +2933,7 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
           </div>
 
           {/* Notes */}
-          <div style={{ padding: '10px 16px', borderBottom: '0.5px solid #111' }}>
+          <div style={{ padding: '10px 16px', borderBottom: '0.5px solid var(--bg-surface)' }}>
             <span style={formLbl}>Notes</span>
             <textarea value={form.notes} onChange={e => set('notes', e.target.value)}
               placeholder="Trade rationale, confluences…" rows={3}
@@ -2944,14 +2944,14 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
           <div style={{ padding: '10px 16px' }}>
             <span style={formLbl}>Chart Screenshot</span>
             <div onClick={() => fileRef.current.click()} style={{
-              background: '#111', border: '0.5px dashed #1e1e1e', borderRadius: '6px',
+              background: 'var(--bg-surface)', border: '0.5px dashed var(--border-color)', borderRadius: '6px',
               padding: '16px', textAlign: 'center', cursor: 'pointer',
             }}>
               {screenshotFile
-                ? <span style={{ color: '#1bba7c', fontFamily: "'JetBrains Mono', monospace", fontSize: '11px' }}>📎 {screenshotFile.name}</span>
+                ? <span style={{ color: 'var(--brand)', fontFamily: "'JetBrains Mono', monospace", fontSize: '11px' }}>📎 {screenshotFile.name}</span>
                 : form.screenshot_url
-                  ? <span style={{ color: '#4d9fff', fontFamily: "'JetBrains Mono', monospace", fontSize: '11px' }}>📎 Screenshot attached</span>
-                  : <span style={{ color: '#999', fontFamily: "'Inter', sans-serif", fontSize: '12px' }}>Tap to upload</span>
+                  ? <span style={{ color: 'var(--blue)', fontFamily: "'JetBrains Mono', monospace", fontSize: '11px' }}>📎 Screenshot attached</span>
+                  : <span style={{ color: 'var(--text-muted)', fontFamily: "'Inter', sans-serif", fontSize: '12px' }}>Tap to upload</span>
               }
             </div>
             <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => { if (e.target.files[0]) setScreenshotFile(e.target.files[0]); }} />
@@ -2962,13 +2962,13 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
         <div style={{
           position: 'sticky', bottom: 0, left: 0, right: 0,
           padding: '10px 16px 14px',
-          background: '#0d0d0d',
-          borderTop: '0.5px solid #1a1a1a', flexShrink: 0,
+          background: 'var(--bg-hover)',
+          borderTop: '0.5px solid var(--border-color)', flexShrink: 0,
         }}>
-          {formError && <div style={{ color: '#c03535', fontSize: '11px', marginBottom: '6px', fontFamily: "'Inter', sans-serif" }}>{formError}</div>}
+          {formError && <div style={{ color: 'var(--red)', fontSize: '11px', marginBottom: '6px', fontFamily: "'Inter', sans-serif" }}>{formError}</div>}
           <button onClick={handleSave} disabled={saving} style={{
-            width: '100%', height: '44px', background: saving ? '#555' : 'oklch(0.72 0.17 152)',
-            border: 'none', borderRadius: '8px', color: saving ? '#777' : '#000',
+            width: '100%', height: '44px', background: saving ? 'var(--text-faint-2)' : 'oklch(0.72 0.17 152)',
+            border: 'none', borderRadius: '8px', color: saving ? 'var(--text-faint)' : 'var(--brand-fg)',
             fontFamily: "'Inter', sans-serif", fontSize: '14px', fontWeight: '600',
             cursor: saving ? 'not-allowed' : 'pointer', transition: 'background 0.15s',
           }}

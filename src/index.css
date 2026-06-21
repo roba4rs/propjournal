@@ -17,6 +17,15 @@
   --bg-hover: #0f0f0f;
   --border-color: #1a1a1a;
   --border-color-2: #2a2a2a;
+  --border-hover: #3a3a3a;     /* NEW — added during TradeLog.jsx migration, hover-state
+                                   border lightening on cards/inputs (was inline #3a3a3a) */
+
+  --brand-rgb: 27, 186, 124;   /* NEW — added during TradeLog.jsx migration, raw r,g,b of
+                                   --brand for use in rgba(var(--brand-rgb), alpha) tinted
+                                   active-states. Consolidates two pre-existing inconsistent
+                                   patterns found in TradeLog.jsx: hardcoded #1bba7c22 hex-
+                                   alpha AND a separate hardcoded rgba(27,186,124,0.15) —
+                                   same intent, two different ad hoc implementations. */
 
   --text-primary: #ffffff;
   --text-secondary: #e0e0e0;
@@ -59,6 +68,8 @@
   --bg-hover: #ececed;
   --border-color: #e5e5e7;
   --border-color-2: #d8d8da;
+  --border-hover: #c7c7ca;
+  --brand-rgb: 22, 156, 105;
 
   --text-primary: #121212;
   --text-secondary: #3a3a3c;
