@@ -76,7 +76,7 @@ export default function DailyBarChart({ trades = [], mobile = false }) {
   // Resolved hex for Recharts direct props (these don't go through CSS, so var() won't resolve here)
   const chart = {
     brand: isLight ? '#169c69' : '#1db97b',
-    red: '#c03535',
+    red: isLight ? '#e0524f' : '#c03535',
     neutral: isLight ? '#d8d8da' : '#222222',
     axisStroke: isLight ? '#a8a8ab' : '#555555',
     tickFill: isLight ? '#8a8a8d' : '#777777',
