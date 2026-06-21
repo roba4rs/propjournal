@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import Sidebar from '../components/Sidebar'
 import { usePaddle } from '../PaddleContext'
+import { useTheme } from '../ThemeContext'
 
 const features = [
   'Unlimited trades',
@@ -49,13 +50,52 @@ const PRICE_IDS = {
   annual: process.env.REACT_APP_PADDLE_YEARLY_PRICE_ID,
 }
 
-const CheckIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1db97b" strokeWidth="2.5" style={{ flexShrink: 0, marginTop: '2px' }}>
+// Theme tokens shared across Pricing's sub-components.
+// PropJournal's accent green (#1db97b) stays constant across both modes —
+// only neutrals (backgrounds, borders, text) flip.
+function getColors(isLight) {
+  return isLight
+    ? {
+        pageBg: '#f7f7f8',
+        cardBg: '#ffffff',
+        cardBorder: 'rgba(0,0,0,0.08)',
+        highlightCardBg: 'rgba(29,185,123,0.05)',
+        text: '#18181b',
+        textMuted: '#6b6b70',
+        textFaint: '#9a9aa0',
+        modalBg: '#ffffff',
+        modalBorder: 'rgba(0,0,0,0.1)',
+        optionBorder: 'rgba(0,0,0,0.12)',
+        optionHoverBg: 'rgba(0,0,0,0.04)',
+        accent: '#1db97b',
+        accentSoft: 'rgba(29,185,123,0.10)',
+        danger: '#c03535',
+      }
+    : {
+        pageBg: '#0a0a0a',
+        cardBg: '#161616',
+        cardBorder: 'rgba(255,255,255,0.07)',
+        highlightCardBg: 'rgba(29,185,123,0.04)',
+        text: '#ffffff',
+        textMuted: '#777777',
+        textFaint: '#555555',
+        modalBg: '#161616',
+        modalBorder: 'rgba(255,255,255,0.1)',
+        optionBorder: 'rgba(255,255,255,0.12)',
+        optionHoverBg: 'rgba(255,255,255,0.05)',
+        accent: '#1db97b',
+        accentSoft: 'rgba(29,185,123,0.12)',
+        danger: '#c03535',
+      }
+}
+
+const CheckIcon = ({ color }) => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" style={{ flexShrink: 0, marginTop: '2px' }}>
     <polyline points="20 6 9 17 4 12" />
   </svg>
 )
 
-function PaymentModal({ plan, onClose, onCard, onCrypto, loading }) {
+function PaymentModal({ plan, onClose, onCard, onCrypto, loading, c }) {
   return (
     <div
       onClick={onClose}
@@ -73,8 +113,8 @@ function PaymentModal({ plan, onClose, onCard, onCrypto, loading }) {
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          background: '#161616',
-          border: '0.5px solid rgba(255,255,255,0.1)',
+          background: c.modalBg,
+          border: `0.5px solid ${c.modalBorder}`,
           borderRadius: '16px',
           padding: '28px 24px',
           width: '100%',
@@ -88,12 +128,12 @@ function PaymentModal({ plan, onClose, onCard, onCrypto, loading }) {
             fontFamily: 'Syne, sans-serif',
             fontSize: '18px',
             fontWeight: '700',
-            color: '#fff',
+            color: c.text,
             margin: '0 0 6px 0',
           }}>
             How would you like to pay?
           </h2>
-          <p style={{ fontSize: '13px', color: '#666', margin: 0 }}>
+          <p style={{ fontSize: '13px', color: c.textMuted, margin: 0 }}>
             {plan.label} plan · ${plan.price}{plan.id !== 'monthly' ? ' total' : '/mo'}
           </p>
         </div>
@@ -110,9 +150,9 @@ function PaymentModal({ plan, onClose, onCard, onCrypto, loading }) {
               gap: '14px',
               padding: '14px 16px',
               borderRadius: '10px',
-              border: '0.5px solid rgba(255,255,255,0.12)',
-              background: loading === 'card' ? 'rgba(255,255,255,0.05)' : 'transparent',
-              color: '#fff',
+              border: `0.5px solid ${c.optionBorder}`,
+              background: loading === 'card' ? c.optionHoverBg : 'transparent',
+              color: c.text,
               cursor: loading ? 'not-allowed' : 'pointer',
               opacity: loading && loading !== 'card' ? 0.4 : 1,
               textAlign: 'left',
@@ -124,7 +164,7 @@ function PaymentModal({ plan, onClose, onCard, onCrypto, loading }) {
               <div style={{ fontSize: '14px', fontWeight: '600', marginBottom: '2px' }}>
                 {loading === 'card' ? 'Opening checkout...' : 'Pay with Card'}
               </div>
-              <div style={{ fontSize: '11px', color: '#666' }}>Visa, Mastercard, Amex via Paddle</div>
+              <div style={{ fontSize: '11px', color: c.textMuted }}>Visa, Mastercard, Amex via Paddle</div>
             </div>
           </button>
 
@@ -138,9 +178,9 @@ function PaymentModal({ plan, onClose, onCard, onCrypto, loading }) {
               gap: '14px',
               padding: '14px 16px',
               borderRadius: '10px',
-              border: '0.5px solid rgba(255,255,255,0.12)',
-              background: loading === 'crypto' ? 'rgba(255,255,255,0.05)' : 'transparent',
-              color: '#fff',
+              border: `0.5px solid ${c.optionBorder}`,
+              background: loading === 'crypto' ? c.optionHoverBg : 'transparent',
+              color: c.text,
               cursor: loading ? 'not-allowed' : 'pointer',
               opacity: loading && loading !== 'crypto' ? 0.4 : 1,
               textAlign: 'left',
@@ -152,7 +192,7 @@ function PaymentModal({ plan, onClose, onCard, onCrypto, loading }) {
               <div style={{ fontSize: '14px', fontWeight: '600', marginBottom: '2px' }}>
                 {loading === 'crypto' ? 'Creating invoice...' : 'Pay with Crypto'}
               </div>
-              <div style={{ fontSize: '11px', color: '#666' }}>BTC, ETH, USDT and more via NOWPayments</div>
+              <div style={{ fontSize: '11px', color: c.textMuted }}>BTC, ETH, USDT and more via NOWPayments</div>
             </div>
           </button>
         </div>
@@ -167,7 +207,7 @@ function PaymentModal({ plan, onClose, onCard, onCrypto, loading }) {
             padding: '10px',
             background: 'transparent',
             border: 'none',
-            color: '#555',
+            color: c.textFaint,
             fontSize: '13px',
             cursor: loading ? 'not-allowed' : 'pointer',
             fontFamily: 'DM Sans, sans-serif',
@@ -181,6 +221,9 @@ function PaymentModal({ plan, onClose, onCard, onCrypto, loading }) {
 }
 
 export default function Pricing() {
+  const { isLight } = useTheme()
+  const c = getColors(isLight)
+
   const [error, setError] = useState('')
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const [selectedPlan, setSelectedPlan] = useState(null) // plan object for modal
@@ -280,7 +323,7 @@ export default function Pricing() {
   }
 
   return (
-    <div style={{ display: 'flex', background: '#0a0a0a', minHeight: '100vh' }}>
+    <div style={{ display: 'flex', background: c.pageBg, minHeight: '100vh' }}>
       <Sidebar />
 
       {/* Payment method modal */}
@@ -291,6 +334,7 @@ export default function Pricing() {
           onClose={() => { if (!modalLoading) setSelectedPlan(null) }}
           onCard={handleCard}
           onCrypto={handleCrypto}
+          c={c}
         />
       )}
 
@@ -316,14 +360,14 @@ export default function Pricing() {
             fontFamily: 'Syne, sans-serif',
             fontSize: isMobile ? '22px' : '30px',
             fontWeight: '700',
-            color: '#fff',
+            color: c.text,
             marginBottom: '8px',
             marginTop: 0,
             letterSpacing: '-0.02em',
           }}>
             {expired ? 'Your free trial has ended.' : 'Take your prop trading seriously.'}
           </h1>
-          <p style={{ color: '#777', fontSize: '14px', margin: 0 }}>
+          <p style={{ color: c.textMuted, fontSize: '14px', margin: 0 }}>
             {expired ? 'Upgrade your plan to continue.' : 'Upgrade your plan.'}
           </p>
         </div>
@@ -338,8 +382,8 @@ export default function Pricing() {
         }}>
           {plans.map((plan) => (
             <div key={plan.id} style={{
-              background: plan.highlight ? 'rgba(29,185,123,0.04)' : '#161616',
-              border: plan.highlight ? '2px solid #1db97b' : '0.5px solid rgba(255,255,255,0.07)',
+              background: plan.highlight ? c.highlightCardBg : c.cardBg,
+              border: plan.highlight ? `2px solid ${c.accent}` : `0.5px solid ${c.cardBorder}`,
               borderRadius: '14px',
               padding: isMobile ? '18px 16px' : '28px 24px',
               display: 'flex',
@@ -356,8 +400,8 @@ export default function Pricing() {
                       <div style={{
                         display: 'inline-block',
                         fontSize: '10px',
-                        background: 'rgba(29,185,123,0.12)',
-                        color: '#1db97b',
+                        background: c.accentSoft,
+                        color: c.accent,
                         borderRadius: '20px',
                         padding: '2px 10px',
                         marginBottom: '6px',
@@ -369,19 +413,19 @@ export default function Pricing() {
                     <div style={{
                       fontSize: '14px',
                       fontWeight: '600',
-                      color: '#fff',
+                      color: c.text,
                       fontFamily: 'Syne, sans-serif',
                       marginBottom: '3px',
                     }}>
                       {plan.label}
                     </div>
-                    <div style={{ fontSize: '11px', color: '#777', lineHeight: '1.4' }}>{plan.billed}</div>
+                    <div style={{ fontSize: '11px', color: c.textMuted, lineHeight: '1.4' }}>{plan.billed}</div>
                     {plan.save && (
                       <div style={{
                         display: 'inline-block',
                         fontSize: '10px',
-                        background: 'rgba(29,185,123,0.12)',
-                        color: '#1db97b',
+                        background: c.accentSoft,
+                        color: c.accent,
                         borderRadius: '20px',
                         padding: '2px 8px',
                         marginTop: '6px',
@@ -407,7 +451,7 @@ export default function Pricing() {
                           fontFamily: 'Syne, sans-serif',
                           fontSize: '13px',
                           fontWeight: '700',
-                          color: '#fff',
+                          color: c.text,
                           marginTop: '5px',
                           marginRight: '1px',
                         }}>$</sup>
@@ -415,23 +459,23 @@ export default function Pricing() {
                           fontFamily: 'Syne, sans-serif',
                           fontSize: '34px',
                           fontWeight: '700',
-                          color: '#fff',
+                          color: c.text,
                           lineHeight: '1',
                           letterSpacing: '-0.03em',
                         }}>
                           {plan.perMonth}
                         </span>
                       </div>
-                      <div style={{ fontSize: '10px', color: '#777' }}>/ month</div>
+                      <div style={{ fontSize: '10px', color: c.textMuted }}>/ month</div>
                     </div>
                     <button
                       onClick={() => handleUpgradeClick(plan.id)}
                       style={{
                         padding: '9px 16px',
                         borderRadius: '8px',
-                        border: plan.highlight ? 'none' : '0.5px solid rgba(255,255,255,0.15)',
-                        backgroundColor: plan.highlight ? '#1db97b' : 'transparent',
-                        color: plan.highlight ? '#000' : '#fff',
+                        border: plan.highlight ? 'none' : `0.5px solid ${c.optionBorder}`,
+                        backgroundColor: plan.highlight ? c.accent : 'transparent',
+                        color: plan.highlight ? '#000' : c.text,
                         fontSize: '12px',
                         fontWeight: '600',
                         fontFamily: 'DM Sans, sans-serif',
@@ -449,8 +493,8 @@ export default function Pricing() {
                     <div style={{
                       display: 'inline-block',
                       fontSize: '11px',
-                      background: 'rgba(29,185,123,0.12)',
-                      color: '#1db97b',
+                      background: c.accentSoft,
+                      color: c.accent,
                       borderRadius: '20px',
                       padding: '3px 12px',
                       marginBottom: '14px',
@@ -463,7 +507,7 @@ export default function Pricing() {
 
                   <div style={{
                     fontSize: '11px',
-                    color: '#777',
+                    color: c.textMuted,
                     textTransform: 'uppercase',
                     letterSpacing: '0.09em',
                     marginBottom: '10px',
@@ -477,7 +521,7 @@ export default function Pricing() {
                       fontFamily: 'Syne, sans-serif',
                       fontSize: '18px',
                       fontWeight: '700',
-                      color: '#fff',
+                      color: c.text,
                       marginTop: '8px',
                       marginRight: '1px',
                     }}>$</sup>
@@ -485,7 +529,7 @@ export default function Pricing() {
                       fontFamily: 'Syne, sans-serif',
                       fontSize: '42px',
                       fontWeight: '700',
-                      color: '#fff',
+                      color: c.text,
                       lineHeight: '1',
                       letterSpacing: '-0.03em',
                     }}>
@@ -493,15 +537,15 @@ export default function Pricing() {
                     </span>
                   </div>
 
-                  <div style={{ fontSize: '12px', color: '#777', marginBottom: '4px' }}>per month</div>
-                  <div style={{ fontSize: '11px', color: '#777', marginBottom: plan.save ? '6px' : '20px' }}>{plan.billed}</div>
+                  <div style={{ fontSize: '12px', color: c.textMuted, marginBottom: '4px' }}>per month</div>
+                  <div style={{ fontSize: '11px', color: c.textMuted, marginBottom: plan.save ? '6px' : '20px' }}>{plan.billed}</div>
 
                   {plan.save && (
                     <div style={{
                       display: 'inline-block',
                       fontSize: '11px',
-                      background: 'rgba(29,185,123,0.12)',
-                      color: '#1db97b',
+                      background: c.accentSoft,
+                      color: c.accent,
                       borderRadius: '20px',
                       padding: '2px 10px',
                       marginBottom: '16px',
@@ -511,7 +555,7 @@ export default function Pricing() {
                     </div>
                   )}
 
-                  <div style={{ borderTop: '0.5px solid rgba(255,255,255,0.07)', margin: '0 0 16px 0' }} />
+                  <div style={{ borderTop: `0.5px solid ${c.cardBorder}`, margin: '0 0 16px 0' }} />
 
                   <ul style={{
                     listStyle: 'none',
@@ -528,9 +572,9 @@ export default function Pricing() {
                         alignItems: 'flex-start',
                         gap: '8px',
                         fontSize: '13px',
-                        color: '#aaa',
+                        color: c.textMuted,
                       }}>
-                        <CheckIcon />
+                        <CheckIcon color={c.accent} />
                         {feature}
                       </li>
                     ))}
@@ -543,9 +587,9 @@ export default function Pricing() {
                       width: '100%',
                       padding: '12px',
                       borderRadius: '9px',
-                      border: plan.highlight ? 'none' : '0.5px solid rgba(255,255,255,0.12)',
-                      backgroundColor: plan.highlight ? '#1db97b' : 'transparent',
-                      color: plan.highlight ? '#000' : '#fff',
+                      border: plan.highlight ? 'none' : `0.5px solid ${c.optionBorder}`,
+                      backgroundColor: plan.highlight ? c.accent : 'transparent',
+                      color: plan.highlight ? '#000' : c.text,
                       fontSize: '13px',
                       fontWeight: '600',
                       fontFamily: 'DM Sans, sans-serif',
@@ -562,12 +606,12 @@ export default function Pricing() {
         </div>
 
         {error && (
-          <div style={{ marginTop: '20px', color: '#c03535', fontSize: '13px', textAlign: 'center' }}>
+          <div style={{ marginTop: '20px', color: c.danger, fontSize: '13px', textAlign: 'center' }}>
             {error}
           </div>
         )}
 
-        <p style={{ marginTop: '20px', fontSize: '12px', color: '#555', textAlign: 'center' }}>
+        <p style={{ marginTop: '20px', fontSize: '12px', color: c.textFaint, textAlign: 'center' }}>
           Payments processed securely · Cancel anytime
         </p>
       </main>

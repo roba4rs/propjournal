@@ -1,7 +1,11 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import { useTheme } from '../ThemeContext'
 
 export default function Terms() {
+  const { isLight } = useTheme()
+  const styles = getStyles(isLight)
+
   return (
     <div style={styles.page}>
       <nav style={styles.nav}>
@@ -26,7 +30,7 @@ export default function Terms() {
             the Service.
           </div>
 
-          <Section num="1" title="Description of Service">
+          <Section num="1" title="Description of Service" styles={styles}>
             <p>
               PropJournal is a software tool that allows users to log trades, track performance metrics,
               and monitor progress against prop trading firm challenge rules. PropJournal is a
@@ -40,14 +44,14 @@ export default function Terms() {
             </p>
           </Section>
 
-          <Section num="2" title="Eligibility">
+          <Section num="2" title="Eligibility" styles={styles}>
             <p>
               You must be at least 18 years old to use the Service. By using PropJournal, you confirm
               that you meet this requirement.
             </p>
           </Section>
 
-          <Section num="3" title="Account Registration">
+          <Section num="3" title="Account Registration" styles={styles}>
             <p>
               You may sign up using Google Sign-In. You are responsible for maintaining the security
               of your account and for all activity that occurs under it. Notify us immediately at{' '}
@@ -56,31 +60,31 @@ export default function Terms() {
             </p>
           </Section>
 
-          <Section num="4" title="Subscription Plans &amp; Billing">
-            <SubSection title="4.1 Plans">
+          <Section num="4" title="Subscription Plans &amp; Billing" styles={styles}>
+            <SubSection title="4.1 Plans" styles={styles}>
               PropJournal offers a free 7-day trial, after which access requires a paid subscription,
               billed monthly ($12/month), every 6 months ($60 every 6 months, equivalent to $10/month),
               or annually ($96/year, equivalent to $8/month).
             </SubSection>
-            <SubSection title="4.2 Payment Processors">
+            <SubSection title="4.2 Payment Processors" styles={styles}>
               <p>We accept payment through two channels:</p>
               <ul style={styles.list}>
                 <li><strong style={styles.strong}>Card payments:</strong> processed by Paddle.com, who act as the merchant of record for these transactions. Your purchase is also subject to Paddle's Buyer Terms &amp; Conditions.</li>
                 <li><strong style={styles.strong}>Cryptocurrency payments:</strong> processed by NOWPayments, settled directly to us. NOWPayments' terms apply to the processing of crypto transactions.</li>
               </ul>
             </SubSection>
-            <SubSection title="4.3 Auto-Renewal">
+            <SubSection title="4.3 Auto-Renewal" styles={styles}>
               Subscriptions renew automatically at the end of each billing cycle unless cancelled before
               the renewal date. You may cancel at any time from your account settings; cancellation
               takes effect at the end of the current billing period.
             </SubSection>
-            <SubSection title="4.4 Price Changes">
+            <SubSection title="4.4 Price Changes" styles={styles}>
               We may change subscription pricing with reasonable advance notice. Changes will not apply
               retroactively to a billing period you have already paid for.
             </SubSection>
           </Section>
 
-          <Section num="5" title="Refunds">
+          <Section num="5" title="Refunds" styles={styles}>
             <p>
               All subscription fees are generally non-refundable. However, we review refund requests
               on a case-by-case basis at our sole discretion. To request a refund, contact us at{' '}
@@ -95,7 +99,7 @@ export default function Terms() {
             </p>
           </Section>
 
-          <Section num="6" title="Acceptable Use">
+          <Section num="6" title="Acceptable Use" styles={styles}>
             <p>You agree not to:</p>
             <ul style={styles.list}>
               <li>Use the Service for any unlawful purpose.</li>
@@ -106,7 +110,7 @@ export default function Terms() {
             <p>We reserve the right to suspend or terminate accounts that violate these Terms.</p>
           </Section>
 
-          <Section num="7" title="Intellectual Property">
+          <Section num="7" title="Intellectual Property" styles={styles}>
             <p>
               The Service, including its design, code, and branding, is owned by Robel Gidey /
               PropJournal. Your trading data and journal entries remain your property; you grant us a
@@ -114,7 +118,7 @@ export default function Terms() {
             </p>
           </Section>
 
-          <Section num="8" title="Disclaimers">
+          <Section num="8" title="Disclaimers" styles={styles}>
             <p>
               The Service is provided "as is" without warranties of any kind, express or implied. We
               do not guarantee that the Service will be uninterrupted or error-free, or that any
@@ -124,7 +128,7 @@ export default function Terms() {
             </p>
           </Section>
 
-          <Section num="9" title="Limitation of Liability">
+          <Section num="9" title="Limitation of Liability" styles={styles}>
             <p>
               To the maximum extent permitted by law, Robel Gidey / PropJournal shall not be liable
               for any indirect, incidental, special, or consequential damages, including loss of
@@ -136,7 +140,7 @@ export default function Terms() {
             </p>
           </Section>
 
-          <Section num="10" title="Termination">
+          <Section num="10" title="Termination" styles={styles}>
             <p>
               You may stop using the Service and cancel your subscription at any time. We may suspend
               or terminate your account if you violate these Terms, with notice where reasonably
@@ -144,7 +148,7 @@ export default function Terms() {
             </p>
           </Section>
 
-          <Section num="11" title="Governing Law">
+          <Section num="11" title="Governing Law" styles={styles}>
             <p>
               These Terms are governed by the laws of Ethiopia, without regard to conflict-of-law
               principles. This does not affect any statutory consumer rights you may have in your own
@@ -152,7 +156,7 @@ export default function Terms() {
             </p>
           </Section>
 
-          <Section num="12" title="Changes to These Terms">
+          <Section num="12" title="Changes to These Terms" styles={styles}>
             <p>
               We may update these Terms from time to time. Continued use of the Service after changes
               take effect constitutes acceptance of the updated Terms. For material changes, we will
@@ -160,7 +164,7 @@ export default function Terms() {
             </p>
           </Section>
 
-          <Section num="13" title="Contact Us">
+          <Section num="13" title="Contact Us" styles={styles}>
             <p>
               Questions about these Terms can be sent to:{' '}
               <a href="mailto:robel4cs@gmail.com" style={styles.link}>robel4cs@gmail.com</a>
@@ -170,7 +174,7 @@ export default function Terms() {
           <div style={styles.footer}>
             <Link to="/privacy" style={styles.link}>Privacy Policy</Link>
             <span style={styles.dot}>·</span>
-            <Link to="/refund" style={styles.link}>Refund Policy</Link>
+            <Link to="/refund-policy" style={styles.link}>Refund Policy</Link>
             <span style={styles.dot}>·</span>
             <Link to="/" style={styles.link}>Back to PropJournal</Link>
           </div>
@@ -180,7 +184,7 @@ export default function Terms() {
   )
 }
 
-function Section({ num, title, children }) {
+function Section({ num, title, children, styles }) {
   return (
     <section style={styles.section}>
       <h2 style={styles.sectionTitle}>
@@ -191,7 +195,7 @@ function Section({ num, title, children }) {
   )
 }
 
-function SubSection({ title, children }) {
+function SubSection({ title, children, styles }) {
   return (
     <div style={styles.subSection}>
       <h3 style={styles.subTitle}>{title}</h3>
@@ -200,147 +204,190 @@ function SubSection({ title, children }) {
   )
 }
 
-const styles = {
-  page: {
-    minHeight: '100vh',
-    backgroundColor: 'oklch(0.16 0 0)',
-    color: 'oklch(0.96 0 0)',
-    fontFamily: "'Inter', ui-sans-serif, system-ui, sans-serif",
-    WebkitFontSmoothing: 'antialiased',
-    lineHeight: '1.6',
-  },
-  nav: {
-    position: 'sticky',
-    top: 0,
-    zIndex: 50,
-    borderBottom: '1px solid oklch(0.28 0 0)',
-    backgroundColor: 'oklch(0.16 0 0 / 0.85)',
-    backdropFilter: 'blur(12px)',
-  },
-  navInner: {
-    maxWidth: '860px',
-    margin: '0 auto',
-    padding: '0 1.5rem',
-    height: '56px',
-    display: 'flex',
-    alignItems: 'center',
-  },
-  logo: {
-    fontSize: '15px',
-    fontWeight: 600,
-    letterSpacing: '-0.02em',
-    textDecoration: 'none',
-    color: 'oklch(0.96 0 0)',
-  },
-  logoAccent: {
-    color: 'oklch(0.72 0.17 152)',
-  },
-  main: {
-    padding: '4rem 1.5rem 6rem',
-  },
-  container: {
-    maxWidth: '720px',
-    margin: '0 auto',
-  },
-  eyebrow: {
-    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-    fontSize: '11px',
-    textTransform: 'uppercase',
-    letterSpacing: '0.12em',
-    color: 'oklch(0.72 0.17 152)',
-    marginBottom: '0.75rem',
-  },
-  title: {
-    fontSize: 'clamp(1.75rem, 4vw, 2.5rem)',
-    fontWeight: 600,
-    letterSpacing: '-0.03em',
-    lineHeight: 1.1,
-    marginBottom: '0.75rem',
-  },
-  meta: {
-    fontSize: '13px',
-    color: 'oklch(0.68 0 0)',
-    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-    marginBottom: '2.5rem',
-  },
-  intro: {
-    fontSize: '14px',
-    lineHeight: 1.75,
-    color: 'oklch(0.78 0 0)',
-    borderLeft: '2px solid oklch(0.28 0 0)',
-    paddingLeft: '1.25rem',
-    marginBottom: '2.5rem',
-  },
-  section: {
-    borderTop: '1px solid oklch(0.22 0 0)',
-    paddingTop: '2rem',
-    marginBottom: '2rem',
-  },
-  sectionTitle: {
-    fontSize: '16px',
-    fontWeight: 600,
-    marginBottom: '1rem',
-    display: 'flex',
-    gap: '0.4rem',
-    alignItems: 'baseline',
-  },
-  sectionNum: {
-    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-    fontSize: '12px',
-    color: 'oklch(0.72 0.17 152)',
-  },
-  sectionBody: {
-    fontSize: '14px',
-    lineHeight: 1.75,
-    color: 'oklch(0.78 0 0)',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.75rem',
-  },
-  subSection: {
-    marginBottom: '1.25rem',
-  },
-  subTitle: {
-    fontSize: '13px',
-    fontWeight: 600,
-    color: 'oklch(0.88 0 0)',
-    marginBottom: '0.5rem',
-    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-    letterSpacing: '0.02em',
-  },
-  highlight: {
-    backgroundColor: 'oklch(0.72 0.17 152 / 0.08)',
-    border: '1px solid oklch(0.72 0.17 152 / 0.2)',
-    borderRadius: '6px',
-    padding: '0.875rem 1rem',
-    color: 'oklch(0.88 0 0)',
-  },
-  list: {
-    paddingLeft: '1.25rem',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.5rem',
-    margin: '0.5rem 0',
-  },
-  strong: {
-    color: 'oklch(0.92 0 0)',
-    fontWeight: 600,
-  },
-  link: {
-    color: 'oklch(0.72 0.17 152)',
-    textDecoration: 'none',
-  },
-  footer: {
-    marginTop: '4rem',
-    paddingTop: '2rem',
-    borderTop: '1px solid oklch(0.22 0 0)',
-    display: 'flex',
-    gap: '0.75rem',
-    alignItems: 'center',
-    fontSize: '13px',
-    flexWrap: 'wrap',
-  },
-  dot: {
-    color: 'oklch(0.4 0 0)',
-  },
+function getStyles(isLight) {
+  const c = isLight
+    ? {
+        bg: '#ffffff',
+        text: '#18181b',
+        navBorder: '#e4e4e7',
+        navBg: 'rgba(255,255,255,0.85)',
+        accent: 'oklch(0.55 0.15 152)',
+        muted: '#52525b',
+        eyebrow: 'oklch(0.55 0.15 152)',
+        introBorder: '#e4e4e7',
+        introText: '#3f3f46',
+        sectionBorder: '#e4e4e7',
+        sectionBody: '#3f3f46',
+        subTitle: '#27272a',
+        highlightBg: 'oklch(0.55 0.15 152 / 0.06)',
+        highlightBorder: 'oklch(0.55 0.15 152 / 0.18)',
+        highlightText: '#18181b',
+        strong: '#09090b',
+        dot: '#a1a1aa',
+      }
+    : {
+        bg: 'oklch(0.16 0 0)',
+        text: 'oklch(0.96 0 0)',
+        navBorder: 'oklch(0.28 0 0)',
+        navBg: 'oklch(0.16 0 0 / 0.85)',
+        accent: 'oklch(0.72 0.17 152)',
+        muted: 'oklch(0.68 0 0)',
+        eyebrow: 'oklch(0.72 0.17 152)',
+        introBorder: 'oklch(0.28 0 0)',
+        introText: 'oklch(0.78 0 0)',
+        sectionBorder: 'oklch(0.22 0 0)',
+        sectionBody: 'oklch(0.78 0 0)',
+        subTitle: 'oklch(0.88 0 0)',
+        highlightBg: 'oklch(0.72 0.17 152 / 0.08)',
+        highlightBorder: 'oklch(0.72 0.17 152 / 0.2)',
+        highlightText: 'oklch(0.88 0 0)',
+        strong: 'oklch(0.92 0 0)',
+        dot: 'oklch(0.4 0 0)',
+      }
+
+  return {
+    page: {
+      minHeight: '100vh',
+      backgroundColor: c.bg,
+      color: c.text,
+      fontFamily: "'Inter', ui-sans-serif, system-ui, sans-serif",
+      WebkitFontSmoothing: 'antialiased',
+      lineHeight: '1.6',
+      transition: 'background-color 0.2s ease, color 0.2s ease',
+    },
+    nav: {
+      position: 'sticky',
+      top: 0,
+      zIndex: 50,
+      borderBottom: `1px solid ${c.navBorder}`,
+      backgroundColor: c.navBg,
+      backdropFilter: 'blur(12px)',
+    },
+    navInner: {
+      maxWidth: '860px',
+      margin: '0 auto',
+      padding: '0 1.5rem',
+      height: '56px',
+      display: 'flex',
+      alignItems: 'center',
+    },
+    logo: {
+      fontSize: '15px',
+      fontWeight: 600,
+      letterSpacing: '-0.02em',
+      textDecoration: 'none',
+      color: c.text,
+    },
+    logoAccent: {
+      color: c.accent,
+    },
+    main: {
+      padding: '4rem 1.5rem 6rem',
+    },
+    container: {
+      maxWidth: '720px',
+      margin: '0 auto',
+    },
+    eyebrow: {
+      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+      fontSize: '11px',
+      textTransform: 'uppercase',
+      letterSpacing: '0.12em',
+      color: c.eyebrow,
+      marginBottom: '0.75rem',
+    },
+    title: {
+      fontSize: 'clamp(1.75rem, 4vw, 2.5rem)',
+      fontWeight: 600,
+      letterSpacing: '-0.03em',
+      lineHeight: 1.1,
+      marginBottom: '0.75rem',
+    },
+    meta: {
+      fontSize: '13px',
+      color: c.muted,
+      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+      marginBottom: '2.5rem',
+    },
+    intro: {
+      fontSize: '14px',
+      lineHeight: 1.75,
+      color: c.introText,
+      borderLeft: `2px solid ${c.introBorder}`,
+      paddingLeft: '1.25rem',
+      marginBottom: '2.5rem',
+    },
+    section: {
+      borderTop: `1px solid ${c.sectionBorder}`,
+      paddingTop: '2rem',
+      marginBottom: '2rem',
+    },
+    sectionTitle: {
+      fontSize: '16px',
+      fontWeight: 600,
+      marginBottom: '1rem',
+      display: 'flex',
+      gap: '0.4rem',
+      alignItems: 'baseline',
+    },
+    sectionNum: {
+      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+      fontSize: '12px',
+      color: c.accent,
+    },
+    sectionBody: {
+      fontSize: '14px',
+      lineHeight: 1.75,
+      color: c.sectionBody,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '0.75rem',
+    },
+    subSection: {
+      marginBottom: '1.25rem',
+    },
+    subTitle: {
+      fontSize: '13px',
+      fontWeight: 600,
+      color: c.subTitle,
+      marginBottom: '0.5rem',
+      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+      letterSpacing: '0.02em',
+    },
+    highlight: {
+      backgroundColor: c.highlightBg,
+      border: `1px solid ${c.highlightBorder}`,
+      borderRadius: '6px',
+      padding: '0.875rem 1rem',
+      color: c.highlightText,
+    },
+    list: {
+      paddingLeft: '1.25rem',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '0.5rem',
+      margin: '0.5rem 0',
+    },
+    strong: {
+      color: c.strong,
+      fontWeight: 600,
+    },
+    link: {
+      color: c.accent,
+      textDecoration: 'none',
+    },
+    footer: {
+      marginTop: '4rem',
+      paddingTop: '2rem',
+      borderTop: `1px solid ${c.sectionBorder}`,
+      display: 'flex',
+      gap: '0.75rem',
+      alignItems: 'center',
+      fontSize: '13px',
+      flexWrap: 'wrap',
+    },
+    dot: {
+      color: c.dot,
+    },
+  }
 }

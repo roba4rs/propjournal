@@ -1,7 +1,11 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import { useTheme } from '../ThemeContext'
 
 export default function RefundPolicy() {
+  const { isLight } = useTheme()
+  const styles = getStyles(isLight)
+
   return (
     <div style={styles.page}>
       <nav style={styles.nav}>
@@ -23,7 +27,7 @@ export default function RefundPolicy() {
             thepropjournal.com, operated by Robel Gidey doing business as PropJournal.
           </div>
 
-          <Section num="1" title="General Policy">
+          <Section num="1" title="General Policy" styles={styles}>
             <p>
               All PropJournal subscription fees are generally non-refundable. Because PropJournal is
               a digital service with immediate access upon purchase, we do not offer automatic refunds
@@ -36,7 +40,7 @@ export default function RefundPolicy() {
             </p>
           </Section>
 
-          <Section num="2" title="How to Request a Refund">
+          <Section num="2" title="How to Request a Refund" styles={styles}>
             <p>
               To request a refund, please contact us within 14 days of your charge at{' '}
               <a href="mailto:robel4cs@gmail.com" style={styles.link}>robel4cs@gmail.com</a>.
@@ -54,7 +58,7 @@ export default function RefundPolicy() {
             </p>
           </Section>
 
-          <Section num="3" title="Card Payments (Paddle)">
+          <Section num="3" title="Card Payments (Paddle)" styles={styles}>
             <p>
               Card payments are processed by Paddle.com, who act as the merchant of record for these
               transactions. In addition to this policy, Paddle's own buyer protections may apply to
@@ -72,7 +76,7 @@ export default function RefundPolicy() {
             </p>
           </Section>
 
-          <Section num="4" title="Cryptocurrency Payments (NOWPayments)">
+          <Section num="4" title="Cryptocurrency Payments (NOWPayments)" styles={styles}>
             <p>
               Cryptocurrency payments processed by NOWPayments are settled directly on the blockchain
               and are generally non-refundable once confirmed, due to the irreversible nature of
@@ -85,7 +89,7 @@ export default function RefundPolicy() {
             </p>
           </Section>
 
-          <Section num="5" title="Free Trial">
+          <Section num="5" title="Free Trial" styles={styles}>
             <p>
               PropJournal offers a 7-day free trial. You will not be charged during the trial period.
               If you do not wish to be charged, you must cancel before the trial ends. We do not issue
@@ -94,14 +98,14 @@ export default function RefundPolicy() {
             </p>
           </Section>
 
-          <Section num="6" title="Account Termination">
+          <Section num="6" title="Account Termination" styles={styles}>
             <p>
               If we suspend or terminate your account due to a violation of our Terms &amp; Conditions,
               you will not be entitled to a refund of any fees paid.
             </p>
           </Section>
 
-          <Section num="7" title="Changes to This Policy">
+          <Section num="7" title="Changes to This Policy" styles={styles}>
             <p>
               We may update this Refund Policy from time to time. Changes will be posted on our
               website with an updated date. Continued use of the Service constitutes acceptance of
@@ -109,7 +113,7 @@ export default function RefundPolicy() {
             </p>
           </Section>
 
-          <Section num="8" title="Contact Us">
+          <Section num="8" title="Contact Us" styles={styles}>
             <p>
               Questions about this Refund Policy can be sent to:{' '}
               <a href="mailto:robel4cs@gmail.com" style={styles.link}>robel4cs@gmail.com</a>
@@ -129,7 +133,7 @@ export default function RefundPolicy() {
   )
 }
 
-function Section({ num, title, children }) {
+function Section({ num, title, children, styles }) {
   return (
     <section style={styles.section}>
       <h2 style={styles.sectionTitle}>
@@ -140,132 +144,171 @@ function Section({ num, title, children }) {
   )
 }
 
-const styles = {
-  page: {
-    minHeight: '100vh',
-    backgroundColor: 'oklch(0.16 0 0)',
-    color: 'oklch(0.96 0 0)',
-    fontFamily: "'Inter', ui-sans-serif, system-ui, sans-serif",
-    WebkitFontSmoothing: 'antialiased',
-    lineHeight: '1.6',
-  },
-  nav: {
-    position: 'sticky',
-    top: 0,
-    zIndex: 50,
-    borderBottom: '1px solid oklch(0.28 0 0)',
-    backgroundColor: 'oklch(0.16 0 0 / 0.85)',
-    backdropFilter: 'blur(12px)',
-  },
-  navInner: {
-    maxWidth: '860px',
-    margin: '0 auto',
-    padding: '0 1.5rem',
-    height: '56px',
-    display: 'flex',
-    alignItems: 'center',
-  },
-  logo: {
-    fontSize: '15px',
-    fontWeight: 600,
-    letterSpacing: '-0.02em',
-    textDecoration: 'none',
-    color: 'oklch(0.96 0 0)',
-  },
-  logoAccent: {
-    color: 'oklch(0.72 0.17 152)',
-  },
-  main: {
-    padding: '4rem 1.5rem 6rem',
-  },
-  container: {
-    maxWidth: '720px',
-    margin: '0 auto',
-  },
-  eyebrow: {
-    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-    fontSize: '11px',
-    textTransform: 'uppercase',
-    letterSpacing: '0.12em',
-    color: 'oklch(0.72 0.17 152)',
-    marginBottom: '0.75rem',
-  },
-  title: {
-    fontSize: 'clamp(1.75rem, 4vw, 2.5rem)',
-    fontWeight: 600,
-    letterSpacing: '-0.03em',
-    lineHeight: 1.1,
-    marginBottom: '0.75rem',
-  },
-  meta: {
-    fontSize: '13px',
-    color: 'oklch(0.68 0 0)',
-    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-    marginBottom: '2.5rem',
-  },
-  intro: {
-    fontSize: '14px',
-    lineHeight: 1.75,
-    color: 'oklch(0.78 0 0)',
-    borderLeft: '2px solid oklch(0.28 0 0)',
-    paddingLeft: '1.25rem',
-    marginBottom: '2.5rem',
-  },
-  section: {
-    borderTop: '1px solid oklch(0.22 0 0)',
-    paddingTop: '2rem',
-    marginBottom: '2rem',
-  },
-  sectionTitle: {
-    fontSize: '16px',
-    fontWeight: 600,
-    marginBottom: '1rem',
-    display: 'flex',
-    gap: '0.4rem',
-    alignItems: 'baseline',
-  },
-  sectionNum: {
-    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-    fontSize: '12px',
-    color: 'oklch(0.72 0.17 152)',
-  },
-  sectionBody: {
-    fontSize: '14px',
-    lineHeight: 1.75,
-    color: 'oklch(0.78 0 0)',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.75rem',
-  },
-  highlight: {
-    backgroundColor: 'oklch(0.72 0.17 152 / 0.08)',
-    border: '1px solid oklch(0.72 0.17 152 / 0.2)',
-    borderRadius: '6px',
-    padding: '0.875rem 1rem',
-    color: 'oklch(0.88 0 0)',
-  },
-  list: {
-    paddingLeft: '1.25rem',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.5rem',
-    margin: '0.5rem 0',
-  },
-  link: {
-    color: 'oklch(0.72 0.17 152)',
-    textDecoration: 'none',
-  },
-  footer: {
-    marginTop: '4rem',
-    paddingTop: '2rem',
-    borderTop: '1px solid oklch(0.22 0 0)',
-    display: 'flex',
-    gap: '0.75rem',
-    alignItems: 'center',
-    fontSize: '13px',
-    flexWrap: 'wrap',
-  },
-  dot: {
-    color: 'oklch(0.4 0 0)',
-  },
+function getStyles(isLight) {
+  const c = isLight
+    ? {
+        bg: '#ffffff',
+        text: '#18181b',
+        navBorder: '#e4e4e7',
+        navBg: 'rgba(255,255,255,0.85)',
+        accent: 'oklch(0.55 0.15 152)',
+        muted: '#52525b',
+        eyebrow: 'oklch(0.55 0.15 152)',
+        introBorder: '#e4e4e7',
+        introText: '#3f3f46',
+        sectionBorder: '#e4e4e7',
+        sectionBody: '#3f3f46',
+        highlightBg: 'oklch(0.55 0.15 152 / 0.06)',
+        highlightBorder: 'oklch(0.55 0.15 152 / 0.18)',
+        highlightText: '#18181b',
+        dot: '#a1a1aa',
+      }
+    : {
+        bg: 'oklch(0.16 0 0)',
+        text: 'oklch(0.96 0 0)',
+        navBorder: 'oklch(0.28 0 0)',
+        navBg: 'oklch(0.16 0 0 / 0.85)',
+        accent: 'oklch(0.72 0.17 152)',
+        muted: 'oklch(0.68 0 0)',
+        eyebrow: 'oklch(0.72 0.17 152)',
+        introBorder: 'oklch(0.28 0 0)',
+        introText: 'oklch(0.78 0 0)',
+        sectionBorder: 'oklch(0.22 0 0)',
+        sectionBody: 'oklch(0.78 0 0)',
+        highlightBg: 'oklch(0.72 0.17 152 / 0.08)',
+        highlightBorder: 'oklch(0.72 0.17 152 / 0.2)',
+        highlightText: 'oklch(0.88 0 0)',
+        dot: 'oklch(0.4 0 0)',
+      }
+
+  return {
+    page: {
+      minHeight: '100vh',
+      backgroundColor: c.bg,
+      color: c.text,
+      fontFamily: "'Inter', ui-sans-serif, system-ui, sans-serif",
+      WebkitFontSmoothing: 'antialiased',
+      lineHeight: '1.6',
+      transition: 'background-color 0.2s ease, color 0.2s ease',
+    },
+    nav: {
+      position: 'sticky',
+      top: 0,
+      zIndex: 50,
+      borderBottom: `1px solid ${c.navBorder}`,
+      backgroundColor: c.navBg,
+      backdropFilter: 'blur(12px)',
+    },
+    navInner: {
+      maxWidth: '860px',
+      margin: '0 auto',
+      padding: '0 1.5rem',
+      height: '56px',
+      display: 'flex',
+      alignItems: 'center',
+    },
+    logo: {
+      fontSize: '15px',
+      fontWeight: 600,
+      letterSpacing: '-0.02em',
+      textDecoration: 'none',
+      color: c.text,
+    },
+    logoAccent: {
+      color: c.accent,
+    },
+    main: {
+      padding: '4rem 1.5rem 6rem',
+    },
+    container: {
+      maxWidth: '720px',
+      margin: '0 auto',
+    },
+    eyebrow: {
+      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+      fontSize: '11px',
+      textTransform: 'uppercase',
+      letterSpacing: '0.12em',
+      color: c.eyebrow,
+      marginBottom: '0.75rem',
+    },
+    title: {
+      fontSize: 'clamp(1.75rem, 4vw, 2.5rem)',
+      fontWeight: 600,
+      letterSpacing: '-0.03em',
+      lineHeight: 1.1,
+      marginBottom: '0.75rem',
+    },
+    meta: {
+      fontSize: '13px',
+      color: c.muted,
+      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+      marginBottom: '2.5rem',
+    },
+    intro: {
+      fontSize: '14px',
+      lineHeight: 1.75,
+      color: c.introText,
+      borderLeft: `2px solid ${c.introBorder}`,
+      paddingLeft: '1.25rem',
+      marginBottom: '2.5rem',
+    },
+    section: {
+      borderTop: `1px solid ${c.sectionBorder}`,
+      paddingTop: '2rem',
+      marginBottom: '2rem',
+    },
+    sectionTitle: {
+      fontSize: '16px',
+      fontWeight: 600,
+      marginBottom: '1rem',
+      display: 'flex',
+      gap: '0.4rem',
+      alignItems: 'baseline',
+    },
+    sectionNum: {
+      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+      fontSize: '12px',
+      color: c.accent,
+    },
+    sectionBody: {
+      fontSize: '14px',
+      lineHeight: 1.75,
+      color: c.sectionBody,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '0.75rem',
+    },
+    highlight: {
+      backgroundColor: c.highlightBg,
+      border: `1px solid ${c.highlightBorder}`,
+      borderRadius: '6px',
+      padding: '0.875rem 1rem',
+      color: c.highlightText,
+    },
+    list: {
+      paddingLeft: '1.25rem',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '0.5rem',
+      margin: '0.5rem 0',
+    },
+    link: {
+      color: c.accent,
+      textDecoration: 'none',
+    },
+    footer: {
+      marginTop: '4rem',
+      paddingTop: '2rem',
+      borderTop: `1px solid ${c.sectionBorder}`,
+      display: 'flex',
+      gap: '0.75rem',
+      alignItems: 'center',
+      fontSize: '13px',
+      flexWrap: 'wrap',
+    },
+    dot: {
+      color: c.dot,
+    },
+  }
 }
