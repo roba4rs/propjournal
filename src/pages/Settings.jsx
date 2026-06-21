@@ -17,9 +17,9 @@ function Toast({ message, type, onClose, mobile = false }) {
       right: mobile ? 'auto' : '32px',
       left: mobile ? '50%' : 'auto',
       transform: mobile ? 'translateX(-50%)' : 'none',
-      background: type === 'success' ? '#0f2219' : '#1e0d0d',
-      border: `0.5px solid ${type === 'success' ? '#1a3826' : '#2e1515'}`,
-      color: type === 'success' ? '#1db97b' : '#c03535',
+      background: type === 'success' ? 'var(--green-bg)' : 'var(--red-bg-2)',
+      border: `0.5px solid ${type === 'success' ? 'var(--green-bg-2)' : 'var(--red-bg)'}`,
+      color: type === 'success' ? 'var(--brand)' : 'var(--red)',
       padding: '12px 20px',
       borderRadius: '10px',
       fontFamily: 'DM Sans, sans-serif',
@@ -38,8 +38,8 @@ function Toast({ message, type, onClose, mobile = false }) {
 function Card({ children, style = {}, mobile = false }) {
   return (
     <div style={{
-      background: '#111',
-      border: '0.5px solid #1e1e1e',
+      background: 'var(--bg-surface)',
+      border: '0.5px solid var(--border-color)',
       borderRadius: mobile ? '10px' : '12px',
       padding: mobile ? '14px' : '20px',
       ...style,
@@ -49,7 +49,7 @@ function Card({ children, style = {}, mobile = false }) {
   )
 }
 
-function SectionLabel({ children, color = '#777', style = {} }) {
+function SectionLabel({ children, color = 'var(--text-faint)', style = {} }) {
   return (
     <p style={{
       color,
@@ -72,7 +72,7 @@ function Field({ label, children }) {
     <div style={{ marginBottom: '14px' }}>
       <label style={{
         display: 'block',
-        color: '#999',
+        color: 'var(--text-muted)',
         fontFamily: 'DM Sans, sans-serif',
         fontSize: '11px',
         marginBottom: '6px',
@@ -86,10 +86,10 @@ function Field({ label, children }) {
 
 const inputBase = {
   width: '100%',
-  background: '#0a0a0a',
-  border: '0.5px solid #2a2a2a',
+  background: 'var(--bg-page)',
+  border: '0.5px solid var(--border-color-2)',
   borderRadius: '8px',
-  color: '#fff',
+  color: 'var(--text-primary)',
   fontFamily: 'DM Sans, sans-serif',
   fontSize: '13px',
   padding: '8px 12px',
@@ -114,8 +114,8 @@ function Toggle({ on, onToggle }) {
       style={{
         width: '36px',
         height: '20px',
-        background: on ? '#1db97b' : '#1e1e1e',
-        border: `0.5px solid ${on ? '#1db97b' : '#2a2a2a'}`,
+        background: on ? 'var(--brand)' : 'var(--border-color)',
+        border: `0.5px solid ${on ? 'var(--brand)' : 'var(--border-color-2)'}`,
         borderRadius: '20px',
         position: 'relative',
         cursor: 'pointer',
@@ -127,7 +127,7 @@ function Toggle({ on, onToggle }) {
         position: 'absolute',
         width: '14px',
         height: '14px',
-        background: '#fff',
+        background: 'var(--text-primary)',
         borderRadius: '50%',
         top: '2px',
         left: on ? '18px' : '2px',
@@ -179,8 +179,8 @@ function EditAccountModal({ account, onSave, onClose }) {
       zIndex: 999,
     }}>
       <div style={{
-        background: '#111',
-        border: '0.5px solid #1e1e1e',
+        background: 'var(--bg-surface)',
+        border: '0.5px solid var(--border-color)',
         borderRadius: '14px',
         padding: isMobile ? '16px' : '24px',
         width: isMobile ? 'calc(100vw - 24px)' : '360px',
@@ -189,11 +189,11 @@ function EditAccountModal({ account, onSave, onClose }) {
       }}>
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-          <span style={{ color: '#fff', fontFamily: 'Syne, sans-serif', fontSize: '15px', fontWeight: '600' }}>
+          <span style={{ color: 'var(--text-primary)', fontFamily: 'Syne, sans-serif', fontSize: '15px', fontWeight: '600' }}>
             {account.name}
           </span>
           <button onClick={onClose} style={{
-            background: 'none', border: 'none', color: '#777',
+            background: 'none', border: 'none', color: 'var(--text-faint)',
             cursor: 'pointer', fontSize: '18px', lineHeight: 1, padding: '2px',
           }}>×</button>
         </div>
@@ -206,11 +206,11 @@ function EditAccountModal({ account, onSave, onClose }) {
               onClick={() => { setTab(t.id); setAmount(''); setError('') }}
               style={{
                 flex: 1,
-                background: tab === t.id ? '#1a1a1a' : 'transparent',
-                border: `0.5px solid ${tab === t.id ? '#2a2a2a' : '#1e1e1e'}`,
+                background: tab === t.id ? 'var(--border-color)' : 'transparent',
+                border: `0.5px solid ${tab === t.id ? 'var(--border-color-2)' : 'var(--border-color)'}`,
                 borderRadius: '8px',
                 padding: '7px 0',
-                color: tab === t.id ? '#fff' : '#777',
+                color: tab === t.id ? 'var(--text-primary)' : 'var(--text-faint)',
                 fontFamily: 'DM Sans, sans-serif',
                 fontSize: '12px',
                 fontWeight: tab === t.id ? '500' : '400',
@@ -226,24 +226,24 @@ function EditAccountModal({ account, onSave, onClose }) {
         {!isRename && (
           <>
             <div style={{
-              background: '#0a0a0a', border: '0.5px solid #1a1a1a',
+              background: 'var(--bg-page)', border: '0.5px solid var(--border-color)',
               borderRadius: '8px', padding: '10px 14px', marginBottom: '14px',
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
             }}>
-              <span style={{ color: '#777', fontFamily: 'DM Sans, sans-serif', fontSize: '11px' }}>Current balance</span>
-              <span style={{ color: '#ccc', fontFamily: 'DM Mono, monospace', fontSize: '13px' }}>
+              <span style={{ color: 'var(--text-faint)', fontFamily: 'DM Sans, sans-serif', fontSize: '11px' }}>Current balance</span>
+              <span style={{ color: 'var(--text-soft)', fontFamily: 'DM Mono, monospace', fontSize: '13px' }}>
                 ${Number(account.account_size).toLocaleString()}
               </span>
             </div>
 
             <div style={{ marginBottom: '14px' }}>
-              <label style={{ display: 'block', color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>
+              <label style={{ display: 'block', color: 'var(--text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>
                 Amount ($)
               </label>
               <input
                 style={{
-                  width: '100%', background: '#0a0a0a', border: '0.5px solid #2a2a2a',
-                  borderRadius: '8px', color: '#fff', fontFamily: 'DM Sans, sans-serif',
+                  width: '100%', background: 'var(--bg-page)', border: '0.5px solid var(--border-color-2)',
+                  borderRadius: '8px', color: 'var(--text-primary)', fontFamily: 'DM Sans, sans-serif',
                   fontSize: '13px', padding: '8px 12px', outline: 'none', boxSizing: 'border-box',
                 }}
                 type="number"
@@ -257,14 +257,14 @@ function EditAccountModal({ account, onSave, onClose }) {
 
             {newSize !== null && (
               <div style={{
-                background: isDeposit ? '#0f2219' : '#1e0d0d',
-                border: `0.5px solid ${isDeposit ? '#1a3826' : '#2e1515'}`,
+                background: isDeposit ? 'var(--green-bg)' : 'var(--red-bg-2)',
+                border: `0.5px solid ${isDeposit ? 'var(--green-bg-2)' : 'var(--red-bg)'}`,
                 borderRadius: '8px', padding: '10px 14px', marginBottom: '14px',
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
               }}>
-                <span style={{ color: '#777', fontFamily: 'DM Sans, sans-serif', fontSize: '11px' }}>New balance</span>
+                <span style={{ color: 'var(--text-faint)', fontFamily: 'DM Sans, sans-serif', fontSize: '11px' }}>New balance</span>
                 <span style={{
-                  color: isDeposit ? '#1db97b' : '#c03535',
+                  color: isDeposit ? 'var(--brand)' : 'var(--red)',
                   fontFamily: 'DM Mono, monospace', fontSize: '13px', fontWeight: '600',
                 }}>
                   ${newSize.toLocaleString()}
@@ -277,13 +277,13 @@ function EditAccountModal({ account, onSave, onClose }) {
         {/* Rename content */}
         {isRename && (
           <div style={{ marginBottom: '14px' }}>
-            <label style={{ display: 'block', color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>
+            <label style={{ display: 'block', color: 'var(--text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>
               Account name
             </label>
             <input
               style={{
-                width: '100%', background: '#0a0a0a', border: '0.5px solid #2a2a2a',
-                borderRadius: '8px', color: '#fff', fontFamily: 'DM Sans, sans-serif',
+                width: '100%', background: 'var(--bg-page)', border: '0.5px solid var(--border-color-2)',
+                borderRadius: '8px', color: 'var(--text-primary)', fontFamily: 'DM Sans, sans-serif',
                 fontSize: '13px', padding: '8px 12px', outline: 'none', boxSizing: 'border-box',
               }}
               type="text"
@@ -295,7 +295,7 @@ function EditAccountModal({ account, onSave, onClose }) {
         )}
 
         {error && (
-          <p style={{ color: '#c03535', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', margin: '0 0 12px' }}>
+          <p style={{ color: 'var(--red)', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', margin: '0 0 12px' }}>
             {error}
           </p>
         )}
@@ -306,8 +306,8 @@ function EditAccountModal({ account, onSave, onClose }) {
             disabled={saving}
             style={{
               flex: 1,
-              background: isWithdraw ? '#c03535' : '#1db97b',
-              color: isWithdraw ? '#fff' : '#000',
+              background: isWithdraw ? 'var(--red)' : 'var(--brand)',
+              color: isWithdraw ? 'var(--text-primary)' : 'var(--brand-fg)',
               border: 'none', borderRadius: '8px', padding: '10px',
               fontFamily: 'DM Sans, sans-serif', fontSize: '13px', fontWeight: '600',
               cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.6 : 1,
@@ -318,8 +318,8 @@ function EditAccountModal({ account, onSave, onClose }) {
           <button
             onClick={onClose}
             style={{
-              background: 'transparent', color: '#aaa',
-              border: '0.5px solid #2a2a2a', borderRadius: '8px',
+              background: 'transparent', color: 'var(--text-muted)',
+              border: '0.5px solid var(--border-color-2)', borderRadius: '8px',
               padding: '10px 16px', fontFamily: 'DM Sans, sans-serif',
               fontSize: '13px', cursor: 'pointer',
             }}
@@ -565,10 +565,10 @@ export default function Settings() {
   }
 
   function getPlanBadge() {
-    if (plan === 'monthly')  return { label: 'Monthly',  bg: '#0f1a2e', color: '#4d9fff', border: '#1a3050' }
-    if (plan === 'biannual') return { label: '6 Months', bg: '#0f1a2e', color: '#4d9fff', border: '#1a3050' }
-    if (plan === 'annual')   return { label: 'Annual',   bg: '#0f2219', color: '#1db97b', border: '#1a3826' }
-    return { label: 'Trial', bg: '#141414', color: '#aaa', border: '#2a2a2a' }
+    if (plan === 'monthly')  return { label: 'Monthly',  bg: 'var(--blue-bg-2)', color: 'var(--blue)', border: 'var(--blue-bg)' }
+    if (plan === 'biannual') return { label: '6 Months', bg: 'var(--blue-bg-2)', color: 'var(--blue)', border: 'var(--blue-bg)' }
+    if (plan === 'annual')   return { label: 'Annual',   bg: 'var(--green-bg)', color: 'var(--brand)', border: 'var(--green-bg-2)' }
+    return { label: 'Trial', bg: 'var(--bg-surface)', color: 'var(--text-muted)', border: 'var(--border-color-2)' }
   }
 
   function isTrialPlan() {
@@ -588,7 +588,7 @@ export default function Settings() {
   // ─── Loading state ──────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div style={{ display: 'flex', background: '#0a0a0a', minHeight: '100vh' }}>
+      <div style={{ display: 'flex', background: 'var(--bg-page)', minHeight: '100vh' }}>
         <Sidebar />
         <main style={{
           marginLeft: isMobile ? 0 : (collapsed ? '60px' : '220px'),
@@ -597,7 +597,7 @@ export default function Settings() {
           minHeight: '100vh',
           padding: isMobile ? '14px' : '32px',
         }}>
-          <p style={{ color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '13px' }}>Loading...</p>
+          <p style={{ color: 'var(--text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: '13px' }}>Loading...</p>
         </main>
       </div>
     )
@@ -605,7 +605,7 @@ export default function Settings() {
 
   // ─── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div style={{ display: 'flex', background: '#0a0a0a', minHeight: '100vh' }}>
+    <div style={{ display: 'flex', background: 'var(--bg-page)', minHeight: '100vh' }}>
       <Sidebar />
 
       <main style={{
@@ -638,7 +638,7 @@ export default function Settings() {
                 fontFamily: "'DM Sans', sans-serif",
                 fontSize: '15px',
                 fontWeight: '500',
-                color: '#e0e0e0',
+                color: 'var(--text-secondary)',
               }}>
                 {mobileView === 'main'
                   ? 'Settings'
@@ -655,8 +655,8 @@ export default function Settings() {
                   onClick={() => setMobileView('main')}
                   style={{
                     background: 'transparent',
-                    border: '0.5px solid #2a2a2a',
-                    color: '#aaa',
+                    border: '0.5px solid var(--border-color-2)',
+                    color: 'var(--text-muted)',
                     borderRadius: '5px',
                     padding: '4px 10px',
                     fontSize: '11px',
@@ -674,54 +674,54 @@ export default function Settings() {
 
             {mobileView === 'main' && (
               <>
-                <SectionLabel style={{ marginBottom: '8px', fontSize: '9px', color: '#999' }}>Account</SectionLabel>
+                <SectionLabel style={{ marginBottom: '8px', fontSize: '9px', color: 'var(--text-muted)' }}>Account</SectionLabel>
                 <div
                   onClick={() => setMobileView('profile')}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: '0.5px solid #141414', cursor: 'pointer' }}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: '0.5px solid var(--bg-surface)', cursor: 'pointer' }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <div style={{
                       width: '40px', height: '40px', borderRadius: '50%',
-                      background: '#0f2219', border: '0.5px solid #1a3826',
+                      background: 'var(--green-bg)', border: '0.5px solid var(--green-bg-2)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontFamily: 'Syne, sans-serif', fontSize: '13px', fontWeight: '600', color: '#1db97b',
+                      fontFamily: 'Syne, sans-serif', fontSize: '13px', fontWeight: '600', color: 'var(--brand)',
                     }}>
                       {getInitials()}
                     </div>
                     <div>
-                      <div style={{ color: '#d8d8d8', fontFamily: 'DM Sans, sans-serif', fontSize: '14px', fontWeight: '500' }}>{name || '—'}</div>
-                      <div style={{ color: '#777', fontFamily: 'DM Sans, sans-serif', fontSize: '12px', marginTop: '2px' }}>{email}</div>
+                      <div style={{ color: 'var(--text-faint-2)', fontFamily: 'DM Sans, sans-serif', fontSize: '14px', fontWeight: '500' }}>{name || '—'}</div>
+                      <div style={{ color: 'var(--text-faint)', fontFamily: 'DM Sans, sans-serif', fontSize: '12px', marginTop: '2px' }}>{email}</div>
                     </div>
                   </div>
-                  <span style={{ color: '#2f2f2f', fontSize: '16px' }}>›</span>
+                  <span style={{ color: 'var(--bg-surface-2)', fontSize: '16px' }}>›</span>
                 </div>
 
-                <SectionLabel style={{ marginTop: '14px', marginBottom: '8px', fontSize: '9px', color: '#999' }}>Preferences</SectionLabel>
-                <div onClick={() => setMobileView('preferences')} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '0.5px solid #141414', cursor: 'pointer' }}>
-                  <span style={{ color: '#cfcfcf', fontSize: '13px', fontFamily: 'DM Sans, sans-serif' }}>Currency</span>
-                  <span style={{ color: '#5a5a5a', fontSize: '13px', fontFamily: 'DM Sans, sans-serif' }}>{currency} <span style={{ color: '#2f2f2f' }}>›</span></span>
+                <SectionLabel style={{ marginTop: '14px', marginBottom: '8px', fontSize: '9px', color: 'var(--text-muted)' }}>Preferences</SectionLabel>
+                <div onClick={() => setMobileView('preferences')} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '0.5px solid var(--bg-surface)', cursor: 'pointer' }}>
+                  <span style={{ color: 'var(--text-soft)', fontSize: '13px', fontFamily: 'DM Sans, sans-serif' }}>Currency</span>
+                  <span style={{ color: 'var(--bg-surface-2)', fontSize: '13px', fontFamily: 'DM Sans, sans-serif' }}>{currency} <span style={{ color: 'var(--bg-surface-2)' }}>›</span></span>
                 </div>
-                <div onClick={() => setMobileView('preferences')} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '0.5px solid #141414', cursor: 'pointer' }}>
-                  <span style={{ color: '#cfcfcf', fontSize: '13px', fontFamily: 'DM Sans, sans-serif' }}>Timezone</span>
-                  <span style={{ color: '#5a5a5a', fontSize: '13px', fontFamily: 'DM Sans, sans-serif' }}>{timezone.replace('Africa/', '')} <span style={{ color: '#2f2f2f' }}>›</span></span>
+                <div onClick={() => setMobileView('preferences')} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '0.5px solid var(--bg-surface)', cursor: 'pointer' }}>
+                  <span style={{ color: 'var(--text-soft)', fontSize: '13px', fontFamily: 'DM Sans, sans-serif' }}>Timezone</span>
+                  <span style={{ color: 'var(--bg-surface-2)', fontSize: '13px', fontFamily: 'DM Sans, sans-serif' }}>{timezone.replace('Africa/', '')} <span style={{ color: 'var(--bg-surface-2)' }}>›</span></span>
                 </div>
 
-                <SectionLabel style={{ marginTop: '14px', marginBottom: '8px', fontSize: '9px', color: '#999' }}>Manage</SectionLabel>
-                <div onClick={() => setMobileView('accounts')} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '0.5px solid #141414', cursor: 'pointer' }}>
-                  <span style={{ color: '#cfcfcf', fontSize: '13px', fontFamily: 'DM Sans, sans-serif' }}>Personal Accounts</span>
-                  <span style={{ color: '#5a5a5a', fontSize: '13px', fontFamily: 'DM Sans, sans-serif' }}>{personalAccounts.length} account{personalAccounts.length !== 1 ? 's' : ''} <span style={{ color: '#2f2f2f' }}>›</span></span>
+                <SectionLabel style={{ marginTop: '14px', marginBottom: '8px', fontSize: '9px', color: 'var(--text-muted)' }}>Manage</SectionLabel>
+                <div onClick={() => setMobileView('accounts')} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '0.5px solid var(--bg-surface)', cursor: 'pointer' }}>
+                  <span style={{ color: 'var(--text-soft)', fontSize: '13px', fontFamily: 'DM Sans, sans-serif' }}>Personal Accounts</span>
+                  <span style={{ color: 'var(--bg-surface-2)', fontSize: '13px', fontFamily: 'DM Sans, sans-serif' }}>{personalAccounts.length} account{personalAccounts.length !== 1 ? 's' : ''} <span style={{ color: 'var(--bg-surface-2)' }}>›</span></span>
                 </div>
-                <div onClick={() => setMobileView('notifications')} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '0.5px solid #141414', cursor: 'pointer' }}>
-                  <span style={{ color: '#cfcfcf', fontSize: '13px', fontFamily: 'DM Sans, sans-serif' }}>Notifications</span>
-                  <span style={{ color: '#5a5a5a', fontSize: '13px', fontFamily: 'DM Sans, sans-serif' }}>
-                    {[notifDrawdown, notifDailyLoss, notifChallenge].filter(Boolean).length} on <span style={{ color: '#2f2f2f' }}>›</span>
+                <div onClick={() => setMobileView('notifications')} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '0.5px solid var(--bg-surface)', cursor: 'pointer' }}>
+                  <span style={{ color: 'var(--text-soft)', fontSize: '13px', fontFamily: 'DM Sans, sans-serif' }}>Notifications</span>
+                  <span style={{ color: 'var(--bg-surface-2)', fontSize: '13px', fontFamily: 'DM Sans, sans-serif' }}>
+                    {[notifDrawdown, notifDailyLoss, notifChallenge].filter(Boolean).length} on <span style={{ color: 'var(--bg-surface-2)' }}>›</span>
                   </span>
                 </div>
 
-                <SectionLabel style={{ marginTop: '14px', marginBottom: '8px', fontSize: '9px', color: '#999' }}>Billing</SectionLabel>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '0.5px solid #141414' }}>
+                <SectionLabel style={{ marginTop: '14px', marginBottom: '8px', fontSize: '9px', color: 'var(--text-muted)' }}>Billing</SectionLabel>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '0.5px solid var(--bg-surface)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ color: '#cfcfcf', fontSize: '13px', fontFamily: 'DM Sans, sans-serif' }}>Plan</span>
+                    <span style={{ color: 'var(--text-soft)', fontSize: '13px', fontFamily: 'DM Sans, sans-serif' }}>Plan</span>
                     <span style={{
                       background: badge.bg,
                       color: badge.color,
@@ -739,8 +739,8 @@ export default function Settings() {
                     <button
                       onClick={() => window.location.href = '/pricing'}
                       style={{
-                        background: '#1db97b',
-                        color: '#000',
+                        background: 'var(--brand)',
+                        color: 'var(--brand-fg)',
                         border: 'none',
                         borderRadius: '6px',
                         padding: '7px 14px',
@@ -755,16 +755,16 @@ export default function Settings() {
                   )}
                 </div>
                 {isTrialPlan() && daysLeft !== null && (
-                  <div style={{ color: '#c97a00', fontSize: '13px', fontFamily: 'DM Sans, sans-serif', padding: '8px 0 0' }}>
+                  <div style={{ color: 'var(--amber)', fontSize: '13px', fontFamily: 'DM Sans, sans-serif', padding: '8px 0 0' }}>
                     {daysLeft} day{daysLeft !== 1 ? 's' : ''} remaining in your free trial.
                   </div>
                 )}
 
-                <SectionLabel style={{ marginTop: '16px', marginBottom: '8px', fontSize: '9px', color: '#c03535' }}>Danger Zone</SectionLabel>
-                <div style={{ border: '0.5px solid #2e1515', borderRadius: '10px', padding: '10px 10px 8px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '10px' }}>
+                <SectionLabel style={{ marginTop: '16px', marginBottom: '8px', fontSize: '9px', color: 'var(--red)' }}>Danger Zone</SectionLabel>
+                <div style={{ border: '0.5px solid var(--red-bg)', borderRadius: '10px', padding: '10px 10px 8px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '10px' }}>
                   <div>
-                    <div style={{ color: '#c03535', fontSize: '13px', fontFamily: 'DM Sans, sans-serif' }}>Delete account</div>
-                    <div style={{ color: '#999', fontSize: '11px', fontFamily: 'DM Sans, sans-serif', marginTop: '2px' }}>
+                    <div style={{ color: 'var(--red)', fontSize: '13px', fontFamily: 'DM Sans, sans-serif' }}>Delete account</div>
+                    <div style={{ color: 'var(--text-muted)', fontSize: '11px', fontFamily: 'DM Sans, sans-serif', marginTop: '2px' }}>
                       Permanently deletes all your data.
                     </div>
                   </div>
@@ -772,8 +772,8 @@ export default function Settings() {
                     disabled
                     style={{
                       background: 'transparent',
-                      color: '#c03535',
-                      border: '0.5px solid #2e1515',
+                      color: 'var(--red)',
+                      border: '0.5px solid var(--red-bg)',
                       borderRadius: '6px',
                       padding: '5px 12px',
                       fontFamily: 'DM Sans, sans-serif',
@@ -794,8 +794,8 @@ export default function Settings() {
                   <input style={inputBase} value={name} onChange={e => setName(e.target.value)} placeholder="Your name" />
                 </Field>
                 <div style={{ marginBottom: 0 }}>
-                  <label style={{ display: 'block', color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>Email</label>
-                  <input style={{ ...inputBase, color: '#999', cursor: 'not-allowed' }} value={email} disabled />
+                  <label style={{ display: 'block', color: 'var(--text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>Email</label>
+                  <input style={{ ...inputBase, color: 'var(--text-muted)', cursor: 'not-allowed' }} value={email} disabled />
                 </div>
               </Card>
             )}
@@ -812,7 +812,7 @@ export default function Settings() {
                   </select>
                 </Field>
                 <div style={{ marginBottom: 0 }}>
-                  <label style={{ display: 'block', color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>Timezone</label>
+                  <label style={{ display: 'block', color: 'var(--text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>Timezone</label>
                   <select style={selectStyle} value={timezone} onChange={e => setTimezone(e.target.value)}>
                     <option value="Africa/Addis_Ababa">Africa/Addis_Ababa (UTC+3)</option>
                     <option value="Europe/London">Europe/London (UTC+0)</option>
@@ -830,17 +830,17 @@ export default function Settings() {
               <Card mobile style={{ marginTop: '8px' }}>
                 <SectionLabel>Personal Accounts</SectionLabel>
                 {personalAccounts.length === 0 && !showAddAccount && (
-                  <p style={{ color: '#3a3a3a', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', margin: 0 }}>
+                  <p style={{ color: 'var(--bg-surface-2)', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', margin: 0 }}>
                     No personal accounts yet.
                   </p>
                 )}
                 {personalAccounts.map((acc, i) => (
-                  <div key={acc.id} style={{ padding: '10px 0', borderBottom: (i < personalAccounts.length - 1 || showAddAccount) ? '0.5px solid #1a1a1a' : 'none' }}>
-                    <div style={{ color: '#ccc', fontFamily: 'DM Sans, sans-serif', fontSize: '13px', fontWeight: '500' }}>{acc.name}</div>
-                    <div style={{ color: '#777', fontFamily: 'DM Mono, monospace', fontSize: '11px', marginTop: '2px', marginBottom: '8px' }}>${Number(acc.account_size).toLocaleString()}</div>
+                  <div key={acc.id} style={{ padding: '10px 0', borderBottom: (i < personalAccounts.length - 1 || showAddAccount) ? '0.5px solid var(--border-color)' : 'none' }}>
+                    <div style={{ color: 'var(--text-soft)', fontFamily: 'DM Sans, sans-serif', fontSize: '13px', fontWeight: '500' }}>{acc.name}</div>
+                    <div style={{ color: 'var(--text-faint)', fontFamily: 'DM Mono, monospace', fontSize: '11px', marginTop: '2px', marginBottom: '8px' }}>${Number(acc.account_size).toLocaleString()}</div>
                     <div style={{ display: 'flex', gap: '8px' }}>
-                      <button onClick={() => setEditModal(acc)} style={{ background: 'transparent', color: '#4d9fff', border: '0.5px solid #1a3050', borderRadius: '8px', padding: '6px 12px', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', width: '50%' }}>Edit</button>
-                      <button onClick={() => handleDeleteAccount(acc.id, acc.name)} disabled={deletingAccountId === acc.id} style={{ background: 'transparent', color: '#c03535', border: '0.5px solid #2e1515', borderRadius: '8px', padding: '6px 12px', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', width: '50%', opacity: deletingAccountId === acc.id ? 0.5 : 1 }}>
+                      <button onClick={() => setEditModal(acc)} style={{ background: 'transparent', color: 'var(--blue)', border: '0.5px solid var(--blue-bg)', borderRadius: '8px', padding: '6px 12px', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', width: '50%' }}>Edit</button>
+                      <button onClick={() => handleDeleteAccount(acc.id, acc.name)} disabled={deletingAccountId === acc.id} style={{ background: 'transparent', color: 'var(--red)', border: '0.5px solid var(--red-bg)', borderRadius: '8px', padding: '6px 12px', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', width: '50%', opacity: deletingAccountId === acc.id ? 0.5 : 1 }}>
                         {deletingAccountId === acc.id ? 'Deleting...' : 'Delete'}
                       </button>
                     </div>
@@ -851,7 +851,7 @@ export default function Settings() {
                   <div style={{ paddingTop: '14px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                       <div>
-                        <label style={{ display: 'block', color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>
+                        <label style={{ display: 'block', color: 'var(--text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>
                           Account name
                         </label>
                         <input
@@ -864,7 +864,7 @@ export default function Settings() {
                         />
                       </div>
                       <div>
-                        <label style={{ display: 'block', color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>
+                        <label style={{ display: 'block', color: 'var(--text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>
                           Starting balance ($)
                         </label>
                         <input
@@ -881,7 +881,7 @@ export default function Settings() {
                           onClick={handleAddAccount}
                           disabled={addingAccount}
                           style={{
-                            background: '#1db97b', color: '#000', border: 'none',
+                            background: 'var(--brand)', color: 'var(--brand-fg)', border: 'none',
                             borderRadius: '8px', padding: '10px 16px',
                             fontFamily: 'DM Sans, sans-serif', fontSize: '12px',
                             fontWeight: '600', cursor: addingAccount ? 'not-allowed' : 'pointer',
@@ -893,8 +893,8 @@ export default function Settings() {
                         <button
                           onClick={() => setShowAddAccount(false)}
                           style={{
-                            background: 'transparent', color: '#777',
-                            border: '0.5px solid #2a2a2a', borderRadius: '8px',
+                            background: 'transparent', color: 'var(--text-faint)',
+                            border: '0.5px solid var(--border-color-2)', borderRadius: '8px',
                             padding: '10px 14px', fontFamily: 'DM Sans, sans-serif',
                             fontSize: '12px', cursor: 'pointer', flex: 1,
                           }}
@@ -911,8 +911,8 @@ export default function Settings() {
                     onClick={() => setShowAddAccount(true)}
                     style={{
                       marginTop: personalAccounts.length > 0 ? '14px' : '0',
-                      background: 'transparent', color: '#1db97b',
-                      border: '0.5px solid #1a3826', borderRadius: '8px',
+                      background: 'transparent', color: 'var(--brand)',
+                      border: '0.5px solid var(--green-bg-2)', borderRadius: '8px',
                       padding: '9px 14px', fontFamily: 'DM Sans, sans-serif',
                       fontSize: '12px', cursor: 'pointer', width: '100%',
                     }}
@@ -931,10 +931,10 @@ export default function Settings() {
                   { label: 'Daily loss limit', sub: 'Alert when daily limit is hit', val: notifDailyLoss, set: setNotifDailyLoss },
                   { label: 'Challenge updates', sub: 'Status changes on your challenges', val: notifChallenge, set: setNotifChallenge },
                 ].map((item, i, arr) => (
-                  <div key={item.label} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: i < arr.length - 1 ? '0.5px solid #1a1a1a' : 'none' }}>
+                  <div key={item.label} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: i < arr.length - 1 ? '0.5px solid var(--border-color)' : 'none' }}>
                     <div>
-                      <div style={{ color: '#ccc', fontFamily: 'DM Sans, sans-serif', fontSize: '13px' }}>{item.label}</div>
-                      <div style={{ color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginTop: '2px' }}>{item.sub}</div>
+                      <div style={{ color: 'var(--text-soft)', fontFamily: 'DM Sans, sans-serif', fontSize: '13px' }}>{item.label}</div>
+                      <div style={{ color: 'var(--text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginTop: '2px' }}>{item.sub}</div>
                     </div>
                     <Toggle on={item.val} onToggle={() => item.set(v => !v)} />
                   </div>
@@ -952,8 +952,8 @@ export default function Settings() {
                 right: '12px',
                 bottom: '12px',
                 zIndex: 50,
-                background: '#0d0d0d',
-                border: '0.5px solid #1e1e1e',
+                background: 'var(--bg-page)',
+                border: '0.5px solid var(--border-color)',
                 borderRadius: '10px',
                 padding: '8px',
               }}>
@@ -961,7 +961,7 @@ export default function Settings() {
                   onClick={handleSave}
                   disabled={saving}
                   style={{
-                    background: '#1db97b', color: '#000', border: 'none',
+                    background: 'var(--brand)', color: 'var(--brand-fg)', border: 'none',
                     borderRadius: '8px', padding: '10px 24px',
                     fontFamily: 'DM Sans, sans-serif', fontSize: '13px',
                     fontWeight: '600', cursor: saving ? 'not-allowed' : 'pointer',
@@ -974,8 +974,8 @@ export default function Settings() {
                   onClick={() => { loadSettings(); setMobileView('main') }}
                   disabled={saving}
                   style={{
-                    background: 'transparent', color: '#aaa',
-                    border: '0.5px solid #2a2a2a', borderRadius: '8px',
+                    background: 'transparent', color: 'var(--text-muted)',
+                    border: '0.5px solid var(--border-color-2)', borderRadius: '8px',
                     padding: '10px 20px', fontFamily: 'DM Sans, sans-serif',
                     fontSize: '13px', cursor: 'pointer', flex: 1,
                   }}
@@ -990,7 +990,7 @@ export default function Settings() {
           <>
             {/* Page heading */}
             <h1 style={{
-              color: '#fff',
+              color: 'var(--text-primary)',
               fontFamily: 'Syne, sans-serif',
               fontSize: '20px',
               fontWeight: '600',
@@ -1017,16 +1017,16 @@ export default function Settings() {
                 width: isMobile ? '36px' : '42px',
                 height: isMobile ? '36px' : '42px',
                 borderRadius: '50%',
-                background: '#0f2219', border: '0.5px solid #1a3826',
+                background: 'var(--green-bg)', border: '0.5px solid var(--green-bg-2)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontFamily: 'Syne, sans-serif', fontSize: isMobile ? '12px' : '14px',
-                fontWeight: '600', color: '#1db97b', flexShrink: 0,
+                fontWeight: '600', color: 'var(--brand)', flexShrink: 0,
               }}>
                 {getInitials()}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ color: '#fff', fontFamily: 'DM Sans, sans-serif', fontSize: '13px', fontWeight: '500' }}>{name || '—'}</div>
-                <div style={{ color: '#777', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{email}</div>
+                <div style={{ color: 'var(--text-primary)', fontFamily: 'DM Sans, sans-serif', fontSize: '13px', fontWeight: '500' }}>{name || '—'}</div>
+                <div style={{ color: 'var(--text-faint)', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{email}</div>
               </div>
             </div>
 
@@ -1040,9 +1040,9 @@ export default function Settings() {
             </Field>
 
             <div style={{ marginBottom: 0 }}>
-              <label style={{ display: 'block', color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>Email</label>
+              <label style={{ display: 'block', color: 'var(--text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>Email</label>
               <input
-                style={{ ...inputBase, color: '#999', cursor: 'not-allowed' }}
+                style={{ ...inputBase, color: 'var(--text-muted)', cursor: 'not-allowed' }}
                 value={email}
                 disabled
               />
@@ -1063,7 +1063,7 @@ export default function Settings() {
             </Field>
 
             <div style={{ marginBottom: 0 }}>
-              <label style={{ display: 'block', color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>Timezone</label>
+              <label style={{ display: 'block', color: 'var(--text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>Timezone</label>
               <select style={selectStyle} value={timezone} onChange={e => setTimezone(e.target.value)}>
                 <option value="Africa/Addis_Ababa">Africa/Addis_Ababa (UTC+3)</option>
                 <option value="Europe/London">Europe/London (UTC+0)</option>
@@ -1090,8 +1090,8 @@ export default function Settings() {
               <button
                 onClick={() => { setShowAddAccount(true); setNewAccountName(''); setNewAccountSize('') }}
                 style={{
-                  background: 'transparent', color: '#1db97b',
-                  border: '0.5px solid #1a3826', borderRadius: '8px',
+                  background: 'transparent', color: 'var(--brand)',
+                  border: '0.5px solid var(--green-bg-2)', borderRadius: '8px',
                   padding: '6px 14px', fontFamily: 'DM Sans, sans-serif',
                   fontSize: '12px', fontWeight: '500', cursor: 'pointer',
                   display: 'flex', alignItems: 'center', gap: '6px',
@@ -1104,7 +1104,7 @@ export default function Settings() {
             </div>
 
             {personalAccounts.length === 0 && !showAddAccount && (
-              <p style={{ color: '#3a3a3a', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', margin: 0 }}>
+              <p style={{ color: 'var(--bg-surface-2)', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', margin: 0 }}>
                 No personal accounts yet.
               </p>
             )}
@@ -1117,16 +1117,16 @@ export default function Settings() {
                   alignItems: isMobile ? 'flex-start' : 'center',
                   justifyContent: 'space-between',
                   padding: '12px 0',
-                  borderBottom: (i < personalAccounts.length - 1 || showAddAccount) ? '0.5px solid #1a1a1a' : 'none',
+                  borderBottom: (i < personalAccounts.length - 1 || showAddAccount) ? '0.5px solid var(--border-color)' : 'none',
                   flexDirection: isMobile ? 'column' : 'row',
                   gap: isMobile ? '10px' : 0,
                 }}
               >
                 <div>
-                  <div style={{ color: '#ccc', fontFamily: 'DM Sans, sans-serif', fontSize: '13px', fontWeight: '500' }}>
+                  <div style={{ color: 'var(--text-soft)', fontFamily: 'DM Sans, sans-serif', fontSize: '13px', fontWeight: '500' }}>
                     {acc.name}
                   </div>
-                  <div style={{ color: '#777', fontFamily: 'DM Mono, monospace', fontSize: '11px', marginTop: '2px' }}>
+                  <div style={{ color: 'var(--text-faint)', fontFamily: 'DM Mono, monospace', fontSize: '11px', marginTop: '2px' }}>
                     ${Number(acc.account_size).toLocaleString()}
                   </div>
                 </div>
@@ -1134,8 +1134,8 @@ export default function Settings() {
                   <button
                     onClick={() => setEditModal(acc)}
                     style={{
-                      background: 'transparent', color: '#4d9fff',
-                      border: '0.5px solid #1a3050', borderRadius: '8px',
+                      background: 'transparent', color: 'var(--blue)',
+                      border: '0.5px solid var(--blue-bg)', borderRadius: '8px',
                       padding: '6px 12px', fontFamily: 'DM Sans, sans-serif',
                       fontSize: '11px', cursor: 'pointer',
                       width: isMobile ? '50%' : 'auto',
@@ -1147,8 +1147,8 @@ export default function Settings() {
                     onClick={() => handleDeleteAccount(acc.id, acc.name)}
                     disabled={deletingAccountId === acc.id}
                     style={{
-                      background: 'transparent', color: '#c03535',
-                      border: '0.5px solid #2e1515', borderRadius: '8px',
+                      background: 'transparent', color: 'var(--red)',
+                      border: '0.5px solid var(--red-bg)', borderRadius: '8px',
                       padding: '6px 12px', fontFamily: 'DM Sans, sans-serif',
                       fontSize: '11px', cursor: deletingAccountId === acc.id ? 'not-allowed' : 'pointer',
                       opacity: deletingAccountId === acc.id ? 0.5 : 1,
@@ -1170,7 +1170,7 @@ export default function Settings() {
                   flexDirection: isMobile ? 'column' : 'row',
                 }}>
                   <div style={{ flex: 1 }}>
-                    <label style={{ display: 'block', color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>
+                    <label style={{ display: 'block', color: 'var(--text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>
                       Account name
                     </label>
                     <input
@@ -1183,7 +1183,7 @@ export default function Settings() {
                     />
                   </div>
                   <div style={{ flex: 1 }}>
-                    <label style={{ display: 'block', color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>
+                    <label style={{ display: 'block', color: 'var(--text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginBottom: '6px' }}>
                       Starting balance ($)
                     </label>
                     <input
@@ -1200,7 +1200,7 @@ export default function Settings() {
                       onClick={handleAddAccount}
                       disabled={addingAccount}
                       style={{
-                        background: '#1db97b', color: '#000', border: 'none',
+                        background: 'var(--brand)', color: 'var(--brand-fg)', border: 'none',
                         borderRadius: '8px', padding: '8px 16px',
                         fontFamily: 'DM Sans, sans-serif', fontSize: '12px',
                         fontWeight: '600', cursor: addingAccount ? 'not-allowed' : 'pointer',
@@ -1213,8 +1213,8 @@ export default function Settings() {
                     <button
                       onClick={() => setShowAddAccount(false)}
                       style={{
-                        background: 'transparent', color: '#777',
-                        border: '0.5px solid #2a2a2a', borderRadius: '8px',
+                        background: 'transparent', color: 'var(--text-faint)',
+                        border: '0.5px solid var(--border-color-2)', borderRadius: '8px',
                         padding: '8px 14px', fontFamily: 'DM Sans, sans-serif',
                         fontSize: '12px', cursor: 'pointer',
                         flex: isMobile ? 1 : 'initial',
@@ -1240,11 +1240,11 @@ export default function Settings() {
               <div key={item.label} style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 padding: '10px 0',
-                borderBottom: i < arr.length - 1 ? '0.5px solid #1a1a1a' : 'none',
+                borderBottom: i < arr.length - 1 ? '0.5px solid var(--border-color)' : 'none',
               }}>
                 <div>
-                  <div style={{ color: '#ccc', fontFamily: 'DM Sans, sans-serif', fontSize: '13px' }}>{item.label}</div>
-                  <div style={{ color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginTop: '2px' }}>{item.sub}</div>
+                  <div style={{ color: 'var(--text-soft)', fontFamily: 'DM Sans, sans-serif', fontSize: '13px' }}>{item.label}</div>
+                  <div style={{ color: 'var(--text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginTop: '2px' }}>{item.sub}</div>
                 </div>
                 <Toggle on={item.val} onToggle={() => item.set(v => !v)} />
               </div>
@@ -1265,7 +1265,7 @@ export default function Settings() {
               <div>
                 {/* Badge row */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-                  <span style={{ color: '#aaa', fontFamily: 'DM Sans, sans-serif', fontSize: '13px' }}>Current plan</span>
+                  <span style={{ color: 'var(--text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: '13px' }}>Current plan</span>
                   <span style={{
                     background: badge.bg, color: badge.color,
                     border: `0.5px solid ${badge.border}`,
@@ -1279,7 +1279,7 @@ export default function Settings() {
                 {/* Trial countdown */}
                 {isTrialPlan() && daysLeft !== null && (
                   <p style={{
-                    color: daysLeft <= 3 ? '#c97a00' : '#777',
+                    color: daysLeft <= 3 ? 'var(--amber)' : 'var(--text-faint)',
                     fontFamily: 'DM Sans, sans-serif', fontSize: '12px',
                     margin: '0 0 16px 0',
                   }}>
@@ -1289,8 +1289,8 @@ export default function Settings() {
 
                 {/* Billing history */}
                 <div style={{ marginTop: isTrialPlan() && daysLeft !== null ? 0 : '12px' }}>
-                  <div style={{ color: '#3a3a3a', fontFamily: 'DM Mono, monospace', fontSize: '10px', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '8px' }}>Billing history</div>
-                  <div style={{ color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '12px' }}>No payments yet.</div>
+                  <div style={{ color: 'var(--bg-surface-2)', fontFamily: 'DM Mono, monospace', fontSize: '10px', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '8px' }}>Billing history</div>
+                  <div style={{ color: 'var(--text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: '12px' }}>No payments yet.</div>
                 </div>
               </div>
 
@@ -1299,7 +1299,7 @@ export default function Settings() {
                 <button
                   onClick={() => window.location.href = '/pricing'}
                   style={{
-                    background: '#1db97b', color: '#000', border: 'none',
+                    background: 'var(--brand)', color: 'var(--brand-fg)', border: 'none',
                     borderRadius: '8px', padding: '9px 20px',
                     fontFamily: 'DM Sans, sans-serif', fontSize: '13px',
                     fontWeight: '600', cursor: 'pointer', flexShrink: 0,
@@ -1323,8 +1323,8 @@ export default function Settings() {
               gap: isMobile ? '10px' : 0,
             }}>
               <div>
-                <div style={{ color: '#ccc', fontFamily: 'DM Sans, sans-serif', fontSize: '13px' }}>Export all trades</div>
-                <div style={{ color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginTop: '3px' }}>
+                <div style={{ color: 'var(--text-soft)', fontFamily: 'DM Sans, sans-serif', fontSize: '13px' }}>Export all trades</div>
+                <div style={{ color: 'var(--text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginTop: '3px' }}>
                   Download your complete trade history as a CSV file.
                 </div>
               </div>
@@ -1333,8 +1333,8 @@ export default function Settings() {
                 disabled={exporting}
                 style={{
                   background: 'transparent',
-                  color: '#4d9fff',
-                  border: '0.5px solid #1a3050',
+                  color: 'var(--blue)',
+                  border: '0.5px solid var(--blue-bg)',
                   borderRadius: '8px',
                   padding: '8px 16px',
                   fontFamily: 'DM Sans, sans-serif',
@@ -1347,7 +1347,7 @@ export default function Settings() {
                 }}
               >
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                  <path d="M6 1v7M3 6l3 3 3-3M1 10h10" stroke="#4d9fff" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M6 1v7M3 6l3 3 3-3M1 10h10" stroke="var(--blue)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
                 {exporting ? 'Exporting...' : 'Export CSV'}
               </button>
@@ -1355,8 +1355,8 @@ export default function Settings() {
           </Card>
 
           {/* ── Danger Zone — full width ── */}
-          <Card mobile={isMobile} style={{ gridColumn: '1 / -1', border: '0.5px solid #2e1515' }}>
-            <SectionLabel color="#c03535">Danger Zone</SectionLabel>
+          <Card mobile={isMobile} style={{ gridColumn: '1 / -1', border: '0.5px solid var(--red-bg)' }}>
+            <SectionLabel color="var(--red)">Danger Zone</SectionLabel>
             <div style={{
               display: 'flex',
               alignItems: isMobile ? 'flex-start' : 'center',
@@ -1365,16 +1365,16 @@ export default function Settings() {
               gap: isMobile ? '10px' : 0,
             }}>
               <div>
-                <div style={{ color: '#ccc', fontFamily: 'DM Sans, sans-serif', fontSize: '13px' }}>Delete account</div>
-                <div style={{ color: '#999', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginTop: '3px' }}>
+                <div style={{ color: 'var(--text-soft)', fontFamily: 'DM Sans, sans-serif', fontSize: '13px' }}>Delete account</div>
+                <div style={{ color: 'var(--text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', marginTop: '3px' }}>
                   Permanently delete your account and all associated data. Cannot be undone.
                 </div>
               </div>
               <button
                 disabled
                 style={{
-                  background: 'transparent', color: '#c03535',
-                  border: '0.5px solid #2e1515', borderRadius: '8px',
+                  background: 'transparent', color: 'var(--red)',
+                  border: '0.5px solid var(--red-bg)', borderRadius: '8px',
                   padding: '8px 16px', fontFamily: 'DM Sans, sans-serif',
                   fontSize: '12px', cursor: 'not-allowed', opacity: 0.5, flexShrink: 0,
                   width: isMobile ? '100%' : 'auto',
@@ -1388,15 +1388,15 @@ export default function Settings() {
             </div>{/* end grid */}
 
             {/* ── Support ── */}
-            <div style={{ marginTop: '20px', padding: '14px 18px', background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ marginTop: '20px', padding: '14px 18px', background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
-                <div style={{ fontSize: '13px', color: '#ccc', fontFamily: 'DM Sans, sans-serif', fontWeight: '500', marginBottom: '2px' }}>Need help?</div>
-                <div style={{ fontSize: '11px', color: '#999', fontFamily: 'DM Sans, sans-serif' }}>Reach out and we'll get back to you.</div>
+                <div style={{ fontSize: '13px', color: 'var(--text-soft)', fontFamily: 'DM Sans, sans-serif', fontWeight: '500', marginBottom: '2px' }}>Need help?</div>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'DM Sans, sans-serif' }}>Reach out and we'll get back to you.</div>
               </div>
               <a href="mailto:robel4cs@gmail.com" style={{
                 padding: '8px 16px', background: 'transparent',
-                border: '0.5px solid #1e1e1e', borderRadius: '8px',
-                color: '#aaa', fontFamily: 'DM Mono, monospace',
+                border: '0.5px solid var(--border-color)', borderRadius: '8px',
+                color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace',
                 fontSize: '11px', textDecoration: 'none',
                 letterSpacing: '0.04em',
               }}>robel4cs@gmail.com</a>
@@ -1408,7 +1408,7 @@ export default function Settings() {
                 onClick={handleSave}
                 disabled={saving}
                 style={{
-                  background: '#1db97b', color: '#000', border: 'none',
+                  background: 'var(--brand)', color: 'var(--brand-fg)', border: 'none',
                   borderRadius: '8px', padding: '10px 24px',
                   fontFamily: 'DM Sans, sans-serif', fontSize: '13px',
                   fontWeight: '600', cursor: saving ? 'not-allowed' : 'pointer',
@@ -1421,8 +1421,8 @@ export default function Settings() {
                 onClick={loadSettings}
                 disabled={saving}
                 style={{
-                  background: 'transparent', color: '#aaa',
-                  border: '0.5px solid #2a2a2a', borderRadius: '8px',
+                  background: 'transparent', color: 'var(--text-muted)',
+                  border: '0.5px solid var(--border-color-2)', borderRadius: '8px',
                   padding: '10px 20px', fontFamily: 'DM Sans, sans-serif',
                   fontSize: '13px', cursor: 'pointer',
                 }}
