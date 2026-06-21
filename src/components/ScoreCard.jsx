@@ -1,5 +1,6 @@
 // src/components/ScoreCard.jsx
 import { useState, useMemo } from 'react'
+import { useTheme } from '../ThemeContext'
 
 // ─── Scoring helpers ──────────────────────────────────────────────────────────
 
@@ -154,6 +155,7 @@ function InfoTooltip({ show }) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function ScoreCard({ trades, mobile }) {
+  const { isLight } = useTheme()
   const [showTooltip, setShowTooltip] = useState(false)
   const scores = useMemo(() => computeScores(trades), [trades])
   const dataPts = useMemo(() => dataPoints(scores), [scores])
@@ -206,8 +208,8 @@ export default function ScoreCard({ trades, mobile }) {
       <svg viewBox={`0 0 ${CX * 2} ${CY * 2 + 20}`} width="100%" style={{ flex: 1, minHeight: 0 }} xmlns="http://www.w3.org/2000/svg">
         <defs>
           <radialGradient id="scoreFill" cx="50%" cy="50%" r="50%">
-            <stop offset="0%"   stopColor="var(--brand)" stopOpacity="0.38"/>
-            <stop offset="100%" stopColor="var(--brand)" stopOpacity="0.08"/>
+            <stop offset="0%"   stopColor="var(--brand)" stopOpacity={isLight ? 0.7 : 0.38}/>
+            <stop offset="100%" stopColor="var(--brand)" stopOpacity={isLight ? 0.25 : 0.08}/>
           </radialGradient>
         </defs>
 

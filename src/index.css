@@ -62,8 +62,8 @@
 }
 
 [data-theme='light'] {
-  --brand: #148a5c;
-  --brand-hover: #169c69;
+  --brand: #0e7a50;
+  --brand-hover: #148a5c;
   --brand-fg: #fff;
 
   /* Stronger page/surface contrast so cards visibly lift off the background */
@@ -85,9 +85,9 @@
   --text-faint-2: #8e8e93;
   --nav-fg: #0a0a0a;
 
-  --red: #b02020;
-  --blue: #1a6fd4;
-  --amber: #a85e00;
+  --red: #8b1010;
+  --blue: #0d54b0;
+  --amber: #8a4a00;
   --yellow: #a07800;
   --warning: #924700;
 
@@ -101,7 +101,7 @@
   --amber-bg: #f5b840;
   --amber-bg-2: #f0a820;
 
-  --funded: #2d6010;
+  --funded: #1e4a08;
   --funded-bg: #8ecc6a;
   --funded-bg-2: #78c050;
 }

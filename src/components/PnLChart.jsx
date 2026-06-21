@@ -1,5 +1,6 @@
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts'
 import { useState, useMemo } from 'react'
+import { useTheme } from '../ThemeContext'
 
 const tabs = ['30D', '7D', 'All']
 
@@ -56,22 +57,23 @@ function getZeroPercent(data) {
   return Math.max(0, Math.min(1, max / range))
 }
 
-function SplitGradient({ id, zeroPercent }) {
+function SplitGradient({ id, zeroPercent, isLight }) {
   return (
     <defs>
       <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
         {/* Green zone — above zero */}
-        <stop offset="0%"               stopColor="var(--brand)" stopOpacity={0.25} />
-        <stop offset={`${zeroPercent * 100}%`} stopColor="var(--brand)" stopOpacity={0.04} />
+        <stop offset="0%"               stopColor="var(--brand)" stopOpacity={isLight ? 0.55 : 0.25} />
+        <stop offset={`${zeroPercent * 100}%`} stopColor="var(--brand)" stopOpacity={isLight ? 0.12 : 0.04} />
         {/* Red zone — below zero */}
-        <stop offset={`${zeroPercent * 100}%`} stopColor="var(--red)" stopOpacity={0.04} />
-        <stop offset="100%"             stopColor="var(--red)" stopOpacity={0.25} />
+        <stop offset={`${zeroPercent * 100}%`} stopColor="var(--red)" stopOpacity={isLight ? 0.12 : 0.04} />
+        <stop offset="100%"             stopColor="var(--red)" stopOpacity={isLight ? 0.55 : 0.25} />
       </linearGradient>
     </defs>
   )
 }
 
 export default function PnLChart({ trades = [], account, noMargin, mobile }) {
+  const { isLight } = useTheme()
   const [activeTab, setActiveTab] = useState('All')
 
   const data = useMemo(() => {
@@ -126,7 +128,7 @@ export default function PnLChart({ trades = [], account, noMargin, mobile }) {
         ) : (
           <ResponsiveContainer width="100%" height={130} style={{ WebkitTapHighlightColor: "transparent", outline: "none" }}>
             <AreaChart data={chartData} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
-              <SplitGradient id="splitGradMobile" zeroPercent={zeroPercent} />
+              <SplitGradient id="splitGradMobile" zeroPercent={zeroPercent} isLight={isLight} />
               <XAxis dataKey="date" stroke="var(--text-faint-2)" tick={{ fill: 'var(--text-faint)', fontSize: 9, fontFamily: 'DM Mono, monospace' }} tickLine={false} axisLine={false} tickFormatter={d => d && d.length >= 10 ? String(parseInt(d.slice(8, 10), 10)) : d} />
               <YAxis stroke="var(--text-faint-2)" tick={{ fill: 'var(--text-faint)', fontSize: 9, fontFamily: 'DM Mono, monospace' }} tickFormatter={v => `$${v}`} tickLine={false} axisLine={false} width={38} />
               <ReferenceLine y={0} stroke="var(--text-faint-2)" strokeDasharray="3 3" />
@@ -176,7 +178,7 @@ export default function PnLChart({ trades = [], account, noMargin, mobile }) {
       ) : (
         <ResponsiveContainer width="100%" height={160} style={{ WebkitTapHighlightColor: "transparent", outline: "none" }}>
           <AreaChart data={chartData}>
-            <SplitGradient id="splitGradDesktop" zeroPercent={zeroPercent} />
+            <SplitGradient id="splitGradDesktop" zeroPercent={zeroPercent} isLight={isLight} />
             <XAxis dataKey="date" stroke="var(--text-faint-2)" tick={{ fill: 'var(--text-faint)', fontSize: 11, fontFamily: 'DM Mono, monospace' }} />
             <YAxis stroke="var(--text-faint-2)" tick={{ fill: 'var(--text-faint)', fontSize: 11, fontFamily: 'DM Mono, monospace' }} tickFormatter={v => `$${v}`} />
             <Tooltip
