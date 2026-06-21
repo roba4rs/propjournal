@@ -62,45 +62,48 @@
 }
 
 [data-theme='light'] {
-  --brand: #169c69;
-  --brand-hover: #1bba7c;
+  --brand: #148a5c;
+  --brand-hover: #169c69;
   --brand-fg: #fff;
 
-  --bg-page: #f7f7f8;
+  /* Stronger page/surface contrast so cards visibly lift off the background */
+  --bg-page: #eeeef0;
   --bg-surface: #ffffff;
-  --bg-surface-2: #f0f0f1;
-  --bg-hover: #ececed;
-  --border-color: #e5e5e7;
-  --border-color-2: #d8d8da;
-  --border-hover: #c7c7ca;
-  --brand-rgb: 22, 156, 105;
+  --bg-surface-2: #e4e4e7;
+  --bg-hover: #d8d8dc;
+  --border-color: #c8c8cc;
+  --border-color-2: #b8b8bc;
+  --border-hover: #a0a0a6;
+  --brand-rgb: 20, 138, 92;
 
-  --text-primary: #121212;
-  --text-secondary: #3a3a3c;
-  --text-soft: #525254;
-  --text-muted: #6b6b6e;
-  --text-faint: #8a8a8d;
-  --text-faint-2: #a8a8ab;
-  --nav-fg: #383838;
+  /* Darker, higher-contrast text hierarchy */
+  --text-primary: #0a0a0a;
+  --text-secondary: #1c1c1e;
+  --text-soft: #3a3a3c;
+  --text-muted: #545458;
+  --text-faint: #6e6e73;
+  --text-faint-2: #8e8e93;
+  --nav-fg: #0a0a0a;
 
-  --red: #c03535;
-  --blue: #2b7fe0;
-  --amber: #c97a00;
-  --yellow: #c9a300;
-  --warning: #b45309;          /* darker amber-700 equivalent for contrast on white */
+  --red: #b02020;
+  --blue: #1a6fd4;
+  --amber: #a85e00;
+  --yellow: #a07800;
+  --warning: #924700;
 
-  --green-bg: #e7f6ee;
-  --green-bg-2: #d7f0e3;
-  --red-bg: #fdecec;
-  --red-bg-2: #fbdada;
-  --blue-bg: #eaf2ff;
-  --blue-bg-2: #d9e9ff;
-  --amber-bg: #fdf3e3;
-  --amber-bg-2: #faeac9;
+  /* More saturated semantic backgrounds so they read clearly on white */
+  --green-bg: #d4f0e2;
+  --green-bg-2: #bde8d3;
+  --red-bg: #fbd8d8;
+  --red-bg-2: #f7c2c2;
+  --blue-bg: #d6e8ff;
+  --blue-bg-2: #c0daff;
+  --amber-bg: #fce8c4;
+  --amber-bg-2: #f8d9a0;
 
-  --funded: #5a9c2a;
-  --funded-bg: #eef6e3;
-  --funded-bg-2: #ddedc5;
+  --funded: #4a8a1e;
+  --funded-bg: #d8edca;
+  --funded-bg-2: #c4e0ae;
 }
 
 body {
