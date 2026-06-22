@@ -3,7 +3,7 @@ import Sidebar from "../components/Sidebar";
 import { supabase } from "../supabaseClient";
 import { useSidebar } from "../SidebarContext";
 import { useLocation } from 'react-router-dom';
-import { ChevronDown, ArrowUp, ArrowDown, Plus, Pencil, X } from "lucide-react";
+import { ChevronDown, ArrowUp, ArrowDown, Plus, Pencil, X, Search } from "lucide-react";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const PAIRS = [
@@ -255,6 +255,25 @@ function Field({ label, children, hint }) {
   );
 }
 
+function Card({ label, labelRight, children }) {
+  return (
+    <div style={{
+      background: "var(--bg-surface)", border: "0.5px solid var(--border-color)",
+      borderRadius: "12px", padding: "18px 20px",
+    }}>
+      {(label || labelRight) && (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
+          <span style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+            {label}
+          </span>
+          {labelRight}
+        </div>
+      )}
+      {children}
+    </div>
+  );
+}
+
 // ─── Full-Screen Log / Edit Form ──────────────────────────────────────────────
 function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
   // Initialize form directly from editTrade so all fields are pre-populated on mount
@@ -307,6 +326,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
   const [accountRisks, setAccountRisks] = useState(initRisk);
   const [accountRiskModes, setAccountRiskModes] = useState(initRiskModes);
   const [selectedAccounts, setSelectedAccounts] = useState(initSelectedAccounts);
+  const [accountSearch, setAccountSearch] = useState("");
   // 'manual' = quick-select R:R (default), 'auto' = Entry/SL/TP price mode
   const [rrMode, setRrMode] = useState(() => {
     // If editing a trade that has entry/sl/tp, open in auto mode
@@ -493,28 +513,22 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
       {/* Body — two columns */}
       <div style={{
         flex: 1, display: "grid",
-        gridTemplateColumns: "1fr 420px",
-        gap: "0", maxWidth: "1200px",
+        gridTemplateColumns: "1fr 380px",
+        gap: "24px", maxWidth: "1200px",
         margin: "0 auto", width: "100%",
-        padding: "40px 40px 60px",
+        padding: "32px 40px 60px",
         boxSizing: "border-box", alignItems: "start",
       }}>
 
-        {/* ── Left: trade details ── */}
-        <div style={{ paddingRight: "48px", display: "flex", flexDirection: "column", gap: "28px" }}>
-          <div>
-            <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "18px" }}>
-              Trade Details
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+        {/* ── Left: trade details, grouped into cards ── */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
 
-              {/* Pair + Direction */}
+          {/* Setup card */}
+          <Card label="Setup">
+            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
                 <Field label="Pair">
-                  <PairCombobox
-                    value={form.pair}
-                    onChange={v => set("pair", v)}
-                  />
+                  <PairCombobox value={form.pair} onChange={v => set("pair", v)} />
                 </Field>
                 <Field label="Direction">
                   <div style={{ display: "flex", gap: "8px" }}>
@@ -525,7 +539,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                           ? `0.5px solid ${d === "long" ? "var(--green-bg-2)" : "var(--red-bg)"}`
                           : "0.5px solid var(--border-color)",
                         background: form.direction === d
-                          ? (d === "long" ? "var(--green-bg)" : "var(--red-bg-2)") : "var(--bg-surface)",
+                          ? (d === "long" ? "var(--green-bg)" : "var(--red-bg-2)") : "var(--bg-page)",
                         color: form.direction === d
                           ? (d === "long" ? "var(--brand)" : "var(--red)") : "var(--text-faint)",
                         cursor: "pointer", fontFamily: "'JetBrains Mono', monospace",
@@ -536,362 +550,331 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                   </div>
                 </Field>
               </div>
-
-              {/* R:R Section — mode toggle */}
-              <div>
-                {/* Mode toggle header */}
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
-                  <span style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "var(--text-faint)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
-                    {rrMode === "manual" ? "Risk:Reward" : "Entry / SL / TP"}
-                  </span>
-                  <div style={{ display: "flex", border: "0.5px solid var(--border-color)", borderRadius: "6px", overflow: "hidden" }}>
-                    {[["manual", "R:R Select"], ["auto", "Price Mode"]].map(([mode, label]) => (
-                      <button key={mode} onClick={() => setRrMode(mode)} style={{
-                        padding: "5px 12px", border: "none", cursor: "pointer", fontSize: "10px",
-                        fontFamily: "'JetBrains Mono', monospace", textTransform: "uppercase", letterSpacing: "0.06em",
-                        background: rrMode === mode ? "rgba(var(--brand-rgb), 0.15)" : "var(--bg-surface)",
-                        color: rrMode === mode ? "var(--brand)" : "var(--text-faint-2)",
-                        transition: "all 0.15s",
-                      }}>{label}</button>
-                    ))}
-                  </div>
-                </div>
-
-                {rrMode === "manual" ? (
-                  /* Quick-select R:R buttons + custom input */
-                  <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                    <div style={{ display: "flex", gap: "8px" }}>
-                      {["1", "2", "3", "4", "5"].map(n => {
-                        const val = n;
-                        const active = form.rr === val;
-                        return (
-                          <button key={n} onClick={() => setForm(prev => ({ ...prev, rr: active ? "" : val }))} style={{
-                            flex: 1, padding: "10px 4px", borderRadius: "8px", cursor: "pointer",
-                            border: `0.5px solid ${active ? "var(--green-bg-2)" : "var(--border-color)"}`,
-                            background: active ? "var(--green-bg)" : "var(--bg-surface)",
-                            color: active ? "var(--brand)" : "var(--text-faint)",
-                            fontFamily: "'JetBrains Mono', monospace", fontSize: "12px",
-                            transition: "all 0.15s",
-                          }}>1:{n}</button>
-                        );
-                      })}
-                    </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
-                      <Field label="Custom R:R">
-                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                          <span style={{ color: "var(--text-faint-2)", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", flexShrink: 0 }}>1:</span>
-                          <input type="number" step="0.1" min="0.1" placeholder="2.5"
-                            value={form.rr} onChange={e => setForm(prev => ({ ...prev, rr: e.target.value }))}
-                            style={{ ...inputStyle }} />
-                        </div>
-                      </Field>
-                      <Field label="Session">
-                        <select value={form.session} onChange={e => set("session", e.target.value)} style={selectStyle}>
-                          {SESSIONS.map(s => <option key={s} value={s}>{sessionLabel(s)}</option>)}
-                        </select>
-                      </Field>
-                    </div>
-                  </div>
-                ) : (
-                  /* Auto price mode: Entry / SL / TP → R:R auto-calculates */
-                  <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "14px" }}>
-                      <Field label="Entry">
-                        <input type="number" step="0.00001" placeholder="0.00000"
-                          value={form.entry} onChange={e => set("entry", e.target.value)} style={inputStyle} />
-                      </Field>
-                      <Field label="Stop Loss">
-                        <input type="number" step="0.00001" placeholder="0.00000"
-                          value={form.stop_loss} onChange={e => set("stop_loss", e.target.value)} style={inputStyle} />
-                      </Field>
-                      <Field label="Take Profit">
-                        <input type="number" step="0.00001" placeholder="0.00000"
-                          value={form.take_profit} onChange={e => set("take_profit", e.target.value)} style={inputStyle} />
-                      </Field>
-                    </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
-                      <Field label="R:R (auto-calculated)">
-                        <input type="text" readOnly
-                          value={form.rr ? `1:${form.rr}` : "—"}
-                          style={{ ...inputStyle, color: form.rr ? "var(--brand)" : "var(--text-muted)", cursor: "default" }} />
-                      </Field>
-                      <Field label="Session">
-                        <select value={form.session} onChange={e => set("session", e.target.value)} style={selectStyle}>
-                          {SESSIONS.map(s => <option key={s} value={s}>{sessionLabel(s)}</option>)}
-                        </select>
-                      </Field>
-                    </div>
-                  </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+                <Field label="Date">
+                  <input type="date" value={form.date} onChange={e => set("date", e.target.value)} style={inputStyle} />
+                </Field>
+                {rrMode === "manual" && (
+                  <Field label="Session">
+                    <select value={form.session} onChange={e => set("session", e.target.value)} style={selectStyle}>
+                      {SESSIONS.map(s => <option key={s} value={s}>{sessionLabel(s)}</option>)}
+                    </select>
+                  </Field>
                 )}
               </div>
+            </div>
+          </Card>
 
-              {/* Date */}
-              <Field label="Date">
-                <input type="date" value={form.date} onChange={e => set("date", e.target.value)}
-                  style={{ ...inputStyle, maxWidth: "200px" }} />
-              </Field>
-
-              {/* Outcome */}
-              <Field label="Outcome">
+          {/* Risk : reward + Outcome card */}
+          <Card
+            label={rrMode === "manual" ? "Risk:Reward" : "Entry / SL / TP"}
+            labelRight={
+              <div style={{ display: "flex", border: "0.5px solid var(--border-color)", borderRadius: "6px", overflow: "hidden" }}>
+                {[["manual", "R:R Select"], ["auto", "Price Mode"]].map(([mode, label]) => (
+                  <button key={mode} onClick={() => setRrMode(mode)} style={{
+                    padding: "5px 12px", border: "none", cursor: "pointer", fontSize: "10px",
+                    fontFamily: "'JetBrains Mono', monospace", textTransform: "uppercase", letterSpacing: "0.06em",
+                    background: rrMode === mode ? "rgba(var(--brand-rgb), 0.15)" : "var(--bg-page)",
+                    color: rrMode === mode ? "var(--brand)" : "var(--text-faint-2)",
+                    transition: "all 0.15s",
+                  }}>{label}</button>
+                ))}
+              </div>
+            }
+          >
+            {rrMode === "manual" ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "16px" }}>
                 <div style={{ display: "flex", gap: "8px" }}>
-                  {[
-                    { value: "win",         label: "WIN",         active: "var(--green-bg)", activeText: "var(--brand)", activeBorder: "var(--green-bg-2)" },
-                    { value: "loss",        label: "LOSS",        active: "var(--red-bg-2)", activeText: "var(--red)", activeBorder: "var(--red-bg)" },
-                    { value: "be",          label: "BE",          active: "var(--bg-surface)", activeText: "var(--text-muted)",    activeBorder: "var(--border-color-2)" },
-                    { value: "in_progress", label: "IN PROGRESS", active: "var(--blue-bg-2)", activeText: "var(--blue)", activeBorder: "var(--blue-bg)" },
-                  ].map(({ value, label, active, activeText, activeBorder }) => {
-                    const isActive = form.outcome === value;
+                  {["1", "2", "3", "4", "5"].map(n => {
+                    const val = n;
+                    const active = form.rr === val;
                     return (
-                      <button key={value} onClick={() => set("outcome", isActive ? null : value)} style={{
-                        flex: 1, padding: "8px 4px", borderRadius: "8px",
-                        border: `0.5px solid ${isActive ? activeBorder : "var(--border-color)"}`,
-                        background: isActive ? active : "var(--bg-surface)",
-                        color: isActive ? activeText : "var(--text-faint)",
-                        cursor: "pointer", fontFamily: "'JetBrains Mono', monospace",
-                        fontSize: "10px", textTransform: "uppercase",
-                        letterSpacing: "0.08em", transition: "all 0.15s",
-                      }}>{label}</button>
+                      <button key={n} onClick={() => setForm(prev => ({ ...prev, rr: active ? "" : val }))} style={{
+                        flex: 1, padding: "10px 4px", borderRadius: "8px", cursor: "pointer",
+                        border: `0.5px solid ${active ? "var(--green-bg-2)" : "var(--border-color)"}`,
+                        background: active ? "var(--green-bg)" : "var(--bg-page)",
+                        color: active ? "var(--brand)" : "var(--text-faint)",
+                        fontFamily: "'JetBrains Mono', monospace", fontSize: "12px",
+                        transition: "all 0.15s",
+                      }}>1:{n}</button>
                     );
                   })}
                 </div>
-              </Field>
-
-              {/* Notes */}
-              <Field label="Notes">
-                <textarea value={form.notes} onChange={e => set("notes", e.target.value)}
-                  placeholder="Trade rationale, confluences, lessons learned…" rows={5}
-                  style={{ ...inputStyle, resize: "vertical", minHeight: "110px", fontFamily: "'Inter', sans-serif", lineHeight: "1.6", fontSize: "14px" }} />
-              </Field>
-
-              {/* Screenshot */}
-              <Field label="Chart Screenshot">
-                <div onClick={() => fileRef.current.click()} style={{
-                  border: "0.5px dashed var(--border-color-2)", borderRadius: "10px", padding: "28px 20px",
-                  cursor: "pointer", textAlign: "center",
-                  color: "var(--text-muted)", fontSize: "13px", transition: "border-color 0.15s",
-                  fontFamily: "'Inter', sans-serif",
-                }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = "var(--border-hover)"}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = "var(--border-color-2)"}
-                >
-                  {screenshotFile
-                    ? <span style={{ color: "var(--brand)", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px" }}>📎 {screenshotFile.name}</span>
-                    : form.screenshot_url
-                      ? <span style={{ color: "var(--blue)", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px" }}>📎 Screenshot attached — click to replace</span>
-                      : <>
-                          <div style={{ fontSize: "22px", marginBottom: "8px" }}>📷</div>
-                          <div style={{ color: "var(--text-faint)" }}>Click to upload chart screenshot</div>
-                          <div style={{ color: "var(--text-faint-2)", fontSize: "11px", marginTop: "4px" }}>PNG, JPG, WEBP</div>
-                        </>
-                  }
+                <Field label="Custom R:R">
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px", maxWidth: "140px" }}>
+                    <span style={{ color: "var(--text-faint-2)", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", flexShrink: 0 }}>1:</span>
+                    <input type="number" step="0.1" min="0.1" placeholder="2.5"
+                      value={form.rr} onChange={e => setForm(prev => ({ ...prev, rr: e.target.value }))}
+                      style={inputStyle} />
+                  </div>
+                </Field>
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "14px", marginBottom: "16px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "14px" }}>
+                  <Field label="Entry">
+                    <input type="number" step="0.00001" placeholder="0.00000"
+                      value={form.entry} onChange={e => set("entry", e.target.value)} style={inputStyle} />
+                  </Field>
+                  <Field label="Stop Loss">
+                    <input type="number" step="0.00001" placeholder="0.00000"
+                      value={form.stop_loss} onChange={e => set("stop_loss", e.target.value)} style={inputStyle} />
+                  </Field>
+                  <Field label="Take Profit">
+                    <input type="number" step="0.00001" placeholder="0.00000"
+                      value={form.take_profit} onChange={e => set("take_profit", e.target.value)} style={inputStyle} />
+                  </Field>
                 </div>
-                <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleFile} />
-              </Field>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+                  <Field label="R:R (auto-calculated)">
+                    <input type="text" readOnly
+                      value={form.rr ? `1:${form.rr}` : "—"}
+                      style={{ ...inputStyle, color: form.rr ? "var(--brand)" : "var(--text-muted)", cursor: "default" }} />
+                  </Field>
+                  <Field label="Session">
+                    <select value={form.session} onChange={e => set("session", e.target.value)} style={selectStyle}>
+                      {SESSIONS.map(s => <option key={s} value={s}>{sessionLabel(s)}</option>)}
+                    </select>
+                  </Field>
+                </div>
+              </div>
+            )}
+
+            <Field label="Outcome">
+              <div style={{ display: "flex", gap: "8px" }}>
+                {[
+                  { value: "win",         label: "WIN",         active: "var(--green-bg)", activeText: "var(--brand)", activeBorder: "var(--green-bg-2)" },
+                  { value: "loss",        label: "LOSS",        active: "var(--red-bg-2)", activeText: "var(--red)", activeBorder: "var(--red-bg)" },
+                  { value: "be",          label: "BE",          active: "var(--bg-page)", activeText: "var(--text-muted)",    activeBorder: "var(--border-color-2)" },
+                  { value: "in_progress", label: "IN PROGRESS", active: "var(--blue-bg-2)", activeText: "var(--blue)", activeBorder: "var(--blue-bg)" },
+                ].map(({ value, label, active, activeText, activeBorder }) => {
+                  const isActive = form.outcome === value;
+                  return (
+                    <button key={value} onClick={() => set("outcome", isActive ? null : value)} style={{
+                      flex: 1, padding: "8px 4px", borderRadius: "8px",
+                      border: `0.5px solid ${isActive ? activeBorder : "var(--border-color)"}`,
+                      background: isActive ? active : "var(--bg-page)",
+                      color: isActive ? activeText : "var(--text-faint)",
+                      cursor: "pointer", fontFamily: "'JetBrains Mono', monospace",
+                      fontSize: "10px", textTransform: "uppercase",
+                      letterSpacing: "0.08em", transition: "all 0.15s",
+                    }}>{label}</button>
+                  );
+                })}
+              </div>
+            </Field>
+          </Card>
+
+          {/* Notes card */}
+          <Card label="Notes">
+            <textarea value={form.notes} onChange={e => set("notes", e.target.value)}
+              placeholder="Trade rationale, confluences, lessons learned…" rows={5}
+              style={{ ...inputStyle, resize: "vertical", minHeight: "100px", fontFamily: "'Inter', sans-serif", lineHeight: "1.6", fontSize: "14px" }} />
+          </Card>
+
+          {/* Screenshot card */}
+          <Card label="Chart Screenshot">
+            <div onClick={() => fileRef.current.click()} style={{
+              border: "0.5px dashed var(--border-color-2)", borderRadius: "10px", padding: "24px 20px",
+              cursor: "pointer", textAlign: "center",
+              color: "var(--text-muted)", fontSize: "13px", transition: "border-color 0.15s",
+              fontFamily: "'Inter', sans-serif",
+            }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = "var(--border-hover)"}
+              onMouseLeave={e => e.currentTarget.style.borderColor = "var(--border-color-2)"}
+            >
+              {screenshotFile
+                ? <span style={{ color: "var(--brand)", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px" }}>📎 {screenshotFile.name}</span>
+                : form.screenshot_url
+                  ? <span style={{ color: "var(--blue)", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px" }}>📎 Screenshot attached — click to replace</span>
+                  : <>
+                      <div style={{ fontSize: "20px", marginBottom: "6px" }}>📷</div>
+                      <div style={{ color: "var(--text-faint)" }}>Click to upload chart screenshot</div>
+                      <div style={{ color: "var(--text-faint-2)", fontSize: "11px", marginTop: "4px" }}>PNG, JPG, WEBP</div>
+                    </>
+              }
             </div>
-          </div>
+            <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleFile} />
+          </Card>
         </div>
 
-        {/* ── Right: account selector ── */}
-        <div style={{
-          borderLeft: "0.5px solid var(--border-color)", paddingLeft: "40px",
-          display: "flex", flexDirection: "column", gap: "20px",
-          position: "sticky", top: "80px",
-        }}>
-          <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
-            Accounts
-          </div>
-          <div style={{ fontSize: "12px", color: "var(--text-muted)", fontFamily: "'Inter', sans-serif", marginTop: "-10px" }}>
-            Select which accounts took this trade. Each account uses its own risk sizing.
-          </div>
+        {/* ── Right: account selector, grouped + searchable + compact rows ── */}
+        <div style={{ position: "sticky", top: "32px" }}>
+          <Card>
+            <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "4px" }}>
+              Accounts
+            </div>
+            <div style={{ fontSize: "12px", color: "var(--text-muted)", fontFamily: "'Inter', sans-serif", marginBottom: "14px" }}>
+              Each account uses its own risk sizing.
+            </div>
 
-          {accounts.map(acc => {
-            const isSelected = selectedAccounts.has(acc.id);
-            const mode = accountRiskModes[acc.id] || "$";
-            const rawVal = accountRisks[acc.id] || "";
+            {/* Search */}
+            <div style={{ position: "relative", marginBottom: "14px" }}>
+              <Search size={14} style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", color: "var(--text-faint-2)" }} />
+              <input
+                type="text"
+                placeholder="Search accounts..."
+                value={accountSearch}
+                onChange={e => setAccountSearch(e.target.value)}
+                style={{ ...inputStyle, paddingLeft: "30px", fontFamily: "'Inter', sans-serif" }}
+              />
+            </div>
 
-            // Resolve both % and $ for the preview
-            let resolvedPct = null;
-            let resolvedDollar = null;
-            const num = parseFloat(rawVal);
-            if (!isNaN(num) && num > 0 && acc.account_size) {
-              if (mode === "%") {
-                resolvedPct = num;
-                resolvedDollar = ((num / 100) * acc.account_size).toFixed(2);
-              } else {
-                resolvedDollar = num.toFixed(2);
-                resolvedPct = ((num / acc.account_size) * 100).toFixed(2);
-              }
-            }
-            const pnl = resolvedPct ? calcPnl(resolvedPct, acc.account_size, form.rr, form.outcome) : null;
-            const pnlNum = pnl !== null ? parseFloat(pnl) : null;
+            {/* Grouped account list */}
+            {["personal", "challenge"].map(groupType => {
+              const groupAccounts = accounts.filter(a =>
+                (a.type || "personal") === groupType &&
+                a.name.toLowerCase().includes(accountSearch.toLowerCase())
+              );
+              if (groupAccounts.length === 0) return null;
+              return (
+                <div key={groupType} style={{ marginBottom: "14px" }}>
+                  <div style={{
+                    fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "var(--text-faint-2)",
+                    textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "6px",
+                  }}>
+                    {groupType === "personal" ? "Personal" : "Challenge"}
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                    {groupAccounts.map(acc => {
+                      const isSelected = selectedAccounts.has(acc.id);
+                      const mode = accountRiskModes[acc.id] || "$";
+                      const rawVal = accountRisks[acc.id] || "";
 
-            return (
-              <div key={acc.id} style={{
-                background: isSelected ? "var(--bg-hover)" : "var(--bg-page)",
-                border: `0.5px solid ${isSelected ? "var(--border-color-2)" : "var(--bg-surface)"}`,
-                borderRadius: "12px", padding: "16px",
-                transition: "all 0.15s", cursor: "pointer",
-                opacity: isSelected ? 1 : 0.5,
-              }}
-                onClick={() => toggleAccount(acc)}
-              >
-                {/* Account header */}
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: isSelected ? "14px" : "0" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    {/* Checkbox */}
-                    <div style={{
-                      width: "16px", height: "16px", borderRadius: "4px",
-                      border: `0.5px solid ${isSelected ? "var(--brand)" : "var(--border-color-2)"}`,
-                      background: isSelected ? "var(--green-bg)" : "transparent",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      flexShrink: 0, transition: "all 0.15s",
-                    }}>
-                      {isSelected && <span style={{ color: "var(--brand)", fontSize: "10px", lineHeight: 1 }}>✓</span>}
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                      <span style={{ fontSize: "13px", fontFamily: "'Inter', sans-serif", fontWeight: 500, color: "var(--text-secondary)" }}>
-                        {acc.name}
-                      </span>
-                      {accountTypeBadge(acc.type)}
-                      {acc.account_size && (
-                        <span style={{ fontSize: "10px", color: "var(--text-muted)", fontFamily: "'JetBrains Mono', monospace" }}>
-                          ${parseFloat(acc.account_size).toLocaleString()}
-                        </span>
-                      )}
-                    </div>
+                      let resolvedPct = null;
+                      let resolvedDollar = null;
+                      const num = parseFloat(rawVal);
+                      if (!isNaN(num) && num > 0 && acc.account_size) {
+                        if (mode === "%") {
+                          resolvedPct = num;
+                          resolvedDollar = ((num / 100) * acc.account_size).toFixed(2);
+                        } else {
+                          resolvedDollar = num.toFixed(2);
+                          resolvedPct = ((num / acc.account_size) * 100).toFixed(2);
+                        }
+                      }
+                      const pnl = resolvedPct ? calcPnl(resolvedPct, acc.account_size, form.rr, form.outcome) : null;
+                      const pnlNum = pnl !== null ? parseFloat(pnl) : null;
+
+                      return (
+                        <div key={acc.id} onClick={() => toggleAccount(acc)} style={{
+                          background: isSelected ? "var(--bg-hover)" : "var(--bg-page)",
+                          border: `0.5px solid ${isSelected ? "var(--border-color-2)" : "var(--bg-surface)"}`,
+                          borderRadius: "10px", padding: "10px 12px",
+                          cursor: "pointer", transition: "all 0.15s",
+                          opacity: isSelected ? 1 : 0.55,
+                        }}>
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 0 }}>
+                              <div style={{
+                                width: "16px", height: "16px", borderRadius: "4px",
+                                border: `0.5px solid ${isSelected ? "var(--brand)" : "var(--border-color-2)"}`,
+                                background: isSelected ? "var(--green-bg)" : "transparent",
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                                flexShrink: 0, transition: "all 0.15s",
+                              }}>
+                                {isSelected && <span style={{ color: "var(--brand)", fontSize: "10px", lineHeight: 1 }}>✓</span>}
+                              </div>
+                              <span style={{
+                                fontSize: "13px", fontFamily: "'Inter', sans-serif",
+                                fontWeight: isSelected ? 500 : 400,
+                                color: isSelected ? "var(--text-secondary)" : "var(--text-muted)",
+                                whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                              }}>
+                                {acc.name}
+                              </span>
+                              {acc.account_size && (
+                                <span style={{ fontSize: "10px", color: isSelected ? "var(--text-muted)" : "var(--text-faint-2)", fontFamily: "'JetBrains Mono', monospace", flexShrink: 0 }}>
+                                  ${parseFloat(acc.account_size).toLocaleString()}
+                                </span>
+                              )}
+                            </div>
+
+                            {isSelected && (
+                              <div onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
+                                <div style={{
+                                  display: "flex", borderRadius: "6px",
+                                  border: "0.5px solid var(--border-color)", overflow: "hidden",
+                                }}>
+                                  {["$", "%"].map(m => {
+                                    const active = mode === m;
+                                    return (
+                                      <button key={m} onClick={() => switchMode(acc, m)} style={{
+                                        padding: "5px 9px", border: "none", cursor: "pointer",
+                                        background: active ? "var(--border-color)" : "transparent",
+                                        color: active ? "var(--text-secondary)" : "var(--text-faint)",
+                                        fontFamily: "'JetBrains Mono', monospace", fontSize: "11px",
+                                        transition: "all 0.15s", lineHeight: 1,
+                                      }}>{m}</button>
+                                    );
+                                  })}
+                                </div>
+                                <input
+                                  type="number" step="0.1" min="0"
+                                  placeholder={mode === "%" ? "1.0" : "100"}
+                                  value={rawVal}
+                                  onChange={e => setRisk(acc.id, e.target.value)}
+                                  style={{ ...inputStyle, width: "60px", padding: "5px 8px", fontSize: "12px" }}
+                                />
+                                <span style={{
+                                  fontSize: "12px", fontFamily: "'JetBrains Mono', monospace",
+                                  minWidth: "62px", textAlign: "right",
+                                  color: pnlNum !== null ? pnlColor(pnlNum) : "var(--text-faint-2)",
+                                }}>
+                                  {pnlNum !== null ? `${pnlNum >= 0 ? "+" : ""}$${Math.abs(pnlNum).toFixed(2)}` : (resolvedDollar ? `$${resolvedDollar}` : "—")}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
+              );
+            })}
 
-                {/* Risk input — only when selected */}
-                {isSelected && (
-                  <div onClick={e => e.stopPropagation()} style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-
-                    {/* Risk input with % / $ toggle */}
-                    <div>
-                      <label style={{
-                        fontSize: "10px", fontFamily: "'JetBrains Mono', monospace",
-                        letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-faint)",
-                        display: "block", marginBottom: "6px",
-                      }}>Risk</label>
-
-                      <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                        {/* Mode toggle pill */}
-                        <div style={{
-                          display: "flex", borderRadius: "6px",
-                          border: "0.5px solid var(--border-color)", overflow: "hidden", flexShrink: 0,
-                        }}>
-                          {["$", "%"].map(m => {
-                            const active = mode === m;
-                            return (
-                              <button
-                                key={m}
-                                onClick={() => switchMode(acc, m)}
-                                style={{
-                                  padding: "7px 13px", border: "none", cursor: "pointer",
-                                  background: active ? "var(--border-color)" : "transparent",
-                                  color: active ? "var(--text-secondary)" : "var(--text-faint)",
-                                  fontFamily: "'JetBrains Mono', monospace", fontSize: "12px",
-                                  transition: "all 0.15s", lineHeight: 1,
-                                }}
-                              >{m}</button>
-                            );
-                          })}
-                        </div>
-
-                        {/* Value input */}
-                        <div style={{ position: "relative", flex: 1 }}>
-                          <input
-                            type="number"
-                            step="0.1"
-                            min="0"
-                            placeholder={mode === "%" ? "1.0" : "100"}
-                            value={rawVal}
-                            onChange={e => setRisk(acc.id, e.target.value)}
-                            style={{ ...inputStyle, paddingRight: "28px" }}
-                          />
-                          <span style={{
-                            position: "absolute", right: "10px", top: "50%",
-                            transform: "translateY(-50%)",
-                            color: "var(--text-faint)", fontSize: "12px",
-                            fontFamily: "'JetBrains Mono', monospace", pointerEvents: "none",
-                          }}>{mode}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Live preview: Risk % + Risk $ + Est. P&L */}
-                    <div style={{
-                      background: "var(--bg-page)", border: "0.5px solid var(--border-color)",
-                      borderRadius: "8px", padding: "10px 12px",
-                      display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px",
-                    }}>
-                      <div>
-                        <div style={{ fontSize: "9px", fontFamily: "'JetBrains Mono', monospace", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "4px" }}>
-                          Risk %
-                        </div>
-                        <div style={{ fontSize: "14px", fontFamily: "'Inter', sans-serif", fontWeight: 600, color: resolvedPct ? "var(--text-secondary)" : "var(--text-faint-2)" }}>
-                          {resolvedPct ? `${parseFloat(resolvedPct).toFixed(2)}%` : "—"}
-                        </div>
-                      </div>
-                      <div>
-                        <div style={{ fontSize: "9px", fontFamily: "'JetBrains Mono', monospace", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "4px" }}>
-                          Risk $
-                        </div>
-                        <div style={{ fontSize: "14px", fontFamily: "'Inter', sans-serif", fontWeight: 600, color: resolvedDollar ? "var(--text-secondary)" : "var(--text-faint-2)" }}>
-                          {resolvedDollar ? `$${resolvedDollar}` : "—"}
-                        </div>
-                      </div>
-                      <div>
-                        <div style={{ fontSize: "9px", fontFamily: "'JetBrains Mono', monospace", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "4px" }}>
-                          Est. P&L
-                        </div>
-                        <div style={{ fontSize: "14px", fontFamily: "'Inter', sans-serif", fontWeight: 600, color: pnlNum !== null ? pnlColor(pnlNum) : "var(--text-faint-2)" }}>
-                          {pnlNum !== null ? `${pnlNum >= 0 ? "+" : ""}$${Math.abs(pnlNum).toFixed(2)}` : "—"}
-                        </div>
-                      </div>
-                    </div>
-
-                    {!form.rr && rawVal && (
-                      <div style={{ fontSize: "11px", color: "var(--text-muted)", fontFamily: "'JetBrains Mono', monospace" }}>
-                        Fill Entry, SL, TP to calculate P&L
-                      </div>
-                    )}
-                  </div>
-                )}
+            {/* Pinned total — replaces the old separate Summary card */}
+            {selectedAccounts.size > 0 && (
+              <div style={{
+                marginTop: "4px", paddingTop: "14px", borderTop: "0.5px solid var(--border-color)",
+                display: "flex", justifyContent: "space-between", alignItems: "center",
+              }}>
+                <span style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+                  Total est. P&amp;L ({selectedAccounts.size} {selectedAccounts.size === 1 ? "account" : "accounts"})
+                </span>
+                <span style={{ fontSize: "15px", fontFamily: "'Inter', sans-serif", fontWeight: 600, color: (() => {
+                  const total = selectedAccountsList.reduce((sum, acc) => {
+                    const mode = accountRiskModes[acc.id] || "$";
+                    const rawVal = accountRisks[acc.id] || "";
+                    const num = parseFloat(rawVal);
+                    let resolvedPct = null;
+                    if (!isNaN(num) && num > 0 && acc.account_size) {
+                      resolvedPct = mode === "%" ? num : (num / acc.account_size) * 100;
+                    }
+                    const pnl = resolvedPct ? calcPnl(resolvedPct, acc.account_size, form.rr, form.outcome) : null;
+                    return sum + (pnl !== null ? parseFloat(pnl) : 0);
+                  }, 0);
+                  return pnlColor(total);
+                })() }}>
+                  {(() => {
+                    const total = selectedAccountsList.reduce((sum, acc) => {
+                      const mode = accountRiskModes[acc.id] || "$";
+                      const rawVal = accountRisks[acc.id] || "";
+                      const num = parseFloat(rawVal);
+                      let resolvedPct = null;
+                      if (!isNaN(num) && num > 0 && acc.account_size) {
+                        resolvedPct = mode === "%" ? num : (num / acc.account_size) * 100;
+                      }
+                      const pnl = resolvedPct ? calcPnl(resolvedPct, acc.account_size, form.rr, form.outcome) : null;
+                      return sum + (pnl !== null ? parseFloat(pnl) : 0);
+                    }, 0);
+                    return `${total >= 0 ? "+" : ""}$${Math.abs(total).toFixed(2)}`;
+                  })()}
+                </span>
               </div>
-            );
-          })}
-
-          {/* Summary of selected accounts */}
-          {selectedAccounts.size > 1 && (
-            <div style={{
-              background: "var(--bg-page)", border: "0.5px solid var(--border-color)",
-              borderRadius: "10px", padding: "14px 16px",
-            }}>
-              <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "10px" }}>
-                Summary
-              </div>
-              {selectedAccountsList.map(acc => {
-                const mode = accountRiskModes[acc.id] || "$";
-                const rawVal = accountRisks[acc.id] || "";
-                const num = parseFloat(rawVal);
-                let resolvedPct = null;
-                if (!isNaN(num) && num > 0 && acc.account_size) {
-                  resolvedPct = mode === "%" ? num : (num / acc.account_size) * 100;
-                }
-                const pnl = resolvedPct ? calcPnl(resolvedPct, acc.account_size, form.rr, form.outcome) : null;
-                const pnlNum = pnl !== null ? parseFloat(pnl) : null;
-                return (
-                  <div key={acc.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-                    <span style={{ fontSize: "12px", fontFamily: "'Inter', sans-serif", color: "var(--text-muted)" }}>{acc.name}</span>
-                    <span style={{ fontSize: "12px", fontFamily: "'JetBrains Mono', monospace", color: pnlNum !== null ? pnlColor(pnlNum) : "var(--text-faint-2)" }}>
-                      {pnlNum !== null ? `${pnlNum >= 0 ? "+" : ""}$${Math.abs(pnlNum).toFixed(2)}` : "—"}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+            )}
+          </Card>
         </div>
       </div>
     </div>
