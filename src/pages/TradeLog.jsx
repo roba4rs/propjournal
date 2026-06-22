@@ -528,20 +528,19 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
       </div>
 
 
-      {/* Body — two columns, each scrolls independently */}
+      {/* Body — two columns */}
       <div style={{
         flex: 1, display: "grid",
         gridTemplateColumns: "1fr 380px",
         gap: "24px", maxWidth: "1200px",
         margin: "0 auto", width: "100%",
         padding: "32px 40px 32px",
-        boxSizing: "border-box", alignItems: "stretch",
-        minHeight: 0, overflow: "hidden",
-        height: 0, // forces each column to fill exactly the remaining viewport height
+        boxSizing: "border-box", alignItems: "start",
+        overflow: "auto",
       }}>
 
-        {/* ── Left: trade details, grouped into cards, scrolls on its own ── */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "14px", overflowY: "auto", minHeight: 0, height: "100%", paddingRight: "4px" }}>
+        {/* ── Left: trade details, grouped into cards, no scroll ── */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "14px", paddingRight: "4px" }}>
 
           {/* Setup card */}
           <Card label="Setup">
@@ -719,8 +718,8 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
         </div>
 
         {/* ── Right: account selector, grouped + searchable + compact rows ── */}
-        <div style={{ display: "flex", minHeight: 0, height: "100%", overflow: "hidden" }}>
-          <Card style={{ width: "100%", height: "100%", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+        <div style={{ display: "flex", position: "sticky", top: "0" }}>
+          <Card style={{ width: "100%", overflow: "hidden", display: "flex", flexDirection: "column" }}>
             <div style={{ flexShrink: 0 }}>
               <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "4px" }}>
                 Accounts
@@ -742,8 +741,8 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
               </div>
             </div>
 
-            {/* Scrollable account list — only this region scrolls internally */}
-            <div style={{ overflowY: "auto", flex: "1 1 auto", minHeight: 0 }}>
+            {/* Account list — scrolls only if content overflows */}
+            <div style={{ overflowY: "auto", maxHeight: "60vh" }}>
             {["personal", "challenge"].map(groupType => {
               const groupAccounts = accounts.filter(a =>
                 (a.type || "personal") === groupType &&
