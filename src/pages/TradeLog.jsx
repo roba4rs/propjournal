@@ -255,14 +255,16 @@ function Field({ label, children, hint }) {
   );
 }
 
-function Card({ label, labelRight, children }) {
+function Card({ label, labelRight, children, style }) {
   return (
     <div style={{
       background: "var(--bg-surface)", border: "0.5px solid var(--border-color)",
       borderRadius: "12px", padding: "18px 20px",
+      display: "flex", flexDirection: "column", minHeight: 0,
+      ...style,
     }}>
       {(label || labelRight) && (
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px", flexShrink: 0 }}>
           <span style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
             {label}
           </span>
@@ -715,28 +717,31 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
         </div>
 
         {/* ── Right: account selector, grouped + searchable + compact rows ── */}
-        <div style={{ position: "sticky", top: "32px" }}>
-          <Card>
-            <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "4px" }}>
-              Accounts
-            </div>
-            <div style={{ fontSize: "12px", color: "var(--text-muted)", fontFamily: "'Inter', sans-serif", marginBottom: "14px" }}>
-              Each account uses its own risk sizing.
+        <div style={{ position: "sticky", top: "32px", maxHeight: "calc(100vh - 124px)", display: "flex" }}>
+          <Card style={{ width: "100%" }}>
+            <div style={{ flexShrink: 0 }}>
+              <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "4px" }}>
+                Accounts
+              </div>
+              <div style={{ fontSize: "12px", color: "var(--text-muted)", fontFamily: "'Inter', sans-serif", marginBottom: "14px" }}>
+                Each account uses its own risk sizing.
+              </div>
+
+              {/* Search */}
+              <div style={{ position: "relative", marginBottom: "14px" }}>
+                <Search size={14} style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", color: "var(--text-faint-2)" }} />
+                <input
+                  type="text"
+                  placeholder="Search accounts..."
+                  value={accountSearch}
+                  onChange={e => setAccountSearch(e.target.value)}
+                  style={{ ...inputStyle, paddingLeft: "30px", fontFamily: "'Inter', sans-serif" }}
+                />
+              </div>
             </div>
 
-            {/* Search */}
-            <div style={{ position: "relative", marginBottom: "14px" }}>
-              <Search size={14} style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", color: "var(--text-faint-2)" }} />
-              <input
-                type="text"
-                placeholder="Search accounts..."
-                value={accountSearch}
-                onChange={e => setAccountSearch(e.target.value)}
-                style={{ ...inputStyle, paddingLeft: "30px", fontFamily: "'Inter', sans-serif" }}
-              />
-            </div>
-
-            {/* Grouped account list */}
+            {/* Scrollable account list — only this region scrolls internally */}
+            <div style={{ overflowY: "auto", flex: "1 1 auto", minHeight: 0 }}>
             {["personal", "challenge"].map(groupType => {
               const groupAccounts = accounts.filter(a =>
                 (a.type || "personal") === groupType &&
@@ -875,12 +880,14 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                 </div>
               );
             })}
+            </div>
 
-            {/* Pinned total — replaces the old separate Summary card */}
+            {/* Pinned total — stays fixed at bottom, outside the scrollable list */}
             {selectedAccounts.size > 0 && (
               <div style={{
                 marginTop: "4px", paddingTop: "14px", borderTop: "0.5px solid var(--border-color)",
                 display: "flex", justifyContent: "space-between", alignItems: "center",
+                flexShrink: 0,
               }}>
                 <span style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
                   Total est. P&amp;L ({selectedAccounts.size} {selectedAccounts.size === 1 ? "account" : "accounts"})
