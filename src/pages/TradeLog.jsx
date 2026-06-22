@@ -412,11 +412,6 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
     });
   }
 
-  function openAccount(acc) {
-    setActiveAccountId(acc.id);
-  }
-
-
   function setRisk(accId, val) {
     setAccountRisks(prev => ({ ...prev, [accId]: val }));
   }
@@ -1735,6 +1730,16 @@ useEffect(() => {
     const fetchAccounts = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
+
+        // Fetch hide_personal_accounts preference
+        const { data: userData } = await supabase
+          .from('users')
+          .select('hide_personal_accounts')
+          .eq('id', user.id)
+          .single();
+        const hidePersonalAccounts = userData?.hide_personal_accounts || false;
+        setHidePersonal(hidePersonalAccounts);
+
         const { data, error } = await supabase
           .from("accounts")
           .select("*")
@@ -1780,10 +1785,11 @@ useEffect(() => {
             if (profitTarget > 0 && netPnl >= profitTarget && (minDays === 0 || tradingDays >= minDays)) return 'passed';
             return 'active';
           };
-          // All accounts shown in switcher (history viewing)
-          setAccounts(data);
-          // Only active/funded challenges available when logging a trade
+          // All accounts shown in switcher (history viewing) — exclude hidden
+          setAccounts(data.filter(a => !a.is_hidden));
+          // Only active/funded challenges + non-hidden personal accounts available when logging
           const loggableAccounts = data.filter(a => {
+            if (a.is_hidden) return false;
             if (a.type === 'personal') return true;
             const status = computeStatus(tradesByAccount[a.id] || [], a);
             return status === 'active' || status === 'funded';

@@ -387,7 +387,7 @@ export default function Settings() {
 
       const { data: accountsData, error: accountError } = await supabase
         .from('accounts')
-        .select('id, name, account_size')
+        .select('id, name, account_size, is_hidden')
         .eq('user_id', authUser.id)
         .eq('type', 'personal')
         .order('created_at', { ascending: true })
@@ -479,6 +479,20 @@ export default function Settings() {
       setToast({ message: err.message || 'Failed to delete account.', type: 'error' })
     } finally {
       setDeletingAccountId(null)
+    }
+  }
+
+  async function handleToggleHide(acc) {
+    const newVal = !acc.is_hidden
+    try {
+      const { error } = await supabase
+        .from('accounts')
+        .update({ is_hidden: newVal })
+        .eq('id', acc.id)
+      if (error) throw error
+      setPersonalAccounts(prev => prev.map(a => a.id === acc.id ? { ...a, is_hidden: newVal } : a))
+    } catch (err) {
+      setToast({ message: err.message || 'Failed to update.', type: 'error' })
     }
   }
 
@@ -1132,13 +1146,26 @@ export default function Settings() {
                 </div>
                 <div style={{ display: 'flex', gap: '8px', width: isMobile ? '100%' : 'auto' }}>
                   <button
+                    onClick={() => handleToggleHide(acc)}
+                    style={{
+                      background: acc.is_hidden ? 'var(--bg-surface-2)' : 'transparent',
+                      color: acc.is_hidden ? 'var(--text-faint)' : 'var(--text-muted)',
+                      border: '0.5px solid var(--border-color-2)', borderRadius: '8px',
+                      padding: '6px 12px', fontFamily: 'DM Sans, sans-serif',
+                      fontSize: '11px', cursor: 'pointer',
+                      width: isMobile ? '33%' : 'auto',
+                    }}
+                  >
+                    {acc.is_hidden ? 'Hidden' : 'Hide'}
+                  </button>
+                  <button
                     onClick={() => setEditModal(acc)}
                     style={{
                       background: 'transparent', color: 'var(--blue)',
                       border: '0.5px solid var(--blue-bg)', borderRadius: '8px',
                       padding: '6px 12px', fontFamily: 'DM Sans, sans-serif',
                       fontSize: '11px', cursor: 'pointer',
-                      width: isMobile ? '50%' : 'auto',
+                      width: isMobile ? '33%' : 'auto',
                     }}
                   >
                     Edit
@@ -1152,7 +1179,7 @@ export default function Settings() {
                       padding: '6px 12px', fontFamily: 'DM Sans, sans-serif',
                       fontSize: '11px', cursor: deletingAccountId === acc.id ? 'not-allowed' : 'pointer',
                       opacity: deletingAccountId === acc.id ? 0.5 : 1,
-                      width: isMobile ? '50%' : 'auto',
+                      width: isMobile ? '33%' : 'auto',
                     }}
                   >
                     {deletingAccountId === acc.id ? 'Deleting...' : 'Delete'}

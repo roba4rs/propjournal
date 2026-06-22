@@ -40,9 +40,10 @@ export default function AccountSwitcher({
 
         if (data) {
           setAccounts(data)
+          const visibleData = data.filter(a => !a.is_hidden)
           const preferred = defaultAccountId
-            ? (data.find(a => a.id === defaultAccountId) || data[0])
-            : data[0]
+            ? (visibleData.find(a => a.id === defaultAccountId) || visibleData[0])
+            : visibleData[0]
           setActive(preferred || null)
           if (onSwitch) onSwitch(preferred)
         }
@@ -93,7 +94,7 @@ export default function AccountSwitcher({
     if (onSwitch) onSwitch(account)
   }
 
-  const personal = accounts.filter(a => a.type === 'personal')
+  const personal = accounts.filter(a => a.type === 'personal' && !a.is_hidden)
   const challenges = accounts.filter(a => a.type !== 'personal')
 
   const groupLabelStyle = {
