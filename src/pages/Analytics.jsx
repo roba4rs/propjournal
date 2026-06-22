@@ -48,11 +48,11 @@ function fmtSigned(v, decimals = 1) {
   return (v >= 0 ? '+' : '') + v.toFixed(decimals)
 }
 
-// health status → badge styling
+// health status → badge styling (matches ChallengeTracker statusBadge)
 const HEALTH = {
-  healthy: { emoji: '🟢', label: 'Healthy', color: T.green },
-  neutral: { emoji: '🟡', label: 'Neutral', color: T.amber },
-  risk:    { emoji: '🔴', label: 'Risk',    color: T.red   },
+  healthy: { label: 'Healthy', bg: 'var(--green-bg)',   color: 'var(--brand)', border: 'var(--green-bg-2)' },
+  neutral: { label: 'Neutral', bg: 'var(--blue-bg-2)',  color: 'var(--blue)',  border: 'var(--blue-bg)'    },
+  risk:    { label: 'At Risk', bg: 'var(--red-bg-2)',   color: 'var(--red)',   border: 'var(--red-bg)'     },
 }
 
 // ── Calendar-aligned date ranges (Mon–Sun / 1st–end of month) ───────
@@ -185,7 +185,7 @@ function Card({ children, style, mobile = false }) {
   return (
     <div style={{
       background: T.card, border: `0.5px solid ${T.cardBorder}`,
-      borderRadius: mobile ? 10 : 12,
+      borderRadius: mobile ? 12 : 14,
       padding: mobile ? '14px' : '24px',
       ...style,
     }}>
@@ -322,7 +322,7 @@ function PeriodComparison({ trades, accountsById, mobile, period, onPeriodChange
         {stats.map(s => (
           <div key={s.label}>
             <div style={{ fontFamily: font.mono, fontSize: 10, color: T.muted, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 6 }}>{s.label}</div>
-            <div style={{ fontFamily: font.heading, fontSize: mobile ? 16 : 18, fontWeight: 600, color: s.valueColor, marginBottom: 4 }}>{s.value}</div>
+            <div style={{ fontFamily: font.mono, fontSize: mobile ? 16 : 18, fontWeight: 600, color: s.valueColor, marginBottom: 4 }}>{s.value}</div>
             <div style={{ fontFamily: font.mono, fontSize: 10.5, color: s.delta.color }}>{s.delta.text}</div>
           </div>
         ))}
@@ -342,7 +342,7 @@ function GroupTable({ title, breakdown, mobile, footnote, scopeLabel }) {
       ) : mobile ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {breakdown.map(g => (
-            <div key={g.key} style={{ background: 'var(--bg-hover)', border: `0.5px solid ${T.statBorder}`, borderRadius: 10, padding: '10px 12px' }}>
+            <div key={g.key} style={{ background: 'var(--bg-surface-2)', border: '0.5px solid var(--border-color)', borderRadius: '10px', padding: '10px 12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
                 <span style={{ fontFamily: font.body, fontSize: 13, color: T.text, fontWeight: 500 }}>{g.key}</span>
                 <span style={{ fontFamily: font.mono, fontSize: 13, fontWeight: 500, color: g.lowSample ? T.amber : pnlColor(g.netPnlPct) }}>{fmtPct(g.netPnlPct)}</span>
@@ -418,12 +418,7 @@ function HighlightCard({ label, metrics, accountTrades, accent, pairLabel, mobil
             {metrics.firmName || '—'}
           </div>
         </div>
-        <span style={{
-          background: 'var(--bg-hover)', border: `0.5px solid ${T.statBorder}`, borderRadius: 6,
-          padding: '4px 10px', fontFamily: font.mono, fontSize: 11, color: health.color,
-        }}>
-          {health.emoji} {health.label}
-        </span>
+        <span style={{ background: health.bg, border: `0.5px solid ${health.border}`, borderRadius: '20px', padding: '4px 12px', color: health.color, fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: '500', whiteSpace: 'nowrap' }}>{health.label}</span>
       </div>
 
       {sparkPoints && (
@@ -444,15 +439,15 @@ function HighlightCard({ label, metrics, accountTrades, accent, pairLabel, mobil
       <div style={{ display: 'grid', gridTemplateColumns: mobile ? '1fr 1fr' : 'repeat(3, 1fr)', gap: '14px 16px' }}>
         <div>
           <div style={{ fontFamily: font.mono, fontSize: 9, color: T.muted, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 4 }}>Net P&L</div>
-          <div style={{ fontFamily: font.heading, fontSize: 18, fontWeight: 600, color: accent }}>{fmtPct(metrics.netPnlPct)}</div>
+          <div style={{ fontFamily: font.mono, fontSize: 18, fontWeight: 600, color: accent }}>{fmtPct(metrics.netPnlPct)}</div>
         </div>
         <div>
           <div style={{ fontFamily: font.mono, fontSize: 9, color: T.muted, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 4 }}>Win Rate</div>
-          <div style={{ fontFamily: font.heading, fontSize: 18, fontWeight: 600, color: T.text }}>{metrics.winRate.toFixed(0)}%</div>
+          <div style={{ fontFamily: font.mono, fontSize: 18, fontWeight: 600, color: T.text }}>{metrics.winRate.toFixed(0)}%</div>
         </div>
         <div>
           <div style={{ fontFamily: font.mono, fontSize: 9, color: T.muted, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 4 }}>Profit Factor</div>
-          <div style={{ fontFamily: font.heading, fontSize: 18, fontWeight: 600, color: T.text }}>{fmtPF(metrics.profitFactor)}</div>
+          <div style={{ fontFamily: font.mono, fontSize: 18, fontWeight: 600, color: T.text }}>{fmtPF(metrics.profitFactor)}</div>
         </div>
         <div>
           <div style={{ fontFamily: font.mono, fontSize: 9, color: T.muted, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 4 }}>Avg Win / Loss</div>
@@ -474,7 +469,7 @@ function HighlightCard({ label, metrics, accountTrades, accent, pairLabel, mobil
         </div>
         <div>
           <div style={{ fontFamily: font.mono, fontSize: 9, color: T.muted, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 4 }}>Drawdown Used</div>
-          <div style={{ fontFamily: font.heading, fontSize: 18, fontWeight: 600, color: metrics.ddConsumedPct >= 60 ? T.red : T.text }}>
+          <div style={{ fontFamily: font.mono, fontSize: 18, fontWeight: 600, color: metrics.ddConsumedPct >= 60 ? T.red : T.text }}>
             {metrics.ddConsumedPct.toFixed(0)}%
           </div>
         </div>
@@ -688,17 +683,15 @@ export default function Analytics() {
                           const health = HEALTH[m.healthStatus]
                           return (
                             <div key={m.accountId} style={{
-                              background: 'var(--bg-hover)', border: `0.5px solid ${T.statBorder}`,
-                              borderRadius: 10, padding: '12px 14px',
+                              background: 'var(--bg-surface-2)', border: '0.5px solid var(--border-color)',
+                              borderRadius: '10px', padding: '12px 14px',
                             }}>
                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
                                 <div>
                                   <div style={{ fontFamily: font.body, fontSize: 13, color: T.text, fontWeight: 500 }}>{m.name}</div>
                                   <div style={{ fontFamily: font.mono, fontSize: 10, color: T.muted, marginTop: 2 }}>{m.firmName || '—'}</div>
                                 </div>
-                                <span style={{ fontFamily: font.mono, fontSize: 11, color: health.color, whiteSpace: 'nowrap', flexShrink: 0, marginLeft: 8 }}>
-                                  {health.emoji} {health.label}
-                                </span>
+                                <span style={{ background: health.bg, border: `0.5px solid ${health.border}`, borderRadius: '20px', padding: '4px 12px', color: health.color, fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: '500', whiteSpace: 'nowrap', flexShrink: 0, marginLeft: 8 }}>{health.label}</span>
                               </div>
                               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 16px' }}>
                                 <div>
@@ -756,7 +749,7 @@ export default function Analytics() {
                                     <div style={{ fontFamily: font.mono, fontSize: 10, color: T.muted, marginTop: 2 }}>{m.maxDDUsedPct.toFixed(1)}% / {m.maxDDLimitPct.toFixed(1)}%</div>
                                   </td>
                                   <td style={{ padding: '14px 0' }}>
-                                    <span style={{ fontFamily: font.mono, fontSize: 11, color: health.color, whiteSpace: 'nowrap' }}>{health.emoji} {health.label}</span>
+                                    <span style={{ background: health.bg, border: `0.5px solid ${health.border}`, borderRadius: '20px', padding: '4px 12px', color: health.color, fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: '500', whiteSpace: 'nowrap' }}>{health.label}</span>
                                   </td>
                                 </tr>
                               )
