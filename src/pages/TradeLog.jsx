@@ -189,7 +189,7 @@ function outcomeBadge(outcome) {
   const map = {
     win:         { label: "WIN",         bg: "var(--green-bg)", color: "var(--brand)", border: "var(--green-bg-2)" },
     loss:        { label: "LOSS",        bg: "var(--red-bg-2)", color: "var(--red)", border: "var(--red-bg)" },
-    be:          { label: "BE",          bg: "var(--bg-surface)", color: "var(--text-muted)",    border: "var(--border-color-2)" },
+    be:          { label: "BE",          bg: "rgba(234,179,8,0.12)", color: "rgb(234,179,8)", border: "rgba(234,179,8,0.3)" },
     in_progress: { label: "IN PROGRESS", bg: "var(--blue-bg-2)", color: "var(--blue)", border: "var(--blue-bg)" },
   };
   const s = map[outcome];
@@ -664,7 +664,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                 {[
                   { value: "win",         label: "WIN",         active: "var(--green-bg)", activeText: "var(--brand)", activeBorder: "var(--green-bg-2)" },
                   { value: "loss",        label: "LOSS",        active: "var(--red-bg-2)", activeText: "var(--red)", activeBorder: "var(--red-bg)" },
-                  { value: "be",          label: "BE",          active: "var(--bg-page)", activeText: "var(--text-muted)",    activeBorder: "var(--border-color-2)" },
+                  { value: "be",          label: "BE",          active: "rgba(234,179,8,0.12)", activeText: "rgb(234,179,8)", activeBorder: "rgba(234,179,8,0.3)" },
                   { value: "in_progress", label: "IN PROGRESS", active: "var(--blue-bg-2)", activeText: "var(--blue)", activeBorder: "var(--blue-bg)" },
                 ].map(({ value, label, active, activeText, activeBorder }) => {
                   const isActive = form.outcome === value;
@@ -782,7 +782,13 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                       return (
                         <div
                           key={acc.id}
-                          onClick={() => isSelected ? openAccount(acc) : toggleAccount(acc)}
+                          onClick={() => {
+                            if (isSelected) {
+                              setActiveAccountId(acc.id); // expand this, collapse others
+                            } else {
+                              toggleAccount(acc); // select + auto-expands via toggleAccount
+                            }
+                          }}
                           style={{
                             border: `0.5px solid ${isSelected ? "var(--brand)" : "var(--border-color)"}`,
                             borderRadius: "10px", padding: "10px 12px",
@@ -820,18 +826,23 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                               )}
                             </div>
 
-                            {/* Selected but collapsed — show read-only risk/result */}
+                            {/* Selected but collapsed — show risk + P&L on one line */}
                             {isSelected && !isExpanded && (
                               <span style={{
-                                fontSize: "12px", fontFamily: "'JetBrains Mono', monospace",
-                                color: pnlNum !== null ? pnlColor(pnlNum) : "var(--text-faint-2)",
-                                flexShrink: 0,
+                                fontSize: "11px", fontFamily: "'JetBrains Mono', monospace",
+                                color: "var(--text-faint)", flexShrink: 0,
+                                display: "flex", alignItems: "center", gap: "6px",
                               }}>
-                                {rawVal ? `${rawVal}${mode}` : "—"}
+                                <span style={{ color: "var(--text-muted)" }}>
+                                  {rawVal ? `${rawVal}${mode}` : "—"}
+                                </span>
                                 {pnlNum !== null && (
-                                  <span style={{ marginLeft: "8px" }}>
-                                    {pnlNum >= 0 ? "+" : ""}${Math.abs(pnlNum).toFixed(2)}
-                                  </span>
+                                  <>
+                                    <span style={{ color: "var(--text-faint-2)" }}>·</span>
+                                    <span style={{ color: pnlColor(pnlNum), fontWeight: 600 }}>
+                                      {pnlNum >= 0 ? "+" : ""}${Math.abs(pnlNum).toFixed(2)}
+                                    </span>
+                                  </>
                                 )}
                               </span>
                             )}
