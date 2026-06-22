@@ -537,10 +537,11 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
         padding: "32px 40px 32px",
         boxSizing: "border-box", alignItems: "stretch",
         minHeight: 0, overflow: "hidden",
+        height: 0, // forces each column to fill exactly the remaining viewport height
       }}>
 
         {/* ── Left: trade details, grouped into cards, scrolls on its own ── */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "14px", overflowY: "auto", minHeight: 0, paddingRight: "4px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "14px", overflowY: "auto", minHeight: 0, height: "100%", paddingRight: "4px" }}>
 
           {/* Setup card */}
           <Card label="Setup">
@@ -718,8 +719,8 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
         </div>
 
         {/* ── Right: account selector, grouped + searchable + compact rows ── */}
-        <div style={{ display: "flex", minHeight: 0, overflow: "hidden" }}>
-          <Card style={{ width: "100%", height: "100%", overflow: "hidden" }}>
+        <div style={{ display: "flex", minHeight: 0, height: "100%", overflow: "hidden" }}>
+          <Card style={{ width: "100%", height: "100%", overflow: "hidden", display: "flex", flexDirection: "column" }}>
             <div style={{ flexShrink: 0 }}>
               <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "4px" }}>
                 Accounts
@@ -784,9 +785,9 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                           key={acc.id}
                           onClick={() => isSelected ? openAccount(acc) : toggleAccount(acc)}
                           style={{
-                            border: "0.5px solid var(--border-color)",
+                            border: `0.5px solid ${isSelected ? "var(--brand)" : "var(--border-color)"}`,
                             borderRadius: "10px", padding: "10px 12px",
-                            cursor: "pointer", transition: "opacity 0.15s",
+                            cursor: "pointer", transition: "opacity 0.15s, border-color 0.15s",
                             opacity: isSelected ? 1 : 0.55,
                           }}
                         >
