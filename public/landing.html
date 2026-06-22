@@ -14,7 +14,7 @@
 <script>
   (function () {
     var saved = localStorage.getItem('theme');
-    if (saved === 'light') document.documentElement.setAttribute('data-theme', 'light');
+    if (saved !== 'dark') document.documentElement.setAttribute('data-theme', 'light');
   })();
 </script>
 <style>
@@ -106,7 +106,7 @@
     .theme-toggle {
       display: flex; align-items: center; justify-content: center;
       width: 32px; height: 32px; border-radius: var(--radius-md);
-      border: 1px solid var(--border); background: transparent; color: var(--foreground);
+      border: none; background: transparent; color: var(--foreground);
       cursor: pointer; transition: background 0.15s, border-color 0.15s;
     }
     .theme-toggle:hover { background: var(--surface-2); border-color: var(--border-strong); }
@@ -392,7 +392,7 @@
     .trust-track:hover { animation-play-state: paused; }
     .firm-name {
       white-space: nowrap; font-size: 14px;
-      color: color-mix(in oklch, var(--muted-fg) 70%, transparent);
+      color: var(--muted-fg);
       transition: color 0.15s;
     }
     .firm-name:hover { color: var(--foreground); }
@@ -620,15 +620,15 @@
       margin-bottom: 0.75rem;
     }
     .testimonial-avatar {
-      width: 28px; height: 28px;
+      width: 32px; height: 32px;
       border-radius: 999px;
-      background: var(--muted);
       border: 1px solid var(--border);
       display: grid; place-items: center;
-      color: var(--foreground);
       flex-shrink: 0;
+      font-size: 12px; font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.02em;
     }
-    .testimonial-avatar svg { width: 14px; height: 14px; fill: currentColor; stroke: none; }
     .testimonial-handle {
       font-size: 0.875rem; font-weight: 600; color: var(--foreground);
     }
@@ -812,19 +812,19 @@
       <div class="step">
         <div class="step-num">01</div>
         <h3>Pick your prop firm</h3>
-        <p>Choose from a growing list of pre-loaded firms — FTMO, MyFundedFX, E8, Funded Next, and more.</p>
+        <p>Choose from a growing list of pre-loaded firms — FTMO, FundedNext, E8, Alpha Capital, Maven Trading, and more. New firms added regularly based on trader demand.</p>
         <span class="step-tag">30+ firms supported</span>
       </div>
       <div class="step">
         <div class="step-num">02</div>
         <h3>Rules auto-fill instantly</h3>
-        <p>Profit targets, max drawdown, daily loss limits — all pre-populated. Edit anything you need.</p>
+        <p>Profit targets, max drawdown, daily loss limits, and minimum trading days — all pre-populated the moment you pick your firm. Edit any rule anytime if your firm updates their terms.</p>
         <span class="step-tag">Zero manual entry</span>
       </div>
       <div class="step">
         <div class="step-num">03</div>
         <h3>Track, analyse, pass</h3>
-        <p>Log trades, watch your rule progress in real time, and use deep analytics to fix your weaknesses.</p>
+        <p>Log trades manually or import directly from MT5, MT4, cTrader and more. Watch your rule progress in real time and use deep analytics to fix your weaknesses.</p>
         <span class="step-tag">Live rule tracking</span>
       </div>
     </div>
@@ -962,78 +962,78 @@
       <p class="eyebrow">Community</p>
       <h2 class="section-h2">Loved by challenge traders.</h2>
       <p class="section-sub">Discover what prop traders have to say about their PropJournal experience.</p>
-      <a href="https://discord.gg/" target="_blank" rel="noopener" class="community-cta">
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.317 4.369A19.79 19.79 0 0 0 16.558 3a14.6 14.6 0 0 0-.69 1.418 18.27 18.27 0 0 0-5.487 0A14.6 14.6 0 0 0 9.691 3a19.74 19.74 0 0 0-3.76 1.369C2.07 10.07 1.02 15.61 1.545 21.06A19.93 19.93 0 0 0 7.55 23a14.3 14.3 0 0 0 1.226-1.994 12.9 12.9 0 0 1-1.93-.928c.162-.119.32-.243.473-.37a14.2 14.2 0 0 0 12.36 0c.156.13.314.254.476.37-.616.366-1.266.677-1.933.93A14.3 14.3 0 0 0 19.45 23a19.9 19.9 0 0 0 6.01-1.94c.616-6.31-1.05-11.8-4.143-16.69ZM9.683 17.27c-1.182 0-2.157-1.085-2.157-2.42 0-1.333.951-2.42 2.157-2.42 1.207 0 2.182 1.087 2.157 2.42 0 1.335-.95 2.42-2.157 2.42Zm6.634 0c-1.183 0-2.157-1.085-2.157-2.42 0-1.333.951-2.42 2.157-2.42 1.207 0 2.182 1.087 2.157 2.42 0 1.335-.95 2.42-2.157 2.42Z"/></svg>
-        Join us on Discord
+      <a href="https://www.instagram.com/prop__journal/" target="_blank" rel="noopener" class="community-cta">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        Follow us on Instagram
       </a>
     </div>
 
     <div class="testimonials-wrap">
       <div class="testimonials-grid">
 
-        <a href="#" class="testimonial">
+        <div class="testimonial">
           <div class="testimonial-head">
-            <div class="testimonial-avatar"><svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></div>
-            <span class="testimonial-handle">@FundedFromZero</span>
+            <div class="testimonial-avatar" style="background:#4f7fe8">MK</div>
+            <span class="testimonial-handle">Marcus K.</span>
           </div>
           <p class="testimonial-body">Finally a journal that <strong>knows my prop firm rules</strong> without me typing them in. Picked FTMO, hit start, done. Spreadsheet is in the trash.</p>
-        </a>
+        </div>
 
-        <a href="#" class="testimonial">
+        <div class="testimonial">
           <div class="testimonial-head">
-            <div class="testimonial-avatar"><svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></div>
-            <span class="testimonial-handle">@SwingTrader_Mo</span>
+            <div class="testimonial-avatar" style="background:#e06c4f">PT</div>
+            <span class="testimonial-handle">Prop Trader</span>
           </div>
           <p class="testimonial-body">The drawdown tracker alone saved my challenge last week. Got a warning at 4.2% daily — closed everything, came back next day, passed. ✅</p>
-        </a>
+        </div>
 
-        <a href="#" class="testimonial">
+        <div class="testimonial">
           <div class="testimonial-head">
-            <div class="testimonial-avatar"><svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></div>
-            <span class="testimonial-handle">@quinn_fx</span>
+            <div class="testimonial-avatar" style="background:#7c5ce8">QR</div>
+            <span class="testimonial-handle">Quinn R.</span>
           </div>
           <p class="testimonial-body">Running 3 challenges across 2 firms. Multi-account switching is instant — P&L, rules, trades, all isolated. No more 4 browser tabs and a notepad.</p>
-        </a>
+        </div>
 
-        <a href="#" class="testimonial">
+        <div class="testimonial">
           <div class="testimonial-head">
-            <div class="testimonial-avatar"><svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></div>
-            <span class="testimonial-handle">@DayTradeDani</span>
+            <div class="testimonial-avatar" style="background:#e8a84f">CT</div>
+            <span class="testimonial-handle">Challenge Trader</span>
           </div>
           <p class="testimonial-body">Calendar heatmap made me realize I lose money every single Monday. Stopped trading Mondays. Win rate jumped 11%. That's it. That's the tweet.</p>
-        </a>
+        </div>
 
-        <a href="#" class="testimonial">
+        <div class="testimonial">
           <div class="testimonial-head">
-            <div class="testimonial-avatar"><svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></div>
-            <span class="testimonial-handle">@nasdaq_nate</span>
+            <div class="testimonial-avatar" style="background:#4fbe8a">NJ</div>
+            <span class="testimonial-handle">Nathan J.</span>
           </div>
           <p class="testimonial-body">Tried every journal out there. TradeZella, Tradervue, you name it. None of them understand prop challenges. PropJournal does. Switched last month, never looking back.</p>
-        </a>
+        </div>
 
-        <a href="#" class="testimonial">
+        <div class="testimonial">
           <div class="testimonial-head">
-            <div class="testimonial-avatar"><svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></div>
-            <span class="testimonial-handle">@elena_pips</span>
+            <div class="testimonial-avatar" style="background:#e84f9a">FT</div>
+            <span class="testimonial-handle">Funded Trader</span>
           </div>
           <p class="testimonial-body">Logged my first trade in under 30 seconds. Screenshot upload, R:R auto-calculated, tagged the setup. This is what a journal should feel like.</p>
-        </a>
+        </div>
 
-        <a href="#" class="testimonial">
+        <div class="testimonial">
           <div class="testimonial-head">
-            <div class="testimonial-avatar"><svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></div>
-            <span class="testimonial-handle">@PropPathRyan</span>
+            <div class="testimonial-avatar" style="background:#4fc4e8">RT</div>
+            <span class="testimonial-handle">Ryan T.</span>
           </div>
-          <p class="testimonial-body">Passed my MyForexFunds 200k challenge last Friday 🎉 The minimum trading days counter kept me honest. Would've blown it without this.</p>
-        </a>
+          <p class="testimonial-body">Passed my FTMO 200k challenge last Friday 🎉 The minimum trading days counter kept me honest. Would've blown it without this.</p>
+        </div>
 
-        <a href="#" class="testimonial">
+        <div class="testimonial">
           <div class="testimonial-head">
-            <div class="testimonial-avatar"><svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></div>
-            <span class="testimonial-handle">@scalper_sai</span>
+            <div class="testimonial-avatar" style="background:#a84fe8">PT</div>
+            <span class="testimonial-handle">Prop Trader</span>
           </div>
           <p class="testimonial-body">No bloat. No "AI insights." No features built for stock investors. Just a clean log + the rules that actually matter to me. Refreshing.</p>
-        </a>
+        </div>
 
       </div>
     </div>
@@ -1099,7 +1099,7 @@
       <a href="/privacy">Privacy</a>
       <a href="/terms">Terms</a>
       <a href="/refund-policy">Refund Policy</a>
-      <a href="mailto:robel4cs@gmail.com" aria-label="Email">
+      <a href="mailto:support@thepropjournal.com" aria-label="Email">
         <svg class="icon" width="16" height="16" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
       </a>
       <a href="https://www.instagram.com/prop__journal/" aria-label="Instagram" target="_blank" rel="noopener">
