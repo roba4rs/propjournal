@@ -1731,15 +1731,6 @@ useEffect(() => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
 
-        // Fetch hide_personal_accounts preference
-        const { data: userData } = await supabase
-          .from('users')
-          .select('hide_personal_accounts')
-          .eq('id', user.id)
-          .single();
-        const hidePersonalAccounts = userData?.hide_personal_accounts || false;
-        setHidePersonal(hidePersonalAccounts);
-
         const { data, error } = await supabase
           .from("accounts")
           .select("*")
