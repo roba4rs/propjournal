@@ -783,6 +783,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                               }}>
                                 {acc.name}
                               </span>
+                              {isSelected && accountTypeBadge(acc.type)}
                               {acc.account_size && (
                                 <span style={{ fontSize: "10px", color: isSelected ? "var(--text-muted)" : "var(--text-faint-2)", fontFamily: "'JetBrains Mono', monospace", flexShrink: 0 }}>
                                   ${parseFloat(acc.account_size).toLocaleString()}
