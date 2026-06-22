@@ -21,9 +21,9 @@ const T = {
 }
 
 const font = {
-  heading: "'Syne', sans-serif",
-  body:    "'DM Sans', sans-serif",
-  mono:    "'DM Mono', monospace",
+  heading: "'Inter', sans-serif",
+  body:    "'Inter', sans-serif",
+  mono:    "'JetBrains Mono', monospace",
 }
 
 // Groups (pair/session) with fewer trades than this render amber, not
