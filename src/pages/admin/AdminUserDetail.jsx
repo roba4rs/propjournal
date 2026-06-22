@@ -103,7 +103,7 @@ export default function AdminUserDetail() {
     return (
       <div style={{ background: 'var(--bg-page)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <Sidebar />
-        <main style={{ marginLeft: isMobile ? 0 : (collapsed ? '60px' : '220px'), paddingTop: isMobile ? '64px' : '32px', flex: 1, padding: '32px', color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '13px' }}>
+        <main style={{ marginLeft: isMobile ? 0 : (collapsed ? '60px' : '220px'), padding: isMobile ? '64px 16px 80px' : '32px', flex: 1, color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '13px' }}>
           {loading ? 'Loading...' : 'User not found.'}
         </main>
       </div>

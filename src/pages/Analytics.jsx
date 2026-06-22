@@ -614,15 +614,14 @@ export default function Analytics() {
         <main style={{
           flex: 1,
           marginLeft: isMobile ? 0 : (collapsed ? 60 : 220),
-          padding: isMobile ? 16 : 40,
-          paddingBottom: isMobile ? 80 : 40,
+          padding: isMobile ? '64px 16px 80px' : '40px',
           transition: 'margin-left 0.2s',
         }}>
           <div style={{ marginBottom: isMobile ? 20 : 32 }}>
-            <h1 style={{ fontFamily: font.heading, fontSize: isMobile ? 20 : 26, fontWeight: 700, color: T.text, margin: '0 0 6px 0' }}>
+            <h1 style={{ fontFamily: 'Inter, sans-serif', fontSize: isMobile ? 20 : 22, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 4px 0' }}>
               Analytics
             </h1>
-            <p style={{ fontFamily: font.body, fontSize: 13, color: T.muted, margin: 0 }}>
+            <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: 'var(--text-muted)', margin: 0 }}>
               Where your edge is, and where it isn't.
             </p>
           </div>
