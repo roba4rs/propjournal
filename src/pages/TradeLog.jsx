@@ -327,6 +327,10 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
   const [accountRiskModes, setAccountRiskModes] = useState(initRiskModes);
   const [selectedAccounts, setSelectedAccounts] = useState(initSelectedAccounts);
   const [accountSearch, setAccountSearch] = useState("");
+  const [activeAccountId, setActiveAccountId] = useState(() => {
+    const first = [...initSelectedAccounts][0];
+    return first ?? null;
+  });
   // 'manual' = quick-select R:R (default), 'auto' = Entry/SL/TP price mode
   const [rrMode, setRrMode] = useState(() => {
     // If editing a trade that has entry/sl/tp, open in auto mode
@@ -391,14 +395,25 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
         next.delete(acc.id);
         setAccountRisks(r => { const n = { ...r }; delete n[acc.id]; return n; });
         setAccountRiskModes(m => { const n = { ...m }; delete n[acc.id]; return n; });
+        setActiveAccountId(prevActive => {
+          if (prevActive !== acc.id) return prevActive;
+          const remaining = [...next];
+          return remaining.length ? remaining[remaining.length - 1] : null;
+        });
       } else {
         next.add(acc.id);
         setAccountRisks(r => ({ ...r, [acc.id]: "" }));
         setAccountRiskModes(m => ({ ...m, [acc.id]: "$" }));
+        setActiveAccountId(acc.id);
       }
       return next;
     });
   }
+
+  function openAccount(acc) {
+    setActiveAccountId(acc.id);
+  }
+
 
   function setRisk(accId, val) {
     setAccountRisks(prev => ({ ...prev, [accId]: val }));
@@ -470,10 +485,10 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
       <div style={{
         position: "sticky", top: 0, zIndex: 10,
         background: "var(--bg-page)", borderBottom: "0.5px solid var(--border-color)",
-        padding: "0 40px", height: "60px",
+        padding: "14px 40px", minHeight: "60px", boxSizing: "border-box",
         display: "flex", alignItems: "center", justifyContent: "space-between",
       }}>
-        <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "16px", fontWeight: 700, color: "var(--text-primary)" }}>
+        <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "15px", fontWeight: 600, color: "var(--text-primary)" }}>
           {editTrade ? "Edit Trade" : "Log Trade"}
         </span>
         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
@@ -495,20 +510,21 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
           }}>Cancel</button>
           <button onClick={handleSave} disabled={saving} style={{
             padding: "8px 22px",
-            background: saving ? "var(--text-faint-2)" : "oklch(0.72 0.17 152)",
+            background: saving ? "var(--text-faint-2)" : "var(--brand)",
             border: "none", borderRadius: "8px",
             color: saving ? "var(--text-faint)" : "var(--brand-fg)",
             cursor: saving ? "not-allowed" : "pointer",
             fontFamily: "'Inter', sans-serif", fontSize: "13px", fontWeight: 600,
             transition: "background 0.15s",
           }}
-          onMouseEnter={e => { if (!saving) e.currentTarget.style.background = "oklch(0.78 0.17 152)" }}
-          onMouseLeave={e => { if (!saving) e.currentTarget.style.background = "oklch(0.72 0.17 152)" }}
+          onMouseEnter={e => { if (!saving) e.currentTarget.style.background = "var(--brand-hover)" }}
+          onMouseLeave={e => { if (!saving) e.currentTarget.style.background = "var(--brand)" }}
           >
             {saving ? "Saving…" : "Save Trade"}
           </button>
         </div>
       </div>
+
 
       {/* Body — two columns */}
       <div style={{
@@ -738,6 +754,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                   <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                     {groupAccounts.map(acc => {
                       const isSelected = selectedAccounts.has(acc.id);
+                      const isExpanded = isSelected && acc.id === activeAccountId;
                       const mode = accountRiskModes[acc.id] || "$";
                       const rawVal = accountRisks[acc.id] || "";
 
@@ -757,22 +774,28 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                       const pnlNum = pnl !== null ? parseFloat(pnl) : null;
 
                       return (
-                        <div key={acc.id} onClick={() => toggleAccount(acc)} style={{
-                          background: isSelected ? "var(--bg-hover)" : "var(--bg-page)",
-                          border: `0.5px solid ${isSelected ? "var(--border-color-2)" : "var(--bg-surface)"}`,
-                          borderRadius: "10px", padding: "10px 12px",
-                          cursor: "pointer", transition: "all 0.15s",
-                          opacity: isSelected ? 1 : 0.55,
-                        }}>
+                        <div
+                          key={acc.id}
+                          onClick={() => isSelected ? openAccount(acc) : toggleAccount(acc)}
+                          style={{
+                            border: "0.5px solid var(--border-color)",
+                            borderRadius: "10px", padding: "10px 12px",
+                            cursor: "pointer", transition: "opacity 0.15s",
+                            opacity: isSelected ? 1 : 0.55,
+                          }}
+                        >
                           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
                             <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 0 }}>
-                              <div style={{
-                                width: "16px", height: "16px", borderRadius: "4px",
-                                border: `0.5px solid ${isSelected ? "var(--brand)" : "var(--border-color-2)"}`,
-                                background: isSelected ? "var(--green-bg)" : "transparent",
-                                display: "flex", alignItems: "center", justifyContent: "center",
-                                flexShrink: 0, transition: "all 0.15s",
-                              }}>
+                              <div
+                                onClick={e => { e.stopPropagation(); toggleAccount(acc); }}
+                                style={{
+                                  width: "16px", height: "16px", borderRadius: "4px",
+                                  border: `0.5px solid ${isSelected ? "var(--brand)" : "var(--border-color-2)"}`,
+                                  background: "transparent",
+                                  display: "flex", alignItems: "center", justifyContent: "center",
+                                  flexShrink: 0, transition: "all 0.15s", cursor: "pointer",
+                                }}
+                              >
                                 {isSelected && <span style={{ color: "var(--brand)", fontSize: "10px", lineHeight: 1 }}>✓</span>}
                               </div>
                               <span style={{
@@ -791,7 +814,24 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                               )}
                             </div>
 
-                            {isSelected && (
+                            {/* Selected but collapsed — show read-only risk/result */}
+                            {isSelected && !isExpanded && (
+                              <span style={{
+                                fontSize: "12px", fontFamily: "'JetBrains Mono', monospace",
+                                color: pnlNum !== null ? pnlColor(pnlNum) : "var(--text-faint-2)",
+                                flexShrink: 0,
+                              }}>
+                                {rawVal ? `${rawVal}${mode}` : "—"}
+                                {pnlNum !== null && (
+                                  <span style={{ marginLeft: "8px" }}>
+                                    {pnlNum >= 0 ? "+" : ""}${Math.abs(pnlNum).toFixed(2)}
+                                  </span>
+                                )}
+                              </span>
+                            )}
+
+                            {/* Expanded — editable controls */}
+                            {isExpanded && (
                               <div onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
                                 <div style={{
                                   display: "flex", borderRadius: "6px",
@@ -815,6 +855,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                                   placeholder={mode === "%" ? "1.0" : "100"}
                                   value={rawVal}
                                   onChange={e => setRisk(acc.id, e.target.value)}
+                                  autoFocus
                                   style={{ ...inputStyle, width: "60px", padding: "5px 8px", fontSize: "12px" }}
                                 />
                                 <span style={{
