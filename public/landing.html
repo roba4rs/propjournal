@@ -1222,8 +1222,8 @@ document.addEventListener('DOMContentLoaded', function() {
     try {
       const { createClient } = supabase;
       const client = createClient(
-        'YOUR_SUPABASE_URL',
-        'YOUR_SUPABASE_ANON_KEY'
+        'https://rtadvmqifguaqpreuslm.supabase.co',
+        'sb_publishable_t7WoiBLpaIEnl5n5uFA-MA_pBRpJ_vw'
       );
 
       const { data: { session } } = await client.auth.getSession();
