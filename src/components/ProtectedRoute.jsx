@@ -4,7 +4,6 @@ import { supabase } from '../supabaseClient'
 
 export default function ProtectedRoute({ children }) {
   const [session, setSession] = useState(undefined)
-  const [trialExpired, setTrialExpired] = useState(false)
   const [checking, setChecking] = useState(true)
   const navigate = useNavigate()
 
@@ -23,7 +22,7 @@ export default function ProtectedRoute({ children }) {
     if (userData) {
       const now = new Date()
       if (userData.plan_expires_at && new Date(userData.plan_expires_at) > now) {
-        setTrialExpired(false)
+        // active plan, do nothing
       } else {
         const trialStart = new Date(userData.trial_start)
         const trialEnd = new Date(trialStart)
@@ -44,8 +43,11 @@ export default function ProtectedRoute({ children }) {
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         setSession(session)
+      }
+      if (event === 'SIGNED_OUT') {
+        setSession(null)
       }
     })
 
@@ -54,6 +56,5 @@ export default function ProtectedRoute({ children }) {
 
   if (session === undefined || checking) return null
   if (!session) return <Navigate to="/login" replace />
-  if (trialExpired) return null
   return children
 }
