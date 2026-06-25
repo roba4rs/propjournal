@@ -49,7 +49,9 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
 
   const dayData = useMemo(() => {
     const map = {}
-    trades.filter(t => t.pnl != null).forEach(t => {
+    // Exclude in_progress trades: their pnl is a projected risk×RR figure,
+    // not a realized result, so it shouldn't count toward a day's P&L yet.
+    trades.filter(t => t.pnl != null && t.outcome !== 'in_progress').forEach(t => {
       // normalise: trade dates may come as "2026-05-06T..." or "2026-05-06"
       const dateKey = t.date ? t.date.slice(0, 10) : null
       if (!dateKey) return
