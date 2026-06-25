@@ -11,6 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
 <script>
   (function () {
     var saved = localStorage.getItem('theme');
@@ -129,7 +130,37 @@
 
     @media (max-width: 768px) {
       .nav-links, .nav-login { display: none; }
+      .nav-dashboard-btn { display: none !important; }
     }
+
+    /* ── Avatar dropdown ── */
+    .avatar-wrap { position: relative; display: inline-flex; }
+    .avatar-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      min-width: 160px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      z-index: 200;
+      display: none;
+    }
+    .avatar-dropdown.open { display: block; }
+    .avatar-dropdown a,
+    .avatar-dropdown button {
+      display: flex; align-items: center; gap: 10px;
+      width: 100%; padding: 11px 14px;
+      font-size: 13px; font-family: var(--font-sans);
+      color: var(--foreground); background: transparent;
+      border: none; cursor: pointer; text-align: left;
+      text-decoration: none; transition: background 0.12s;
+    }
+    .avatar-dropdown a:hover,
+    .avatar-dropdown button:hover { background: var(--surface-2); }
+    .avatar-dropdown .signout { color: var(--red-fg); }
+    .avatar-dropdown .divider { height: 1px; background: var(--border); margin: 0; }
 
     /* ── Hero ── */
     .hero {
@@ -644,8 +675,6 @@
     .nav-avatar {
       width: 32px; height: 32px;
       border-radius: 50%;
-      background: var(--brand);
-      color: var(--brand-fg);
       font-size: 12px; font-weight: 700;
       display: inline-flex; align-items: center; justify-content: center;
       letter-spacing: 0.02em;
@@ -653,8 +682,8 @@
       text-decoration: none;
       flex-shrink: 0;
       border: none;
+      font-family: var(--font-sans);
     }
-    .nav-avatar:hover { background: var(--brand-hover); }
 
 </style>
 </head>
@@ -1193,17 +1222,30 @@ document.addEventListener('DOMContentLoaded', function() {
     try {
       const { createClient } = supabase;
       const client = createClient(
-        'https://rtadvmqifguaqpreuslm.supabase.co',
-        'sb_publishable_t7WoiBLpaIEnl5n5uFA-MA_pBRpJ_vw'
+        'YOUR_SUPABASE_URL',
+        'YOUR_SUPABASE_ANON_KEY'
       );
 
       const { data: { session } } = await client.auth.getSession();
       if (!session) return; // not logged in — leave buttons as-is
 
       const email = session.user.email || '';
-      // Get up to 2 initials from email prefix (e.g. "ro" → "RO", "r" → "R")
       const prefix = email.split('@')[0] || '';
       const initials = prefix.slice(0, 2).toUpperCase();
+
+      // Deterministic palette — same hash logic as AdminUsers.jsx
+      const AVATAR_PALETTES = [
+        { bg: 'rgba(29,185,123,0.15)', fg: '#1db97b' },  // green
+        { bg: 'rgba(96,165,250,0.15)', fg: '#60a5fa' },  // blue
+        { bg: 'rgba(251,191,36,0.15)', fg: '#f59e0b' },  // amber
+        { bg: 'rgba(239,68,68,0.15)',  fg: '#ef4444' },  // red
+      ];
+      function avatarPalette(seed) {
+        let hash = 0;
+        for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
+        return AVATAR_PALETTES[hash % AVATAR_PALETTES.length];
+      }
+      const palette = avatarPalette(email);
 
       // ── Nav: hide "Log in", replace "Sign up" with avatar + Dashboard ──
       const navLogin = document.getElementById('nav-login');
@@ -1212,19 +1254,62 @@ document.addEventListener('DOMContentLoaded', function() {
       if (navLogin) navLogin.style.display = 'none';
 
       if (navSignup) {
-        const avatar = document.createElement('a');
-        avatar.href = '/dashboard';
+        const isMobile = window.innerWidth <= 768;
+
+        // Avatar wrapped in a div for dropdown
+        const wrap = document.createElement('div');
+        wrap.className = 'avatar-wrap';
+
+        const avatar = document.createElement('button');
         avatar.className = 'nav-avatar';
         avatar.title = email;
         avatar.textContent = initials;
+        avatar.style.background = palette.bg;
+        avatar.style.color = palette.fg;
 
+        // Dropdown (always in DOM, visibility toggled by class)
+        const dropdown = document.createElement('div');
+        dropdown.className = 'avatar-dropdown';
+        dropdown.innerHTML = `
+          <a href="/dashboard">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+            Dashboard
+          </a>
+          <div class="divider"></div>
+          <button class="signout" id="nav-signout">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Sign out
+          </button>
+        `;
+
+        wrap.appendChild(avatar);
+        wrap.appendChild(dropdown);
+
+        // Toggle dropdown on avatar click
+        avatar.addEventListener('click', function(e) {
+          e.stopPropagation();
+          dropdown.classList.toggle('open');
+        });
+
+        // Close dropdown on outside click
+        document.addEventListener('click', function() {
+          dropdown.classList.remove('open');
+        });
+
+        // Sign out handler
+        dropdown.querySelector('#nav-signout').addEventListener('click', async function() {
+          await client.auth.signOut();
+          window.location.href = '/login';
+        });
+
+        // Dashboard button — hidden on mobile via CSS
         const dashBtn = document.createElement('a');
         dashBtn.href = '/dashboard';
-        dashBtn.className = 'btn-brand';
+        dashBtn.className = 'btn-brand nav-dashboard-btn';
         dashBtn.textContent = 'Dashboard';
 
-        navSignup.replaceWith(avatar);
-        avatar.insertAdjacentElement('afterend', dashBtn);
+        navSignup.replaceWith(wrap);
+        wrap.insertAdjacentElement('afterend', dashBtn);
       }
 
       // ── Hero: "Sign up" → "Dashboard", "Log in" → "My Account" ──
@@ -1237,8 +1322,8 @@ document.addEventListener('DOMContentLoaded', function() {
       }
 
       if (heroLogin) {
-        heroLogin.href = '/settings';
-        heroLogin.textContent = 'My Account';
+        heroLogin.href = '/trades';
+        heroLogin.innerHTML = '<i class="ti ti-list-details" aria-hidden="true" style="font-size:16px;line-height:1"></i> Log Trade';
       }
 
     } catch (e) {

@@ -1,5 +1,5 @@
 import { NavLink, useNavigate, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Flame, TrendingUp, Settings2, BookOpen, Plus, Bell, ShieldCheck, Sun, Moon } from 'lucide-react'
+import { LayoutDashboard, Flame, TrendingUp, Settings, ListDetails, Plus, Bell, ShieldCheck, Sun, Moon } from 'lucide-react'
 
 import { supabase } from '../supabaseClient'
 import { useEffect, useState, useRef } from 'react'
@@ -12,9 +12,9 @@ import { ADMIN_USER_ID } from '../constants/admin'
 const navItems = [
   { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
   { label: 'Challenges', path: '/challenges', icon: Flame },
-  { label: 'Trade Log', path: '/trades', icon: BookOpen },
+  { label: 'Trade Log', path: '/trades', icon: ListDetails },
   { label: 'Analytics', path: '/analytics', icon: TrendingUp },
-  { label: 'Settings', path: '/settings', icon: Settings2 },
+  { label: 'Settings', path: '/settings', icon: Settings },
 ]
 
 // Bottom tab bar icons — Trades slot is replaced by a + FAB button
