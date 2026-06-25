@@ -154,7 +154,7 @@ export default function Signup() {
                 pattern: { value: /^\S+@\S+$/i, message: 'Invalid email' }
               })}
               type="email"
-              placeholder="you@example.com"
+              placeholder="robert@thepropjournal.com"
               style={inputStyle}
             />
             {errors.email && (

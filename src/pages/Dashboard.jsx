@@ -83,11 +83,78 @@ function sessionLabel(s) {
   return { london: 'London', new_york: 'NY', asian: 'Asian' }[s] || s || '—'
 }
 
+// Resolving an in_progress trade: the stored pnl is already the projected
+// risk×RR profit. Win keeps it as-is. Loss derives the original risk amount
+// from pnl/rr (since risk% itself isn't stored per-trade) and negates it,
+// falling back to mirroring the magnitude if rr is missing/zero.
+function resolvedPnl(trade, newOutcome) {
+  const projected = trade.pnl_gross != null ? parseFloat(trade.pnl_gross) : (trade.pnl != null ? parseFloat(trade.pnl) : null)
+  if (newOutcome === 'win') return projected
+  if (newOutcome === 'loss') {
+    const rr = parseFloat(trade.rr)
+    if (projected != null && rr) return -Math.abs(projected / rr)
+    if (projected != null) return -Math.abs(projected)
+    return null
+  }
+  return projected
+}
+
 // ─── Trade Detail Modal ───────────────────────────────────────────────────────
-function TradeDetailModal({ trade, onClose, isMobile }) {
+function TradeDetailModal({ trade, onClose, isMobile, onResolve }) {
+  const [resolving, setResolving] = useState(false)
   if (!trade) return null
 
   const pnlVal = trade.pnl != null ? parseFloat(trade.pnl) : null
+  const isOpen = trade.outcome === 'in_progress'
+
+  async function handleResolve(newOutcome) {
+    if (resolving) return
+    setResolving(true)
+    try {
+      await onResolve(trade, newOutcome)
+    } finally {
+      setResolving(false)
+    }
+  }
+
+  const resolveSection = isOpen && (
+    <div style={{
+      background: 'var(--blue-bg-2)', border: '0.5px solid var(--blue-bg)',
+      borderRadius: isMobile ? '8px' : '10px', padding: isMobile ? '12px' : '16px 18px',
+      display: 'flex', flexDirection: isMobile ? 'column' : 'row',
+      alignItems: isMobile ? 'stretch' : 'center', justifyContent: 'space-between', gap: isMobile ? '10px' : '16px',
+    }}>
+      <div style={{ fontSize: isMobile ? '11px' : '13px', color: 'var(--blue)', fontFamily: 'Inter, sans-serif', fontWeight: 500 }}>
+        This trade is still open — mark the outcome to log the final P&L
+      </div>
+      <div style={{ display: 'flex', gap: '8px' }}>
+        <button
+          disabled={resolving}
+          onClick={() => handleResolve('win')}
+          style={{
+            flex: isMobile ? 1 : undefined, padding: isMobile ? '9px 14px' : '8px 18px',
+            borderRadius: '8px', border: '0.5px solid var(--green-bg-2)',
+            background: 'var(--green-bg)', color: 'var(--brand)',
+            fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', fontWeight: 600,
+            textTransform: 'uppercase', letterSpacing: '0.06em',
+            cursor: resolving ? 'default' : 'pointer', opacity: resolving ? 0.6 : 1,
+          }}
+        >Win</button>
+        <button
+          disabled={resolving}
+          onClick={() => handleResolve('loss')}
+          style={{
+            flex: isMobile ? 1 : undefined, padding: isMobile ? '9px 14px' : '8px 18px',
+            borderRadius: '8px', border: '0.5px solid var(--red-bg)',
+            background: 'var(--red-bg-2)', color: 'var(--red)',
+            fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', fontWeight: 600,
+            textTransform: 'uppercase', letterSpacing: '0.06em',
+            cursor: resolving ? 'default' : 'pointer', opacity: resolving ? 0.6 : 1,
+          }}
+        >Loss</button>
+      </div>
+    </div>
+  )
 
   if (isMobile) {
     return (
@@ -114,6 +181,7 @@ function TradeDetailModal({ trade, onClose, isMobile }) {
           </div>
           {/* Body */}
           <div style={{ overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {resolveSection}
             {/* Stats row */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
               {[
@@ -182,6 +250,7 @@ function TradeDetailModal({ trade, onClose, isMobile }) {
         </div>
         {/* Body */}
         <div style={{ padding: '28px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          {resolveSection}
           {/* Stats strip */}
           <div style={{ display: 'flex', gap: '1px', background: 'var(--border-color)', borderRadius: '10px', overflow: 'hidden', border: '0.5px solid var(--border-color)' }}>
             {[
@@ -414,6 +483,33 @@ export default function Dashboard() {
     }
   }
 
+  async function handleResolveTrade(trade, newOutcome) {
+    const newPnlGross = resolvedPnl(trade, newOutcome)
+    try {
+      const { error } = await supabase
+        .from('trades')
+        .update({ outcome: newOutcome, pnl: newPnlGross })
+        .eq('id', trade.id)
+      if (error) throw error
+
+      const swap = parseFloat(trade.swap) || 0
+      const commission = parseFloat(trade.commission) || 0
+      const hasAdjustments = trade.swap != null || trade.commission != null
+      const updated = {
+        ...trade,
+        outcome: newOutcome,
+        pnl_gross: hasAdjustments ? newPnlGross : undefined,
+        pnl: hasAdjustments ? (parseFloat(newPnlGross) || 0) + swap + commission : newPnlGross,
+      }
+
+      setTrades(prev => prev.map(t => (t.id === trade.id ? updated : t)))
+      setDetailTrade(updated)
+    } catch (err) {
+      console.error('Failed to resolve trade:', err)
+      alert('Could not save the trade outcome. Please try again.')
+    }
+  }
+
   // ─── MOBILE LAYOUT ───────────────────────────────────────────────────────────
   if (isMobile) {
     const stats = computeStats(trades)
@@ -504,6 +600,7 @@ export default function Dashboard() {
             trade={detailTrade}
             isMobile
             onClose={() => setDetailTrade(null)}
+            onResolve={handleResolveTrade}
           />
         )}
       </div>
@@ -594,6 +691,7 @@ export default function Dashboard() {
         <TradeDetailModal
           trade={detailTrade}
           onClose={() => setDetailTrade(null)}
+          onResolve={handleResolveTrade}
         />
       )}
     </div>
