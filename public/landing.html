@@ -1227,7 +1227,7 @@ document.addEventListener('DOMContentLoaded', function() {
       );
 
       const { data: { session } } = await client.auth.getSession();
-      if (!session) return; // not logged in — leave buttons as-is
+      if (!session) return; // not logged in — leave buttons as-is.
 
       const user = session.user;
       const email = user.email || '';
