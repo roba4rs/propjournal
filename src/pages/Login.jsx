@@ -156,7 +156,7 @@ export default function Login() {
                     pattern: { value: /^\S+@\S+$/i, message: 'Invalid email' }
                   })}
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder="robert@thepropjournal.com"
                   autoComplete="email"
                   style={inputStyle}
                 />

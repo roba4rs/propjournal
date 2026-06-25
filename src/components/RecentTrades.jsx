@@ -142,12 +142,13 @@ export default function RecentTrades({ trades = [], loading = false, mobile = fa
         ) : (
           recent.map(t => {
             const pnlVal = parseFloat(t.pnl)
-            const isWin  = t.outcome === 'win'  || pnlVal > 0
-            const isLoss = t.outcome === 'loss' || pnlVal < 0
-            const outcomeLabel  = isWin ? 'Win'  : isLoss ? 'Loss' : 'BE'
-            const outcomeBg     = isWin ? 'var(--green-bg)' : isLoss ? 'var(--red-bg-2)' : 'var(--amber-bg-2)'
-            const outcomeColor  = isWin ? 'var(--brand)' : isLoss ? 'var(--red)' : 'var(--amber)'
-            const outcomeBorder = isWin ? 'var(--green-bg-2)' : isLoss ? 'var(--red-bg)' : 'var(--amber-bg)'
+            const isInProgress = t.outcome === 'in_progress'
+            const isWin  = !isInProgress && (t.outcome === 'win'  || pnlVal > 0)
+            const isLoss = !isInProgress && (t.outcome === 'loss' || pnlVal < 0)
+            const outcomeLabel  = isInProgress ? 'In Progress' : isWin ? 'Win'  : isLoss ? 'Loss' : 'BE'
+            const outcomeBg     = isInProgress ? 'var(--blue-bg-2)' : isWin ? 'var(--green-bg)' : isLoss ? 'var(--red-bg-2)' : 'var(--amber-bg-2)'
+            const outcomeColor  = isInProgress ? 'var(--blue)' : isWin ? 'var(--brand)' : isLoss ? 'var(--red)' : 'var(--amber)'
+            const outcomeBorder = isInProgress ? 'var(--blue-bg)' : isWin ? 'var(--green-bg-2)' : isLoss ? 'var(--red-bg)' : 'var(--amber-bg)'
             return (
               <div key={t.id} style={{
                 display: 'grid', gridTemplateColumns: '1fr auto 1fr',
