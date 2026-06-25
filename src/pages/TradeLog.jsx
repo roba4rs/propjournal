@@ -3017,7 +3017,7 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
           onMouseEnter={e => { if (!saving) e.currentTarget.style.background = 'oklch(0.78 0.17 152)' }}
           onMouseLeave={e => { if (!saving) e.currentTarget.style.background = 'oklch(0.72 0.17 152)' }}
           >
-            {saving ? 'Saving…' : 'Save Trade'}
+            {saving ? 'Saving….' : 'Save Trade'}
           </button>
         </div>
       </div>
