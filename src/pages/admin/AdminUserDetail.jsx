@@ -1,12 +1,73 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, AlertTriangle } from 'lucide-react'
 import Sidebar from '../../components/Sidebar'
 import { supabase } from '../../supabaseClient'
 import { useSidebar } from '../../SidebarContext'
 
+const PAID_PLANS = ['monthly', 'biannual', 'annual']
+const TRIAL_DAYS = 7
+
 function fmtDate(d) {
   return d ? new Date(d).toLocaleDateString() : '—'
+}
+
+function fmtMoney(n) {
+  if (n == null || n === '') return '—'
+  return `$${Number(n).toLocaleString('en-US')}`
+}
+
+function initials(name, email) {
+  if (name) return name.trim().split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0, 2)
+  return email ? email.slice(0, 2).toUpperCase() : '?'
+}
+
+function trialDaysLeft(trialStart) {
+  if (!trialStart) return null
+  const start = new Date(trialStart)
+  const now = new Date()
+  const diff = TRIAL_DAYS - Math.floor((now - start) / (1000 * 60 * 60 * 24))
+  return Math.max(0, diff)
+}
+
+function StatusPill({ plan, trialStart }) {
+  if (PAID_PLANS.includes(plan)) {
+    return (
+      <span style={{
+        fontSize: '10px', fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.07em',
+        textTransform: 'uppercase', padding: '3px 9px', borderRadius: '5px',
+        background: 'var(--green-bg)', color: 'var(--brand)', border: '0.5px solid var(--green-bg-2)',
+        display: 'inline-flex', alignItems: 'center', gap: '5px',
+      }}>
+        <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: 'var(--brand)' }} />
+        {plan}
+      </span>
+    )
+  }
+  const days = trialDaysLeft(trialStart)
+  if (days === null) {
+    return (
+      <span style={{
+        fontSize: '10px', fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.07em',
+        textTransform: 'uppercase', padding: '3px 9px', borderRadius: '5px',
+        background: 'var(--bg-surface-2)', color: 'var(--text-muted)', border: '0.5px solid var(--border-color-2)',
+      }}>Trial</span>
+    )
+  }
+  const expired = days === 0
+  return (
+    <span style={{
+      fontSize: '10px', fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.07em',
+      textTransform: 'uppercase', padding: '3px 9px', borderRadius: '5px',
+      background: expired ? 'var(--red-bg-2)' : 'var(--amber-bg-2)',
+      color: expired ? 'var(--red)' : 'var(--amber)',
+      border: `0.5px solid ${expired ? 'var(--red-bg)' : 'var(--amber-bg)'}`,
+      display: 'inline-flex', alignItems: 'center', gap: '5px',
+    }}>
+      <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: expired ? 'var(--red)' : 'var(--amber)' }} />
+      {expired ? 'Trial expired' : `Trial · ${days}d left`}
+    </span>
+  )
 }
 
 function StatusBadge({ status }) {
@@ -69,6 +130,98 @@ function Row({ label, children, last }) {
   )
 }
 
+function TabBar({ tab, setTab, counts }) {
+  const tabs = [
+    { id: 'overview', label: 'Overview' },
+    { id: 'accounts', label: `Accounts${counts.accounts != null ? ` (${counts.accounts})` : ''}` },
+    { id: 'trades', label: `Trades${counts.trades != null ? ` (${counts.trades})` : ''}` },
+    { id: 'billing', label: 'Billing' },
+  ]
+  return (
+    <div style={{ display: 'flex', gap: '4px', borderBottom: '0.5px solid var(--border-color)', marginBottom: '24px', overflowX: 'auto' }}>
+      {tabs.map(t => (
+        <button
+          key={t.id}
+          onClick={() => setTab(t.id)}
+          style={{
+            border: 'none', background: 'transparent',
+            color: tab === t.id ? 'var(--text-primary)' : 'var(--text-faint)',
+            fontFamily: 'Inter, sans-serif', fontSize: '13px', fontWeight: 500,
+            padding: '10px 4px', marginRight: '22px', cursor: 'pointer', whiteSpace: 'nowrap',
+            borderBottom: `2px solid ${tab === t.id ? 'var(--brand)' : 'transparent'}`,
+            position: 'relative', top: '1px',
+          }}
+        >{t.label}</button>
+      ))}
+    </div>
+  )
+}
+
+function AccountsTable({ accounts }) {
+  return (
+    <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px', overflow: 'hidden' }}>
+      {accounts.length === 0 ? (
+        <div style={{ padding: '18px', color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '13px' }}>No accounts created yet.</div>
+      ) : (
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ borderBottom: '0.5px solid var(--border-color)' }}>
+              {['Name', 'Firm', 'Size', 'Type', 'Phase', 'Status', 'Created'].map((h) => (
+                <th key={h} style={{ textAlign: 'left', padding: '12px 18px', fontSize: '11px', color: 'var(--text-faint)', fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: '500' }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {accounts.map((acc) => (
+              <tr key={acc.id} style={{ borderBottom: '0.5px solid var(--border-color)' }}>
+                <td style={{ padding: '12px 18px', fontSize: '14px', color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif' }}>{acc.name}</td>
+                <td style={{ padding: '12px 18px', fontSize: '13px', color: 'var(--text-muted)', fontFamily: 'Inter, sans-serif' }}>{acc.firm_name || '—'}</td>
+                <td style={{ padding: '12px 18px', fontSize: '13px', color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace' }}>{fmtMoney(acc.account_size)}</td>
+                <td style={{ padding: '12px 18px', fontSize: '13px', color: 'var(--text-muted)', fontFamily: 'Inter, sans-serif', textTransform: 'capitalize' }}>{acc.type || '—'}</td>
+                <td style={{ padding: '12px 18px', fontSize: '13px', color: 'var(--text-muted)', fontFamily: 'Inter, sans-serif', textTransform: 'capitalize' }}>{acc.phase ? acc.phase.replace('_', ' ') : '—'}</td>
+                <td style={{ padding: '12px 18px' }}><StatusBadge status={acc.status} /></td>
+                <td style={{ padding: '12px 18px', fontSize: '13px', color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace' }}>{fmtDate(acc.created_at)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  )
+}
+
+function TradesTable({ trades }) {
+  return (
+    <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px', overflow: 'hidden' }}>
+      {trades.length === 0 ? (
+        <div style={{ padding: '18px', color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '13px' }}>No trades logged yet.</div>
+      ) : (
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ borderBottom: '0.5px solid var(--border-color)' }}>
+              {['Pair', 'Direction', 'Outcome', 'P&L', 'Date'].map((h) => (
+                <th key={h} style={{ textAlign: 'left', padding: '12px 18px', fontSize: '11px', color: 'var(--text-faint)', fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: '500' }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {trades.map((t) => (
+              <tr key={t.id} style={{ borderBottom: '0.5px solid var(--border-color)' }}>
+                <td style={{ padding: '12px 18px', fontSize: '14px', color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif' }}>{t.pair || '—'}</td>
+                <td style={{ padding: '12px 18px', fontSize: '13px', color: 'var(--text-muted)', fontFamily: 'Inter, sans-serif', textTransform: 'capitalize' }}>{t.direction || '—'}</td>
+                <td style={{ padding: '12px 18px' }}><OutcomeBadge outcome={t.outcome} /></td>
+                <td style={{ padding: '12px 18px', fontSize: '13px', fontFamily: 'JetBrains Mono, monospace', color: pnlColor(t.pnl) }}>
+                  {t.pnl != null ? `${parseFloat(t.pnl) >= 0 ? '+' : ''}$${Math.abs(parseFloat(t.pnl)).toFixed(2)}` : '—'}
+                </td>
+                <td style={{ padding: '12px 18px', fontSize: '13px', color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace' }}>{t.date || fmtDate(t.created_at)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  )
+}
 
 export default function AdminUserDetail() {
   const { userId } = useParams()
@@ -76,9 +229,10 @@ export default function AdminUserDetail() {
   const { collapsed } = useSidebar()
   const [user, setUser] = useState(null)
   const [accounts, setAccounts] = useState([])
-  const [recentTrades, setRecentTrades] = useState([])
+  const [trades, setTrades] = useState([])
   const [loading, setLoading] = useState(true)
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
+  const [tab, setTab] = useState('overview')
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768)
@@ -92,8 +246,9 @@ export default function AdminUserDetail() {
       setUser(userData)
       const { data: accountsData } = await supabase.from('accounts').select('*').eq('user_id', userId).order('created_at', { ascending: false })
       setAccounts(accountsData || [])
-      const { data: tradesData } = await supabase.from('trades').select('id, pair, direction, outcome, pnl, date, created_at').eq('user_id', userId).order('created_at', { ascending: false }).limit(5)
-      setRecentTrades(tradesData || [])
+      // Full trade history for this tab — not capped, since it's now a dedicated view.
+      const { data: tradesData } = await supabase.from('trades').select('id, pair, direction, outcome, pnl, date, created_at').eq('user_id', userId).order('created_at', { ascending: false })
+      setTrades(tradesData || [])
       setLoading(false)
     }
     load()
@@ -109,6 +264,9 @@ export default function AdminUserDetail() {
       </div>
     )
   }
+
+  const activeAccounts = accounts.filter(a => a.status === 'active' || a.status === 'funded').length
+  const closedTrades = trades.filter(t => t.outcome && t.outcome !== 'in_progress').length
 
   // ─── MOBILE ──────────────────────────────────────────────────────────────────
   if (isMobile) {
@@ -129,103 +287,59 @@ export default function AdminUserDetail() {
             >
               <ArrowLeft size={13} strokeWidth={2} /> Back to users
             </button>
-            <h1 style={{ color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontSize: '20px', fontWeight: '600', margin: '0 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {user.name || user.email}
-            </h1>
-            {user.name && (
-              <p style={{ color: 'var(--text-faint-2)', fontFamily: 'Inter, sans-serif', fontSize: '12px', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+              <div style={{
+                width: '40px', height: '40px', borderRadius: '11px', flexShrink: 0,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: 'var(--green-bg)', color: 'var(--brand)', fontSize: '15px', fontWeight: 700, fontFamily: 'Inter, sans-serif',
+              }}>{initials(user.name, user.email)}</div>
+              <div style={{ minWidth: 0 }}>
+                <h1 style={{ color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontSize: '18px', fontWeight: '600', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {user.name || user.email}
+                </h1>
+                <p style={{ color: 'var(--text-faint-2)', fontFamily: 'Inter, sans-serif', fontSize: '12px', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</p>
+              </div>
+            </div>
+            <StatusPill plan={user.plan} trialStart={user.trial_start} />
+          </div>
+
+          <div style={{ margin: '16px 14px 0' }}>
+            <TabBar tab={tab} setTab={setTab} counts={{ accounts: accounts.length, trades: trades.length }} />
+          </div>
+
+          <div style={{ margin: '0 14px' }}>
+            {tab === 'overview' && (
+              <>
+                <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px', overflow: 'hidden', marginBottom: '16px' }}>
+                  <Row label="Plan"><span style={{ fontFamily: 'JetBrains Mono, monospace' }}>{user.plan || '—'}</span></Row>
+                  <Row label="Signed Up">{fmtDate(user.created_at)}</Row>
+                  <Row label="Trial Start">{fmtDate(user.trial_start)}</Row>
+                  <Row label="Plan Expires" last>{fmtDate(user.plan_expires_at)}</Row>
+                </div>
+                <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px', padding: '14px', fontSize: '13px', color: 'var(--text-muted)', lineHeight: 1.6, fontFamily: 'Inter, sans-serif' }}>
+                  {activeAccounts} active account{activeAccounts !== 1 ? 's' : ''} · {trades.length} trade{trades.length !== 1 ? 's' : ''} logged · {closedTrades} closed
+                </div>
+              </>
+            )}
+            {tab === 'accounts' && <AccountsTable accounts={accounts} />}
+            {tab === 'trades' && <TradesTable trades={trades} />}
+            {tab === 'billing' && (
+              <>
+                <div style={{
+                  background: 'var(--amber-bg-2)', border: '0.5px solid var(--amber-bg)', borderRadius: '8px',
+                  padding: '12px 14px', fontSize: '12px', color: 'var(--amber)', display: 'flex', gap: '8px', marginBottom: '16px',
+                }}>
+                  <AlertTriangle size={14} style={{ flexShrink: 0, marginTop: '1px' }} />
+                  <span>Transaction history isn't tracked yet — Paddle webhooks only update plan and expiry, not individual payments.</span>
+                </div>
+                <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px', overflow: 'hidden' }}>
+                  <Row label="Current Plan"><span style={{ fontFamily: 'JetBrains Mono, monospace' }}>{user.plan || '—'}</span></Row>
+                  <Row label="Trial Start">{fmtDate(user.trial_start)}</Row>
+                  <Row label="Plan Expires" last>{fmtDate(user.plan_expires_at)}</Row>
+                </div>
+              </>
             )}
           </div>
-
-          {/* User info — labeled rows */}
-          <div style={{ margin: '14px 14px 0', background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px', overflow: 'hidden' }}>
-            <Row label="Plan"><span style={{ fontFamily: 'JetBrains Mono, monospace' }}>{user.plan || '—'}</span></Row>
-            <Row label="Signed Up">{fmtDate(user.created_at)}</Row>
-            <Row label="Trial Start">{fmtDate(user.trial_start)}</Row>
-            <Row label="Plan Expires" last>{fmtDate(user.plan_expires_at)}</Row>
-          </div>
-
-          {/* Accounts */}
-          <div style={{ margin: '20px 14px 0' }}>
-            <h2 style={{ color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: '600', margin: '0 0 8px' }}>
-              Accounts ({accounts.length})
-            </h2>
-            <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px', overflow: 'hidden' }}>
-
-              {/* Column headers */}
-              {accounts.length > 0 && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px 70px 60px', gap: '0', padding: '7px 14px', borderBottom: '0.5px solid var(--border-color)', background: 'var(--bg-page)' }}>
-                  {['Name', 'Type', 'Status', 'Date'].map(h => (
-                    <span key={h} style={{ fontSize: '10px', color: 'var(--text-faint-2)', fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{h}</span>
-                  ))}
-                </div>
-              )}
-
-              {accounts.length === 0 ? (
-                <div style={{ padding: '14px', color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '13px' }}>No accounts created yet.</div>
-              ) : accounts.map((acc, i) => (
-                <div key={acc.id} style={{
-                  display: 'grid', gridTemplateColumns: '1fr 80px 70px 60px',
-                  alignItems: 'center', padding: '10px 14px',
-                  borderBottom: i < accounts.length - 1 ? '0.5px solid var(--border-color)' : 'none',
-                }}>
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: '13px', color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontWeight: '500', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{acc.name}</div>
-                    {acc.firm_name && (
-                      <div style={{ fontSize: '11px', color: 'var(--text-faint-2)', fontFamily: 'Inter, sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px' }}>{acc.firm_name}{acc.phase ? ` · ${acc.phase}` : ''}</div>
-                    )}
-                  </div>
-                  <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontFamily: 'Inter, sans-serif', textTransform: 'capitalize' }}>{acc.type || '—'}</span>
-                  <StatusBadge status={acc.status} />
-                  <span style={{ fontSize: '11px', color: 'var(--text-faint-2)', fontFamily: 'JetBrains Mono, monospace' }}>
-                    {acc.created_at ? new Date(acc.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Recent Trades */}
-          <div style={{ margin: '20px 14px 0' }}>
-            <h2 style={{ color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: '600', margin: '0 0 8px' }}>
-              Recent Trades
-            </h2>
-            <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px', overflow: 'hidden' }}>
-
-              {/* Column headers */}
-              {recentTrades.length > 0 && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 55px 50px 70px', padding: '7px 14px', borderBottom: '0.5px solid var(--border-color)', background: 'var(--bg-page)' }}>
-                  {['Pair', 'Dir', 'Result', 'P&L'].map(h => (
-                    <span key={h} style={{ fontSize: '10px', color: 'var(--text-faint-2)', fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{h}</span>
-                  ))}
-                </div>
-              )}
-
-              {recentTrades.length === 0 ? (
-                <div style={{ padding: '14px', color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '13px' }}>No trades logged yet.</div>
-              ) : recentTrades.map((t, i) => {
-                const pnlVal = t.pnl != null ? parseFloat(t.pnl) : null
-                return (
-                  <div key={t.id} style={{
-                    display: 'grid', gridTemplateColumns: '1fr 55px 50px 70px',
-                    alignItems: 'center', padding: '10px 14px',
-                    borderBottom: i < recentTrades.length - 1 ? '0.5px solid var(--border-color)' : 'none',
-                  }}>
-                    <div>
-                      <div style={{ fontSize: '13px', color: 'var(--text-primary)', fontFamily: 'JetBrains Mono, monospace', fontWeight: '500' }}>{t.pair || '—'}</div>
-                      <div style={{ fontSize: '11px', color: 'var(--text-faint-2)', fontFamily: 'JetBrains Mono, monospace', marginTop: '2px' }}>{t.date || fmtDate(t.created_at)}</div>
-                    </div>
-                    <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontFamily: 'Inter, sans-serif', textTransform: 'capitalize' }}>{t.direction || '—'}</span>
-                    <OutcomeBadge outcome={t.outcome} />
-                    <span style={{ fontSize: '12px', fontFamily: 'JetBrains Mono, monospace', color: pnlColor(t.pnl) }}>
-                      {pnlVal != null ? `${pnlVal >= 0 ? '+' : ''}$${Math.abs(pnlVal).toFixed(2)}` : '—'}
-                    </span>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-
         </main>
       </div>
     )
@@ -251,83 +365,70 @@ export default function AdminUserDetail() {
           <ArrowLeft size={14} strokeWidth={2} /> Back to users
         </button>
 
-        <h1 style={{ color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontSize: '22px', fontWeight: '600', margin: '0 0 4px' }}>
-          {user.name || user.email}
-        </h1>
-        <p style={{ color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '13px', margin: '0 0 24px' }}>{user.email}</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '24px' }}>
+          <div style={{
+            width: '52px', height: '52px', borderRadius: '14px', flexShrink: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'var(--green-bg)', color: 'var(--brand)', fontSize: '19px', fontWeight: 700, fontFamily: 'Inter, sans-serif',
+          }}>{initials(user.name, user.email)}</div>
+          <div>
+            <h1 style={{ color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontSize: '20px', fontWeight: '600', margin: '0 0 4px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              {user.name || user.email}
+              <StatusPill plan={user.plan} trialStart={user.trial_start} />
+            </h1>
+            <p style={{ color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '13px', margin: 0 }}>{user.email}</p>
+          </div>
+        </div>
 
-        <div style={{ display: 'flex', gap: '16px', marginBottom: '28px', flexWrap: 'wrap' }}>
-          {[
-            { label: 'Plan',         value: user.plan || '—' },
-            { label: 'Signed Up',    value: fmtDate(user.created_at) },
-            { label: 'Trial Start',  value: fmtDate(user.trial_start) },
-            { label: 'Plan Expires', value: fmtDate(user.plan_expires_at) },
-          ].map((s) => (
-            <div key={s.label} style={{ flex: '1 1 140px', minWidth: '140px', background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px', padding: '14px 16px' }}>
-              <div style={{ fontSize: '11px', color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', marginBottom: '5px' }}>{s.label}</div>
-              <div style={{ fontSize: '15px', color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontWeight: '500' }}>{s.value}</div>
+        <TabBar tab={tab} setTab={setTab} counts={{ accounts: accounts.length, trades: trades.length }} />
+
+        {tab === 'overview' && (
+          <>
+            <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
+              {[
+                { label: 'Plan',         value: user.plan || '—' },
+                { label: 'Signed Up',    value: fmtDate(user.created_at) },
+                { label: 'Trial Start',  value: fmtDate(user.trial_start) },
+                { label: 'Plan Expires', value: fmtDate(user.plan_expires_at) },
+              ].map((s) => (
+                <div key={s.label} style={{ flex: '1 1 160px', minWidth: '160px', background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px', padding: '14px 16px' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', marginBottom: '5px' }}>{s.label}</div>
+                  <div style={{ fontSize: '15px', color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontWeight: '500' }}>{s.value}</div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+            <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px', padding: '16px 18px', fontSize: '13px', color: 'var(--text-muted)', lineHeight: 1.7, fontFamily: 'Inter, sans-serif' }}>
+              {activeAccounts} active account{activeAccounts !== 1 ? 's' : ''} · {trades.length} trade{trades.length !== 1 ? 's' : ''} logged · {closedTrades} closed
+            </div>
+          </>
+        )}
 
-        <h2 style={{ color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontSize: '15px', fontWeight: '600', margin: '0 0 12px' }}>Accounts ({accounts.length})</h2>
-        <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px', overflow: 'hidden', marginBottom: '28px' }}>
-          {accounts.length === 0 ? (
-            <div style={{ padding: '18px', color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '13px' }}>No accounts created yet.</div>
-          ) : (
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ borderBottom: '0.5px solid var(--border-color)' }}>
-                  {['Name', 'Firm', 'Type', 'Phase', 'Status', 'Created'].map((h) => (
-                    <th key={h} style={{ textAlign: 'left', padding: '12px 18px', fontSize: '11px', color: 'var(--text-faint)', fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: '500' }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {accounts.map((acc) => (
-                  <tr key={acc.id} style={{ borderBottom: '0.5px solid var(--border-color)' }}>
-                    <td style={{ padding: '12px 18px', fontSize: '14px', color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif' }}>{acc.name}</td>
-                    <td style={{ padding: '12px 18px', fontSize: '13px', color: 'var(--text-muted)', fontFamily: 'Inter, sans-serif' }}>{acc.firm_name || '—'}</td>
-                    <td style={{ padding: '12px 18px', fontSize: '13px', color: 'var(--text-muted)', fontFamily: 'Inter, sans-serif' }}>{acc.type}</td>
-                    <td style={{ padding: '12px 18px', fontSize: '13px', color: 'var(--text-muted)', fontFamily: 'Inter, sans-serif' }}>{acc.phase || '—'}</td>
-                    <td style={{ padding: '12px 18px' }}><StatusBadge status={acc.status} /></td>
-                    <td style={{ padding: '12px 18px', fontSize: '13px', color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace' }}>{fmtDate(acc.created_at)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
+        {tab === 'accounts' && <AccountsTable accounts={accounts} />}
+        {tab === 'trades' && <TradesTable trades={trades} />}
 
-        <h2 style={{ color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontSize: '15px', fontWeight: '600', margin: '0 0 12px' }}>Recent Trades</h2>
-        <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px', overflow: 'hidden' }}>
-          {recentTrades.length === 0 ? (
-            <div style={{ padding: '18px', color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '13px' }}>No trades logged yet.</div>
-          ) : (
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ borderBottom: '0.5px solid var(--border-color)' }}>
-                  {['Pair', 'Direction', 'Outcome', 'P&L', 'Date'].map((h) => (
-                    <th key={h} style={{ textAlign: 'left', padding: '12px 18px', fontSize: '11px', color: 'var(--text-faint)', fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: '500' }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {recentTrades.map((t) => (
-                  <tr key={t.id} style={{ borderBottom: '0.5px solid var(--border-color)' }}>
-                    <td style={{ padding: '12px 18px', fontSize: '14px', color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif' }}>{t.pair || '—'}</td>
-                    <td style={{ padding: '12px 18px', fontSize: '13px', color: 'var(--text-muted)', fontFamily: 'Inter, sans-serif', textTransform: 'capitalize' }}>{t.direction || '—'}</td>
-                    <td style={{ padding: '12px 18px' }}><OutcomeBadge outcome={t.outcome} /></td>
-                    <td style={{ padding: '12px 18px', fontSize: '13px', fontFamily: 'JetBrains Mono, monospace', color: pnlColor(t.pnl) }}>
-                      {t.pnl != null ? `${parseFloat(t.pnl) >= 0 ? '+' : ''}$${Math.abs(parseFloat(t.pnl)).toFixed(2)}` : '—'}
-                    </td>
-                    <td style={{ padding: '12px 18px', fontSize: '13px', color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace' }}>{t.date || fmtDate(t.created_at)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
+        {tab === 'billing' && (
+          <>
+            <div style={{
+              background: 'var(--amber-bg-2)', border: '0.5px solid var(--amber-bg)', borderRadius: '8px',
+              padding: '12px 16px', fontSize: '12.5px', color: 'var(--amber)', display: 'flex', gap: '10px', marginBottom: '20px', alignItems: 'flex-start',
+            }}>
+              <AlertTriangle size={15} style={{ flexShrink: 0, marginTop: '1px' }} />
+              <span>Transaction history isn't tracked yet — Paddle webhooks currently only update plan and expiry, not individual payments. Add a transactions table to show real payment history here.</span>
+            </div>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              {[
+                { label: 'Current Plan', value: user.plan || '—' },
+                { label: 'Trial Start',  value: fmtDate(user.trial_start) },
+                { label: 'Plan Expires', value: fmtDate(user.plan_expires_at) },
+              ].map((s) => (
+                <div key={s.label} style={{ flex: '1 1 160px', minWidth: '160px', background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px', padding: '14px 16px' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', marginBottom: '5px' }}>{s.label}</div>
+                  <div style={{ fontSize: '15px', color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontWeight: '500' }}>{s.value}</div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </main>
     </div>
   )
