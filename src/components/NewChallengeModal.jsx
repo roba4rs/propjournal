@@ -225,23 +225,23 @@ export default function NewChallengeModal({ onClose, onCreated }) {
 
   // ── Shared style primitives ────────────────────────────────
   const label = {
-    display: 'block', color: '#555',
+    display: 'block', color: 'var(--text-faint-2)',
     fontFamily: 'DM Sans, sans-serif',
     fontSize: '11px', marginBottom: '6px',
     textTransform: 'uppercase', letterSpacing: '0.05em',
   }
   const input = {
-    width: '100%', background: '#0d0d0d',
-    border: '0.5px solid #1e1e1e', borderRadius: '8px',
-    padding: '9px 12px', color: '#fff',
+    width: '100%', background: 'var(--bg-page)',
+    border: '0.5px solid var(--border-color)', borderRadius: '8px',
+    padding: '9px 12px', color: 'var(--text-primary)',
     fontFamily: 'DM Sans, sans-serif', fontSize: '13px',
     outline: 'none', boxSizing: 'border-box',
   }
   const selectTrigger = (active) => ({
-    width: '100%', background: '#0d0d0d',
-    border: `0.5px solid ${active ? '#1db97b' : '#1e1e1e'}`,
+    width: '100%', background: 'var(--bg-page)',
+    border: `0.5px solid ${active ? 'var(--brand)' : 'var(--border-color)'}`,
     borderRadius: '8px', padding: '9px 12px',
-    color: active ? '#fff' : '#444',
+    color: active ? 'var(--text-primary)' : 'var(--text-faint-2)',
     fontFamily: 'DM Sans, sans-serif', fontSize: '13px',
     cursor: 'pointer', display: 'flex',
     justifyContent: 'space-between', alignItems: 'center',
@@ -249,30 +249,30 @@ export default function NewChallengeModal({ onClose, onCreated }) {
   })
   const dropdown = {
     position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0,
-    background: '#161616', border: '0.5px solid #2a2a2a',
+    background: 'var(--bg-surface-2)', border: '0.5px solid var(--border-color-2)',
     borderRadius: '8px', zIndex: 20, overflow: 'hidden',
     boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
   }
   const dropItem = (sel) => ({
     padding: '9px 12px', cursor: 'pointer',
-    color: sel ? '#1db97b' : '#bbb',
-    background: sel ? '#0f2219' : 'transparent',
+    color: sel ? 'var(--brand)' : 'var(--text-soft)',
+    background: sel ? 'var(--green-bg)' : 'transparent',
     fontFamily: 'DM Sans, sans-serif', fontSize: '13px',
   })
   const pill = (active) => ({
-    flex: 1, background: active ? '#0c1f16' : '#0d0d0d',
-    border: `0.5px solid ${active ? '#1db97b' : '#1e1e1e'}`,
+    flex: 1, background: active ? 'var(--green-bg)' : 'var(--bg-page)',
+    border: `0.5px solid ${active ? 'var(--brand)' : 'var(--border-color)'}`,
     borderRadius: '8px', padding: '8px 6px',
-    color: active ? '#1db97b' : '#444',
+    color: active ? 'var(--brand)' : 'var(--text-faint-2)',
     fontFamily: 'DM Sans, sans-serif', fontSize: '12px',
     textAlign: 'center', cursor: 'pointer',
   })
-  const hintGreen = { color: '#1db97b', fontFamily: 'DM Mono, monospace', fontSize: '11px', marginTop: '4px' }
-  const hintRed   = { color: '#c03535', fontFamily: 'DM Mono, monospace', fontSize: '11px', marginTop: '4px' }
-  const hintBlue  = { color: '#4d9fff', fontFamily: 'DM Mono, monospace', fontSize: '11px', marginTop: '4px' }
+  const hintGreen = { color: 'var(--brand)', fontFamily: 'DM Mono, monospace', fontSize: '11px', marginTop: '4px' }
+  const hintRed   = { color: 'var(--red)', fontFamily: 'DM Mono, monospace', fontSize: '11px', marginTop: '4px' }
+  const hintBlue  = { color: 'var(--blue)', fontFamily: 'DM Mono, monospace', fontSize: '11px', marginTop: '4px' }
 
   const divider = {
-    width: '0.5px', background: '#1a1a1a',
+    width: '0.5px', background: 'var(--border-color)',
     alignSelf: 'stretch', margin: '0 4px',
   }
 
@@ -287,7 +287,7 @@ export default function NewChallengeModal({ onClose, onCreated }) {
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
     >
       <div style={{
-        background: '#111', border: '0.5px solid #1e1e1e',
+        background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)',
         borderRadius: isMobile ? '10px' : '14px', width: '100%', maxWidth: isMobile ? '100%' : '860px',
         overflow: 'hidden',
       }}>
@@ -295,18 +295,18 @@ export default function NewChallengeModal({ onClose, onCreated }) {
         {/* ── Top bar ── */}
         <div style={{
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          padding: '18px 24px', borderBottom: '0.5px solid #1a1a1a',
+          padding: '18px 24px', borderBottom: '0.5px solid var(--border-color)',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <h2 style={{
-              color: '#fff', fontFamily: 'Syne, sans-serif',
+              color: 'var(--text-primary)', fontFamily: 'Syne, sans-serif',
               fontSize: '16px', fontWeight: '600', margin: 0,
             }}>New Challenge</h2>
             {autoFilled && (
               <span style={{
-                background: '#0f2219', border: '0.5px solid #1a3826',
+                background: 'var(--green-bg)', border: '0.5px solid var(--green-bg-2)',
                 borderRadius: '20px', padding: '3px 10px',
-                color: '#1db97b', fontFamily: 'DM Sans, sans-serif', fontSize: '11px',
+                color: 'var(--brand)', fontFamily: 'DM Sans, sans-serif', fontSize: '11px',
                 display: 'flex', alignItems: 'center', gap: '4px',
               }}>
                 <span>✓</span> Auto-filled from {selectedFirm}
@@ -315,7 +315,7 @@ export default function NewChallengeModal({ onClose, onCreated }) {
           </div>
           <button
             onClick={onClose}
-            style={{ background: 'none', border: 'none', color: '#444', fontSize: '20px', cursor: 'pointer', lineHeight: 1 }}
+            style={{ background: 'none', border: 'none', color: 'var(--text-faint-2)', fontSize: '20px', cursor: 'pointer', lineHeight: 1 }}
           >×</button>
         </div>
 
@@ -326,7 +326,7 @@ export default function NewChallengeModal({ onClose, onCreated }) {
           <div style={{ flex: isMobile ? '1' : '0 0 300px', padding: '16px 16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
 
             {/* Section label */}
-            <p style={{ color: '#333', fontFamily: 'DM Sans, sans-serif', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
+            <p style={{ color: 'var(--text-faint-2)', fontFamily: 'DM Sans, sans-serif', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
               Firm Setup
             </p>
 
@@ -339,7 +339,7 @@ export default function NewChallengeModal({ onClose, onCreated }) {
                   onClick={() => { setFirmOpen(o => !o); setPhaseOpen(false) }}
                 >
                   <span>{selectedFirm || 'Select firm'}</span>
-                  <span style={{ color: '#444', fontSize: '9px' }}>{firmOpen ? '▲' : '▼'}</span>
+                  <span style={{ color: 'var(--text-faint-2)', fontSize: '9px' }}>{firmOpen ? '▲' : '▼'}</span>
                 </div>
                 {firmOpen && (
                   <div style={{ ...dropdown, display: 'flex', flexDirection: 'column' }}>
@@ -352,19 +352,19 @@ export default function NewChallengeModal({ onClose, onCreated }) {
                             id={'firm-item-' + f.replace(/\s+/g, '-')}
                             style={{
                               ...dropItem(selectedFirm === f),
-                              background: isMatch ? '#1a2e20' : selectedFirm === f ? '#0f2219' : 'transparent',
-                              color: isMatch ? '#fff' : selectedFirm === f ? '#1db97b' : '#bbb',
+                              background: isMatch ? 'var(--green-bg-2)' : selectedFirm === f ? 'var(--green-bg)' : 'transparent',
+                              color: isMatch ? 'var(--text-primary)' : selectedFirm === f ? 'var(--brand)' : 'var(--text-soft)',
                             }}
                             onClick={() => { setSelectedFirm(f); setFirmOpen(false) }}
-                            onMouseEnter={e => { if (selectedFirm !== f) e.currentTarget.style.background = '#1e1e1e' }}
-                            onMouseLeave={e => { e.currentTarget.style.background = isMatch ? '#1a2e20' : selectedFirm === f ? '#0f2219' : 'transparent' }}
+                            onMouseEnter={e => { if (selectedFirm !== f) e.currentTarget.style.background = 'var(--border-color)' }}
+                            onMouseLeave={e => { e.currentTarget.style.background = isMatch ? 'var(--green-bg-2)' : selectedFirm === f ? 'var(--green-bg)' : 'transparent' }}
                           >{f}</div>
                         )
                       })}
                     </div>
-                    <div style={{ ...dropItem(selectedFirm === 'Other'), borderTop: '0.5px solid #2a2a2a', flexShrink: 0 }}
+                    <div style={{ ...dropItem(selectedFirm === 'Other'), borderTop: '0.5px solid var(--border-color-2)', flexShrink: 0 }}
                       onClick={() => { setSelectedFirm('Other'); setFirmOpen(false) }}
-                      onMouseEnter={e => { if (selectedFirm !== 'Other') e.currentTarget.style.background = '#1e1e1e' }}
+                      onMouseEnter={e => { if (selectedFirm !== 'Other') e.currentTarget.style.background = 'var(--border-color)' }}
                       onMouseLeave={e => { if (selectedFirm !== 'Other') e.currentTarget.style.background = 'transparent' }}
                     >+ Other (manual entry)</div>
                   </div>
@@ -391,7 +391,7 @@ export default function NewChallengeModal({ onClose, onCreated }) {
                     onClick={() => { setProgramOpen(o => !o); setFirmOpen(false); setPhaseOpen(false) }}
                   >
                     <span>{selectedProgram || 'Select program'}</span>
-                    <span style={{ color: '#444', fontSize: '9px' }}>{programOpen ? '▲' : '▼'}</span>
+                    <span style={{ color: 'var(--text-faint-2)', fontSize: '9px' }}>{programOpen ? '▲' : '▼'}</span>
                   </div>
                   {programOpen && (
                     <div style={dropdown}>
@@ -405,7 +405,7 @@ export default function NewChallengeModal({ onClose, onCreated }) {
                             clearRuleFields()
                             setProgramOpen(false)
                           }}
-                          onMouseEnter={e => { if (selectedProgram !== p) e.currentTarget.style.background = '#1e1e1e' }}
+                          onMouseEnter={e => { if (selectedProgram !== p) e.currentTarget.style.background = 'var(--border-color)' }}
                           onMouseLeave={e => { if (selectedProgram !== p) e.currentTarget.style.background = 'transparent' }}
                         >{p}</div>
                       ))}
@@ -423,7 +423,7 @@ export default function NewChallengeModal({ onClose, onCreated }) {
                   {filteredTypes.map(t => (
                     <button key={t} onClick={() => setSelectedType(t)} style={pill(selectedType === t)}>
                       <span style={{ display: 'block', fontWeight: '600', fontSize: '12px' }}>{TYPE_META[t]?.label || t}</span>
-                      <span style={{ display: 'block', fontSize: '10px', color: selectedType === t ? '#1db97b88' : '#333', marginTop: '2px' }}>
+                      <span style={{ display: 'block', fontSize: '10px', color: selectedType === t ? 'rgba(var(--brand-rgb), 0.53)' : 'var(--text-faint-2)', marginTop: '2px' }}>
                         {TYPE_META[t]?.desc}
                       </span>
                     </button>
@@ -448,14 +448,14 @@ export default function NewChallengeModal({ onClose, onCreated }) {
                   }}
                 >
                   <span>{selectedPhase ? PHASE_LABELS[selectedPhase] : (isOther ? 'Phase 1' : '—')}</span>
-                  <span style={{ color: '#444', fontSize: '9px' }}>{phaseOpen ? '▲' : '▼'}</span>
+                  <span style={{ color: 'var(--text-faint-2)', fontSize: '9px' }}>{phaseOpen ? '▲' : '▼'}</span>
                 </div>
                 {phaseOpen && (
                   <div style={dropdown}>
                     {(isOther ? ['phase_1','phase_2','phase_3','funded'] : availablePhases).map(p => (
                       <div key={p} style={dropItem(selectedPhase === p)}
                         onClick={() => { setSelectedPhase(p); setPhaseOpen(false) }}
-                        onMouseEnter={e => { if (selectedPhase !== p) e.currentTarget.style.background = '#1e1e1e' }}
+                        onMouseEnter={e => { if (selectedPhase !== p) e.currentTarget.style.background = 'var(--border-color)' }}
                         onMouseLeave={e => { if (selectedPhase !== p) e.currentTarget.style.background = 'transparent' }}
                       >{PHASE_LABELS[p]}</div>
                     ))}
@@ -477,9 +477,9 @@ export default function NewChallengeModal({ onClose, onCreated }) {
           {!isMobile && <div style={divider} />}
 
           {/* RIGHT — account size + rules */}
-          <div style={{ flex: 1, padding: '16px 16px', display: 'flex', flexDirection: 'column', gap: '14px', borderTop: isMobile ? '0.5px solid #1a1a1a' : 'none' }}>
+          <div style={{ flex: 1, padding: '16px 16px', display: 'flex', flexDirection: 'column', gap: '14px', borderTop: isMobile ? '0.5px solid var(--border-color)' : 'none' }}>
 
-            <p style={{ color: '#333', fontFamily: 'DM Sans, sans-serif', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
+            <p style={{ color: 'var(--text-faint-2)', fontFamily: 'DM Sans, sans-serif', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
               Account & Rules
             </p>
 
@@ -492,7 +492,7 @@ export default function NewChallengeModal({ onClose, onCreated }) {
 
             {/* Rules grid */}
             <div style={{
-              background: '#0d0d0d', border: '0.5px solid #1a1a1a',
+              background: 'var(--bg-page)', border: '0.5px solid var(--border-color)',
               borderRadius: '10px', padding: '14px',
               opacity: (autoFilled || isOther) ? 1 : 0.4,
               transition: 'opacity 0.25s', flex: 1,
@@ -503,10 +503,10 @@ export default function NewChallengeModal({ onClose, onCreated }) {
               }}>
                 <span style={{
                   width: '5px', height: '5px', borderRadius: '50%',
-                  background: (autoFilled || isOther) ? '#1db97b' : '#2a2a2a',
+                  background: (autoFilled || isOther) ? 'var(--brand)' : 'var(--border-color-2)',
                   transition: 'background 0.2s', flexShrink: 0,
                 }} />
-                <span style={{ color: '#444', fontFamily: 'DM Sans, sans-serif', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                <span style={{ color: 'var(--text-faint-2)', fontFamily: 'DM Sans, sans-serif', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                   Challenge Rules
                 </span>
               </div>
@@ -568,9 +568,9 @@ export default function NewChallengeModal({ onClose, onCreated }) {
         {/* ── Error ── */}
         {error && (
           <div style={{
-            margin: '0 22px', background: '#1e0d0d',
-            border: '0.5px solid #2e1515', borderRadius: '8px',
-            padding: '10px 12px', color: '#c03535',
+            margin: '0 22px', background: 'var(--red-bg-2)',
+            border: '0.5px solid var(--red-bg)', borderRadius: '8px',
+            padding: '10px 12px', color: 'var(--red)',
             fontFamily: 'DM Sans, sans-serif', fontSize: '13px',
           }}>{error}</div>
         )}
@@ -578,18 +578,18 @@ export default function NewChallengeModal({ onClose, onCreated }) {
         {/* ── Footer ── */}
         <div style={{
           display: 'flex', gap: '10px', padding: '16px 22px',
-          borderTop: '0.5px solid #1a1a1a',
+          borderTop: '0.5px solid var(--border-color)',
         }}>
           <button onClick={onClose} style={{
             flex: 1, background: 'transparent',
-            border: '0.5px solid #1e1e1e', borderRadius: '8px',
-            padding: '10px', color: '#555',
+            border: '0.5px solid var(--border-color)', borderRadius: '8px',
+            padding: '10px', color: 'var(--text-faint-2)',
             fontFamily: 'DM Sans, sans-serif', fontSize: '13px', cursor: 'pointer',
           }}>Cancel</button>
           <button onClick={handleSubmit} disabled={loading || !canCreate} style={{
-            flex: 3, background: canCreate ? '#1db97b' : '#0f2219',
+            flex: 3, background: canCreate ? 'var(--brand)' : 'var(--green-bg)',
             border: 'none', borderRadius: '8px', padding: '10px',
-            color: canCreate ? '#000' : '#1db97b44',
+            color: canCreate ? 'var(--brand-fg)' : 'rgba(var(--brand-rgb), 0.27)',
             fontFamily: 'DM Sans, sans-serif', fontWeight: '600',
             fontSize: '13px', cursor: (loading || !canCreate) ? 'not-allowed' : 'pointer',
             transition: 'all 0.2s',
