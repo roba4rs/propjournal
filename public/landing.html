@@ -1229,9 +1229,18 @@ document.addEventListener('DOMContentLoaded', function() {
       const { data: { session } } = await client.auth.getSession();
       if (!session) return; // not logged in — leave buttons as-is
 
-      const email = session.user.email || '';
-      const prefix = email.split('@')[0] || '';
-      const initials = prefix.slice(0, 2).toUpperCase();
+      const user = session.user;
+      const email = user.email || '';
+      const fullName = user.user_metadata?.full_name || user.user_metadata?.name || '';
+      let initials;
+      if (fullName.trim()) {
+        const parts = fullName.trim().split(/\s+/);
+        initials = parts.length >= 2
+          ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+          : parts[0].slice(0, 2).toUpperCase();
+      } else {
+        initials = email.split('@')[0].slice(0, 2).toUpperCase();
+      }
 
       // Deterministic palette — same hash logic as AdminUsers.jsx
       const AVATAR_PALETTES = [
@@ -1299,7 +1308,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Sign out handler
         dropdown.querySelector('#nav-signout').addEventListener('click', async function() {
           await client.auth.signOut();
-          window.location.href = '/login';
+          window.location.href = '/';
         });
 
         // Dashboard button — hidden on mobile via CSS
@@ -1322,8 +1331,8 @@ document.addEventListener('DOMContentLoaded', function() {
       }
 
       if (heroLogin) {
-        heroLogin.href = '/trades';
-        heroLogin.innerHTML = '<i class="ti ti-list-details" aria-hidden="true" style="font-size:16px;line-height:1"></i> Log Trade';
+        heroLogin.href = '/trades?openForm=true';
+        heroLogin.textContent = 'Log Trade';
       }
 
     } catch (e) {

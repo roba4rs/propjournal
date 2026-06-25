@@ -1714,14 +1714,15 @@ export default function TradeLog() {
     return () => document.removeEventListener("mousedown", handleOutside);
   }, []);
 
-  // Open Log Trade form when navigated here from the + button
+  // Open Log Trade form when navigated here from the + button or landing page
 const location = useLocation();
 useEffect(() => {
-  if (location.state?.openForm) {
+  const params = new URLSearchParams(window.location.search);
+  if (location.state?.openForm || params.get('openForm') === 'true') {
     setEditTrade(null);
     setFormOpen(true);
-    // Clear the state so re-renders don't re-open it
-    window.history.replaceState({}, '');
+    // Clear so re-renders don't re-open it
+    window.history.replaceState({}, '', window.location.pathname);
   }
 }, [location.state]);
 
