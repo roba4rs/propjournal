@@ -1316,8 +1316,8 @@ export default function ChallengeTracker() {
 
         ) : (
 
-          /* ── CARDS VIEW ── */
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          /* ── LIST VIEW ── */
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {filtered.map(challenge => {
               const trades = tradesByAccount[challenge.id] || []
               const s = computeStats(trades)
@@ -1328,80 +1328,107 @@ export default function ChallengeTracker() {
               const pnlColor = s.netPnl > 0 ? 'var(--brand)' : s.netPnl < 0 ? 'var(--red)' : 'var(--text-primary)'
               const pnlLabel = trades.length === 0 ? '$0.00'
                 : `${s.netPnl >= 0 ? '+' : ''}$${Math.abs(s.netPnl).toFixed(2)}`
+              const statusBarColor = computedStatus === 'failed' ? 'var(--red)' : computedStatus === 'passed' ? 'var(--brand)' : computedStatus === 'funded' ? '#7c3aed' : 'var(--text-faint)'
+              const profitTargetPct = p.accountSize > 0 ? (p.profitTarget / p.accountSize * 100).toFixed(1) : '—'
 
               return (
-                <div key={challenge.id} style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '14px', padding: '24px' }}>
+                <div
+                  key={challenge.id}
+                  onClick={() => navigate(`/dashboard?account=${challenge.id}`)}
+                  style={{
+                    background: 'var(--bg-surface)',
+                    border: '0.5px solid var(--border-color)',
+                    borderRadius: '12px',
+                    padding: '0',
+                    display: 'flex',
+                    alignItems: 'stretch',
+                    overflow: 'hidden',
+                    cursor: 'pointer',
+                    transition: 'border-color 0.15s',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--border-color-2)'}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-color)'}
+                >
+                  {/* Left status bar */}
+                  <div style={{ width: '3px', flexShrink: 0, background: statusBarColor, borderRadius: '12px 0 0 12px' }} />
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                        <h2 style={{ color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontSize: '16px', fontWeight: '600', margin: 0 }}>
+                  {/* Main content */}
+                  <div style={{ flex: 1, padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '20px', minWidth: 0 }}>
+
+                    {/* Account name + meta */}
+                    <div style={{ minWidth: '180px', flexShrink: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
+                        <span style={{ color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: '600' }}>
                           {challenge.firm_name}
-                        </h2>
-                        <button onClick={() => setEditingChallenge(challenge)} style={{ background: 'transparent', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: '13px', padding: '2px 4px', lineHeight: 1 }}>✏️</button>
+                        </span>
+                        <button
+                          onClick={e => { e.stopPropagation(); setEditingChallenge(challenge) }}
+                          style={{ background: 'transparent', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: '11px', padding: '1px 2px', lineHeight: 1 }}
+                        >✏️</button>
+                        <span style={{ background: badge.bg, border: `0.5px solid ${badge.border}`, borderRadius: '20px', padding: '2px 8px', color: badge.color, fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: '500' }}>
+                          {badge.label}
+                        </span>
                       </div>
-                      <p style={{ color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '12px', margin: 0 }}>
-                        {challenge.phase?.replace('_', ' ').toUpperCase()} · ${Number(challenge.account_size).toLocaleString()} · Started {challenge.start_date} · {s.total} trade{s.total !== 1 ? 's' : ''}
-                      </p>
+                      <span style={{ color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '11px' }}>
+                        {challenge.firm_name?.toUpperCase()} · {challenge.phase?.replace('_', ' ').toUpperCase()} · ${Number(challenge.account_size).toLocaleString()} · {s.total}T
+                      </span>
                     </div>
-                    <span style={{ background: badge.bg, border: `0.5px solid ${badge.border}`, borderRadius: '20px', padding: '4px 12px', color: badge.color, fontFamily: 'Inter, sans-serif', fontSize: '12px', fontWeight: '500' }}>
-                      {badge.label}
-                    </span>
-                  </div>
 
+                    {/* P&L */}
+                    <div style={{ minWidth: '90px', flexShrink: 0 }}>
+                      <div style={{ color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '2px' }}>P&amp;L</div>
+                      <div style={{ color: pnlColor, fontFamily: 'JetBrains Mono, monospace', fontSize: '15px', fontWeight: '600' }}>{pnlLabel}</div>
+                    </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '20px' }}>
-                    {[
-                      { label: 'P&L', value: pnlLabel, color: trades.length === 0 ? 'var(--text-primary)' : pnlColor },
-                      { label: 'Win Rate', value: s.total === 0 ? '0%' : `${s.winRate.toFixed(1)}%`, color: 'var(--text-primary)' },
-                      { label: 'Trades', value: String(s.total), color: 'var(--text-primary)' },
-                      { label: 'W / L / BE', value: `${s.wins}W · ${s.losses}L · ${s.be}BE`, color: 'var(--text-primary)' },
-                    ].map(stat => (
-                      <div key={stat.label} style={{ background: 'var(--bg-surface-2)', border: '0.5px solid var(--border-color)', borderRadius: '10px', padding: '14px' }}>
-                        <p style={{ color: 'var(--text-muted)', fontFamily: 'Inter, sans-serif', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 6px 0' }}>{stat.label}</p>
-                        <p style={{ color: stat.color, fontFamily: 'JetBrains Mono, monospace', fontSize: '15px', margin: 0 }}>{stat.value}</p>
+                    {/* Win Rate */}
+                    <div style={{ minWidth: '48px', flexShrink: 0 }}>
+                      <div style={{ color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '2px' }}>WR</div>
+                      <div style={{ color: 'var(--text-primary)', fontFamily: 'JetBrains Mono, monospace', fontSize: '13px' }}>{s.total === 0 ? '0%' : `${s.winRate.toFixed(0)}%`}</div>
+                    </div>
+
+                    {/* Progress bars */}
+                    <div style={{ flex: 1, display: 'flex', gap: '16px', alignItems: 'center' }}>
+
+                      {/* Target */}
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                          <span style={{ color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>TARGET</span>
+                          <span style={{ color: p.netPnlPct >= 0 ? 'var(--brand)' : 'var(--red)', fontFamily: 'JetBrains Mono, monospace', fontSize: '11px' }}>
+                            {`${p.netPnlPct >= 0 ? '+' : ''}${p.netPnlPct.toFixed(1)}%`}
+                          </span>
+                        </div>
+                        <div style={{ height: '3px', background: 'var(--bg-surface-2)', borderRadius: '2px' }}>
+                          <div style={{ height: '3px', width: `${Math.max(0, Math.min(p.profitPct, 100))}%`, background: 'var(--brand)', borderRadius: '2px' }} />
+                        </div>
                       </div>
-                    ))}
-                  </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '20px' }}>
-                    <ProgressBlock
-                      label={`Profit Target — ${p.maxDDLimitPct > 0 ? (parseFloat(challenge.profit_target) / parseFloat(challenge.account_size) * 100).toFixed(1) : '—'}%`}
-                      barPct={p.profitPct}
-                      barColor="var(--brand)"
-                      leftLabel={`${p.netPnlPct >= 0 ? '+' : ''}${p.netPnlPct.toFixed(2)}%`}
-                      rightLabel={`target ${p.accountSize > 0 ? (p.profitTarget / p.accountSize * 100).toFixed(1) : '—'}%`}
-                    />
-                    <ProgressBlock
-                      label={`Max Drawdown — ${p.maxDDLimitPct.toFixed(1)}%`}
-                      barPct={p.maxDDBarPct}
-                      barColor="var(--red)"
-                      leftLabel={`${p.maxDDUsedPct.toFixed(2)}%`}
-                      rightLabel={`max ${p.maxDDLimitPct.toFixed(1)}%`}
-                    />
-                    <ProgressBlock
-                      label={`Daily Drawdown — ${p.dailyDDLimitPct.toFixed(1)}%`}
-                      barPct={p.dailyDDBarPct}
-                      barColor="var(--amber)"
-                      leftLabel={`${p.dailyDDUsedPct.toFixed(2)}%`}
-                      rightLabel={`max ${p.dailyDDLimitPct.toFixed(1)}%`}
-                    />
-                    <ProgressBlock
-                      label={challenge.min_trading_days ? `Min Trading Days — Need ${challenge.min_trading_days}` : 'Min Trading Days'}
-                      barPct={p.minDaysBarPct}
-                      barColor="var(--blue)"
-                      leftLabel={String(p.tradingDays)}
-                      rightLabel={`need ${p.minDays || '—'}`}
-                    />
-                  </div>
+                      {/* DD */}
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                          <span style={{ color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>DD</span>
+                          <span style={{ color: 'var(--red)', fontFamily: 'JetBrains Mono, monospace', fontSize: '11px' }}>{p.maxDDUsedPct.toFixed(1)}%</span>
+                        </div>
+                        <div style={{ height: '3px', background: 'var(--bg-surface-2)', borderRadius: '2px' }}>
+                          <div style={{ height: '3px', width: `${Math.max(0, Math.min(p.maxDDBarPct, 100))}%`, background: 'var(--red)', borderRadius: '2px' }} />
+                        </div>
+                      </div>
 
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <button onClick={() => setPreviewChallenge(challenge)} style={{ background: 'transparent', border: '0.5px solid var(--border-color)', borderRadius: '6px', padding: '7px 14px', color: 'var(--text-muted)', fontFamily: 'Inter, sans-serif', fontSize: '12px', cursor: 'pointer' }}>
-                      Preview
-                    </button>
-                    <button onClick={() => navigate(`/dashboard?account=${challenge.id}`)} style={{ background: 'transparent', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '7px 14px', color: 'var(--text-secondary)', fontFamily: 'Inter, sans-serif', fontSize: '12px', cursor: 'pointer' }}>
-                      Go to Dashboard →
-                    </button>
+                      {/* Days */}
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                          <span style={{ color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>DAYS</span>
+                          <span style={{ color: 'var(--text-secondary)', fontFamily: 'JetBrains Mono, monospace', fontSize: '11px' }}>{p.tradingDays}/{p.minDays || '—'}</span>
+                        </div>
+                        <div style={{ height: '3px', background: 'var(--bg-surface-2)', borderRadius: '2px' }}>
+                          <div style={{ height: '3px', width: `${Math.max(0, Math.min(p.minDaysBarPct, 100))}%`, background: 'var(--blue)', borderRadius: '2px' }} />
+                        </div>
+                      </div>
+
+                    </div>
+
+                    {/* Arrow */}
+                    <div style={{ color: 'var(--text-faint)', fontSize: '16px', flexShrink: 0, marginLeft: '8px' }}>→</div>
+
                   </div>
                 </div>
               )
