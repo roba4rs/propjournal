@@ -986,7 +986,7 @@ export default function ChallengeTracker() {
                     {/* Actions */}
                     <div style={{ display: 'flex', gap: '4px', marginTop: 'auto' }}>
                       <button onClick={() => setPreviewChallenge(challenge)} style={{ background: 'transparent', border: '0.5px solid var(--border-color)', borderRadius: '4px', padding: '5px 7px', fontSize: '11px', color: 'var(--text-muted)', cursor: 'pointer', flexShrink: 0 }}>👁</button>
-                      <button onClick={() => navigate(`/dashboard?account=${challenge.id}`)} style={{ flex: 1, background: 'var(--brand)', border: 'none', borderRadius: '4px', padding: '5px', fontSize: '10px', fontWeight: '600', color: 'var(--brand-fg)', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Dashboard →</button>
+                      <button onClick={() => navigate(`/dashboard?account=${challenge.id}`)} style={{ flex: 1, background: 'transparent', border: `0.5px solid ${isFailed ? 'var(--red-bg)' : 'var(--border-color)'}`, borderRadius: '4px', padding: '5px', fontSize: '10px', color: 'var(--text-muted)', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Dashboard →</button>
                     </div>
                   </div>
                 )
@@ -995,7 +995,7 @@ export default function ChallengeTracker() {
 
           ) : (
 
-            /* ── MOBILE LIST VIEW (matches desktop list redesign, stacked for narrow width) ── */
+            /* ── MOBILE LIST VIEW (existing) ── */
             filtered.map(challenge => {
               const trades = tradesByAccount[challenge.id] || []
               const s = computeStats(trades)
@@ -1003,103 +1003,123 @@ export default function ChallengeTracker() {
               const computedStatus = computeStatus(trades, challenge)
               const badge = statusBadge[computedStatus] || statusBadge.active
 
-              const pnlColor = s.netPnl > 0 ? 'var(--brand)' : s.netPnl < 0 ? 'var(--red)' : 'var(--text-primary)'
-              const pnlLabel = trades.length === 0 ? '$0.00'
-                : `${s.netPnl >= 0 ? '+' : ''}$${Math.abs(s.netPnl).toFixed(2)}`
-              const statusBarColor = computedStatus === 'failed' ? 'var(--red)' : computedStatus === 'passed' ? 'var(--brand)' : computedStatus === 'funded' ? '#7c3aed' : 'var(--text-faint)'
+              const pnlColor = s.netPnl > 0 ? 'var(--brand)' : s.netPnl < 0 ? 'var(--red)' : 'var(--text-secondary)'
+              const pnlLabel = `${s.netPnl >= 0 ? '+' : ''}$${Math.abs(s.netPnl).toFixed(0)}`
+
+              const isActive = computedStatus === 'active'
+              const isFailed = computedStatus === 'failed'
+
+              const phaseLabel = challenge.phase
+                ? challenge.phase.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())
+                : '—'
+              const startFormatted = challenge.start_date
+                ? new Date(challenge.start_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                : '—'
 
               return (
-                <div
-                  key={challenge.id}
-                  onClick={() => navigate(`/dashboard?account=${challenge.id}`)}
-                  style={{
-                    margin: '8px 10px 0',
-                    background: 'var(--bg-surface)',
-                    border: '0.5px solid var(--border-color)',
-                    borderRadius: '12px',
-                    display: 'flex',
-                    alignItems: 'stretch',
-                    overflow: 'hidden',
-                    cursor: 'pointer',
-                  }}
-                >
-                  {/* Left status bar */}
-                  <div style={{ width: '3px', flexShrink: 0, background: statusBarColor, borderRadius: '12px 0 0 12px' }} />
-
-                  {/* Main content */}
-                  <div style={{ flex: 1, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: '10px', minWidth: 0 }}>
-
-                    {/* Row 1: firm name + edit + badge */}
+                <div key={challenge.id} style={{
+                  margin: '8px 10px 0',
+                  background: 'var(--bg-surface)',
+                  border: `0.5px solid ${isFailed ? 'var(--red-bg)' : 'var(--border-color)'}`,
+                  borderRadius: '8px',
+                  padding: '12px',
+                }}>
+                  {/* Card header: firm name + status badge */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px' }}>
-                        <span style={{ color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: '600' }}>
-                          {challenge.firm_name}
-                        </span>
-                        <button
-                          onClick={e => { e.stopPropagation(); setEditingChallenge(challenge) }}
-                          style={{ background: 'transparent', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: '11px', padding: '1px 2px', lineHeight: 1 }}
-                        >✏️</button>
-                        <span style={{ background: badge.bg, border: `0.5px solid ${badge.border}`, borderRadius: '20px', padding: '2px 8px', color: badge.color, fontFamily: 'Inter, sans-serif', fontSize: '10px', fontWeight: '500', marginLeft: 'auto', flexShrink: 0 }}>
-                          {badge.label}
-                        </span>
-                      </div>
-                      <span style={{ color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '10px' }}>
-                        {challenge.firm_name?.toUpperCase()} · {challenge.phase?.replace('_', ' ').toUpperCase()} · ${Number(challenge.account_size).toLocaleString()} · {s.total}T
-                      </span>
-                    </div>
-
-                    {/* Row 2: P&L + Win Rate side by side */}
-                    <div style={{ display: 'flex', gap: '20px' }}>
-                      <div>
-                        <div style={{ color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '2px' }}>P&amp;L</div>
-                        <div style={{ color: pnlColor, fontFamily: 'JetBrains Mono, monospace', fontSize: '14px', fontWeight: '600' }}>{pnlLabel}</div>
-                      </div>
-                      <div>
-                        <div style={{ color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '2px' }}>WR</div>
-                        <div style={{ color: 'var(--text-primary)', fontFamily: 'JetBrains Mono, monospace', fontSize: '13px' }}>{s.total === 0 ? '0%' : `${s.winRate.toFixed(0)}%`}</div>
+                      <span style={{
+                        fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)',
+                        fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.5px',
+                      }}>{challenge.firm_name}</span>
+                      <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '3px', fontFamily: "'Inter', sans-serif" }}>
+                        {phaseLabel} · ${Number(challenge.account_size).toLocaleString()} · Started {startFormatted}
                       </div>
                     </div>
+                    <span style={{
+                      background: badge.bg, border: `0.5px solid ${badge.border}`,
+                      borderRadius: '4px', padding: '2px 7px',
+                      fontSize: '9px', color: badge.color,
+                      fontFamily: "'JetBrains Mono', monospace", flexShrink: 0,
+                    }}>{badge.label}</span>
+                  </div>
 
-                    {/* Row 3: progress bars — stacked, not side by side */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {/* 2 stat cards: P&L + Win Rate */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px', margin: '8px 0 10px' }}>
+                    <div style={{ background: 'var(--bg-surface-2)', border: '0.5px solid var(--border-color)', borderRadius: '5px', padding: '7px 8px' }}>
+                      <div style={{ fontSize: '8px', color: 'var(--text-faint)', marginBottom: '3px', textTransform: 'uppercase', letterSpacing: '0.04em', fontFamily: "'JetBrains Mono', monospace" }}>P&L</div>
+                      <div style={{ fontSize: '13px', color: pnlColor, fontFamily: "'JetBrains Mono', monospace" }}>{pnlLabel}</div>
+                    </div>
+                    <div style={{ background: 'var(--bg-surface-2)', border: '0.5px solid var(--border-color)', borderRadius: '5px', padding: '7px 8px' }}>
+                      <div style={{ fontSize: '8px', color: 'var(--text-faint)', marginBottom: '3px', textTransform: 'uppercase', letterSpacing: '0.04em', fontFamily: "'JetBrains Mono', monospace" }}>Win Rate</div>
+                      <div style={{ fontSize: '13px', color: 'var(--text-secondary)', fontFamily: "'JetBrains Mono', monospace" }}>
+                        {s.total === 0 ? '0%' : `${s.winRate.toFixed(0)}%`}
+                      </div>
+                    </div>
+                  </div>
 
-                      {/* Target */}
-                      <div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3px' }}>
-                          <span style={{ color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>TARGET</span>
-                          <span style={{ color: p.netPnlPct >= 0 ? 'var(--brand)' : 'var(--red)', fontFamily: 'JetBrains Mono, monospace', fontSize: '10px' }}>
-                            {`${p.netPnlPct >= 0 ? '+' : ''}${p.netPnlPct.toFixed(1)}%`}
+                  {/* Progress bars — active only */}
+                  {isActive && (
+                    <>
+                      {/* Profit Target bar */}
+                      <div style={{ marginBottom: '6px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
+                          <span style={{ fontSize: '8px', color: 'var(--text-faint)', fontFamily: "'Inter', sans-serif" }}>Profit Target</span>
+                          <span style={{ fontSize: '8px', color: p.netPnlPct >= 0 ? 'var(--brand)' : 'var(--text-faint)', fontFamily: "'JetBrains Mono', monospace" }}>
+                            {p.netPnlPct >= 0 ? p.netPnlPct.toFixed(1) : '0.0'}% / {p.accountSize > 0 ? (p.profitTarget / p.accountSize * 100).toFixed(0) : '—'}%
                           </span>
                         </div>
                         <div style={{ height: '3px', background: 'var(--bg-surface-2)', borderRadius: '2px' }}>
-                          <div style={{ height: '3px', width: `${Math.max(0, Math.min(p.profitPct, 100))}%`, background: 'var(--brand)', borderRadius: '2px' }} />
+                          <div style={{ height: '100%', width: `${p.netPnlPct >= 0 ? Math.min(p.profitPct, 100) : 0}%`, background: p.netPnlPct >= 0 ? 'var(--brand)' : 'var(--red)', borderRadius: '2px' }} />
                         </div>
                       </div>
 
-                      {/* DD */}
-                      <div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3px' }}>
-                          <span style={{ color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>DD</span>
-                          <span style={{ color: 'var(--red)', fontFamily: 'JetBrains Mono, monospace', fontSize: '10px' }}>{p.maxDDUsedPct.toFixed(1)}%</span>
+                      {/* Max Drawdown bar */}
+                      <div style={{ marginBottom: '10px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
+                          <span style={{ fontSize: '8px', color: 'var(--text-faint)', fontFamily: "'Inter', sans-serif" }}>Max Drawdown</span>
+                          <span style={{ fontSize: '8px', color: 'var(--red)', fontFamily: "'JetBrains Mono', monospace" }}>
+                            {p.maxDDUsedPct.toFixed(1)}% / {p.maxDDLimitPct.toFixed(0)}%
+                          </span>
                         </div>
                         <div style={{ height: '3px', background: 'var(--bg-surface-2)', borderRadius: '2px' }}>
-                          <div style={{ height: '3px', width: `${Math.max(0, Math.min(p.maxDDBarPct, 100))}%`, background: 'var(--red)', borderRadius: '2px' }} />
+                          <div style={{ height: '100%', width: `${Math.min(p.maxDDBarPct, 100)}%`, background: 'var(--red)', borderRadius: '2px' }} />
                         </div>
                       </div>
+                    </>
+                  )}
 
-                      {/* Days */}
-                      <div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3px' }}>
-                          <span style={{ color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>DAYS</span>
-                          <span style={{ color: 'var(--text-secondary)', fontFamily: 'JetBrains Mono, monospace', fontSize: '10px' }}>{p.tradingDays}/{p.minDays || '—'}</span>
-                        </div>
-                        <div style={{ height: '3px', background: 'var(--bg-surface-2)', borderRadius: '2px' }}>
-                          <div style={{ height: '3px', width: `${Math.max(0, Math.min(p.minDaysBarPct, 100))}%`, background: 'var(--blue)', borderRadius: '2px' }} />
-                        </div>
-                      </div>
-
-                    </div>
-
+                  {/* Bottom row: Edit + Preview + Go to Dashboard */}
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    <button
+                      onClick={() => setEditingChallenge(challenge)}
+                      style={{
+                        background: 'transparent',
+                        border: '0.5px solid var(--border-color)',
+                        borderRadius: '5px', padding: '6px 10px',
+                        fontSize: '13px', color: 'var(--text-muted)', cursor: 'pointer',
+                        flexShrink: 0,
+                      }}
+                    >✏️</button>
+                    <button
+                      onClick={() => setPreviewChallenge(challenge)}
+                      style={{
+                        background: 'transparent',
+                        border: '0.5px solid var(--border-color)',
+                        borderRadius: '5px', padding: '6px 10px',
+                        fontSize: '13px', color: 'var(--text-muted)', cursor: 'pointer',
+                        flexShrink: 0,
+                      }}
+                    >👁</button>
+                    <button
+                      onClick={() => navigate(`/dashboard?account=${challenge.id}`)}
+                      style={{
+                        flex: 1, background: 'transparent',
+                        border: `1px solid ${isFailed ? 'var(--red-bg)' : 'var(--border-color)'}`,
+                        borderRadius: '5px', padding: '6px',
+                        fontSize: '11px', color: 'var(--text-secondary)', cursor: 'pointer',
+                        fontFamily: "'Inter', sans-serif",
+                      }}
+                    >Go to Dashboard →</button>
                   </div>
                 </div>
               )
@@ -1284,12 +1304,7 @@ export default function ChallengeTracker() {
                     <button onClick={() => setPreviewChallenge(challenge)} style={{ background: 'transparent', border: '0.5px solid var(--border-color)', borderRadius: '8px', padding: '8px 14px', color: 'var(--text-muted)', fontFamily: 'Inter, sans-serif', fontSize: '12px', cursor: 'pointer', flex: 1 }}>
                       Preview
                     </button>
-                    <button
-                      onClick={() => navigate(`/dashboard?account=${challenge.id}`)}
-                      style={{ background: 'var(--brand)', border: 'none', borderRadius: '8px', padding: '8px 14px', color: 'var(--brand-fg)', fontFamily: 'Inter, sans-serif', fontWeight: '600', fontSize: '12px', cursor: 'pointer', flex: 1, transition: 'background 0.15s' }}
-                      onMouseEnter={e => e.currentTarget.style.background = 'var(--brand-hover)'}
-                      onMouseLeave={e => e.currentTarget.style.background = 'var(--brand)'}
-                    >
+                    <button onClick={() => navigate(`/dashboard?account=${challenge.id}`)} style={{ background: 'transparent', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '8px 14px', color: 'var(--text-secondary)', fontFamily: 'Inter, sans-serif', fontSize: '12px', cursor: 'pointer', flex: 1 }}>
                       Go to Dashboard →
                     </button>
                   </div>
