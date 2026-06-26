@@ -664,7 +664,7 @@ export default function Dashboard() {
             <button onClick={() => setPaymentToast(false)} style={{ background: 'none', border: 'none', color: 'var(--brand)', cursor: 'pointer', fontSize: '18px', lineHeight: 1 }}>×</button>
           </div>
         )}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '20px', marginBottom: '24px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '24px' }}>
           <MetricCard
             label="Net P&L"
             value={fmt(stats.totalPnl)}
@@ -679,10 +679,6 @@ export default function Dashboard() {
             label="Profit Factor"
             value={stats.tradeCount === 0 ? '0.00' : isFinite(stats.profitFactor) ? stats.profitFactor.toFixed(2) : '∞'}
             color={stats.tradeCount === 0 ? undefined : (stats.profitFactor >= 1 || !isFinite(stats.profitFactor)) ? 'var(--brand)' : 'var(--red)'}
-          />
-          <MetricCard
-            label="Best / Worst Trade"
-            value={`${stats.bestTrade != null ? `+$${stats.bestTrade.toFixed(2)}` : '—'} / ${stats.worstTrade != null ? `-$${Math.abs(stats.worstTrade).toFixed(2)}` : '—'}`}
           />
           <MetricCard label="Avg RR" value={stats.tradeCount === 0 ? '0.00R' : `${stats.avgRR.toFixed(2)}R`} />
         </div>

@@ -38,6 +38,32 @@ function pnlColor(n) {
   return 'var(--text-primary)'
 }
 
+function StatCell({ label, value, color }) {
+  return (
+    <div style={{
+      background: 'var(--bg-surface)',
+      border: '0.5px solid var(--border-color)',
+      borderRadius: '10px',
+      padding: '12px',
+    }}>
+      <p style={{
+        color: 'var(--text-muted)',
+        fontFamily: 'DM Sans, sans-serif',
+        fontSize: '11px',
+        textTransform: 'uppercase',
+        letterSpacing: '0.5px',
+        margin: '0 0 5px 0',
+      }}>{label}</p>
+      <p style={{
+        color: color || 'var(--text-primary)',
+        fontFamily: 'DM Mono, monospace',
+        fontSize: '16px',
+        margin: 0,
+      }}>{value}</p>
+    </div>
+  )
+}
+
 function ProgressBar({ label, pct, color, rightLabel }) {
   const clamped = Math.min(Math.max(pct, 0), 100)
   return (
@@ -111,11 +137,11 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
     return (
       <div style={{
         background: 'var(--bg-surface)', border: '0.5px solid var(--border-color-2)',
-        borderRadius: '12px', padding: '24px',
+        borderRadius: '12px', padding: '18px',
         flex: 1, display: 'flex', flexDirection: 'column',
       }}>
         <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }`}</style>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
           <div>
             <h2 style={{ color: 'var(--text-primary)', fontFamily: 'Syne, sans-serif', fontSize: '15px', fontWeight: '600', margin: '0 0 4px 0' }}>{account?.name || 'Personal Account'}</h2>
             {mobile ? (
@@ -152,6 +178,21 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
                 <span style={{ color: 'var(--red)' }}>{s.losses}</span>
               </p>
             </div>
+          </>)}
+        </div>}
+
+        {/* Stats row — desktop only (metrics not already on the top strip) */}
+        {!mobile && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '14px' }}>
+          {loading ? (
+            [1,2,3,4].map(i => <div key={i} style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px', padding: '12px' }}><div style={{background:'var(--border-color)',height:'9px',width:'40px',borderRadius:'4px'}}/><div style={{background:'var(--border-color)',height:'18px',width:'70px',borderRadius:'4px',marginTop:'8px'}}/></div>)
+          ) : (<>
+            <StatCell label="Total Trades" value={String(s.total)} />
+            <StatCell
+              label="W / L"
+              value={`${s.wins} / ${s.losses}`}
+            />
+            <StatCell label="Best Trade" value={s.bestTrade != null ? `+$${s.bestTrade.toFixed(2)}` : '—'} color={s.bestTrade != null ? 'var(--brand)' : 'var(--text-faint)'} />
+            <StatCell label="Worst Trade" value={s.worstTrade != null ? `-$${Math.abs(s.worstTrade).toFixed(2)}` : '—'} color={s.worstTrade != null ? 'var(--red)' : 'var(--text-faint)'} />
           </>)}
         </div>}
 
@@ -255,11 +296,11 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
   const floorLabel = `Floor $${ddFloor.toLocaleString(undefined, { maximumFractionDigits: 0 })}`
 
   return (
-    <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color-2)', borderRadius: '12px', padding: mobile ? '16px' : '24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+    <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color-2)', borderRadius: '12px', padding: mobile ? '16px' : '18px', flex: 1, display: 'flex', flexDirection: 'column' }}>
       <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }`}</style>
 
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
         <div>
           <h2 style={{ color: 'var(--text-primary)', fontFamily: 'Syne, sans-serif', fontSize: '15px', fontWeight: '600', margin: '0 0 4px 0' }}>{account.name}</h2>
           <p style={{ color: 'var(--text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: '13px', margin: 0 }}>
@@ -290,6 +331,18 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
             <p style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 4px 0' }}>W/L</p>
             <p style={{ color: 'var(--text-primary)', fontFamily: 'DM Mono, monospace', fontSize: '13px', fontWeight: '600', margin: 0 }}>{`${s.wins}/${s.losses}`}</p>
           </div>
+        </>)}
+      </div>}
+
+      {/* Stats row — desktop only (metrics not already on the top strip) */}
+      {!mobile && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '14px' }}>
+        {loading ? (
+          [1,2,3,4].map(i => <div key={i} style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px', padding: '12px' }}><div style={{background:'var(--border-color)',height:'9px',width:'40px',borderRadius:'4px'}}/><div style={{background:'var(--border-color)',height:'18px',width:'70px',borderRadius:'4px',marginTop:'8px'}}/></div>)
+        ) : (<>
+          <StatCell label="Total Trades" value={String(s.total)} />
+          <StatCell label="W / L" value={`${s.wins} / ${s.losses}`} />
+          <StatCell label="Best Trade" value={s.bestTrade != null ? `+$${s.bestTrade.toFixed(2)}` : '—'} color={s.bestTrade != null ? 'var(--brand)' : 'var(--text-faint)'} />
+          <StatCell label="Worst Trade" value={s.worstTrade != null ? `-$${Math.abs(s.worstTrade).toFixed(2)}` : '—'} color={s.worstTrade != null ? 'var(--red)' : 'var(--text-faint)'} />
         </>)}
       </div>}
 
