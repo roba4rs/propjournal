@@ -98,7 +98,7 @@ function computeScores(trades) {
 
 // ─── Radar geometry ───────────────────────────────────────────────────────────
 
-const CX = 130, CY = 118, R = 82
+const CX = 130, CY = 100, R = 72
 
 function axisPoint(i, r) {
   const a = -Math.PI / 2 + (2 * Math.PI / 6) * i
@@ -174,7 +174,7 @@ export default function ScoreCard({ trades, mobile }) {
     background: 'var(--bg-surface)',
     border: '0.5px solid var(--border-color)',
     borderRadius: '12px',
-    padding: mobile ? '14px' : '20px',
+    padding: mobile ? '12px' : '16px',
     fontFamily: 'DM Sans, sans-serif',
     boxSizing: 'border-box',
     display: 'flex',
@@ -186,7 +186,7 @@ export default function ScoreCard({ trades, mobile }) {
   return (
     <div style={card}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px', position: 'relative' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px', position: 'relative' }}>
         <span style={{ fontFamily: 'Syne, sans-serif', fontSize: '13px', fontWeight: '600', color: 'var(--text-soft)' }}>Score</span>
         <button
           onMouseEnter={() => setShowTooltip(true)}
@@ -205,7 +205,7 @@ export default function ScoreCard({ trades, mobile }) {
       </div>
 
       {/* Radar SVG */}
-      <svg viewBox={`0 0 ${CX * 2} ${CY * 2 + 20}`} width="100%" style={{ flex: 1, minHeight: 0 }} xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox={`0 0 ${CX * 2} ${CY * 2 + 10}`} width="100%" style={{ flex: 1, minHeight: 0, maxHeight: '190px' }} xmlns="http://www.w3.org/2000/svg">
         <defs>
           <radialGradient id="scoreFill" cx="50%" cy="50%" r="50%">
             <stop offset="0%"   stopColor="var(--brand)" stopOpacity={isLight ? 0.7 : 0.38}/>
@@ -271,7 +271,7 @@ export default function ScoreCard({ trades, mobile }) {
       </svg>
 
       {/* Score bar */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginTop: '8px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginTop: '4px' }}>
         <div style={{ flexShrink: 0 }}>
           <div style={{ fontSize: '10px', color: 'var(--text-faint)', marginBottom: '2px' }}>Your Score</div>
           <div style={{ fontFamily: 'Syne, sans-serif', fontSize: '26px', fontWeight: '700', color: 'var(--text-primary)', lineHeight: 1 }}>

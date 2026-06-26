@@ -44,7 +44,7 @@ function StatCell({ label, value, color }) {
       background: 'var(--bg-surface)',
       border: '0.5px solid var(--border-color)',
       borderRadius: '10px',
-      padding: '12px',
+      padding: '9px 10px',
     }}>
       <p style={{
         color: 'var(--text-muted)',
@@ -296,11 +296,11 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
   const floorLabel = `Floor $${ddFloor.toLocaleString(undefined, { maximumFractionDigits: 0 })}`
 
   return (
-    <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color-2)', borderRadius: '12px', padding: mobile ? '16px' : '18px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+    <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color-2)', borderRadius: '12px', padding: mobile ? '14px' : '16px', flex: 1, display: 'flex', flexDirection: 'column' }}>
       <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }`}</style>
 
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
         <div>
           <h2 style={{ color: 'var(--text-primary)', fontFamily: 'Syne, sans-serif', fontSize: '15px', fontWeight: '600', margin: '0 0 4px 0' }}>{account.name}</h2>
           <p style={{ color: 'var(--text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: '13px', margin: 0 }}>
@@ -335,7 +335,7 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
       </div>}
 
       {/* Stats row — desktop only (metrics not already on the top strip) */}
-      {!mobile && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '14px' }}>
+      {!mobile && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: '12px' }}>
         {loading ? (
           [1,2,3,4].map(i => <div key={i} style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px', padding: '12px' }}><div style={{background:'var(--border-color)',height:'9px',width:'40px',borderRadius:'4px'}}/><div style={{background:'var(--border-color)',height:'18px',width:'70px',borderRadius:'4px',marginTop:'8px'}}/></div>)
         ) : (<>
@@ -367,7 +367,7 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
       </div>}
 
       {/* Progress bars */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         <ProgressBar
           label={`Profit Target — ${profitTarget > 0 ? (profitTarget / accountSize * 100).toFixed(1) : '—'}%`}
           pct={profitPct}
