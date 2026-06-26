@@ -320,7 +320,7 @@ function RRBar({ value, max = 4 }) {
   const clamped = Math.max(0, Math.min(max, value))
   const pct = (clamped / max) * 100
   return (
-    <div style={{ width: '76px' }}>
+    <div style={{ width: '76px', height: '44px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
       <div style={{ position: 'relative', height: '5px', background: 'var(--bg-surface-2)', borderRadius: '3px' }}>
         <div style={{ position: 'absolute', inset: 0, width: `${pct}%`, background: 'var(--brand)', borderRadius: '3px' }} />
         <div style={{
@@ -328,7 +328,7 @@ function RRBar({ value, max = 4 }) {
           width: '2px', height: '11px', background: 'var(--text-primary)', borderRadius: '1px',
         }} />
       </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '3px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px' }}>
         <span style={{ fontSize: '8px', color: 'var(--text-faint)', fontFamily: 'DM Mono, monospace' }}>0</span>
         <span style={{ fontSize: '8px', color: 'var(--text-faint)', fontFamily: 'DM Mono, monospace' }}>{max}R</span>
       </div>
