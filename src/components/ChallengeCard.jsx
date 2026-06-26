@@ -38,33 +38,7 @@ function pnlColor(n) {
   return 'var(--text-primary)'
 }
 
-function StatCell({ label, value, color }) {
-  return (
-    <div style={{
-      background: 'var(--bg-surface)',
-      border: '0.5px solid var(--border-color)',
-      borderRadius: '10px',
-      padding: '16px',
-    }}>
-      <p style={{
-        color: 'var(--text-muted)',
-        fontFamily: 'DM Sans, sans-serif',
-        fontSize: '11px',
-        textTransform: 'uppercase',
-        letterSpacing: '0.5px',
-        margin: '0 0 6px 0',
-      }}>{label}</p>
-      <p style={{
-        color: color || 'var(--text-primary)',
-        fontFamily: 'DM Mono, monospace',
-        fontSize: '18px',
-        margin: 0,
-      }}>{value}</p>
-    </div>
-  )
-}
-
-export function ProgressBar({ label, pct, color, rightLabel }) {
+function ProgressBar({ label, pct, color, rightLabel }) {
   const clamped = Math.min(Math.max(pct, 0), 100)
   return (
     <div>
@@ -99,7 +73,7 @@ export function ProgressBar({ label, pct, color, rightLabel }) {
 //   ddFloor — the current hard floor in dollars
 //   ddRoom  — dollars remaining before account blows (currentBalance - floor)
 //
-export function calcDrawdown(trades, accountSize, maxDD, drawdownType) {
+function calcDrawdown(trades, accountSize, maxDD, drawdownType) {
   const withPnl = trades.filter(t => t.pnl != null)
 
   if (drawdownType === 'trailing_balance' || drawdownType === 'trailing_equity') {
@@ -129,10 +103,6 @@ export function calcDrawdown(trades, accountSize, maxDD, drawdownType) {
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function ChallengeCard({ account, trades = [], loading = false, mobile = false }) {
   const accountType = account?.type || 'personal'
-
-  const Skeleton = ({ w = '60px', h = '22px' }) => (
-    <div style={{ width: w, height: h, background: 'var(--border-color)', borderRadius: '4px', animation: 'pulse 1.5s ease-in-out infinite' }} />
-  )
 
   // ── Personal ──
   if (accountType === 'personal') {
@@ -182,30 +152,6 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
                 <span style={{ color: 'var(--red)' }}>{s.losses}</span>
               </p>
             </div>
-          </>)}
-        </div>}
-
-        {/* Row 1 */}
-        {!mobile && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '16px' }}>
-          {loading ? (
-            [1,2,3,4].map(i => <div key={i} style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px', padding: '16px' }}><Skeleton w="40px" h="10px" /><div style={{marginTop:'10px'}}><Skeleton w="80px" h="22px" /></div></div>)
-          ) : (<>
-            <StatCell label="Net P&L" value={s.total === 0 ? '$0.00' : fmt$(s.netPnl)} color={s.total === 0 ? 'var(--text-primary)' : pnlColor(s.netPnl)} />
-            <StatCell label="Win Rate" value={s.total === 0 ? '0%' : `${s.winRate.toFixed(1)}%`} color={s.total === 0 ? 'var(--text-primary)' : s.winRate >= 50 ? 'var(--brand)' : 'var(--red)'} />
-            <StatCell label="Total Trades" value={String(s.total)} />
-            <StatCell label="Avg RR" value={s.total === 0 ? '0.00' : `${s.avgRR.toFixed(2)}R`} />
-          </>)}
-        </div>}
-
-        {/* Row 2 */}
-        {!mobile && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '20px' }}>
-          {loading ? (
-            [1,2,3,4].map(i => <div key={i} style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px', padding: '16px' }}><Skeleton w="40px" h="10px" /><div style={{marginTop:'10px'}}><Skeleton w="80px" h="22px" /></div></div>)
-          ) : (<>
-            <StatCell label="Profit Factor" value={s.total === 0 ? '0.00' : isFinite(s.profitFactor) ? s.profitFactor.toFixed(2) : '∞'} color={s.total === 0 ? 'var(--text-primary)' : (s.profitFactor >= 1 || !isFinite(s.profitFactor)) ? 'var(--brand)' : 'var(--red)'} />
-            <StatCell label="Best Trade" value={s.bestTrade != null ? `+$${s.bestTrade.toFixed(2)}` : '—'} color={s.bestTrade != null ? 'var(--brand)' : 'var(--text-faint)'} />
-            <StatCell label="Worst Trade" value={s.worstTrade != null ? `-$${Math.abs(s.worstTrade).toFixed(2)}` : '—'} color={s.worstTrade != null ? 'var(--red)' : 'var(--text-faint)'} />
-            <StatCell label="Avg Win / Loss" value={s.total === 0 ? '— / —' : `$${s.avgWin.toFixed(0)} / $${s.avgLoss.toFixed(0)}`} />
           </>)}
         </div>}
 
@@ -322,30 +268,6 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
         </div>
         <span style={{ background: badge.bg, border: `0.5px solid ${badge.border}`, borderRadius: '6px', padding: '4px 10px', color: badge.color, fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>{badge.label}</span>
       </div>
-
-      {/* Stats row 1 — desktop only */}
-      {!mobile && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '16px' }}>
-        {loading ? (
-          [1,2,3,4].map(i => <div key={i} style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px', padding: '16px' }}><div style={{background:'var(--border-color)',height:'10px',width:'40px',borderRadius:'4px'}}/><div style={{background:'var(--border-color)',height:'22px',width:'80px',borderRadius:'4px',marginTop:'10px'}}/></div>)
-        ) : (<>
-          <StatCell label="Net P&L" value={s.total === 0 ? '$0.00' : fmt$(netPnl)} color={s.total === 0 ? 'var(--text-primary)' : pnlColor(netPnl)} />
-          <StatCell label="Win Rate" value={s.total === 0 ? '0%' : `${s.winRate.toFixed(1)}%`} />
-          <StatCell label="Trades" value={String(s.total)} />
-          <StatCell label="W / L" value={`${s.wins} / ${s.losses}`} />
-        </>)}
-      </div>}
-
-      {/* Stats row 2 — desktop only */}
-      {!mobile && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '20px' }}>
-        {loading ? (
-          [1,2,3,4].map(i => <div key={i} style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px', padding: '16px' }}><div style={{background:'var(--border-color)',height:'10px',width:'40px',borderRadius:'4px'}}/><div style={{background:'var(--border-color)',height:'22px',width:'80px',borderRadius:'4px',marginTop:'10px'}}/></div>)
-        ) : (<>
-          <StatCell label="Profit Factor" value={s.total === 0 ? '0.00' : isFinite(s.profitFactor) ? s.profitFactor.toFixed(2) : '∞'} />
-          <StatCell label="Best Trade" value={s.bestTrade != null ? `+$${s.bestTrade.toFixed(2)}` : '—'} color={s.bestTrade != null ? 'var(--brand)' : 'var(--text-faint)'} />
-          <StatCell label="Worst Trade" value={s.worstTrade != null ? `-$${Math.abs(s.worstTrade).toFixed(2)}` : '—'} color={s.worstTrade != null ? 'var(--red)' : 'var(--text-faint)'} />
-          <StatCell label="Avg Win / Loss" value={s.total === 0 ? '— / —' : `$${s.avgWin.toFixed(0)} / $${s.avgLoss.toFixed(0)}`} />
-        </>)}
-      </div>}
 
       {/* Mobile stats — single row */}
       {mobile && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px', marginBottom: '10px' }}>

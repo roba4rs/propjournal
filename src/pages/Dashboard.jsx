@@ -14,7 +14,7 @@ import { supabase } from '../supabaseClient'
 import { useSidebar } from '../SidebarContext'
 
 function computeStats(trades) {
-  if (!trades || trades.length === 0) return { totalPnl: 0, tradeCount: 0, winRate: 0, profitFactor: 0, todayPnl: 0, dayCount: 0 }
+  if (!trades || trades.length === 0) return { totalPnl: 0, tradeCount: 0, winRate: 0, profitFactor: 0, todayPnl: 0, dayCount: 0, bestTrade: null, worstTrade: null, avgRR: 0 }
   const total = trades.reduce((s, t) => s + (t.pnl || 0), 0)
   const wins = trades.filter(t => t.outcome === 'win')
   const losses = trades.filter(t => t.outcome === 'loss')
@@ -24,6 +24,10 @@ function computeStats(trades) {
   const today = new Date().toISOString().slice(0, 10)
   const todayPnl = trades.filter(t => t.date === today).reduce((s, t) => s + (t.pnl || 0), 0)
   const days = new Set(trades.map(t => t.date)).size
+  const bestTrade = wins.length > 0 ? Math.max(...wins.map(t => t.pnl)) : null
+  const worstTrade = losses.length > 0 ? Math.min(...losses.map(t => t.pnl)) : null
+  const withRR = trades.filter(t => t.rr != null)
+  const avgRR = withRR.length > 0 ? withRR.reduce((s, t) => s + parseFloat(t.rr), 0) / withRR.length : 0
   return {
     totalPnl: total,
     tradeCount: trades.length,
@@ -31,6 +35,9 @@ function computeStats(trades) {
     profitFactor: pf,
     todayPnl,
     dayCount: days,
+    bestTrade,
+    worstTrade,
+    avgRR,
   }
 }
 
@@ -657,11 +664,11 @@ export default function Dashboard() {
             <button onClick={() => setPaymentToast(false)} style={{ background: 'none', border: 'none', color: 'var(--brand)', cursor: 'pointer', fontSize: '18px', lineHeight: 1 }}>×</button>
           </div>
         )}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '24px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '20px', marginBottom: '24px' }}>
           <MetricCard
-            label="Profit Factor"
-            value={stats.tradeCount === 0 ? '0.00' : isFinite(stats.profitFactor) ? stats.profitFactor.toFixed(2) : '∞'}
-            color={stats.tradeCount === 0 ? undefined : (stats.profitFactor >= 1 || !isFinite(stats.profitFactor)) ? 'var(--brand)' : 'var(--red)'}
+            label="Net P&L"
+            value={fmt(stats.totalPnl)}
+            color={stats.tradeCount === 0 ? undefined : stats.totalPnl >= 0 ? 'var(--brand)' : 'var(--red)'}
           />
           <MetricCard
             label="Win Rate"
@@ -669,11 +676,15 @@ export default function Dashboard() {
             color={stats.tradeCount === 0 ? undefined : stats.winRate >= 50 ? 'var(--brand)' : 'var(--red)'}
           />
           <MetricCard
-            label="Net P&L (Today)"
-            value={fmt(stats.todayPnl)}
-            color={stats.todayPnl >= 0 ? 'var(--brand)' : 'var(--red)'}
+            label="Profit Factor"
+            value={stats.tradeCount === 0 ? '0.00' : isFinite(stats.profitFactor) ? stats.profitFactor.toFixed(2) : '∞'}
+            color={stats.tradeCount === 0 ? undefined : (stats.profitFactor >= 1 || !isFinite(stats.profitFactor)) ? 'var(--brand)' : 'var(--red)'}
           />
-          <MetricCard label="Total Trades" value={String(stats.tradeCount)} />
+          <MetricCard
+            label="Best / Worst Trade"
+            value={`${stats.bestTrade != null ? `+$${stats.bestTrade.toFixed(2)}` : '—'} / ${stats.worstTrade != null ? `-$${Math.abs(stats.worstTrade).toFixed(2)}` : '—'}`}
+          />
+          <MetricCard label="Avg RR" value={stats.tradeCount === 0 ? '0.00R' : `${stats.avgRR.toFixed(2)}R`} />
         </div>
         <div style={{ display: 'flex', gap: '20px', alignItems: 'stretch', marginBottom: '24px' }}>
           <div style={{ flex: '0 0 30%', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
