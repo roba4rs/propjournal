@@ -92,14 +92,14 @@ function sessionLabel(s) {
 
 // ─── New top metrics strip ──────────────────────────────────────────────────
 
-// Shared card shell
+// Shared card shell — label on top, value + chart anchored to bottom
 function MetricShell({ label, value, color, chart }) {
   return (
-    <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color-2)', borderRadius: '12px', padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+    <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color-2)', borderRadius: '12px', padding: '16px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '90px' }}>
       <p style={{ color: 'var(--text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: 0 }}>{label}</p>
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '10px' }}>
         <p style={{ color: color || 'var(--text-primary)', fontFamily: 'DM Mono, monospace', fontSize: '22px', fontWeight: '600', margin: 0, lineHeight: 1 }}>{value}</p>
-        {chart}
+        <div style={{ display: 'flex', alignItems: 'flex-end' }}>{chart}</div>
       </div>
     </div>
   )
@@ -156,9 +156,9 @@ function DonutRing({ value, color }) {
   const pct = Math.min((value || 0) / 3, 1)
   const dash = pct * circ
   return (
-    <svg width="48" height="48" style={{ transform: 'rotate(-90deg)' }}>
-      <circle cx="24" cy="24" r={r} fill="none" stroke="var(--border-color-2)" strokeWidth={stroke} />
-      <circle cx="24" cy="24" r={r} fill="none" stroke={color || 'var(--brand)'} strokeWidth={stroke}
+    <svg width="44" height="44" style={{ transform: 'rotate(-90deg)' }}>
+      <circle cx="22" cy="22" r={r} fill="none" stroke="var(--border-color-2)" strokeWidth={stroke} />
+      <circle cx="22" cy="22" r={r} fill="none" stroke={color || 'var(--brand)'} strokeWidth={stroke}
         strokeDasharray={`${dash.toFixed(2)} ${circ.toFixed(2)}`} strokeLinecap="round" />
     </svg>
   )
@@ -172,17 +172,17 @@ function RRBar({ value }) {
   const benchmarkPct = (1 / max) * 100
   const isGood = value >= 1
   return (
-    <div style={{ width: '80px', display: 'flex', flexDirection: 'column', gap: '4px', paddingBottom: '2px' }}>
-      <div style={{ position: 'relative', height: '6px', background: 'var(--bg-surface-2)', borderRadius: '3px', overflow: 'visible' }}>
-        <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${pct}%`, background: isGood ? 'var(--brand)' : 'var(--amber)', borderRadius: '3px', transition: 'width 0.4s ease' }} />
-        {/* 1.0 benchmark tick */}
-        <div style={{ position: 'absolute', left: `${benchmarkPct}%`, top: '-3px', bottom: '-3px', width: '1.5px', background: 'var(--text-faint)', borderRadius: '1px' }} />
-      </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: '9px', color: 'var(--text-faint)', fontFamily: 'DM Mono, monospace' }}>0</span>
-        <span style={{ fontSize: '9px', color: 'var(--text-faint)', fontFamily: 'DM Mono, monospace' }}>{max}R</span>
-      </div>
-    </div>
+    <svg width="80" height="20" style={{ overflow: 'visible' }}>
+      {/* track */}
+      <rect x="0" y="7" width="80" height="6" rx="3" fill="var(--bg-surface-2)" />
+      {/* fill */}
+      <rect x="0" y="7" width={`${pct * 0.8}`} height="6" rx="3" fill={isGood ? 'var(--brand)' : 'var(--amber)'} />
+      {/* 1R benchmark tick */}
+      <rect x={benchmarkPct * 0.8} y="4" width="1.5" height="12" rx="1" fill="var(--text-faint)" />
+      {/* labels */}
+      <text x="0" y="20" fontSize="8" fill="var(--text-faint)" fontFamily="DM Mono, monospace">0</text>
+      <text x="80" y="20" fontSize="8" fill="var(--text-faint)" fontFamily="DM Mono, monospace" textAnchor="end">4R</text>
+    </svg>
   )
 }
 
