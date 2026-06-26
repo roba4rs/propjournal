@@ -64,7 +64,7 @@ function StatCell({ label, value, color }) {
   )
 }
 
-function ProgressBar({ label, pct, color, rightLabel }) {
+export function ProgressBar({ label, pct, color, rightLabel }) {
   const clamped = Math.min(Math.max(pct, 0), 100)
   return (
     <div>
@@ -99,7 +99,7 @@ function ProgressBar({ label, pct, color, rightLabel }) {
 //   ddFloor — the current hard floor in dollars
 //   ddRoom  — dollars remaining before account blows (currentBalance - floor)
 //
-function calcDrawdown(trades, accountSize, maxDD, drawdownType) {
+export function calcDrawdown(trades, accountSize, maxDD, drawdownType) {
   const withPnl = trades.filter(t => t.pnl != null)
 
   if (drawdownType === 'trailing_balance' || drawdownType === 'trailing_equity') {

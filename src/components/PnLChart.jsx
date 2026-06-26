@@ -72,7 +72,7 @@ function SplitGradient({ id, zeroPercent, isLight }) {
   )
 }
 
-export default function PnLChart({ trades = [], account, noMargin, mobile }) {
+export default function PnLChart({ trades = [], account, noMargin, mobile, footer }) {
   const { isLight } = useTheme()
   const [activeTab, setActiveTab] = useState('All')
 
@@ -189,6 +189,12 @@ export default function PnLChart({ trades = [], account, noMargin, mobile }) {
             <Area type="monotone" dataKey="pnl" stroke={lineColor} strokeWidth={2} fill="url(#splitGradDesktop)" dot={false} />
           </AreaChart>
         </ResponsiveContainer>
+      )}
+
+      {footer && (
+        <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '0.5px solid var(--border-color)' }}>
+          {footer}
+        </div>
       )}
     </div>
   )
