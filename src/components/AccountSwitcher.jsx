@@ -126,7 +126,7 @@ export default function AccountSwitcher({
   })
 
   return (
-    <div style={{ marginBottom: mobile ? '0' : '24px', width: mobile && !compact ? '100%' : 'auto' }}>
+    <div style={{ width: mobile && !compact ? '100%' : 'auto' }}>
       <div style={{
         display: 'flex',
         alignItems: mobile && !compact ? 'stretch' : 'center',
@@ -253,33 +253,6 @@ export default function AccountSwitcher({
             </div>
           )}
         </div>
-
-        {/* Balance pill — all account types */}
-        {showBalance && totalBalance !== null && (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            background: 'var(--bg-surface-2)',
-            border: '0.5px solid var(--border-color)',
-            borderRadius: '10px',
-            padding: mobile ? '10px 12px' : '9px 14px',
-            width: mobile ? '100%' : 'auto',
-            boxSizing: 'border-box',
-          }}>
-            <span style={{ color: 'var(--text-faint)', fontFamily: 'DM Sans, sans-serif', fontSize: '11px' }}>
-              Balance
-            </span>
-            <span style={{
-              color: totalBalance >= (Number(active.account_size) || 0) ? 'var(--brand)' : 'var(--red)',
-              fontFamily: 'DM Mono, monospace',
-              fontSize: '13px',
-              fontWeight: '500',
-            }}>
-              ${totalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </span>
-          </div>
-        )}
 
       </div>
     </div>
