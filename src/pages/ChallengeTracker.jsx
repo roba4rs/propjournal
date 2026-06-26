@@ -422,7 +422,7 @@ const statusBadge = {
 
 function computeStats(trades) {
   const withPnl = trades.filter(t => t.pnl != null)
-  const netPnl = withPnl.reduce((s, t) => s + parseFloat(t.pnl), 0)
+  const netPnl = withPnl.reduce((s, t) => s + parseFloat(t.pnl) + (parseFloat(t.swap) || 0) + (parseFloat(t.commission) || 0), 0)
   const closed = trades.filter(t => t.outcome && t.outcome !== 'in_progress')
   const wins = closed.filter(t => t.outcome === 'win')
   const losses = closed.filter(t => t.outcome === 'loss')
@@ -433,7 +433,7 @@ function computeStats(trades) {
 
 function computeProgress(trades, account) {
   const withPnl = trades.filter(t => t.pnl != null)
-  const netPnl = withPnl.reduce((s, t) => s + parseFloat(t.pnl), 0)
+  const netPnl = withPnl.reduce((s, t) => s + parseFloat(t.pnl) + (parseFloat(t.swap) || 0) + (parseFloat(t.commission) || 0), 0)
   const accountSize = parseFloat(account.account_size) || 0
   const profitTarget = parseFloat(account.profit_target) || 0
   const maxDD = parseFloat(account.max_drawdown) || 0
@@ -485,19 +485,19 @@ function computeStatus(trades, account) {
   const minDays = account.min_trading_days || 0
   const accountSize = parseFloat(account.account_size) || 0
 
-  const netPnl = withPnl.reduce((s, t) => s + parseFloat(t.pnl), 0)
+  const netPnl = withPnl.reduce((s, t) => s + parseFloat(t.pnl) + (parseFloat(t.swap) || 0) + (parseFloat(t.commission) || 0), 0)
 
   let balance = accountSize
   let lowestBalance = accountSize
   for (const t of withPnl) {
-    balance += parseFloat(t.pnl)
+    balance += parseFloat(t.pnl) + (parseFloat(t.swap) || 0) + (parseFloat(t.commission) || 0)
     if (balance < lowestBalance) lowestBalance = balance
   }
   const maxDrawdownUsed = Math.max(0, accountSize - lowestBalance)
 
   const byDay = {}
   withPnl.forEach(t => {
-    byDay[t.date] = (byDay[t.date] || 0) + parseFloat(t.pnl)
+    byDay[t.date] = (byDay[t.date] || 0) + parseFloat(t.pnl) + (parseFloat(t.swap) || 0) + (parseFloat(t.commission) || 0)
   })
   const worstDayLoss = Object.values(byDay).length > 0
     ? Math.max(0, ...Object.values(byDay).map(v => -v))
