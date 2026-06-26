@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
 import AccountSwitcher from '../components/AccountSwitcher'
-import ChallengeCard, { calcDrawdown, ProgressBar } from '../components/ChallengeCard'
+import ChallengeCard from '../components/ChallengeCard'
 import PnLChart from '../components/PnLChart'
 import DailyBarChart from '../components/DailyBarChart'
 import StreakCard from '../components/StreakCard'
@@ -89,86 +89,6 @@ function MetricCard({ label, value, color }) {
     <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color-2)', borderRadius: '12px', padding: '18px 20px' }}>
       <p style={{ color: 'var(--text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 8px 0' }}>{label}</p>
       <p style={{ color: color || 'var(--text-primary)', fontFamily: 'DM Mono, monospace', fontSize: '22px', fontWeight: '600', margin: 0 }}>{value}</p>
-    </div>
-  )
-}
-
-// ─── Challenge stats footer (lives under the equity curve now) ─────────────
-function buildChallengeFooter(account, trades) {
-  if (!account) return null
-  const accountType = account.type || 'personal'
-  const withPnl = trades.filter(t => t.pnl != null)
-  const netPnl = withPnl.reduce((s, t) => s + parseFloat(t.pnl), 0)
-  const accountSize = parseFloat(account.account_size) || 0
-
-  if (accountType === 'personal') {
-    const profitableDays = Object.entries(
-      withPnl.reduce((acc, t) => { acc[t.date] = (acc[t.date] || 0) + parseFloat(t.pnl); return acc }, {})
-    ).filter(([, v]) => v > 0).length
-    const totalDays = new Set(withPnl.map(t => t.date)).size
-    const consistency = totalDays > 0 ? (profitableDays / totalDays) * 100 : 0
-    const growth = accountSize > 0 ? Math.min(Math.max((netPnl / accountSize) * 100, 0), 100) : 0
-    const growthRaw = accountSize > 0 ? (netPnl / accountSize) * 100 : 0
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        <ProgressBar
-          label={`Consistency — ${profitableDays} of ${totalDays} days profitable`}
-          pct={consistency}
-          color="var(--brand)"
-          rightLabel={`${consistency.toFixed(1)}% profitable days`}
-        />
-        <ProgressBar
-          label="Account Growth"
-          pct={growth}
-          color="var(--blue)"
-          rightLabel={accountSize > 0 ? `${growthRaw >= 0 ? '+' : ''}${growthRaw.toFixed(2)}% on $${accountSize.toLocaleString()}` : 'Set account size to track'}
-        />
-      </div>
-    )
-  }
-
-  // Challenge account — profit target / max DD / daily DD
-  const profitTarget = parseFloat(account.profit_target) || 0
-  const maxDD = parseFloat(account.max_drawdown) || 0
-  const dailyDD = parseFloat(account.daily_drawdown) || 0
-  const drawdownType = account.drawdown_type || 'static'
-
-  const profitPct = profitTarget > 0 ? Math.min((netPnl / profitTarget) * 100, 100) : 0
-
-  const { ddUsed, ddFloor } = calcDrawdown(trades, accountSize, maxDD, drawdownType)
-  const maxDDUsedPct = accountSize > 0 ? (ddUsed / accountSize) * 100 : 0
-  const maxDDLimitPct = accountSize > 0 ? (maxDD / accountSize) * 100 : 0
-  const maxDDPct = maxDDLimitPct > 0 ? Math.min((maxDDUsedPct / maxDDLimitPct) * 100, 100) : 0
-
-  const byDay = {}
-  withPnl.forEach(t => { byDay[t.date] = (byDay[t.date] || 0) + parseFloat(t.pnl) })
-  const worstDayLoss = Object.values(byDay).length > 0 ? Math.max(0, ...Object.values(byDay).map(v => -v)) : 0
-  const dailyDDUsedPct = accountSize > 0 ? (worstDayLoss / accountSize) * 100 : 0
-  const dailyDDLimitPct = accountSize > 0 ? (dailyDD / accountSize) * 100 : 0
-  const dailyDDPct = dailyDDLimitPct > 0 ? Math.min((dailyDDUsedPct / dailyDDLimitPct) * 100, 100) : 0
-
-  const floorLabel = `Floor $${ddFloor.toLocaleString(undefined, { maximumFractionDigits: 0 })}`
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-      <ProgressBar
-        label={`Profit Target — ${profitTarget > 0 ? (profitTarget / accountSize * 100).toFixed(1) : '—'}%`}
-        pct={profitPct}
-        color="var(--brand)"
-        rightLabel={`${(netPnl / accountSize * 100 >= 0 ? '+' : '')}${(netPnl / accountSize * 100).toFixed(2)}% of ${profitTarget > 0 ? (profitTarget / accountSize * 100).toFixed(1) : '—'}% target`}
-      />
-      <ProgressBar
-        label={`Max Drawdown — ${maxDDUsedPct.toFixed(2)}% / ${maxDDLimitPct.toFixed(1)}%`}
-        pct={maxDDPct}
-        color="var(--red)"
-        rightLabel={`${maxDDUsedPct.toFixed(2)}% used · ${floorLabel}`}
-      />
-      <ProgressBar
-        label={`Daily Drawdown — ${dailyDDUsedPct.toFixed(2)}% / ${dailyDDLimitPct.toFixed(1)}%`}
-        pct={dailyDDPct}
-        color="var(--amber)"
-        rightLabel={dailyDD > 0 ? 'Worst single day so far' : 'No daily DD rule set'}
-      />
     </div>
   )
 }
@@ -699,7 +619,6 @@ export default function Dashboard() {
 
   // ─── DESKTOP LAYOUT ──────────────────────────────────────────────────────────
   const stats = computeStats(trades)
-  const challengeFooter = buildChallengeFooter(activeAccount, trades)
 
   return (
     <div style={{ display: 'flex', background: 'var(--bg-page)', minHeight: '100vh' }}>
@@ -757,17 +676,24 @@ export default function Dashboard() {
           <MetricCard label="Total Trades" value={String(stats.tradeCount)} />
         </div>
         <div style={{ display: 'flex', gap: '20px', alignItems: 'stretch', marginBottom: '24px' }}>
-          <div style={{ flex: '0 0 65%', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-            <PnLChart trades={trades} account={activeAccount} noMargin footer={challengeFooter} />
-          </div>
-          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div style={{ flex: '0 0 30%', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
             <ScoreCard trades={trades} />
-            <WinLossDonut trades={trades} />
+          </div>
+          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+            <ChallengeCard account={activeAccount} trades={trades} loading={loading} />
           </div>
         </div>
         <div style={{ display: 'flex', gap: '20px', alignItems: 'stretch', marginBottom: '24px' }}>
           <div style={{ flex: '0 0 65%', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
             <DailyBarChart trades={trades} />
+          </div>
+          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+            <WinLossDonut trades={trades} />
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: '20px', alignItems: 'stretch', marginBottom: '24px' }}>
+          <div style={{ flex: '0 0 65%', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+            <PnLChart trades={trades} account={activeAccount} noMargin />
           </div>
           <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
             <StreakCard trades={trades} />
