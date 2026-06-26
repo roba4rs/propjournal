@@ -1329,7 +1329,6 @@ export default function ChallengeTracker() {
               const pnlLabel = trades.length === 0 ? '$0.00'
                 : `${s.netPnl >= 0 ? '+' : ''}$${Math.abs(s.netPnl).toFixed(2)}`
               const statusBarColor = computedStatus === 'failed' ? 'var(--red)' : computedStatus === 'passed' ? 'var(--brand)' : computedStatus === 'funded' ? '#7c3aed' : 'var(--text-faint)'
-              const profitTargetPct = p.accountSize > 0 ? (p.profitTarget / p.accountSize * 100).toFixed(1) : '—'
 
               return (
                 <div
