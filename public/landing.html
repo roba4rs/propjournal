@@ -672,6 +672,8 @@
     .testimonial-body strong { color: var(--foreground); font-weight: 500; }
 
     /* ── Auth-aware nav ── */
+    #nav-login, #nav-signup { visibility: hidden; }
+
     .nav-avatar {
       width: 32px; height: 32px;
       border-radius: 50%;
@@ -1226,8 +1228,15 @@ document.addEventListener('DOMContentLoaded', function() {
         'sb_publishable_t7WoiBLpaIEnl5n5uFA-MA_pBRpJ_vw'
       );
 
+      function revealNav() {
+        const navLogin = document.getElementById('nav-login');
+        const navSignup = document.getElementById('nav-signup');
+        if (navLogin) navLogin.style.visibility = 'visible';
+        if (navSignup) navSignup.style.visibility = 'visible';
+      }
+
       const { data: { session } } = await client.auth.getSession();
-      if (!session) return; // not logged in — leave buttons as-is
+      if (!session) { revealNav(); return; } // not logged in — show default buttons
 
       const user = session.user;
       const email = user.email || '';
@@ -1320,6 +1329,8 @@ document.addEventListener('DOMContentLoaded', function() {
         navSignup.replaceWith(wrap);
         wrap.insertAdjacentElement('afterend', dashBtn);
       }
+
+      revealNav();
 
       // ── Hero: "Sign up" → "Dashboard", "Log in" → "My Account" ──
       const heroSignup = document.getElementById('hero-signup');
