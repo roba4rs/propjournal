@@ -91,11 +91,97 @@ function sessionLabel(s) {
 }
 
 // ─── New top metrics strip ──────────────────────────────────────────────────
-function MetricCard({ label, value, color }) {
+
+// Shared card shell
+function MetricShell({ label, value, color, chart }) {
   return (
-    <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color-2)', borderRadius: '12px', padding: '18px 20px' }}>
-      <p style={{ color: 'var(--text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 8px 0' }}>{label}</p>
-      <p style={{ color: color || 'var(--text-primary)', fontFamily: 'DM Mono, monospace', fontSize: '22px', fontWeight: '600', margin: 0 }}>{value}</p>
+    <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color-2)', borderRadius: '12px', padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+      <p style={{ color: 'var(--text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: 0 }}>{label}</p>
+      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '10px' }}>
+        <p style={{ color: color || 'var(--text-primary)', fontFamily: 'DM Mono, monospace', fontSize: '22px', fontWeight: '600', margin: 0, lineHeight: 1 }}>{value}</p>
+        {chart}
+      </div>
+    </div>
+  )
+}
+
+// 1. Sparkline for Net P&L
+function SparklineChart({ trades }) {
+  const W = 80, H = 40
+  if (!trades || trades.length === 0) {
+    return <svg width={W} height={H}><line x1="0" y1={H/2} x2={W} y2={H/2} stroke="var(--border-color-2)" strokeWidth="1.5" strokeDasharray="3 3" /></svg>
+  }
+  const sorted = [...trades].sort((a, b) => new Date(a.date + 'T' + (a.time || '00:00')) - new Date(b.date + 'T' + (b.time || '00:00')))
+  let cum = 0
+  const points = [0, ...sorted.map(t => { cum += (t.pnl || 0); return cum })]
+  const min = Math.min(...points), max = Math.max(...points)
+  const range = max - min || 1
+  const xs = points.map((_, i) => (i / (points.length - 1)) * W)
+  const ys = points.map(v => H - ((v - min) / range) * (H - 4) - 2)
+  const d = xs.map((x, i) => `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${ys[i].toFixed(1)}`).join(' ')
+  const fill = `${d} L${W},${H} L0,${H} Z`
+  const isPos = points[points.length - 1] >= 0
+  const stroke = isPos ? 'var(--brand)' : 'var(--red)'
+  const fillColor = isPos ? 'rgba(0,200,120,0.12)' : 'rgba(255,80,80,0.10)'
+  return (
+    <svg width={W} height={H} style={{ overflow: 'visible' }}>
+      <path d={fill} fill={fillColor} />
+      <path d={d} fill="none" stroke={stroke} strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+// 2. Semicircle gauge for Win Rate
+function SemicircleGauge({ pct, color }) {
+  const W = 72, H = 42
+  const cx = W / 2, cy = H - 2, r = 32
+  const clamp = Math.min(Math.max(pct || 0, 0), 100)
+  const angle = (clamp / 100) * Math.PI
+  const ex = cx + r * Math.cos(Math.PI - angle)
+  const ey = cy - r * Math.sin(Math.PI - angle)
+  const trackD = `M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`
+  const fillD = clamp === 0 ? '' : `M ${cx - r} ${cy} A ${r} ${r} 0 ${clamp > 50 ? 1 : 0} 1 ${ex.toFixed(2)} ${ey.toFixed(2)}`
+  return (
+    <svg width={W} height={H} style={{ overflow: 'visible' }}>
+      <path d={trackD} fill="none" stroke="var(--border-color-2)" strokeWidth="5" strokeLinecap="round" />
+      {fillD && <path d={fillD} fill="none" stroke={color || 'var(--brand)'} strokeWidth="5" strokeLinecap="round" />}
+    </svg>
+  )
+}
+
+// 3. Donut ring for Profit Factor (capped at 3x = 100%)
+function DonutRing({ value, color }) {
+  const r = 18, stroke = 5
+  const circ = 2 * Math.PI * r
+  const pct = Math.min((value || 0) / 3, 1)
+  const dash = pct * circ
+  return (
+    <svg width="48" height="48" style={{ transform: 'rotate(-90deg)' }}>
+      <circle cx="24" cy="24" r={r} fill="none" stroke="var(--border-color-2)" strokeWidth={stroke} />
+      <circle cx="24" cy="24" r={r} fill="none" stroke={color || 'var(--brand)'} strokeWidth={stroke}
+        strokeDasharray={`${dash.toFixed(2)} ${circ.toFixed(2)}`} strokeLinecap="round" />
+    </svg>
+  )
+}
+
+// 4. Horizontal bar vs 1.0 benchmark for Avg RR
+function RRBar({ value }) {
+  const max = 4
+  const clamp = Math.min(Math.max(value || 0, 0), max)
+  const pct = (clamp / max) * 100
+  const benchmarkPct = (1 / max) * 100
+  const isGood = value >= 1
+  return (
+    <div style={{ width: '80px', display: 'flex', flexDirection: 'column', gap: '4px', paddingBottom: '2px' }}>
+      <div style={{ position: 'relative', height: '6px', background: 'var(--bg-surface-2)', borderRadius: '3px', overflow: 'visible' }}>
+        <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${pct}%`, background: isGood ? 'var(--brand)' : 'var(--amber)', borderRadius: '3px', transition: 'width 0.4s ease' }} />
+        {/* 1.0 benchmark tick */}
+        <div style={{ position: 'absolute', left: `${benchmarkPct}%`, top: '-3px', bottom: '-3px', width: '1.5px', background: 'var(--text-faint)', borderRadius: '1px' }} />
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <span style={{ fontSize: '9px', color: 'var(--text-faint)', fontFamily: 'DM Mono, monospace' }}>0</span>
+        <span style={{ fontSize: '9px', color: 'var(--text-faint)', fontFamily: 'DM Mono, monospace' }}>{max}R</span>
+      </div>
     </div>
   )
 }
@@ -665,22 +751,29 @@ export default function Dashboard() {
           </div>
         )}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '24px' }}>
-          <MetricCard
+          <MetricShell
             label="Net P&L"
             value={fmt(stats.totalPnl)}
             color={stats.tradeCount === 0 ? undefined : stats.totalPnl >= 0 ? 'var(--brand)' : 'var(--red)'}
+            chart={<SparklineChart trades={trades} />}
           />
-          <MetricCard
+          <MetricShell
             label="Win Rate"
             value={`${stats.winRate}%`}
             color={stats.tradeCount === 0 ? undefined : stats.winRate >= 50 ? 'var(--brand)' : 'var(--red)'}
+            chart={<SemicircleGauge pct={stats.winRate} color={stats.tradeCount === 0 ? 'var(--border-color-2)' : stats.winRate >= 50 ? 'var(--brand)' : 'var(--red)'} />}
           />
-          <MetricCard
+          <MetricShell
             label="Profit Factor"
             value={stats.tradeCount === 0 ? '0.00' : isFinite(stats.profitFactor) ? stats.profitFactor.toFixed(2) : '∞'}
             color={stats.tradeCount === 0 ? undefined : (stats.profitFactor >= 1 || !isFinite(stats.profitFactor)) ? 'var(--brand)' : 'var(--red)'}
+            chart={<DonutRing value={isFinite(stats.profitFactor) ? stats.profitFactor : 3} color={stats.tradeCount === 0 ? 'var(--border-color-2)' : (stats.profitFactor >= 1 || !isFinite(stats.profitFactor)) ? 'var(--brand)' : 'var(--red)'} />}
           />
-          <MetricCard label="Avg RR" value={stats.tradeCount === 0 ? '0.00R' : `${stats.avgRR.toFixed(2)}R`} />
+          <MetricShell
+            label="Avg RR"
+            value={stats.tradeCount === 0 ? '0.00R' : `${stats.avgRR.toFixed(2)}R`}
+            chart={<RRBar value={stats.avgRR} />}
+          />
         </div>
         <div style={{ display: 'flex', gap: '20px', alignItems: 'stretch', marginBottom: '24px' }}>
           <div style={{ flex: '0 0 30%', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
