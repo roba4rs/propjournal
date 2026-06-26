@@ -224,121 +224,81 @@ export default function NewChallengeModal({ onClose, onCreated }) {
     (isFunded || (form.profit_target_pct && form.max_drawdown_pct))
 
   // ── Shared style primitives ────────────────────────────────
-  const label = {
-    display: 'block', color: 'var(--text-faint-2)',
-    fontFamily: 'DM Sans, sans-serif',
-    fontSize: '11px', marginBottom: '6px',
-    textTransform: 'uppercase', letterSpacing: '0.05em',
-  }
-  const input = {
-    width: '100%', background: 'var(--bg-page)',
-    border: '0.5px solid var(--border-color)', borderRadius: '8px',
-    padding: '9px 12px', color: 'var(--text-primary)',
-    fontFamily: 'DM Sans, sans-serif', fontSize: '13px',
-    outline: 'none', boxSizing: 'border-box',
-  }
-  const selectTrigger = (active) => ({
-    width: '100%', background: 'var(--bg-page)',
-    border: `0.5px solid ${active ? 'var(--brand)' : 'var(--border-color)'}`,
-    borderRadius: '8px', padding: '9px 12px',
-    color: active ? 'var(--text-primary)' : 'var(--text-faint-2)',
-    fontFamily: 'DM Sans, sans-serif', fontSize: '13px',
-    cursor: 'pointer', display: 'flex',
-    justifyContent: 'space-between', alignItems: 'center',
-    boxSizing: 'border-box',
-  })
-  const dropdown = {
-    position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0,
-    background: 'var(--bg-surface-2)', border: '0.5px solid var(--border-color-2)',
-    borderRadius: '8px', zIndex: 20, overflow: 'hidden',
-    boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
-  }
-  const dropItem = (sel) => ({
-    padding: '9px 12px', cursor: 'pointer',
-    color: sel ? 'var(--brand)' : 'var(--text-soft)',
-    background: sel ? 'var(--green-bg)' : 'transparent',
-    fontFamily: 'DM Sans, sans-serif', fontSize: '13px',
-  })
-  const pill = (active) => ({
-    flex: 1, background: active ? 'var(--green-bg)' : 'var(--bg-page)',
-    border: `0.5px solid ${active ? 'var(--brand)' : 'var(--border-color)'}`,
-    borderRadius: '8px', padding: '8px 6px',
-    color: active ? 'var(--brand)' : 'var(--text-faint-2)',
-    fontFamily: 'DM Sans, sans-serif', fontSize: '12px',
-    textAlign: 'center', cursor: 'pointer',
-  })
-  const hintGreen = { color: 'var(--brand)', fontFamily: 'DM Mono, monospace', fontSize: '11px', marginTop: '4px' }
-  const hintRed   = { color: 'var(--red)', fontFamily: 'DM Mono, monospace', fontSize: '11px', marginTop: '4px' }
-  const hintBlue  = { color: 'var(--blue)', fontFamily: 'DM Mono, monospace', fontSize: '11px', marginTop: '4px' }
+  const ff  = 'DM Sans, sans-serif'
+  const ffm = 'DM Mono, monospace'
+  const label = { display: 'block', color: 'var(--text-faint-2)', fontFamily: ff, fontSize: '10.5px', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.07em' }
+  const input = { width: '100%', background: 'var(--bg-page)', border: '0.5px solid var(--border-color)', borderRadius: '8px', padding: '9px 12px', color: 'var(--text-primary)', fontFamily: ff, fontSize: '13px', outline: 'none', boxSizing: 'border-box' }
+  const dropdown = { position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, background: 'var(--bg-surface-2)', border: '0.5px solid var(--border-color-2)', borderRadius: '8px', zIndex: 20, overflow: 'hidden', boxShadow: '0 8px 32px rgba(0,0,0,0.6)' }
+  const dropItem = (sel) => ({ padding: '9px 12px', cursor: 'pointer', color: sel ? 'var(--brand)' : 'var(--text-soft)', background: sel ? 'var(--green-bg)' : 'transparent', fontFamily: ff, fontSize: '13px' })
+  const pill = (active) => ({ flex: 1, background: active ? 'var(--green-bg)' : 'var(--bg-page)', border: `0.5px solid ${active ? 'var(--brand)' : 'var(--border-color)'}`, borderRadius: '8px', padding: '8px 6px', color: active ? 'var(--brand)' : 'var(--text-faint-2)', fontFamily: ff, fontSize: '12px', textAlign: 'center', cursor: 'pointer' })
+  const hintGreen = { color: 'var(--brand)', fontFamily: ffm, fontSize: '11px', marginTop: '4px' }
+  const hintRed   = { color: 'var(--red)',   fontFamily: ffm, fontSize: '11px', marginTop: '4px' }
+  const hintBlue  = { color: 'var(--blue)',  fontFamily: ffm, fontSize: '11px', marginTop: '4px' }
+  const sectionBadge = { display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }
+  const badgeNum = { width: '20px', height: '20px', borderRadius: '6px', border: '0.5px solid var(--border-color-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-faint-2)', fontFamily: ffm, fontSize: '10px', flexShrink: 0 }
+  const badgeText = { color: 'var(--text-faint-2)', fontFamily: ff, fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.08em' }
+  const ruleCard = (icon, title, value, unit, hint, hintStyle) => (
+    <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px', padding: '12px 14px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '6px' }}>
+        <span style={{ fontSize: '12px' }}>{icon}</span>
+        <span style={{ color: 'var(--text-faint-2)', fontFamily: ff, fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.07em' }}>{title}</span>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+        <input name={value[0]} type="number" placeholder="—" value={value[1]} onChange={handleChange}
+          style={{ background: 'transparent', border: 'none', outline: 'none', color: 'var(--text-primary)', fontFamily: ffm, fontSize: '22px', fontWeight: '600', width: '100%', padding: 0 }} />
+        <span style={{ color: 'var(--text-faint-2)', fontFamily: ff, fontSize: '12px', flexShrink: 0 }}>{unit}</span>
+      </div>
+      {hint && <p style={hintStyle}>{hint}</p>}
+    </div>
+  )
 
-  const divider = {
-    width: '0.5px', background: 'var(--border-color)',
-    alignSelf: 'stretch', margin: '0 4px',
-  }
+  const SIZE_PRESETS = [10000, 25000, 50000, 100000, 200000]
+  const fmtSize = n => n >= 1000 ? `$${n/1000}K` : `$${n}`
 
   return (
     <div
-      style={{
-        position: 'fixed', inset: 0,
-        background: 'rgba(0,0,0,0.75)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        zIndex: 1000, padding: isMobile ? '12px' : '24px',
-      }}
+      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: isMobile ? '12px' : '24px' }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
     >
-      <div style={{
-        background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)',
-        borderRadius: isMobile ? '10px' : '14px', width: '100%', maxWidth: isMobile ? '100%' : '860px',
-        overflow: 'hidden',
-      }}>
+      <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: isMobile ? '10px' : '14px', width: '100%', maxWidth: isMobile ? '100%' : '860px', overflow: 'hidden' }}>
 
-        {/* ── Top bar ── */}
-        <div style={{
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          padding: '18px 24px', borderBottom: '0.5px solid var(--border-color)',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <h2 style={{
-              color: 'var(--text-primary)', fontFamily: 'Syne, sans-serif',
-              fontSize: '16px', fontWeight: '600', margin: 0,
-            }}>New Challenge</h2>
+        {/* ── Header ── */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 24px', borderBottom: '0.5px solid var(--border-color)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>🏆</div>
+            <div>
+              <h2 style={{ color: 'var(--text-primary)', fontFamily: 'Syne, sans-serif', fontSize: '16px', fontWeight: '700', margin: 0 }}>New Challenge</h2>
+              <p style={{ color: 'var(--text-faint-2)', fontFamily: ff, fontSize: '12px', margin: 0, marginTop: '1px' }}>Set up a prop firm evaluation and track every rule.</p>
+            </div>
             {autoFilled && (
-              <span style={{
-                background: 'var(--green-bg)', border: '0.5px solid var(--green-bg-2)',
-                borderRadius: '20px', padding: '3px 10px',
-                color: 'var(--brand)', fontFamily: 'DM Sans, sans-serif', fontSize: '11px',
-                display: 'flex', alignItems: 'center', gap: '4px',
-              }}>
+              <span style={{ background: 'var(--green-bg)', border: '0.5px solid var(--green-bg-2)', borderRadius: '20px', padding: '3px 10px', color: 'var(--brand)', fontFamily: ff, fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <span>✓</span> Auto-filled from {selectedFirm}
               </span>
             )}
           </div>
-          <button
-            onClick={onClose}
-            style={{ background: 'none', border: 'none', color: 'var(--text-faint-2)', fontSize: '20px', cursor: 'pointer', lineHeight: 1 }}
-          >×</button>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-faint-2)', fontSize: '20px', cursor: 'pointer', lineHeight: 1 }}>×</button>
         </div>
 
-        {/* ── Two-column body ── */}
-        <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', minHeight: isMobile ? 'auto' : '360px', maxHeight: isMobile ? '60vh' : 'none', overflowY: isMobile ? 'auto' : 'visible' }}>
+        {/* ── Body ── */}
+        <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', maxHeight: isMobile ? '65vh' : '520px', overflowY: isMobile ? 'auto' : 'visible' }}>
 
-          {/* LEFT — firm config */}
-          <div style={{ flex: isMobile ? '1' : '0 0 300px', padding: '16px 16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          {/* LEFT */}
+          <div style={{ flex: isMobile ? '1' : '0 0 300px', padding: '20px 18px', display: 'flex', flexDirection: 'column', overflowY: isMobile ? 'visible' : 'auto' }}>
+            <div style={sectionBadge}>
+              <div style={badgeNum}>01</div>
+              <span style={badgeText}>Firm Setup</span>
+            </div>
 
-            {/* Section label */}
-            <p style={{ color: 'var(--text-faint-2)', fontFamily: 'DM Sans, sans-serif', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
-              Firm Setup
-            </p>
-
-            {/* Firm dropdown */}
-            <div>
+            {/* Prop Firm dropdown */}
+            <div style={{ marginBottom: '14px' }}>
               <label style={label}>Prop Firm</label>
               <div style={{ position: 'relative' }}>
-                <div
-                  style={selectTrigger(!!selectedFirm)}
-                  onClick={() => { setFirmOpen(o => !o); setPhaseOpen(false) }}
-                >
-                  <span>{selectedFirm || 'Select firm'}</span>
+                <div style={{ width: '100%', background: 'var(--bg-page)', border: `0.5px solid ${selectedFirm ? 'var(--brand)' : 'var(--border-color)'}`, borderRadius: '8px', padding: '10px 13px', color: selectedFirm ? 'var(--text-primary)' : 'var(--text-faint-2)', fontFamily: ff, fontSize: '13px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxSizing: 'border-box' }}
+                  onClick={() => { setFirmOpen(o => !o); setPhaseOpen(false); setProgramOpen(false) }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '15px' }}>🏛</span>
+                    <span style={{ fontWeight: selectedFirm ? '600' : '400' }}>{selectedFirm || 'Select firm'}</span>
+                  </span>
                   <span style={{ color: 'var(--text-faint-2)', fontSize: '9px' }}>{firmOpen ? '▲' : '▼'}</span>
                 </div>
                 {firmOpen && (
@@ -346,23 +306,21 @@ export default function NewChallengeModal({ onClose, onCreated }) {
                     <div style={{ overflowY: 'auto', maxHeight: '200px' }}>
                       {firms.map(f => {
                         const isMatch = keySearch && f.toLowerCase().startsWith(keySearch)
+                        const sel = selectedFirm === f
                         return (
-                          <div
-                            key={f}
-                            id={'firm-item-' + f.replace(/\s+/g, '-')}
-                            style={{
-                              ...dropItem(selectedFirm === f),
-                              background: isMatch ? 'var(--green-bg-2)' : selectedFirm === f ? 'var(--green-bg)' : 'transparent',
-                              color: isMatch ? 'var(--text-primary)' : selectedFirm === f ? 'var(--brand)' : 'var(--text-soft)',
-                            }}
+                          <div key={f} id={'firm-item-' + f.replace(/\s+/g, '-')}
+                            style={{ padding: '9px 13px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: isMatch ? 'var(--green-bg-2)' : sel ? 'var(--green-bg)' : 'transparent', color: sel ? 'var(--brand)' : 'var(--text-soft)', fontFamily: ff, fontSize: '13px' }}
                             onClick={() => { setSelectedFirm(f); setFirmOpen(false) }}
-                            onMouseEnter={e => { if (selectedFirm !== f) e.currentTarget.style.background = 'var(--border-color)' }}
-                            onMouseLeave={e => { e.currentTarget.style.background = isMatch ? 'var(--green-bg-2)' : selectedFirm === f ? 'var(--green-bg)' : 'transparent' }}
-                          >{f}</div>
+                            onMouseEnter={e => { if (!sel) e.currentTarget.style.background = 'var(--border-color)' }}
+                            onMouseLeave={e => { e.currentTarget.style.background = isMatch ? 'var(--green-bg-2)' : sel ? 'var(--green-bg)' : 'transparent' }}
+                          >
+                            <span>{f}</span>
+                            {sel && <span style={{ color: 'var(--brand)' }}>✓</span>}
+                          </div>
                         )
                       })}
                     </div>
-                    <div style={{ ...dropItem(selectedFirm === 'Other'), borderTop: '0.5px solid var(--border-color-2)', flexShrink: 0 }}
+                    <div style={{ padding: '9px 13px', cursor: 'pointer', color: selectedFirm === 'Other' ? 'var(--brand)' : 'var(--text-faint-2)', background: selectedFirm === 'Other' ? 'var(--green-bg)' : 'transparent', fontFamily: ff, fontSize: '13px', borderTop: '0.5px solid var(--border-color-2)' }}
                       onClick={() => { setSelectedFirm('Other'); setFirmOpen(false) }}
                       onMouseEnter={e => { if (selectedFirm !== 'Other') e.currentTarget.style.background = 'var(--border-color)' }}
                       onMouseLeave={e => { if (selectedFirm !== 'Other') e.currentTarget.style.background = 'transparent' }}
@@ -374,22 +332,19 @@ export default function NewChallengeModal({ onClose, onCreated }) {
 
             {/* Custom firm */}
             {isOther && (
-              <div>
+              <div style={{ marginBottom: '14px' }}>
                 <label style={label}>Firm Name</label>
-                <input name="custom_firm" type="text" placeholder="e.g. Alpha Capital"
-                  value={form.custom_firm} onChange={handleChange} style={input} />
+                <input name="custom_firm" type="text" placeholder="e.g. Alpha Capital" value={form.custom_firm} onChange={handleChange} style={input} />
               </div>
             )}
 
-            {/* Program dropdown — only shown if firm has multiple programs */}
+            {/* Program dropdown */}
             {!isOther && programs.length > 1 && (
-              <div>
+              <div style={{ marginBottom: '14px' }}>
                 <label style={label}>Program</label>
                 <div style={{ position: 'relative' }}>
-                  <div
-                    style={selectTrigger(!!selectedProgram)}
-                    onClick={() => { setProgramOpen(o => !o); setFirmOpen(false); setPhaseOpen(false) }}
-                  >
+                  <div style={{ width: '100%', background: 'var(--bg-page)', border: `0.5px solid ${selectedProgram ? 'var(--brand)' : 'var(--border-color)'}`, borderRadius: '8px', padding: '9px 12px', color: selectedProgram ? 'var(--text-primary)' : 'var(--text-faint-2)', fontFamily: ff, fontSize: '13px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxSizing: 'border-box' }}
+                    onClick={() => { setProgramOpen(o => !o); setFirmOpen(false); setPhaseOpen(false) }}>
                     <span>{selectedProgram || 'Select program'}</span>
                     <span style={{ color: 'var(--text-faint-2)', fontSize: '9px' }}>{programOpen ? '▲' : '▼'}</span>
                   </div>
@@ -397,14 +352,7 @@ export default function NewChallengeModal({ onClose, onCreated }) {
                     <div style={dropdown}>
                       {programs.map(p => (
                         <div key={p} style={dropItem(selectedProgram === p)}
-                          onClick={() => {
-                            setSelectedProgram(p)
-                            setSelectedType(null)
-                            setSelectedPhase(null)
-                            setAvailablePhases([])
-                            clearRuleFields()
-                            setProgramOpen(false)
-                          }}
+                          onClick={() => { setSelectedProgram(p); setSelectedType(null); setSelectedPhase(null); setAvailablePhases([]); clearRuleFields(); setProgramOpen(false) }}
                           onMouseEnter={e => { if (selectedProgram !== p) e.currentTarget.style.background = 'var(--border-color)' }}
                           onMouseLeave={e => { if (selectedProgram !== p) e.currentTarget.style.background = 'transparent' }}
                         >{p}</div>
@@ -417,183 +365,131 @@ export default function NewChallengeModal({ onClose, onCreated }) {
 
             {/* Challenge type pills */}
             {!isOther && !isFunded && filteredTypes.length > 0 && (programs.length <= 1 || selectedProgram) && (
-              <div>
+              <div style={{ marginBottom: '14px' }}>
                 <label style={label}>Challenge Type</label>
                 <div style={{ display: 'flex', gap: '6px' }}>
                   {filteredTypes.map(t => (
                     <button key={t} onClick={() => setSelectedType(t)} style={pill(selectedType === t)}>
                       <span style={{ display: 'block', fontWeight: '600', fontSize: '12px' }}>{TYPE_META[t]?.label || t}</span>
-                      <span style={{ display: 'block', fontSize: '10px', color: selectedType === t ? 'rgba(var(--brand-rgb), 0.53)' : 'var(--text-faint-2)', marginTop: '2px' }}>
-                        {TYPE_META[t]?.desc}
-                      </span>
+                      <span style={{ display: 'block', fontSize: '10px', color: selectedType === t ? 'rgba(var(--brand-rgb), 0.53)' : 'var(--text-faint-2)', marginTop: '2px' }}>{TYPE_META[t]?.desc}</span>
                     </button>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Phase */}
-            <div>
-              <label style={label}>Phase</label>
-              <div style={{ position: 'relative' }}>
-                <div
-                  style={{
-                    ...selectTrigger(!!selectedPhase),
-                    opacity: (!isOther && !selectedType) ? 0.35 : 1,
-                    cursor:  (!isOther && !selectedType) ? 'not-allowed' : 'pointer',
-                  }}
-                  onClick={() => {
-                    if (!isOther && !selectedType) return
-                    setPhaseOpen(o => !o); setFirmOpen(false)
-                  }}
-                >
-                  <span>{selectedPhase ? PHASE_LABELS[selectedPhase] : (isOther ? 'Phase 1' : '—')}</span>
-                  <span style={{ color: 'var(--text-faint-2)', fontSize: '9px' }}>{phaseOpen ? '▲' : '▼'}</span>
-                </div>
-                {phaseOpen && (
-                  <div style={dropdown}>
-                    {(isOther ? ['phase_1','phase_2','phase_3','funded'] : availablePhases).map(p => (
-                      <div key={p} style={dropItem(selectedPhase === p)}
-                        onClick={() => { setSelectedPhase(p); setPhaseOpen(false) }}
-                        onMouseEnter={e => { if (selectedPhase !== p) e.currentTarget.style.background = 'var(--border-color)' }}
-                        onMouseLeave={e => { if (selectedPhase !== p) e.currentTarget.style.background = 'transparent' }}
-                      >{PHASE_LABELS[p]}</div>
-                    ))}
+            {/* Phase — segmented tabs */}
+            {(() => {
+              const phaseList = isOther ? ['phase_1','phase_2','phase_3','funded'] : availablePhases
+              const disabled = !isOther && !selectedType
+              const PHASE_DESC = { phase_1: 'Phase 1 evaluation', phase_2: 'Phase 2 evaluation', phase_3: 'Phase 3 evaluation', funded: 'Live capital' }
+              return phaseList.length > 0 ? (
+                <div style={{ marginBottom: '14px', opacity: disabled ? 0.35 : 1, pointerEvents: disabled ? 'none' : 'auto' }}>
+                  <label style={label}>Phase</label>
+                  <div style={{ display: 'flex', background: 'var(--bg-page)', border: '0.5px solid var(--border-color)', borderRadius: '10px', overflow: 'hidden' }}>
+                    {phaseList.map((p, i) => {
+                      const active = selectedPhase === p
+                      return (
+                        <div key={p} onClick={() => setSelectedPhase(p)}
+                          style={{ flex: 1, padding: '10px 6px', textAlign: 'center', cursor: 'pointer', background: active ? 'var(--green-bg)' : 'transparent', borderRight: i < phaseList.length - 1 ? '0.5px solid var(--border-color)' : 'none', transition: 'background 0.15s' }}
+                        >
+                          <div style={{ color: active ? 'var(--brand)' : 'var(--text-soft)', fontFamily: ff, fontSize: '12px', fontWeight: active ? '700' : '500' }}>{PHASE_LABELS[p]}</div>
+                          <div style={{ color: active ? 'rgba(var(--brand-rgb),0.6)' : 'var(--text-faint-2)', fontFamily: ff, fontSize: '10px', marginTop: '2px' }}>{PHASE_DESC[p]}</div>
+                        </div>
+                      )
+                    })}
                   </div>
-                )}
-              </div>
-            </div>
+                </div>
+              ) : null
+            })()}
 
             {/* Start date */}
             <div>
               <label style={label}>Start Date</label>
-              <input name="start_date" type="date"
-                value={form.start_date} onChange={handleChange} style={input} />
+              <input name="start_date" type="date" value={form.start_date} onChange={handleChange} style={input} />
+              <p style={{ color: 'var(--text-faint-2)', fontFamily: ff, fontSize: '11px', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <span>📅</span> Trading days count starts from this date.
+              </p>
             </div>
-
           </div>
 
           {/* Divider */}
-          {!isMobile && <div style={divider} />}
+          {!isMobile && <div style={{ width: '0.5px', background: 'var(--border-color)', alignSelf: 'stretch' }} />}
 
-          {/* RIGHT — account size + rules */}
-          <div style={{ flex: 1, padding: '16px 16px', display: 'flex', flexDirection: 'column', gap: '14px', borderTop: isMobile ? '0.5px solid var(--border-color)' : 'none' }}>
-
-            <p style={{ color: 'var(--text-faint-2)', fontFamily: 'DM Sans, sans-serif', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
-              Account & Rules
-            </p>
+          {/* RIGHT */}
+          <div style={{ flex: 1, padding: '20px 18px', display: 'flex', flexDirection: 'column', overflowY: isMobile ? 'visible' : 'auto', borderTop: isMobile ? '0.5px solid var(--border-color)' : 'none' }}>
+            <div style={sectionBadge}>
+              <div style={badgeNum}>02</div>
+              <span style={badgeText}>Account & Rules</span>
+            </div>
 
             {/* Account size */}
-            <div>
-              <label style={label}>Account Size ($)</label>
-              <input name="account_size" type="number" placeholder="100000"
-                value={form.account_size} onChange={handleChange} style={{ ...input, fontSize: '15px', fontFamily: 'DM Mono, monospace' }} />
+            <div style={{ marginBottom: '14px' }}>
+              <label style={label}>Account Size</label>
+              {/* Quick presets */}
+              <div style={{ display: 'flex', gap: '6px', marginBottom: '8px', flexWrap: 'wrap' }}>
+                {SIZE_PRESETS.map(s => {
+                  const active = parseInt(form.account_size) === s
+                  return (
+                    <button key={s} onClick={() => setForm(f => ({ ...f, account_size: String(s) }))}
+                      style={{ background: active ? 'var(--brand)' : 'var(--bg-page)', border: `0.5px solid ${active ? 'var(--brand)' : 'var(--border-color)'}`, borderRadius: '7px', padding: '5px 10px', color: active ? 'var(--brand-fg)' : 'var(--text-faint-2)', fontFamily: ffm, fontSize: '11px', cursor: 'pointer', fontWeight: active ? '700' : '400' }}>
+                      {fmtSize(s)}
+                    </button>
+                  )
+                })}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-page)', border: '0.5px solid var(--border-color)', borderRadius: '8px', padding: '9px 12px', gap: '8px' }}>
+                <span style={{ color: 'var(--text-faint-2)', fontFamily: ffm, fontSize: '14px' }}>$</span>
+                <input name="account_size" type="number" placeholder="100000" value={form.account_size} onChange={handleChange}
+                  style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: 'var(--text-primary)', fontFamily: ffm, fontSize: '15px', fontWeight: '600' }} />
+                <span style={{ color: 'var(--text-faint-2)', fontFamily: ff, fontSize: '12px' }}>USD</span>
+              </div>
             </div>
 
             {/* Rules grid */}
-            <div style={{
-              background: 'var(--bg-page)', border: '0.5px solid var(--border-color)',
-              borderRadius: '10px', padding: '14px',
-              opacity: (autoFilled || isOther) ? 1 : 0.4,
-              transition: 'opacity 0.25s', flex: 1,
-            }}>
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: '6px',
-                marginBottom: '12px',
-              }}>
-                <span style={{
-                  width: '5px', height: '5px', borderRadius: '50%',
-                  background: (autoFilled || isOther) ? 'var(--brand)' : 'var(--border-color-2)',
-                  transition: 'background 0.2s', flexShrink: 0,
-                }} />
-                <span style={{ color: 'var(--text-faint-2)', fontFamily: 'DM Sans, sans-serif', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                  Challenge Rules
-                </span>
+            <div style={{ opacity: (autoFilled || isOther) ? 1 : 0.4, transition: 'opacity 0.25s', flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: (autoFilled || isOther) ? 'var(--brand)' : 'var(--border-color-2)', transition: 'background 0.2s', flexShrink: 0, display: 'block' }} />
+                  <span style={{ color: 'var(--text-faint-2)', fontFamily: ff, fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Challenge Rules</span>
+                </div>
+                {autoFilled && <span style={{ color: 'var(--text-faint-2)', fontFamily: ff, fontSize: '10.5px' }}>Auto-filled from preset</span>}
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-
-                <div>
-                  <label style={label}>Profit Target (%)</label>
-                  <input name="profit_target_pct" type="number" placeholder="—"
-                    value={form.profit_target_pct} onChange={handleChange} style={input} />
-                  {fmt(profitTargetDollar) && <p style={hintGreen}>{fmt(profitTargetDollar)}</p>}
-                </div>
-
-                <div>
-                  <label style={label}>Max Drawdown (%)</label>
-                  <input name="max_drawdown_pct" type="number" placeholder="—"
-                    value={form.max_drawdown_pct} onChange={handleChange} style={input} />
-                  {fmt(maxDDDollar) && <p style={hintRed}>{fmt(maxDDDollar)}</p>}
-                </div>
-
-                <div>
-                  <label style={label}>Daily Drawdown (%)</label>
-                  <input name="daily_drawdown_pct" type="number" placeholder="—"
-                    value={form.daily_drawdown_pct} onChange={handleChange} style={input} />
-                  {fmt(dailyDDDollar) && <p style={hintRed}>{fmt(dailyDDDollar)}</p>}
-                </div>
-
-                <div>
-                  <label style={label}>Min Trading Days</label>
-                  <input name="min_trading_days" type="number" placeholder="—"
-                    value={form.min_trading_days} onChange={handleChange} style={input} />
-                  {form.min_days_type && (
-                    <p style={hintBlue}>
-                      {form.min_days_type === 'profitable' ? 'Profitable days' : 'Any trading days'}
-                    </p>
-                  )}
-                </div>
-
+                {ruleCard('🎯', 'Profit Target', ['profit_target_pct', form.profit_target_pct], '%', fmt(profitTargetDollar), hintGreen)}
+                {ruleCard('📉', 'Max Drawdown', ['max_drawdown_pct', form.max_drawdown_pct], '%', fmt(maxDDDollar), hintRed)}
+                {ruleCard('🛡', 'Daily Drawdown', ['daily_drawdown_pct', form.daily_drawdown_pct], '%', fmt(dailyDDDollar), hintRed)}
+                {ruleCard('📅', 'Min Trading Days', ['min_trading_days', form.min_trading_days], 'days',
+                  form.min_days_type ? (form.min_days_type === 'profitable' ? 'Profitable days' : 'Any trading days') : null, hintBlue)}
               </div>
 
               {/* Profitable day min % */}
               {form.min_days_type === 'profitable' && (
                 <div style={{ marginTop: '10px' }}>
                   <label style={label}>Min profit per day (%) — if required</label>
-                  <input name="min_profit_per_day_pct" type="number" placeholder="0.5"
-                    value={form.min_profit_per_day_pct} onChange={handleChange} style={input} />
+                  <input name="min_profit_per_day_pct" type="number" placeholder="0.5" value={form.min_profit_per_day_pct} onChange={handleChange} style={input} />
                   {form.min_profit_per_day_pct && accountSize > 0 && (
-                    <p style={hintGreen}>
-                      = ${((parseFloat(form.min_profit_per_day_pct) / 100) * accountSize).toLocaleString()} / day
-                    </p>
+                    <p style={hintGreen}>= ${((parseFloat(form.min_profit_per_day_pct) / 100) * accountSize).toLocaleString()} / day</p>
                   )}
                 </div>
               )}
             </div>
-
           </div>
         </div>
 
         {/* ── Error ── */}
         {error && (
-          <div style={{
-            margin: '0 22px', background: 'var(--red-bg-2)',
-            border: '0.5px solid var(--red-bg)', borderRadius: '8px',
-            padding: '10px 12px', color: 'var(--red)',
-            fontFamily: 'DM Sans, sans-serif', fontSize: '13px',
-          }}>{error}</div>
+          <div style={{ margin: '0 22px', background: 'var(--red-bg-2)', border: '0.5px solid var(--red-bg)', borderRadius: '8px', padding: '10px 12px', color: 'var(--red)', fontFamily: ff, fontSize: '13px' }}>{error}</div>
         )}
 
         {/* ── Footer ── */}
-        <div style={{
-          display: 'flex', gap: '10px', padding: '16px 22px',
-          borderTop: '0.5px solid var(--border-color)',
-        }}>
-          <button onClick={onClose} style={{
-            flex: 1, background: 'transparent',
-            border: '0.5px solid var(--border-color)', borderRadius: '8px',
-            padding: '10px', color: 'var(--text-faint-2)',
-            fontFamily: 'DM Sans, sans-serif', fontSize: '13px', cursor: 'pointer',
-          }}>Cancel</button>
-          <button onClick={handleSubmit} disabled={loading || !canCreate} style={{
-            flex: 3, background: canCreate ? 'var(--brand)' : 'var(--green-bg)',
-            border: 'none', borderRadius: '8px', padding: '10px',
-            color: canCreate ? 'var(--brand-fg)' : 'rgba(var(--brand-rgb), 0.27)',
-            fontFamily: 'DM Sans, sans-serif', fontWeight: '600',
-            fontSize: '13px', cursor: (loading || !canCreate) ? 'not-allowed' : 'pointer',
-            transition: 'all 0.2s',
-          }}>{loading ? 'Creating...' : 'Create Challenge'}</button>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 22px', borderTop: '0.5px solid var(--border-color)' }}>
+          <p style={{ color: 'var(--text-faint-2)', fontFamily: ff, fontSize: '11px', margin: 0 }}>You can edit these settings anytime after creation.</p>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button onClick={onClose} style={{ background: 'transparent', border: '0.5px solid var(--border-color)', borderRadius: '8px', padding: '10px 20px', color: 'var(--text-faint-2)', fontFamily: ff, fontSize: '13px', cursor: 'pointer' }}>Cancel</button>
+            <button onClick={handleSubmit} disabled={loading || !canCreate} style={{ background: canCreate ? 'var(--brand)' : 'var(--green-bg)', border: 'none', borderRadius: '8px', padding: '10px 28px', color: canCreate ? 'var(--brand-fg)' : 'rgba(var(--brand-rgb), 0.27)', fontFamily: ff, fontWeight: '700', fontSize: '13px', cursor: (loading || !canCreate) ? 'not-allowed' : 'pointer', transition: 'all 0.2s' }}>{loading ? 'Creating...' : 'Create Challenge'}</button>
+          </div>
         </div>
 
       </div>
