@@ -129,7 +129,7 @@ function DateRangePicker({ dateRange, onChange }) {
   const isActive = dateRange.start || dateRange.end
 
   return (
-    <div style={{ position: 'relative' }} ref={r => ref.current = r}>
+    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }} ref={r => ref.current = r}>
       <button
         onClick={() => { setOpen(o => !o); if (!open) setSelecting('start') }}
         style={{
