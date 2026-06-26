@@ -803,22 +803,15 @@ export default function Dashboard() {
           </div>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
             <h1 style={{ color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontSize: '22px', fontWeight: '600', margin: 0 }}>Dashboard</h1>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <DateRangePicker dateRange={dateRange} onChange={setDateRange} />
-                <AccountSwitcher
-                  onSwitch={(acc) => {
-                    setActiveAccount(acc)
-                    if (acc?.id) localStorage.setItem('activeAccountId', acc.id)
-                  }}
-                  defaultAccountId={defaultAccountId}
-                />
-              </div>
-              {activeAccount?.account_size && (
-                <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '12px', color: 'var(--text-faint)', paddingRight: '2px' }}>
-                  ${parseFloat(activeAccount.account_size).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </span>
-              )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <DateRangePicker dateRange={dateRange} onChange={setDateRange} />
+              <AccountSwitcher
+                onSwitch={(acc) => {
+                  setActiveAccount(acc)
+                  if (acc?.id) localStorage.setItem('activeAccountId', acc.id)
+                }}
+                defaultAccountId={defaultAccountId}
+              />
             </div>
           </div>
         </div>
