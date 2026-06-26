@@ -90,99 +90,169 @@ function sessionLabel(s) {
   return { london: 'London', new_york: 'NY', asian: 'Asian' }[s] || s || '—'
 }
 
-// ─── New top metrics strip ──────────────────────────────────────────────────
+// ─── Date Range Picker ───────────────────────────────────────────────────────
+function DateRangePicker({ dateRange, onChange }) {
+  const [open, setOpen] = useState(false)
+  const [hoverDate, setHoverDate] = useState(null)
+  const [selecting, setSelecting] = useState(null) // 'start' | 'end'
+  const [leftMonth, setLeftMonth] = useState(() => {
+    const d = new Date(); d.setDate(1); return d
+  })
+  const ref = { current: null }
 
-// Shared card shell — label on top, value + chart anchored to bottom
-function MetricShell({ label, value, color, chart }) {
+  const rightMonth = new Date(leftMonth.getFullYear(), leftMonth.getMonth() + 1, 1)
+
+  function prevMonth() { setLeftMonth(m => new Date(m.getFullYear(), m.getMonth() - 1, 1)) }
+  function nextMonth() { setLeftMonth(m => new Date(m.getFullYear(), m.getMonth() + 1, 1)) }
+
+  function handleDayClick(dateStr) {
+    if (!selecting || selecting === 'start') {
+      onChange({ start: dateStr, end: null })
+      setSelecting('end')
+    } else {
+      if (dateStr < dateRange.start) {
+        onChange({ start: dateStr, end: dateRange.start })
+      } else {
+        onChange({ start: dateRange.start, end: dateStr })
+      }
+      setSelecting(null)
+      setOpen(false)
+    }
+  }
+
+  function reset() { onChange({ start: null, end: null }); setSelecting(null); setOpen(false) }
+
+  const label = dateRange.start && dateRange.end
+    ? `${dateRange.start} → ${dateRange.end}`
+    : dateRange.start ? `${dateRange.start} → …` : 'Date range'
+
+  const isActive = dateRange.start || dateRange.end
+
   return (
-    <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color-2)', borderRadius: '12px', padding: '16px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '90px' }}>
-      <p style={{ color: 'var(--text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: 0 }}>{label}</p>
-      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '10px' }}>
-        <p style={{ color: color || 'var(--text-primary)', fontFamily: 'DM Mono, monospace', fontSize: '22px', fontWeight: '600', margin: 0, lineHeight: 1 }}>{value}</p>
-        <div style={{ display: 'flex', alignItems: 'flex-end' }}>{chart}</div>
+    <div style={{ position: 'relative' }} ref={r => ref.current = r}>
+      <button
+        onClick={() => { setOpen(o => !o); if (!open) setSelecting('start') }}
+        style={{
+          display: 'flex', alignItems: 'center', gap: '6px',
+          background: isActive ? 'var(--bg-surface-2)' : 'var(--bg-surface)',
+          border: `0.5px solid ${isActive ? 'var(--border-color-2)' : 'var(--border-color)'}`,
+          borderRadius: '8px', padding: '7px 12px', cursor: 'pointer',
+          color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
+          fontFamily: 'DM Sans, sans-serif', fontSize: '13px', whiteSpace: 'nowrap',
+        }}
+      >
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+          <rect x="1" y="2" width="14" height="13" rx="2" stroke="currentColor" strokeWidth="1.2"/>
+          <path d="M1 6h14" stroke="currentColor" strokeWidth="1.2"/>
+          <path d="M5 1v2M11 1v2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+        </svg>
+        {label}
+        {isActive && (
+          <span
+            onClick={e => { e.stopPropagation(); reset() }}
+            style={{ marginLeft: '2px', color: 'var(--text-faint)', fontSize: '14px', lineHeight: 1, cursor: 'pointer' }}
+          >×</span>
+        )}
+      </button>
+
+      {open && (
+        <>
+          <div onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 99 }} />
+          <div style={{
+            position: 'absolute', top: 'calc(100% + 8px)', right: 0,
+            background: 'var(--bg-surface)', border: '0.5px solid var(--border-color-2)',
+            borderRadius: '12px', padding: '16px', zIndex: 100,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+            display: 'flex', gap: '20px',
+          }}>
+            <CalendarMonth
+              month={leftMonth} dateRange={dateRange} hoverDate={hoverDate}
+              onDayClick={handleDayClick} onHover={setHoverDate}
+              onPrev={prevMonth} onNext={null}
+            />
+            <CalendarMonth
+              month={rightMonth} dateRange={dateRange} hoverDate={hoverDate}
+              onDayClick={handleDayClick} onHover={setHoverDate}
+              onPrev={null} onNext={nextMonth}
+            />
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+function CalendarMonth({ month, dateRange, hoverDate, onDayClick, onHover, onPrev, onNext }) {
+  const DAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
+  const year = month.getFullYear()
+  const mon = month.getMonth()
+  const firstDow = new Date(year, mon, 1).getDay()
+  const daysInMonth = new Date(year, mon + 1, 0).getDate()
+  const monthLabel = month.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+
+  function toStr(d) {
+    return `${year}-${String(mon + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+  }
+
+  function inRange(str) {
+    const s = dateRange.start, e = dateRange.end || hoverDate
+    if (!s) return false
+    const lo = s < e ? s : e
+    const hi = s < e ? e : s
+    return str > lo && str < hi
+  }
+
+  const cells = []
+  for (let i = 0; i < firstDow; i++) cells.push(null)
+  for (let d = 1; d <= daysInMonth; d++) cells.push(d)
+
+  return (
+    <div style={{ width: '196px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+        <button onClick={onPrev} disabled={!onPrev} style={{ background: 'none', border: 'none', color: onPrev ? 'var(--text-muted)' : 'transparent', cursor: onPrev ? 'pointer' : 'default', fontSize: '16px', padding: '2px 6px' }}>‹</button>
+        <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '12px', fontWeight: '600', color: 'var(--text-primary)' }}>{monthLabel}</span>
+        <button onClick={onNext} disabled={!onNext} style={{ background: 'none', border: 'none', color: onNext ? 'var(--text-muted)' : 'transparent', cursor: onNext ? 'pointer' : 'default', fontSize: '16px', padding: '2px 6px' }}>›</button>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px' }}>
+        {DAYS.map(d => (
+          <div key={d} style={{ textAlign: 'center', fontSize: '10px', color: 'var(--text-faint)', fontFamily: 'DM Sans, sans-serif', padding: '3px 0' }}>{d}</div>
+        ))}
+        {cells.map((d, i) => {
+          if (!d) return <div key={`e${i}`} />
+          const str = toStr(d)
+          const isStart = str === dateRange.start
+          const isEnd = str === dateRange.end
+          const isSelected = isStart || isEnd
+          const isIn = inRange(str)
+          return (
+            <div
+              key={d}
+              onClick={() => onDayClick(str)}
+              onMouseEnter={() => onHover(str)}
+              onMouseLeave={() => onHover(null)}
+              style={{
+                textAlign: 'center', fontSize: '11px', padding: '5px 2px', borderRadius: '6px',
+                cursor: 'pointer', fontFamily: 'DM Mono, monospace',
+                background: isSelected ? 'var(--brand)' : isIn ? 'var(--green-bg)' : 'transparent',
+                color: isSelected ? '#000' : isIn ? 'var(--brand)' : 'var(--text-primary)',
+                fontWeight: isSelected ? '700' : '400',
+                transition: 'background 0.1s',
+              }}
+            >{d}</div>
+          )
+        })}
       </div>
     </div>
   )
 }
 
-// 1. Sparkline for Net P&L
-function SparklineChart({ trades }) {
-  const W = 80, H = 40
-  if (!trades || trades.length === 0) {
-    return <svg width={W} height={H}><line x1="0" y1={H/2} x2={W} y2={H/2} stroke="var(--border-color-2)" strokeWidth="1.5" strokeDasharray="3 3" /></svg>
-  }
-  const sorted = [...trades].sort((a, b) => new Date(a.date + 'T' + (a.time || '00:00')) - new Date(b.date + 'T' + (b.time || '00:00')))
-  let cum = 0
-  const points = [0, ...sorted.map(t => { cum += (t.pnl || 0); return cum })]
-  const min = Math.min(...points), max = Math.max(...points)
-  const range = max - min || 1
-  const xs = points.map((_, i) => (i / (points.length - 1)) * W)
-  const ys = points.map(v => H - ((v - min) / range) * (H - 4) - 2)
-  const d = xs.map((x, i) => `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${ys[i].toFixed(1)}`).join(' ')
-  const fill = `${d} L${W},${H} L0,${H} Z`
-  const isPos = points[points.length - 1] >= 0
-  const stroke = isPos ? 'var(--brand)' : 'var(--red)'
-  const fillColor = isPos ? 'rgba(0,200,120,0.12)' : 'rgba(255,80,80,0.10)'
+// ─── New top metrics strip ──────────────────────────────────────────────────
+function MetricCard({ label, value, color }) {
   return (
-    <svg width={W} height={H} style={{ overflow: 'visible' }}>
-      <path d={fill} fill={fillColor} />
-      <path d={d} fill="none" stroke={stroke} strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
-    </svg>
-  )
-}
-
-// 2. Semicircle gauge for Win Rate
-function SemicircleGauge({ pct, color }) {
-  const W = 72, H = 42
-  const cx = W / 2, cy = H - 2, r = 32
-  const clamp = Math.min(Math.max(pct || 0, 0), 100)
-  const angle = (clamp / 100) * Math.PI
-  const ex = cx + r * Math.cos(Math.PI - angle)
-  const ey = cy - r * Math.sin(Math.PI - angle)
-  const trackD = `M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`
-  const fillD = clamp === 0 ? '' : `M ${cx - r} ${cy} A ${r} ${r} 0 ${clamp > 50 ? 1 : 0} 1 ${ex.toFixed(2)} ${ey.toFixed(2)}`
-  return (
-    <svg width={W} height={H} style={{ overflow: 'visible' }}>
-      <path d={trackD} fill="none" stroke="var(--border-color-2)" strokeWidth="5" strokeLinecap="round" />
-      {fillD && <path d={fillD} fill="none" stroke={color || 'var(--brand)'} strokeWidth="5" strokeLinecap="round" />}
-    </svg>
-  )
-}
-
-// 3. Donut ring for Profit Factor (capped at 3x = 100%)
-function DonutRing({ value, color }) {
-  const r = 18, stroke = 5
-  const circ = 2 * Math.PI * r
-  const pct = Math.min((value || 0) / 3, 1)
-  const dash = pct * circ
-  return (
-    <svg width="44" height="44" style={{ transform: 'rotate(-90deg)' }}>
-      <circle cx="22" cy="22" r={r} fill="none" stroke="var(--border-color-2)" strokeWidth={stroke} />
-      <circle cx="22" cy="22" r={r} fill="none" stroke={color || 'var(--brand)'} strokeWidth={stroke}
-        strokeDasharray={`${dash.toFixed(2)} ${circ.toFixed(2)}`} strokeLinecap="round" />
-    </svg>
-  )
-}
-
-// 4. Horizontal bar vs 1.0 benchmark for Avg RR
-function RRBar({ value }) {
-  const max = 4
-  const clamp = Math.min(Math.max(value || 0, 0), max)
-  const pct = (clamp / max) * 100
-  const benchmarkPct = (1 / max) * 100
-  const isGood = value >= 1
-  return (
-    <svg width="80" height="20" style={{ overflow: 'visible' }}>
-      {/* track */}
-      <rect x="0" y="7" width="80" height="6" rx="3" fill="var(--bg-surface-2)" />
-      {/* fill */}
-      <rect x="0" y="7" width={`${pct * 0.8}`} height="6" rx="3" fill={isGood ? 'var(--brand)' : 'var(--amber)'} />
-      {/* 1R benchmark tick */}
-      <rect x={benchmarkPct * 0.8} y="4" width="1.5" height="12" rx="1" fill="var(--text-faint)" />
-      {/* labels */}
-      <text x="0" y="20" fontSize="8" fill="var(--text-faint)" fontFamily="DM Mono, monospace">0</text>
-      <text x="80" y="20" fontSize="8" fill="var(--text-faint)" fontFamily="DM Mono, monospace" textAnchor="end">4R</text>
-    </svg>
+    <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color-2)', borderRadius: '12px', padding: '18px 20px' }}>
+      <p style={{ color: 'var(--text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 8px 0' }}>{label}</p>
+      <p style={{ color: color || 'var(--text-primary)', fontFamily: 'DM Mono, monospace', fontSize: '22px', fontWeight: '600', margin: 0 }}>{value}</p>
+    </div>
   )
 }
 
@@ -534,7 +604,7 @@ export default function Dashboard() {
   const [detailTrade, setDetailTrade] = useState(null)
   const [dayModal, setDayModal] = useState(null)
   const [userName, setUserName] = useState('')
-
+  const [dateRange, setDateRange] = useState({ start: null, end: null })
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       const meta = data?.user?.user_metadata
@@ -711,13 +781,18 @@ export default function Dashboard() {
   }
 
   // ─── DESKTOP LAYOUT ──────────────────────────────────────────────────────────
-  const stats = computeStats(trades)
+  const filteredTrades = trades.filter(t => {
+    if (dateRange.start && t.date < dateRange.start) return false
+    if (dateRange.end && t.date > dateRange.end) return false
+    return true
+  })
+  const stats = computeStats(filteredTrades)
 
   return (
     <div style={{ display: 'flex', background: 'var(--bg-page)', minHeight: '100vh' }}>
       <Sidebar />
       <main style={{ marginLeft: collapsed ? '60px' : '220px', transition: 'margin-left 0.2s ease', flex: 1, padding: '32px', isolation: 'isolate' }}>
-        <div style={{ marginBottom: '12px' }}>
+        <div style={{ marginBottom: '20px' }}>
           <div style={{ marginBottom: '4px' }}>
             <span style={{ color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontSize: '15px', fontWeight: '600' }}>
               Hi{userName ? `, ${userName}` : ''}
@@ -728,13 +803,30 @@ export default function Dashboard() {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <h1 style={{ color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontSize: '22px', fontWeight: '600', margin: 0 }}>Dashboard</h1>
-            <AccountSwitcher
-              onSwitch={(acc) => {
-                setActiveAccount(acc)
-                if (acc?.id) localStorage.setItem('activeAccountId', acc.id)
-              }}
-              defaultAccountId={defaultAccountId}
-            />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              {/* Balance chip */}
+              <div style={{
+                display: 'flex', flexDirection: 'column',
+                background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)',
+                borderRadius: '8px', padding: '6px 14px',
+              }}>
+                <span style={{ fontSize: '10px', color: 'var(--text-faint)', fontFamily: 'DM Sans, sans-serif', textTransform: 'uppercase', letterSpacing: '0.4px' }}>Net P&L</span>
+                <span style={{
+                  fontFamily: 'DM Mono, monospace', fontSize: '14px', fontWeight: '600', lineHeight: 1.2,
+                  color: stats.tradeCount === 0 ? 'var(--text-primary)' : stats.totalPnl >= 0 ? 'var(--brand)' : 'var(--red)',
+                }}>{fmt(stats.totalPnl)}</span>
+              </div>
+              {/* Date range picker */}
+              <DateRangePicker dateRange={dateRange} onChange={setDateRange} />
+              {/* Account switcher */}
+              <AccountSwitcher
+                onSwitch={(acc) => {
+                  setActiveAccount(acc)
+                  if (acc?.id) localStorage.setItem('activeAccountId', acc.id)
+                }}
+                defaultAccountId={defaultAccountId}
+              />
+            </div>
           </div>
         </div>
         {paymentToast && (
@@ -751,60 +843,53 @@ export default function Dashboard() {
           </div>
         )}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '24px' }}>
-          <MetricShell
+          <MetricCard
             label="Net P&L"
             value={fmt(stats.totalPnl)}
             color={stats.tradeCount === 0 ? undefined : stats.totalPnl >= 0 ? 'var(--brand)' : 'var(--red)'}
-            chart={<SparklineChart trades={trades} />}
           />
-          <MetricShell
+          <MetricCard
             label="Win Rate"
             value={`${stats.winRate}%`}
             color={stats.tradeCount === 0 ? undefined : stats.winRate >= 50 ? 'var(--brand)' : 'var(--red)'}
-            chart={<SemicircleGauge pct={stats.winRate} color={stats.tradeCount === 0 ? 'var(--border-color-2)' : stats.winRate >= 50 ? 'var(--brand)' : 'var(--red)'} />}
           />
-          <MetricShell
+          <MetricCard
             label="Profit Factor"
             value={stats.tradeCount === 0 ? '0.00' : isFinite(stats.profitFactor) ? stats.profitFactor.toFixed(2) : '∞'}
             color={stats.tradeCount === 0 ? undefined : (stats.profitFactor >= 1 || !isFinite(stats.profitFactor)) ? 'var(--brand)' : 'var(--red)'}
-            chart={<DonutRing value={isFinite(stats.profitFactor) ? stats.profitFactor : 3} color={stats.tradeCount === 0 ? 'var(--border-color-2)' : (stats.profitFactor >= 1 || !isFinite(stats.profitFactor)) ? 'var(--brand)' : 'var(--red)'} />}
           />
-          <MetricShell
-            label="Avg RR"
-            value={stats.tradeCount === 0 ? '0.00R' : `${stats.avgRR.toFixed(2)}R`}
-            chart={<RRBar value={stats.avgRR} />}
-          />
+          <MetricCard label="Avg RR" value={stats.tradeCount === 0 ? '0.00R' : `${stats.avgRR.toFixed(2)}R`} />
         </div>
         <div style={{ display: 'flex', gap: '20px', alignItems: 'stretch', marginBottom: '24px' }}>
           <div style={{ flex: '0 0 30%', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-            <ScoreCard trades={trades} />
+            <ScoreCard trades={filteredTrades} />
           </div>
           <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-            <ChallengeCard account={activeAccount} trades={trades} loading={loading} />
+            <ChallengeCard account={activeAccount} trades={filteredTrades} loading={loading} />
           </div>
         </div>
         <div style={{ display: 'flex', gap: '20px', alignItems: 'stretch', marginBottom: '24px' }}>
           <div style={{ flex: '0 0 65%', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-            <DailyBarChart trades={trades} />
+            <DailyBarChart trades={filteredTrades} />
           </div>
           <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-            <WinLossDonut trades={trades} />
+            <WinLossDonut trades={filteredTrades} />
           </div>
         </div>
         <div style={{ display: 'flex', gap: '20px', alignItems: 'stretch', marginBottom: '24px' }}>
           <div style={{ flex: '0 0 65%', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-            <PnLChart trades={trades} account={activeAccount} noMargin />
+            <PnLChart trades={filteredTrades} account={activeAccount} noMargin />
           </div>
           <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-            <StreakCard trades={trades} />
+            <StreakCard trades={filteredTrades} />
           </div>
         </div>
         <div style={{ display: 'flex', gap: '20px', alignItems: 'stretch', marginBottom: '24px' }}>
           <div style={{ flex: '0 0 65%', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-            <CalendarPnL trades={trades} account={activeAccount} onDayClick={date => setDayModal(date)} />
+            <CalendarPnL trades={filteredTrades} account={activeAccount} onDayClick={date => setDayModal(date)} />
           </div>
           <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-            <RecentTrades trades={trades} loading={loading} onTradeClick={t => setDetailTrade(t)} />
+            <RecentTrades trades={filteredTrades} loading={loading} onTradeClick={t => setDetailTrade(t)} />
           </div>
         </div>
       </main>
