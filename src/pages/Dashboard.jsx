@@ -801,31 +801,24 @@ export default function Dashboard() {
               {todayLabel}
             </span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
             <h1 style={{ color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontSize: '22px', fontWeight: '600', margin: 0 }}>Dashboard</h1>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              {/* Balance chip */}
-              <div style={{
-                display: 'flex', flexDirection: 'column',
-                background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)',
-                borderRadius: '8px', padding: '6px 14px',
-              }}>
-                <span style={{ fontSize: '10px', color: 'var(--text-faint)', fontFamily: 'DM Sans, sans-serif', textTransform: 'uppercase', letterSpacing: '0.4px' }}>Net P&L</span>
-                <span style={{
-                  fontFamily: 'DM Mono, monospace', fontSize: '14px', fontWeight: '600', lineHeight: 1.2,
-                  color: stats.tradeCount === 0 ? 'var(--text-primary)' : stats.totalPnl >= 0 ? 'var(--brand)' : 'var(--red)',
-                }}>{fmt(stats.totalPnl)}</span>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <DateRangePicker dateRange={dateRange} onChange={setDateRange} />
+                <AccountSwitcher
+                  onSwitch={(acc) => {
+                    setActiveAccount(acc)
+                    if (acc?.id) localStorage.setItem('activeAccountId', acc.id)
+                  }}
+                  defaultAccountId={defaultAccountId}
+                />
               </div>
-              {/* Date range picker */}
-              <DateRangePicker dateRange={dateRange} onChange={setDateRange} />
-              {/* Account switcher */}
-              <AccountSwitcher
-                onSwitch={(acc) => {
-                  setActiveAccount(acc)
-                  if (acc?.id) localStorage.setItem('activeAccountId', acc.id)
-                }}
-                defaultAccountId={defaultAccountId}
-              />
+              {activeAccount?.account_size && (
+                <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '12px', color: 'var(--text-faint)', paddingRight: '2px' }}>
+                  ${parseFloat(activeAccount.account_size).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
+              )}
             </div>
           </div>
         </div>
