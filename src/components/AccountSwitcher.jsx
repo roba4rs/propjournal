@@ -4,7 +4,6 @@ import { supabase } from '../supabaseClient'
 export default function AccountSwitcher({
   onSwitch,
   mobile = false,
-  showBalance = true,
   compact = false,
   showSelectedNameOnMobile = false,
   defaultAccountId = null,
@@ -12,7 +11,6 @@ export default function AccountSwitcher({
   const [accounts, setAccounts] = useState([])
   const [active, setActive] = useState(null)
   const [open, setOpen] = useState(false)
-  const [totalBalance, setTotalBalance] = useState(null)
   const dropdownRef = useRef(null)
 
   useEffect(() => {
@@ -57,24 +55,6 @@ export default function AccountSwitcher({
     fetchAccounts()
     return () => { cancelled = true }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Fetch total balance (account_size + sum of pnl) for any active account
-  useEffect(() => {
-    if (!active) {
-      setTotalBalance(null)
-      return
-    }
-    const fetchBalance = async () => {
-      const { data } = await supabase
-        .from('trades')
-        .select('pnl, swap, commission')
-        .eq('account_id', active.id)
-      const totalPnl = (data || []).reduce((sum, t) =>
-        sum + (Number(t.pnl) || 0) + (Number(t.swap) || 0) + (Number(t.commission) || 0), 0)
-      setTotalBalance((Number(active.account_size) || 0) + totalPnl)
-    }
-    fetchBalance()
-  }, [active])
 
   // Close dropdown on outside click
   useEffect(() => {
