@@ -129,7 +129,7 @@ function DateRangePicker({ dateRange, onChange }) {
   const isActive = dateRange.start || dateRange.end
 
   return (
-    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }} ref={r => ref.current = r}>
+    <div style={{ position: 'relative' }} ref={r => ref.current = r}>
       <button
         onClick={() => { setOpen(o => !o); if (!open) setSelecting('start') }}
         style={{
@@ -801,7 +801,7 @@ export default function Dashboard() {
               {todayLabel}
             </span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <h1 style={{ color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontSize: '22px', fontWeight: '600', margin: 0 }}>Dashboard</h1>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <DateRangePicker dateRange={dateRange} onChange={setDateRange} />
