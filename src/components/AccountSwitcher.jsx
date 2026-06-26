@@ -137,13 +137,7 @@ export default function AccountSwitcher({
             }}
           >
             <span style={{ flex: 1, textAlign: 'left' }}>
-              {mobile && showSelectedNameOnMobile
-                ? (active?.name || active?.firm_name || 'Select account')
-                : active?.type === 'personal'
-                  ? 'Personal Account'
-                  : active
-                    ? 'Challenge Account'
-                    : 'Select account'}
+              {active?.name || active?.firm_name || 'Select account'}
             </span>
             <svg
               width="10" height="6" viewBox="0 0 10 6" fill="none"
