@@ -247,11 +247,111 @@ function CalendarMonth({ month, dateRange, hoverDate, onDayClick, onHover, onPre
 }
 
 // ─── New top metrics strip ──────────────────────────────────────────────────
-function MetricCard({ label, value, color }) {
+// ─── Metric card mini-visuals ─────────────────────────────────────────────────
+
+function Sparkline({ trades, color }) {
+  if (!trades || trades.length === 0) {
+    return <svg width="90" height="44" viewBox="0 0 90 44" />
+  }
+  const sorted = [...trades].sort((a, b) => new Date(a.date) - new Date(b.date))
+  let cum = 0
+  const series = sorted.map(t => { cum += (t.pnl || 0); return cum })
+  const min = Math.min(0, ...series)
+  const max = Math.max(0, ...series)
+  const range = max - min || 1
+  const w = 90, h = 44, pad = 3
+  const stepX = series.length > 1 ? (w - pad * 2) / (series.length - 1) : 0
+  const pts = series.map((v, i) => {
+    const x = pad + i * stepX
+    const y = h - pad - ((v - min) / range) * (h - pad * 2)
+    return { x, y }
+  })
+  const lineStr = pts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')
+  const areaStr = `${pad},${(h - pad).toFixed(1)} ${lineStr} ${pts[pts.length - 1].x.toFixed(1)},${(h - pad).toFixed(1)}`
+
   return (
-    <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color-2)', borderRadius: '12px', padding: '18px 20px' }}>
-      <p style={{ color: 'var(--text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 8px 0' }}>{label}</p>
-      <p style={{ color: color || 'var(--text-primary)', fontFamily: 'DM Mono, monospace', fontSize: '22px', fontWeight: '600', margin: 0 }}>{value}</p>
+    <svg width="90" height="44" viewBox={`0 0 ${w} ${h}`}>
+      <polygon points={areaStr} fill={color} opacity="0.12" />
+      <polyline points={lineStr} fill="none" stroke={color} strokeWidth="1.6" strokeLinejoin="round" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function ArcGauge({ pct, color }) {
+  // Semicircle gauge, 180° sweep from left to right
+  const r = 30, cx = 36, cy = 34
+  const clamped = Math.max(0, Math.min(100, pct))
+  const sweep = (clamped / 100) * Math.PI
+  const startX = cx - r, startY = cy
+  const endX = cx - r * Math.cos(sweep)
+  const endY = cy - r * Math.sin(sweep)
+  const trackPath = `M ${startX} ${startY} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`
+  const valuePath = clamped > 0
+    ? `M ${startX} ${startY} A ${r} ${r} 0 ${sweep > Math.PI / 2 ? 1 : 0} 1 ${endX.toFixed(2)} ${endY.toFixed(2)}`
+    : null
+
+  return (
+    <svg width="72" height="40" viewBox="0 0 72 40">
+      <path d={trackPath} fill="none" stroke="var(--border-color-2)" strokeWidth="6" strokeLinecap="round" />
+      {valuePath && <path d={valuePath} fill="none" stroke={color} strokeWidth="6" strokeLinecap="round" />}
+    </svg>
+  )
+}
+
+function ProgressRing({ pct, color }) {
+  const r = 18, cx = 22, cy = 22
+  const circumference = 2 * Math.PI * r
+  const clamped = Math.max(0, Math.min(100, pct))
+  const offset = circumference * (1 - clamped / 100)
+
+  return (
+    <svg width="44" height="44" viewBox="0 0 44 44">
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--border-color-2)" strokeWidth="5" />
+      <circle
+        cx={cx} cy={cy} r={r} fill="none" stroke={color} strokeWidth="5"
+        strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round"
+        transform={`rotate(-90 ${cx} ${cy})`}
+      />
+    </svg>
+  )
+}
+
+function RRBar({ value, max = 4 }) {
+  const clamped = Math.max(0, Math.min(max, value))
+  const pct = (clamped / max) * 100
+  return (
+    <div style={{ width: '76px' }}>
+      <div style={{ position: 'relative', height: '5px', background: 'var(--bg-surface-2)', borderRadius: '3px' }}>
+        <div style={{ position: 'absolute', inset: 0, width: `${pct}%`, background: 'var(--brand)', borderRadius: '3px' }} />
+        <div style={{
+          position: 'absolute', top: '-3px', left: `calc(${pct}% - 1px)`,
+          width: '2px', height: '11px', background: 'var(--text-primary)', borderRadius: '1px',
+        }} />
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '3px' }}>
+        <span style={{ fontSize: '8px', color: 'var(--text-faint)', fontFamily: 'DM Mono, monospace' }}>0</span>
+        <span style={{ fontSize: '8px', color: 'var(--text-faint)', fontFamily: 'DM Mono, monospace' }}>{max}R</span>
+      </div>
+    </div>
+  )
+}
+
+function MetricCard({ label, value, color, visual, visualProps = {} }) {
+  return (
+    <div style={{
+      background: 'var(--bg-surface)', border: '0.5px solid var(--border-color-2)', borderRadius: '12px',
+      padding: '18px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px',
+    }}>
+      <div style={{ minWidth: 0 }}>
+        <p style={{ color: 'var(--text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 8px 0' }}>{label}</p>
+        <p style={{ color: color || 'var(--text-primary)', fontFamily: 'DM Mono, monospace', fontSize: '22px', fontWeight: '600', margin: 0 }}>{value}</p>
+      </div>
+      <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}>
+        {visual === 'sparkline' && <Sparkline {...visualProps} />}
+        {visual === 'gauge' && <ArcGauge {...visualProps} />}
+        {visual === 'ring' && <ProgressRing {...visualProps} />}
+        {visual === 'rrbar' && <RRBar {...visualProps} />}
+      </div>
     </div>
   )
 }
@@ -833,18 +933,29 @@ export default function Dashboard() {
             label="Net P&L"
             value={fmt(stats.totalPnl)}
             color={stats.tradeCount === 0 ? undefined : stats.totalPnl >= 0 ? 'var(--brand)' : 'var(--red)'}
+            visual="sparkline"
+            visualProps={{ trades: filteredTrades, color: stats.tradeCount === 0 ? 'var(--text-faint)' : stats.totalPnl >= 0 ? 'var(--brand)' : 'var(--red)' }}
           />
           <MetricCard
             label="Win Rate"
             value={`${stats.winRate}%`}
             color={stats.tradeCount === 0 ? undefined : stats.winRate >= 50 ? 'var(--brand)' : 'var(--red)'}
+            visual="gauge"
+            visualProps={{ pct: stats.winRate, color: stats.tradeCount === 0 ? 'var(--text-faint)' : stats.winRate >= 50 ? 'var(--brand)' : 'var(--red)' }}
           />
           <MetricCard
             label="Profit Factor"
             value={stats.tradeCount === 0 ? '0.00' : isFinite(stats.profitFactor) ? stats.profitFactor.toFixed(2) : '∞'}
             color={stats.tradeCount === 0 ? undefined : (stats.profitFactor >= 1 || !isFinite(stats.profitFactor)) ? 'var(--brand)' : 'var(--red)'}
+            visual="ring"
+            visualProps={{ pct: stats.tradeCount === 0 ? 0 : Math.min(100, (stats.profitFactor / 3) * 100), color: stats.tradeCount === 0 ? 'var(--text-faint)' : (stats.profitFactor >= 1 || !isFinite(stats.profitFactor)) ? 'var(--brand)' : 'var(--red)' }}
           />
-          <MetricCard label="Avg RR" value={stats.tradeCount === 0 ? '0.00R' : `${stats.avgRR.toFixed(2)}R`} />
+          <MetricCard
+            label="Avg RR"
+            value={stats.tradeCount === 0 ? '0.00R' : `${stats.avgRR.toFixed(2)}R`}
+            visual="rrbar"
+            visualProps={{ value: stats.avgRR, max: 4 }}
+          />
         </div>
         <div style={{ display: 'flex', gap: '20px', alignItems: 'stretch', marginBottom: '24px' }}>
           <div style={{ flex: '0 0 30%', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
