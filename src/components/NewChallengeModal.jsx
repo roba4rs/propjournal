@@ -39,7 +39,6 @@ export default function NewChallengeModal({ onClose, onCreated }) {
   const [selectedPhase,   setSelectedPhase]   = useState(null)
   const [firmOpen,  setFirmOpen]              = useState(false)
   const [programOpen, setProgramOpen]         = useState(false)
-  const [phaseOpen, setPhaseOpen]             = useState(false)
   const [keySearch, setKeySearch]             = useState('')
 
   // ── Keyboard navigation for firm dropdown ─────────────────
@@ -294,7 +293,7 @@ export default function NewChallengeModal({ onClose, onCreated }) {
               <label style={label}>Prop Firm</label>
               <div style={{ position: 'relative' }}>
                 <div style={{ width: '100%', background: 'var(--bg-page)', border: `0.5px solid ${selectedFirm ? 'var(--brand)' : 'var(--border-color)'}`, borderRadius: '8px', padding: '10px 13px', color: selectedFirm ? 'var(--text-primary)' : 'var(--text-faint-2)', fontFamily: ff, fontSize: '13px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxSizing: 'border-box' }}
-                  onClick={() => { setFirmOpen(o => !o); setPhaseOpen(false); setProgramOpen(false) }}>
+                  onClick={() => { setFirmOpen(o => !o); setProgramOpen(false) }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ fontSize: '15px' }}>🏛</span>
                     <span style={{ fontWeight: selectedFirm ? '600' : '400' }}>{selectedFirm || 'Select firm'}</span>
@@ -344,7 +343,7 @@ export default function NewChallengeModal({ onClose, onCreated }) {
                 <label style={label}>Program</label>
                 <div style={{ position: 'relative' }}>
                   <div style={{ width: '100%', background: 'var(--bg-page)', border: `0.5px solid ${selectedProgram ? 'var(--brand)' : 'var(--border-color)'}`, borderRadius: '8px', padding: '9px 12px', color: selectedProgram ? 'var(--text-primary)' : 'var(--text-faint-2)', fontFamily: ff, fontSize: '13px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxSizing: 'border-box' }}
-                    onClick={() => { setProgramOpen(o => !o); setFirmOpen(false); setPhaseOpen(false) }}>
+                    onClick={() => { setProgramOpen(o => !o); setFirmOpen(false) }}>
                     <span>{selectedProgram || 'Select program'}</span>
                     <span style={{ color: 'var(--text-faint-2)', fontSize: '9px' }}>{programOpen ? '▲' : '▼'}</span>
                   </div>
