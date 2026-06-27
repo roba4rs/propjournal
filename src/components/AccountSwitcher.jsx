@@ -132,11 +132,11 @@ export default function AccountSwitcher({
               fontSize: compact ? '12px' : '13px',
               fontWeight: '500',
               cursor: 'pointer',
-              minWidth: compact ? 'unset' : mobile ? '0' : '180px',
+              minWidth: mobile ? '0' : 'unset',
               width: mobile && !compact ? '100%' : 'auto',
             }}
           >
-            <span style={{ flex: 1, textAlign: 'left' }}>
+            <span style={{ textAlign: 'left', whiteSpace: 'nowrap' }}>
               {active?.name || active?.firm_name || 'Select account'}
             </span>
             <svg
