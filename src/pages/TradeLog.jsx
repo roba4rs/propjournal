@@ -1689,8 +1689,7 @@ export default function TradeLog() {
   const [error, setError] = useState(null);
   const [formOpen, setFormOpen] = useState(false);
   const [editTrade, setEditTrade] = useState(null);
-  const [filterDir, setFilterDir] = useState("all");
-  const [filterSession, setFilterSession] = useState("all");
+  const [filterDir, setFilterDir] = useState("all"); // still used by mobile filter pills
   const [detailTrade, setDetailTrade] = useState(null);
   const [loggableAccounts, setLoggableAccounts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -2290,9 +2289,7 @@ useEffect(() => {
   }
 
   // ── DESKTOP LAYOUT ─────────────────────────────────────────────────────────
-  const filtered = trades
-    .filter(t => filterDir === "all" || t.direction === filterDir)
-    .filter(t => filterSession === "all" || t.session === filterSession);
+  const filtered = trades;
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const safePage = Math.min(currentPage, totalPages);
@@ -2330,9 +2327,10 @@ useEffect(() => {
                   onClick={() => setAccountMenuOpen(o => !o)}
                   style={{
                     display: "flex", alignItems: "center", gap: "8px",
-                    padding: "7px 12px", borderRadius: "8px",
+                    padding: "9px 14px", borderRadius: "10px",
                     border: "0.5px solid var(--border-color)", background: "var(--bg-surface)",
-                    color: "var(--text-secondary)", fontFamily: "'Inter', sans-serif", fontSize: "13px",
+                    color: "var(--text-primary)", fontFamily: "'Inter', sans-serif",
+                    fontSize: "14px", fontWeight: 700,
                     cursor: "pointer", whiteSpace: "nowrap",
                   }}
                 >
@@ -2369,22 +2367,18 @@ useEffect(() => {
                 )}
               </div>
 
-              {activeAccount && (
-                <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
-                  <span style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, color: "var(--text-faint)" }}>
-                    Active Account
-                  </span>
-                  <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "14px", fontWeight: 500, color: "var(--text-secondary)", whiteSpace: "nowrap" }}>
-                    {activeAccount.name || activeAccount.firm_name || "Account"}{" "}
-                    {activeAccount.account_size && (
-                      <span style={{ color: "var(--text-muted)" }}>${Number(activeAccount.account_size).toLocaleString()}</span>
-                    )}{" "}
-                    {activeAccount.created_at && (
-                      <span style={{ color: "var(--text-faint-2)", fontSize: "12px" }}>
-                        Since {new Date(activeAccount.created_at).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
-                      </span>
-                    )}
-                  </span>
+              {activeAccount && (activeAccount.account_size || activeAccount.created_at) && (
+                <div style={{ display: "flex", alignItems: "center", gap: "6px", minWidth: 0 }}>
+                  {activeAccount.account_size && (
+                    <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "13px", fontWeight: 500, color: "var(--text-muted)", whiteSpace: "nowrap" }}>
+                      ${Number(activeAccount.account_size).toLocaleString()}
+                    </span>
+                  )}
+                  {activeAccount.created_at && (
+                    <span style={{ color: "var(--text-faint-2)", fontSize: "12px", whiteSpace: "nowrap" }}>
+                      Since {new Date(activeAccount.created_at).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+                    </span>
+                  )}
                 </div>
               )}
             </div>
@@ -2421,35 +2415,8 @@ useEffect(() => {
           }}>{error}</div>
         )}
 
-        {/* Filters + Export */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "16px", marginBottom: "16px" }}>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
-            <div style={{ display: "flex", gap: "4px", padding: "4px", borderRadius: "10px", border: "0.5px solid var(--border-color)", background: "var(--bg-surface)" }}>
-              {["all", "long", "short"].map(d => (
-                <button key={d} onClick={() => { setFilterDir(d); setCurrentPage(1); }} style={{
-                  padding: "7px 18px", borderRadius: "8px", border: "none",
-                  background: filterDir === d ? "var(--green-bg)" : "transparent",
-                  color: filterDir === d ? "var(--brand)" : "var(--text-faint)",
-                  fontFamily: "'Inter', sans-serif", fontSize: "13px", fontWeight: 600,
-                  textTransform: "capitalize",
-                  cursor: "pointer", transition: "all 0.15s",
-                }}>{d}</button>
-              ))}
-            </div>
-            <div style={{ display: "flex", gap: "8px" }}>
-              {SESSIONS.map(s => (
-                <button key={s} onClick={() => { setFilterSession(filterSession === s ? "all" : s); setCurrentPage(1); }} style={{
-                  padding: "7px 16px", borderRadius: "8px", border: "0.5px solid",
-                  borderColor: filterSession === s ? "var(--green-bg-2)" : "var(--border-color)",
-                  background: filterSession === s ? "rgba(var(--brand-rgb), 0.15)" : "var(--bg-surface)",
-                  color: filterSession === s ? "var(--brand)" : "var(--text-muted)",
-                  fontFamily: "'JetBrains Mono', monospace", fontSize: "11px",
-                  textTransform: "uppercase", letterSpacing: "0.05em",
-                  cursor: "pointer", transition: "all 0.15s",
-                }}>{sessionLabel(s)}</button>
-              ))}
-            </div>
-          </div>
+        {/* Export */}
+        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "16px" }}>
           <button onClick={() => {
             const headers = ["Date", "Pair", "Outcome", "Direction", "Entry", "Stop Loss", "Take Profit", "R:R", "Swap", "Commission", "P&L", "Session", "Notes"];
             const rows = filtered.map(t => [
