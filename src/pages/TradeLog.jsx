@@ -293,15 +293,21 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
     outcome: editTrade.outcome ?? null,
   } : makeEmptyForm();
 
-  // Pre-calculate risk $ from pnl + rr for edit mode
+  // Pre-calculate risk $ from pnl for edit mode — must exactly invert calcPnl()
   const initRisk = (() => {
     if (!editTrade) return {};
-    const acc = accounts.find(a => a.id === editTrade.account_id);
     let prefilledRisk = "";
-    if (acc?.account_size && editTrade.pnl != null && editTrade.rr) {
-      const rr = parseFloat(editTrade.rr);
-      const pnl = Math.abs(parseFloat(editTrade.pnl));
-      if (rr > 0) prefilledRisk = (pnl / rr).toFixed(2);
+    if (editTrade.pnl != null) {
+      const pnl = parseFloat(editTrade.pnl);
+      if (editTrade.outcome === "loss") {
+        // calcPnl: pnl = -riskAmount  →  riskAmount = abs(pnl)
+        prefilledRisk = Math.abs(pnl).toFixed(2);
+      } else if (editTrade.outcome === "win" || editTrade.outcome === "in_progress") {
+        // calcPnl: pnl = riskAmount * rr  →  riskAmount = pnl / rr
+        const rr = parseFloat(editTrade.rr);
+        if (rr > 0) prefilledRisk = (pnl / rr).toFixed(2);
+      }
+      // breakeven: pnl is always 0, no risk amount can be recovered from it — leave blank
     }
     return { [editTrade.account_id]: prefilledRisk };
   })();
@@ -2548,12 +2554,15 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
     outcome: editTrade.outcome ?? null,
   } : makeEmptyForm();
 
+  // Pre-calculate risk $ from pnl for edit mode — must exactly invert calcPnl()
   const initRisk = (() => {
-    if (!editTrade) return {};
-    const acc = accounts.find(a => a.id === editTrade.account_id);
-    if (acc?.account_size && editTrade.pnl != null && editTrade.rr) {
+    if (!editTrade || editTrade.pnl == null) return {};
+    const pnl = parseFloat(editTrade.pnl);
+    if (editTrade.outcome === "loss") {
+      return { [editTrade.account_id]: Math.abs(pnl).toFixed(2) };
+    }
+    if (editTrade.outcome === "win" || editTrade.outcome === "in_progress") {
       const rr = parseFloat(editTrade.rr);
-      const pnl = Math.abs(parseFloat(editTrade.pnl));
       if (rr > 0) return { [editTrade.account_id]: (pnl / rr).toFixed(2) };
     }
     return {};
