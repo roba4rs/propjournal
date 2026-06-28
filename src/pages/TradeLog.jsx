@@ -1085,19 +1085,11 @@ function TradeRow({ trade, onViewDetail, onEdit, onDelete }) {
       <td style={{ ...td, fontFamily: "'JetBrains Mono', monospace", color: "var(--text-muted)" }}>{trade.date}</td>
       <td style={{ ...td, fontFamily: "'JetBrains Mono', monospace", fontSize: "13px", fontWeight: 700, color: "var(--text-secondary)" }}>{trade.pair}</td>
       <td style={td}>{outcomeBadge(trade.outcome) || <span style={{ color: "var(--text-faint-2)" }}>—</span>}</td>
-      <td style={td}>{directionBadge(trade.direction)}</td>
       <td style={{ ...td, textAlign: "right", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", color: "var(--text-muted)" }}>{fmt(trade.entry)}</td>
-      <td style={{ ...td, textAlign: "center", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", color: "var(--text-muted)" }}>{trade.rr ? `${trade.rr}R` : "—"}</td>
-      <td style={{ ...td, textAlign: "right", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", color: trade.swap != null ? pnlColor(trade.swap) : "var(--text-faint-2)" }}>
-        {trade.swap != null ? `${parseFloat(trade.swap) >= 0 ? "+" : ""}${fmt(trade.swap)}` : "—"}
-      </td>
-      <td style={{ ...td, textAlign: "right", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", color: trade.commission != null ? pnlColor(trade.commission) : "var(--text-faint-2)" }}>
-        {trade.commission != null ? `${parseFloat(trade.commission) >= 0 ? "+" : ""}${fmt(trade.commission)}` : "—"}
-      </td>
-      <td style={{ ...td, textAlign: "right", fontFamily: "'JetBrains Mono', monospace", fontSize: "13px", fontWeight: 700, color: pnlColor(trade.pnl) }}>
+      <td style={{ ...td, textAlign: "right", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", color: "var(--text-muted)" }}>{trade.rr ? `${trade.rr}R` : "—"}</td>
+      <td style={{ ...td, textAlign: "right", fontFamily: "'JetBrains Mono', monospace", fontSize: "15px", fontWeight: 700, color: pnlColor(trade.pnl) }}>
         {trade.pnl != null ? `${parseFloat(trade.pnl) >= 0 ? "+" : ""}${fmt(trade.pnl)}` : "—"}
       </td>
-      <td style={{ ...td, textAlign: "center", color: "var(--text-faint)", fontSize: "11px", fontWeight: 700, opacity: 0.7 }}>{sessionLabel(trade.session)}</td>
       <td style={{ ...td, textAlign: "right" }}>
         <div style={{
           display: "flex", gap: "8px", justifyContent: "flex-end",
@@ -2295,6 +2287,26 @@ useEffect(() => {
   const safePage = Math.min(currentPage, totalPages);
   const paginated = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
+  // ── Stat card calculations (based on all filtered trades, not just current page) ──
+  const decidedTrades = filtered.filter(t => t.outcome === "win" || t.outcome === "loss" || t.outcome === "be");
+  const netProfit = filtered.reduce((sum, t) => sum + (parseFloat(t.pnl) || 0), 0);
+  const winCount = filtered.filter(t => t.outcome === "win").length;
+  const winRate = decidedTrades.length > 0 ? (winCount / decidedTrades.length) * 100 : 0;
+  const rrTrades = filtered.filter(t => t.rr != null && t.rr !== "");
+  const avgRR = rrTrades.length > 0
+    ? rrTrades.reduce((sum, t) => sum + parseFloat(t.rr), 0) / rrTrades.length
+    : null;
+
+  const statCardStyle = {
+    background: "var(--bg-surface)", border: "0.5px solid var(--border-color)",
+    borderRadius: "14px", padding: "16px 18px", flex: 1, minWidth: "160px",
+  };
+  const statLabelStyle = {
+    fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.06em",
+    fontWeight: 700, color: "var(--text-faint)", marginBottom: "8px", display: "block",
+  };
+  const statValueStyle = { fontSize: "22px", fontWeight: 700, color: "var(--text-primary)", fontFamily: "'Inter', sans-serif" };
+
   return (
     <div style={{ display: "flex", background: "var(--bg-page)", minHeight: "100vh" }}>
       <Sidebar />
@@ -2415,8 +2427,31 @@ useEffect(() => {
           }}>{error}</div>
         )}
 
-        {/* Export */}
-        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "16px" }}>
+        {/* Stat cards */}
+        <div style={{ display: "flex", gap: "14px", flexWrap: "wrap", marginBottom: "24px" }}>
+          <div style={statCardStyle}>
+            <span style={statLabelStyle}>Net Profit</span>
+            <span style={{ ...statValueStyle, color: netProfit >= 0 ? "var(--brand)" : "var(--red)" }}>
+              {netProfit >= 0 ? "+" : ""}${fmt(netProfit)}
+            </span>
+          </div>
+          <div style={statCardStyle}>
+            <span style={statLabelStyle}>Win Rate</span>
+            <span style={statValueStyle}>{decidedTrades.length > 0 ? `${winRate.toFixed(1)}%` : "—"}</span>
+          </div>
+          <div style={statCardStyle}>
+            <span style={statLabelStyle}>Total Trades</span>
+            <span style={statValueStyle}>{filtered.length}</span>
+          </div>
+          <div style={statCardStyle}>
+            <span style={statLabelStyle}>Avg R:R</span>
+            <span style={statValueStyle}>{avgRR != null ? `1:${avgRR.toFixed(1)}` : "—"}</span>
+          </div>
+        </div>
+
+        {/* Table section header */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
+          <h2 style={{ margin: 0, fontSize: "15px", fontWeight: 700, color: "var(--text-primary)" }}>Recent Executions</h2>
           <button onClick={() => {
             const headers = ["Date", "Pair", "Outcome", "Direction", "Entry", "Stop Loss", "Take Profit", "R:R", "Swap", "Commission", "P&L", "Session", "Notes"];
             const rows = filtered.map(t => [
@@ -2452,10 +2487,10 @@ useEffect(() => {
           <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
             <thead>
               <tr style={{ borderBottom: "0.5px solid var(--border-color)", background: "rgba(255,255,255,0.02)" }}>
-                {["Date", "Pair", "Outcome", "Dir", "Entry", "R:R", "Swap", "Commission", "P&L", "Session", ""].map((h, i) => (
+                {["Date", "Pair", "Outcome", "Entry", "R:R", "P&L", ""].map((h, i) => (
                   <th key={i} style={{
                     padding: "14px 16px",
-                    textAlign: i === 0 || i === 1 ? "left" : i === 2 || i === 3 || i === 5 || i === 9 ? "center" : i === 10 ? "right" : "right",
+                    textAlign: i === 0 || i === 1 ? "left" : i === 2 ? "center" : i === 6 ? "right" : "right",
                     fontSize: "11px", fontFamily: "'JetBrains Mono', monospace",
                     letterSpacing: "0.1em", textTransform: "uppercase",
                     color: "var(--text-muted)", fontWeight: 700,
@@ -2465,9 +2500,9 @@ useEffect(() => {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={11} style={{ padding: "48px", textAlign: "center", color: "var(--text-muted)", fontSize: "13px" }}>Loading trades…</td></tr>
+                <tr><td colSpan={7} style={{ padding: "48px", textAlign: "center", color: "var(--text-muted)", fontSize: "13px" }}>Loading trades…</td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={11} style={{ padding: "48px", textAlign: "center", color: "var(--text-muted)", fontSize: "13px" }}>
+                <tr><td colSpan={7} style={{ padding: "48px", textAlign: "center", color: "var(--text-muted)", fontSize: "13px" }}>
                   No trades yet. Click <strong style={{ color: "var(--text-muted)" }}>+ Log Trade</strong> to get started.
                 </td></tr>
               ) : (
