@@ -315,7 +315,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
       })();
 
   const initRiskModes = editTrade
-    ? { [editTrade.account_id]: "$" }
+    ? { [editTrade.account_id]: "%" }
     : (() => {
         const personal = accounts.find(a => a.type === "personal");
         return personal ? { [personal.id]: "$" } : {};
@@ -2618,7 +2618,7 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
     : (() => { const p = accounts.find(a => a.type === "personal"); return p ? new Set([p.id]) : new Set(); })();
 
   const initModes = editTrade
-    ? { [editTrade.account_id]: "$" }
+    ? { [editTrade.account_id]: "%" }
     : (() => { const p = accounts.find(a => a.type === "personal"); return p ? { [p.id]: "$" } : {}; })();
 
   const [form, setForm] = useState(initForm);
