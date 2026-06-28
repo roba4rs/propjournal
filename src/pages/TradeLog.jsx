@@ -2449,44 +2449,43 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* Table section header */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
-          <h2 style={{ margin: 0, fontSize: "15px", fontWeight: 700, color: "var(--text-primary)" }}>Recent Executions</h2>
-          <button onClick={() => {
-            const headers = ["Date", "Pair", "Outcome", "Direction", "Entry", "Stop Loss", "Take Profit", "R:R", "Swap", "Commission", "P&L", "Session", "Notes"];
-            const rows = filtered.map(t => [
-              t.date, t.pair, t.outcome ?? "", t.direction,
-              t.entry ?? "", t.stop_loss ?? "", t.take_profit ?? "",
-              t.rr ?? "", t.swap ?? "", t.commission ?? "", t.pnl ?? "",
-              t.session, (t.notes || "").replace(/,/g, " "),
-            ]);
-            const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
-            const blob = new Blob([csv], { type: "text/csv" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `trades-${activeAccount?.name || "export"}-${new Date().toISOString().split("T")[0]}.csv`;
-            a.click();
-            URL.revokeObjectURL(url);
-          }} style={{
-            display: "flex", alignItems: "center", gap: "8px",
-            padding: "7px 14px", background: "var(--bg-surface)",
-            border: "0.5px solid var(--border-color)", borderRadius: "8px",
-            color: "var(--text-faint)", cursor: "pointer",
-            fontFamily: "'Inter', sans-serif", fontSize: "11px", fontWeight: 700,
-            textTransform: "uppercase", letterSpacing: "0.08em",
-            transition: "all 0.15s",
-          }}
-            onMouseEnter={e => { e.currentTarget.style.color = "var(--text-primary)"; }}
-            onMouseLeave={e => { e.currentTarget.style.color = "var(--text-faint)"; }}
-          ><ArrowDown size={14} /> Export CSV</button>
-        </div>
-
-        {/* Table */}
+        {/* Recent Executions card (header + table combined) */}
         <div style={{ border: "0.5px solid var(--border-color)", borderRadius: "16px", overflow: "hidden", background: "var(--bg-surface)" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 20px" }}>
+            <h2 style={{ margin: 0, fontSize: "15px", fontWeight: 700, color: "var(--text-primary)" }}>Recent Executions</h2>
+            <button onClick={() => {
+              const headers = ["Date", "Pair", "Outcome", "Direction", "Entry", "Stop Loss", "Take Profit", "R:R", "Swap", "Commission", "P&L", "Session", "Notes"];
+              const rows = filtered.map(t => [
+                t.date, t.pair, t.outcome ?? "", t.direction,
+                t.entry ?? "", t.stop_loss ?? "", t.take_profit ?? "",
+                t.rr ?? "", t.swap ?? "", t.commission ?? "", t.pnl ?? "",
+                t.session, (t.notes || "").replace(/,/g, " "),
+              ]);
+              const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
+              const blob = new Blob([csv], { type: "text/csv" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = `trades-${activeAccount?.name || "export"}-${new Date().toISOString().split("T")[0]}.csv`;
+              a.click();
+              URL.revokeObjectURL(url);
+            }} style={{
+              display: "flex", alignItems: "center", gap: "8px",
+              padding: "7px 14px", background: "var(--bg-page)",
+              border: "0.5px solid var(--border-color)", borderRadius: "8px",
+              color: "var(--text-faint)", cursor: "pointer",
+              fontFamily: "'Inter', sans-serif", fontSize: "11px", fontWeight: 700,
+              textTransform: "uppercase", letterSpacing: "0.08em",
+              transition: "all 0.15s",
+            }}
+              onMouseEnter={e => { e.currentTarget.style.color = "var(--text-primary)"; }}
+              onMouseLeave={e => { e.currentTarget.style.color = "var(--text-faint)"; }}
+            ><ArrowDown size={14} /> Export CSV</button>
+          </div>
+
           <table style={{ width: "100%", tableLayout: "fixed", borderCollapse: "collapse", textAlign: "left" }}>
             <thead>
-              <tr style={{ borderBottom: "0.5px solid var(--border-color)", background: "rgba(255,255,255,0.02)" }}>
+              <tr style={{ borderTop: "0.5px solid var(--border-color)", borderBottom: "0.5px solid var(--border-color)", background: "rgba(255,255,255,0.02)" }}>
                 {[
                   { label: "Date", width: "14%" },
                   { label: "Pair", width: "16%" },
