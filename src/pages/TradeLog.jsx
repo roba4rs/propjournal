@@ -1089,7 +1089,8 @@ function TradeRow({ trade, onViewDetail, onEdit, onDelete }) {
     >
       <td style={{ ...td, fontFamily: "'JetBrains Mono', monospace", color: "var(--text-muted)" }}>{trade.date}</td>
       <td style={{ ...td, fontFamily: "'JetBrains Mono', monospace", fontSize: "13px", fontWeight: 700, color: "var(--text-secondary)" }}>{trade.pair}</td>
-      <td style={td}>{outcomeBadge(trade.outcome) || <span style={{ color: "var(--text-faint-2)" }}>—</span>}</td>
+      <td style={{ ...td, textAlign: "center" }}>{directionBadge(trade.direction)}</td>
+      <td style={{ ...td, textAlign: "center" }}>{outcomeBadge(trade.outcome) || <span style={{ color: "var(--text-faint-2)" }}>—</span>}</td>
       <td style={{ ...td, textAlign: "right", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", color: "var(--text-muted)" }}>{fmt(trade.entry)}</td>
       <td style={{ ...td, textAlign: "right", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", color: "var(--text-muted)" }}>{trade.rr ? `${trade.rr}R` : "—"}</td>
       <td style={{ ...td, textAlign: "right", fontFamily: "'JetBrains Mono', monospace", fontSize: "15px", fontWeight: 700, color: pnlColor(trade.pnl) }}>
@@ -2440,18 +2441,19 @@ useEffect(() => {
             <thead>
               <tr style={{ borderTop: "0.5px solid var(--border-color)", borderBottom: "0.5px solid var(--border-color)", background: "rgba(255,255,255,0.02)" }}>
                 {[
-                  { label: "Date", width: "14%" },
-                  { label: "Pair", width: "16%" },
-                  { label: "Outcome", width: "14%" },
-                  { label: "Entry", width: "16%" },
-                  { label: "R:R", width: "12%" },
+                  { label: "Date", width: "13%" },
+                  { label: "Pair", width: "14%" },
+                  { label: "Dir", width: "9%" },
+                  { label: "Outcome", width: "12%" },
+                  { label: "Entry", width: "14%" },
+                  { label: "R:R", width: "10%" },
                   { label: "P&L", width: "18%" },
                   { label: "", width: "10%" },
                 ].map((col, i) => (
                   <th key={i} style={{
                     width: col.width,
                     padding: "14px 16px",
-                    textAlign: i === 0 || i === 1 ? "left" : i === 2 ? "center" : i === 6 ? "right" : "right",
+                    textAlign: i === 0 || i === 1 ? "left" : i === 2 || i === 3 ? "center" : i === 7 ? "right" : "right",
                     fontSize: "11px", fontFamily: "'JetBrains Mono', monospace",
                     letterSpacing: "0.1em", textTransform: "uppercase",
                     color: "var(--text-muted)", fontWeight: 700,
@@ -2461,9 +2463,9 @@ useEffect(() => {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={7} style={{ padding: "48px", textAlign: "center", color: "var(--text-muted)", fontSize: "13px" }}>Loading trades…</td></tr>
+                <tr><td colSpan={8} style={{ padding: "48px", textAlign: "center", color: "var(--text-muted)", fontSize: "13px" }}>Loading trades…</td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={7} style={{ padding: "48px", textAlign: "center", color: "var(--text-muted)", fontSize: "13px" }}>
+                <tr><td colSpan={8} style={{ padding: "48px", textAlign: "center", color: "var(--text-muted)", fontSize: "13px" }}>
                   No trades yet. Click <strong style={{ color: "var(--text-muted)" }}>+ Log Trade</strong> to get started.
                 </td></tr>
               ) : (
