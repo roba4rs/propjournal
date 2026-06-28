@@ -293,7 +293,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
     outcome: editTrade.outcome ?? null,
   } : makeEmptyForm();
 
-  // Pre-calculate risk % from pnl + rr for edit mode
+  // Pre-calculate risk $ from pnl + rr for edit mode
   const initRisk = (() => {
     if (!editTrade) return {};
     const acc = accounts.find(a => a.id === editTrade.account_id);
@@ -301,8 +301,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
     if (acc?.account_size && editTrade.pnl != null && editTrade.rr) {
       const rr = parseFloat(editTrade.rr);
       const pnl = Math.abs(parseFloat(editTrade.pnl));
-      const size = parseFloat(acc.account_size);
-      if (rr > 0 && size > 0) prefilledRisk = ((pnl / rr / size) * 100).toFixed(2);
+      if (rr > 0) prefilledRisk = (pnl / rr).toFixed(2);
     }
     return { [editTrade.account_id]: prefilledRisk };
   })();
@@ -315,7 +314,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
       })();
 
   const initRiskModes = editTrade
-    ? { [editTrade.account_id]: "%" }
+    ? { [editTrade.account_id]: "$" }
     : (() => {
         const personal = accounts.find(a => a.type === "personal");
         return personal ? { [personal.id]: "$" } : {};
@@ -1681,7 +1680,6 @@ export default function TradeLog() {
   const [error, setError] = useState(null);
   const [formOpen, setFormOpen] = useState(false);
   const [editTrade, setEditTrade] = useState(null);
-  const [filterDir, setFilterDir] = useState("all"); // still used by mobile filter pills
   const [detailTrade, setDetailTrade] = useState(null);
   const [loggableAccounts, setLoggableAccounts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -2064,29 +2062,9 @@ useEffect(() => {
 
   // ── MOBILE LAYOUT ──────────────────────────────────────────────────────────
   if (isMobile) {
-    const filtered = trades.filter(t => {
-      if (filterDir === 'all') return true;
-      if (filterDir === 'win')  return t.outcome === 'win';
-      if (filterDir === 'loss') return t.outcome === 'loss';
-      return t.direction === filterDir; // 'long' | 'short'
-    });
+    const filtered = trades;
 
-    const pillStyle = (active) => ({
-      fontSize: '11px',
-      padding: '4px 10px',
-      borderRadius: '5px',
-      border: `0.5px solid ${active ? 'var(--text-faint-2)' : 'var(--border-color)'}`,
-      background: active ? 'var(--border-color)' : 'var(--bg-surface)',
-      color: active ? 'var(--text-secondary)' : 'var(--text-faint)',
-      fontFamily: "'JetBrains Mono', monospace",
-      whiteSpace: 'nowrap',
-      flexShrink: 0,
-      cursor: 'pointer',
-      textTransform: 'uppercase',
-      letterSpacing: '0.04em',
-    });
-
-    const colTemplate = '36px 1fr 46px 38px 52px 48px';
+    const colTemplate = '52px 1fr 56px 44px 64px 52px';
     const headerCellStyle = {
       fontSize: '9px', color: 'var(--text-faint-2)', fontFamily: "'JetBrains Mono', monospace",
       textTransform: 'uppercase', letterSpacing: '0.08em',
@@ -2127,44 +2105,23 @@ useEffect(() => {
           onSwitch={(acc) => { setActiveAccount(acc); if (acc?.id) localStorage.setItem('activeAccountId', acc.id); }}
         />
 
-        {/* ── ROW 3: Filter bar — All / Win / Loss / Long / Short ── */}
+        {/* ── ROW 3: Column headers ── */}
         <div style={{
           position: 'fixed', top: '100px', left: 0, right: 0,
-          background: 'var(--bg-page)', borderBottom: '0.5px solid var(--bg-surface)',
-          padding: '6px 14px', zIndex: 198,
-          display: 'flex', gap: '5px', overflowX: 'auto',
-          scrollbarWidth: 'none',
-        }}>
-          {[
-            { key: 'all',   label: 'All' },
-            { key: 'win',   label: 'Win' },
-            { key: 'loss',  label: 'Loss' },
-            { key: 'long',  label: 'Long' },
-            { key: 'short', label: 'Short' },
-          ].map(({ key, label }) => (
-            <button key={key} onClick={() => setFilterDir(key)} style={pillStyle(filterDir === key)}>
-              {label}
-            </button>
-          ))}
-        </div>
-
-        {/* ── ROW 4: Column headers ── */}
-        <div style={{
-          position: 'fixed', top: '134px', left: 0, right: 0,
           background: 'var(--bg-page)', borderBottom: '0.5px solid var(--border-color)',
           padding: '8px 14px', zIndex: 197,
           display: 'grid', gridTemplateColumns: colTemplate, gap: '6px', alignItems: 'center',
         }}>
           <span style={headerCellStyle}>Date</span>
           <span style={headerCellStyle}>Pair</span>
-          <span style={{ ...headerCellStyle, textAlign: 'center' }}>Result</span>
-          <span style={{ ...headerCellStyle, textAlign: 'center' }}>Side</span>
+          <span style={{ ...headerCellStyle, textAlign: 'center' }}>Outcome</span>
+          <span style={{ ...headerCellStyle, textAlign: 'right' }}>R:R</span>
           <span style={{ ...headerCellStyle, textAlign: 'right' }}>P&L</span>
           <span style={headerCellStyle} />
         </div>
 
         {/* Scrollable trade list */}
-        <main style={{ paddingTop: '166px', paddingBottom: '68px', flex: 1, overflowY: 'auto' }}>
+        <main style={{ paddingTop: '134px', paddingBottom: '68px', flex: 1, overflowY: 'auto' }}>
           {error && (
             <div style={{ margin: '10px 14px', background: 'var(--red-bg-2)', border: '0.5px solid var(--red-bg)', borderRadius: '8px', padding: '10px 14px', color: 'var(--red)', fontSize: '12px' }}>
               {error}
@@ -2190,7 +2147,6 @@ useEffect(() => {
                 in_progress: { label: 'IN PROG', bg: 'var(--blue-bg-2)', color: 'var(--blue)', border: 'var(--blue-bg)' },
               };
               const ob = outcomeMap[t.outcome];
-              const isLong = t.direction === 'long';
 
               return (
                 <div key={t.id} style={{
@@ -2210,28 +2166,19 @@ useEffect(() => {
                     {t.pair}
                   </div>
 
-                  {/* Result */}
+                  {/* Outcome */}
                   <div style={{ display: 'flex', justifyContent: 'center' }}>
                     {ob ? mobileBadge(ob.label, ob.bg, ob.color, ob.border) : <span style={{ color: 'var(--text-faint-2)', fontSize: '11px' }}>—</span>}
                   </div>
 
-                  {/* Side */}
-                  <div style={{ display: 'flex', justifyContent: 'center' }}>
-                    {mobileBadge(isLong ? 'BUY' : 'SELL',
-                      isLong ? 'var(--green-bg)' : 'var(--red-bg-2)',
-                      isLong ? 'var(--brand)' : 'var(--red)',
-                      isLong ? 'var(--green-bg-2)' : 'var(--red-bg)'
-                    )}
+                  {/* R:R */}
+                  <div style={{ textAlign: 'right', fontSize: '11px', color: 'var(--text-muted)', fontFamily: "'JetBrains Mono', monospace" }}>
+                    {t.rr ? `${t.rr}R` : '—'}
                   </div>
 
-                  {/* P&L + RR */}
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '13px', fontWeight: '500', color: pnlClr, fontFamily: "'JetBrains Mono', monospace" }}>
-                      {pnlVal != null ? `${pnlVal >= 0 ? '+' : ''}$${Math.abs(pnlVal).toFixed(0)}` : '—'}
-                    </div>
-                    <div style={{ fontSize: '9px', color: 'var(--text-faint)', fontFamily: "'JetBrains Mono', monospace" }}>
-                      {t.rr ? `${t.rr}R` : ''}
-                    </div>
+                  {/* P&L */}
+                  <div style={{ textAlign: 'right', fontSize: '13px', fontWeight: '500', color: pnlClr, fontFamily: "'JetBrains Mono', monospace" }}>
+                    {pnlVal != null ? `${pnlVal >= 0 ? '+' : ''}$${Math.abs(pnlVal).toFixed(0)}` : '—'}
                   </div>
 
                   {/* Actions */}
@@ -2607,8 +2554,7 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
     if (acc?.account_size && editTrade.pnl != null && editTrade.rr) {
       const rr = parseFloat(editTrade.rr);
       const pnl = Math.abs(parseFloat(editTrade.pnl));
-      const size = parseFloat(acc.account_size);
-      if (rr > 0 && size > 0) return { [editTrade.account_id]: ((pnl / rr / size) * 100).toFixed(2) };
+      if (rr > 0) return { [editTrade.account_id]: (pnl / rr).toFixed(2) };
     }
     return {};
   })();
@@ -2618,7 +2564,7 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
     : (() => { const p = accounts.find(a => a.type === "personal"); return p ? new Set([p.id]) : new Set(); })();
 
   const initModes = editTrade
-    ? { [editTrade.account_id]: "%" }
+    ? { [editTrade.account_id]: "$" }
     : (() => { const p = accounts.find(a => a.type === "personal"); return p ? { [p.id]: "$" } : {}; })();
 
   const [form, setForm] = useState(initForm);
