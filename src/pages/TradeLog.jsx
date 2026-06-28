@@ -2484,17 +2484,26 @@ useEffect(() => {
 
         {/* Table */}
         <div style={{ border: "0.5px solid var(--border-color)", borderRadius: "16px", overflow: "hidden", background: "var(--bg-surface)" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
+          <table style={{ width: "100%", tableLayout: "fixed", borderCollapse: "collapse", textAlign: "left" }}>
             <thead>
               <tr style={{ borderBottom: "0.5px solid var(--border-color)", background: "rgba(255,255,255,0.02)" }}>
-                {["Date", "Pair", "Outcome", "Entry", "R:R", "P&L", ""].map((h, i) => (
+                {[
+                  { label: "Date", width: "14%" },
+                  { label: "Pair", width: "16%" },
+                  { label: "Outcome", width: "14%" },
+                  { label: "Entry", width: "16%" },
+                  { label: "R:R", width: "12%" },
+                  { label: "P&L", width: "18%" },
+                  { label: "", width: "10%" },
+                ].map((col, i) => (
                   <th key={i} style={{
+                    width: col.width,
                     padding: "14px 16px",
                     textAlign: i === 0 || i === 1 ? "left" : i === 2 ? "center" : i === 6 ? "right" : "right",
                     fontSize: "11px", fontFamily: "'JetBrains Mono', monospace",
                     letterSpacing: "0.1em", textTransform: "uppercase",
                     color: "var(--text-muted)", fontWeight: 700,
-                  }}>{h}</th>
+                  }}>{col.label}</th>
                 ))}
               </tr>
             </thead>
