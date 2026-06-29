@@ -1132,7 +1132,7 @@ const FIELD_ALIASES = {
   entry:       ["openprice","entryprice","open","entry","openrate","entryrate","fillprice","execprice","executionprice","openprice","price"],
   stop_loss:   ["sl","stoploss","stop","stoplosslevel","stoplossrate","slprice"],
   take_profit: ["tp","takeprofit","target","takeprofitlevel","takeprofitrate","tpprice","profittarget"],
-  pnl:         ["profit","pl","pandl","netpl","netprofit","nettprofit","grosspnl","netpnl","realizedpnl","closedpnl","gainloss","result","return"],
+  pnl:         ["profit","pl","pandl","netpl","netprofit","nettprofit","grosspnl","netpnl","realizedpnl","closedpnl","gainloss"],
   commission:  ["commission","commissions","comm","fee","fees","brokerfee","tradingfee","execfee"],
   swap:        ["swap","swaps","overnight","rollover","overnightfee","swapfee","financing","financingfee","interest"],
   date:        ["opentime","entrytime","opendate","entrydate","date","closetime","closedate","tradetime","tradedate","datetime","timestamp","time","opendatetime"],
