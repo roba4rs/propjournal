@@ -1122,7 +1122,7 @@ function TradeRow({ trade, onViewDetail, onEdit, onDelete }) {
 
 // Normalize a header string: lowercase, remove spaces/underscores/dashes/dots
 function normalizeKey(str) {
-  return str.toLowerCase().replace(/[\s_\-./\\]/g, "");
+  return str.toLowerCase().replace(/[\s_\-./\\&]/g, "");
 }
 
 // Aliases for each target field (all pre-normalized)
