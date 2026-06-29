@@ -356,34 +356,28 @@ function GroupTable({ title, breakdown, mobile, footnote, scopeLabel }) {
           ))}
         </div>
       ) : (
-        <div style={{ width: '100%', overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr>
-                {['', 'Trades', 'Win Rate', 'Avg Win', 'Avg Loss', 'Profit Factor', 'Net P&L'].map((h, i) => (
-                  <th key={h + i} style={{
-                    fontFamily: font.mono, fontSize: 10, color: T.sub,
-                    textAlign: i === 0 ? 'left' : 'right', padding: '0 12px 10px 0',
-                    letterSpacing: '0.07em', textTransform: 'uppercase', fontWeight: 400,
-                    borderBottom: `0.5px solid ${T.cardBorder}`,
-                  }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {breakdown.map((g, i) => (
-                <tr key={g.key} style={{ borderBottom: i < breakdown.length - 1 ? `0.5px solid ${T.cardBorder}` : 'none' }}>
-                  <td style={{ padding: '10px 12px 10px 0', fontFamily: font.body, fontSize: 13, color: T.text }}>{g.key}</td>
-                  <td style={{ padding: '10px 12px 10px 0', fontFamily: font.mono, fontSize: 13, color: T.muted, textAlign: 'right' }}>{g.count}</td>
-                  <td style={{ padding: '10px 12px 10px 0', fontFamily: font.mono, fontSize: 13, textAlign: 'right', color: g.lowSample ? T.amber : T.text }}>{g.winRate.toFixed(0)}%</td>
-                  <td style={{ padding: '10px 12px 10px 0', fontFamily: font.mono, fontSize: 13, textAlign: 'right', color: T.green }}>{fmtPct(g.avgWin)}</td>
-                  <td style={{ padding: '10px 12px 10px 0', fontFamily: font.mono, fontSize: 13, textAlign: 'right', color: T.red }}>{fmtPct(g.avgLoss)}</td>
-                  <td style={{ padding: '10px 12px 10px 0', fontFamily: font.mono, fontSize: 13, textAlign: 'right', color: g.lowSample ? T.amber : T.text }}>{fmtPF(g.profitFactor)}</td>
-                  <td style={{ padding: '10px 0', fontFamily: font.mono, fontSize: 13, fontWeight: 500, textAlign: 'right', color: g.lowSample ? T.amber : pnlColor(g.netPnlPct) }}>{fmtPct(g.netPnlPct)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {(() => {
+            const maxAbs = Math.max(1, ...breakdown.map(g => Math.abs(g.netPnlPct)))
+            return breakdown.map((g, i) => {
+              const widthPct = Math.min(100, (Math.abs(g.netPnlPct) / maxAbs) * 100)
+              const barColor = g.lowSample ? T.amber : pnlColor(g.netPnlPct)
+              return (
+                <div key={g.key} style={{
+                  display: 'flex', alignItems: 'center', gap: 14, padding: '10px 0',
+                  borderBottom: i < breakdown.length - 1 ? `0.5px solid ${T.cardBorder}` : 'none',
+                }}>
+                  <div style={{ width: 76, flexShrink: 0, fontFamily: font.body, fontSize: 13, fontWeight: 500, color: T.text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{g.key}</div>
+                  <div style={{ flex: 1, height: 8, background: 'var(--bg-hover)', borderRadius: 4, overflow: 'hidden' }}>
+                    <div style={{ width: `${widthPct}%`, height: '100%', background: barColor, borderRadius: 4 }} />
+                  </div>
+                  <div style={{ width: 64, flexShrink: 0, textAlign: 'right', fontFamily: font.mono, fontSize: 13, fontWeight: 600, color: barColor }}>{fmtPct(g.netPnlPct)}</div>
+                  <div style={{ width: 50, flexShrink: 0, textAlign: 'right', fontFamily: font.mono, fontSize: 11, color: g.lowSample ? T.amber : T.muted }}>{g.winRate.toFixed(0)}% WR</div>
+                  <div style={{ width: 50, flexShrink: 0, textAlign: 'right', fontFamily: font.mono, fontSize: 11, color: g.lowSample ? T.amber : T.muted }}>{fmtPF(g.profitFactor)} PF</div>
+                </div>
+              )
+            })
+          })()}
         </div>
       )}
       {footnote && breakdown.some(g => g.lowSample) && (
@@ -717,44 +711,35 @@ export default function Analytics() {
                         })}
                       </div>
                     ) : (
-                      <div style={{ width: '100%', overflowX: 'visible' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                          <thead>
-                            <tr>
-                              {['Account', 'P&L', 'Win Rate', 'Profit Factor', 'Drawdown', 'Status'].map(h => (
-                                <th key={h} style={{
-                                  fontFamily: font.mono, fontSize: 10, color: T.sub,
-                                  textAlign: 'left', padding: '0 12px 12px 0',
-                                  letterSpacing: '0.07em', textTransform: 'uppercase',
-                                  borderBottom: `0.5px solid ${T.cardBorder}`, fontWeight: 400,
-                                }}>{h}</th>
-                              ))}
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {activeMetrics.map((m, i) => {
-                              const health = HEALTH[m.healthStatus]
-                              return (
-                                <tr key={m.accountId} style={{ borderBottom: i < activeMetrics.length - 1 ? `0.5px solid ${T.cardBorder}` : 'none' }}>
-                                  <td style={{ padding: '14px 12px 14px 0' }}>
-                                    <div style={{ fontFamily: font.body, fontSize: 13, color: T.text, fontWeight: 500 }}>{m.name}</div>
-                                    <div style={{ fontFamily: font.mono, fontSize: 10, color: T.muted, marginTop: 2 }}>{m.firmName || '—'}</div>
-                                  </td>
-                                  <td style={{ padding: '14px 12px 14px 0', fontFamily: font.mono, fontSize: 13, color: pnlColor(m.netPnl), fontWeight: 500 }}>{fmtPct(m.netPnlPct)}</td>
-                                  <td style={{ padding: '14px 12px 14px 0', fontFamily: font.mono, fontSize: 12, color: m.winRate >= 50 ? T.green : T.amber }}>{m.winRate.toFixed(0)}%</td>
-                                  <td style={{ padding: '14px 12px 14px 0', fontFamily: font.mono, fontSize: 12, color: m.profitFactor >= 1 ? T.green : T.red }}>{fmtPF(m.profitFactor)}</td>
-                                  <td style={{ padding: '14px 12px 14px 0' }}>
-                                    <div style={{ fontFamily: font.mono, fontSize: 12, color: m.ddConsumedPct >= 60 ? T.red : T.sub, fontWeight: 500 }}>{m.ddConsumedPct.toFixed(0)}% of limit</div>
-                                    <div style={{ fontFamily: font.mono, fontSize: 10, color: T.muted, marginTop: 2 }}>{m.maxDDUsedPct.toFixed(1)}% / {m.maxDDLimitPct.toFixed(1)}%</div>
-                                  </td>
-                                  <td style={{ padding: '14px 0' }}>
-                                    <span style={{ background: health.bg, border: `0.5px solid ${health.border}`, borderRadius: '20px', padding: '4px 12px', color: health.color, fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: '500', whiteSpace: 'nowrap' }}>{health.label}</span>
-                                  </td>
-                                </tr>
-                              )
-                            })}
-                          </tbody>
-                        </table>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        {(() => {
+                          const maxAbs = Math.max(1, ...activeMetrics.map(m => Math.abs(m.netPnlPct)))
+                          return activeMetrics.map((m, i) => {
+                            const health = HEALTH[m.healthStatus]
+                            const widthPct = Math.min(100, (Math.abs(m.netPnlPct) / maxAbs) * 100)
+                            const barColor = pnlColor(m.netPnl)
+                            return (
+                              <div key={m.accountId} style={{
+                                display: 'flex', alignItems: 'center', gap: 14, padding: '12px 0',
+                                borderBottom: i < activeMetrics.length - 1 ? `0.5px solid ${T.cardBorder}` : 'none',
+                              }}>
+                                <div style={{ width: 120, flexShrink: 0 }}>
+                                  <div style={{ fontFamily: font.body, fontSize: 13, fontWeight: 500, color: T.text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.name}</div>
+                                  <div style={{ fontFamily: font.mono, fontSize: 10, color: T.muted, marginTop: 1 }}>{m.firmName || '—'}</div>
+                                </div>
+                                <div style={{ flex: 1, height: 8, background: 'var(--bg-hover)', borderRadius: 4, overflow: 'hidden' }}>
+                                  <div style={{ width: `${widthPct}%`, height: '100%', background: barColor, borderRadius: 4 }} />
+                                </div>
+                                <div style={{ width: 64, flexShrink: 0, textAlign: 'right', fontFamily: font.mono, fontSize: 13, fontWeight: 600, color: barColor }}>{fmtPct(m.netPnlPct)}</div>
+                                <div style={{ width: 46, flexShrink: 0, textAlign: 'right', fontFamily: font.mono, fontSize: 11, color: m.winRate >= 50 ? T.green : T.amber }}>{m.winRate.toFixed(0)}% WR</div>
+                                <div style={{ width: 90, flexShrink: 0, textAlign: 'right' }}>
+                                  <div style={{ fontFamily: font.mono, fontSize: 11, color: m.ddConsumedPct >= 60 ? T.red : T.muted }}>{m.ddConsumedPct.toFixed(0)}% DD</div>
+                                </div>
+                                <span style={{ background: health.bg, border: `0.5px solid ${health.border}`, borderRadius: '20px', padding: '4px 10px', color: health.color, fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: '500', whiteSpace: 'nowrap', flexShrink: 0 }}>{health.label}</span>
+                              </div>
+                            )
+                          })
+                        })()}
                       </div>
                     )}
                   </Card>
