@@ -164,6 +164,7 @@ export default function Sidebar({ mobileTopBarRight = null }) {
         left: 0,
         transition: 'width 0.2s ease',
         overflow: 'hidden',
+        zIndex: 50,
       }}>
         {/* Logo + Chevron */}
         <div style={{

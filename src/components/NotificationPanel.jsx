@@ -141,7 +141,7 @@ export default function NotificationPanel({ onClose, onRead, anchorRef }) {
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
-        zIndex: 500,
+        zIndex: 9999,
       }}
     >
       {/* Header */}
