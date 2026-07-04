@@ -1,5 +1,5 @@
 import { NavLink, useNavigate, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Flame, TrendingUp, Settings, Logs, Plus, Bell, ShieldCheck, Sun, Moon } from 'lucide-react'
+import { LayoutDashboard, Flame, TrendingUp, Settings, Logs, Plus, Bell, ShieldCheck, CalendarClock, Sun, Moon } from 'lucide-react'
 
 import { supabase } from '../supabaseClient'
 import { useEffect, useState, useRef } from 'react'
@@ -267,6 +267,34 @@ export default function Sidebar({ mobileTopBarRight = null }) {
             >
               <ShieldCheck size={16} strokeWidth={1.8} style={{ flexShrink: 0 }} />
               {!collapsed && 'Admin'}
+            </NavLink>
+          )}
+
+          {/* Schedule — owner-only, same gating as Admin */}
+          {user?.id === ADMIN_USER_ID && (
+            <NavLink
+              to="/schedule"
+              title={collapsed ? 'Schedule' : ''}
+              style={({ isActive }) => ({
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: collapsed ? 'center' : 'flex-start',
+                gap: collapsed ? '0' : '10px',
+                padding: '10px 12px',
+                borderRadius: '8px',
+                marginBottom: '4px',
+                textDecoration: 'none',
+                background: isActive ? 'var(--green-bg)' : 'transparent',
+                color: isActive ? 'var(--brand)' : 'var(--text-muted)',
+                fontFamily: 'Inter, sans-serif',
+                fontSize: '14px',
+                fontWeight: isActive ? '500' : '400',
+                transition: 'all 0.15s ease',
+                whiteSpace: 'nowrap',
+              })}
+            >
+              <CalendarClock size={16} strokeWidth={1.8} style={{ flexShrink: 0 }} />
+              {!collapsed && 'Schedule'}
             </NavLink>
           )}
 
@@ -641,6 +669,30 @@ export default function Sidebar({ mobileTopBarRight = null }) {
             >
               <ShieldCheck size={16} strokeWidth={1.8} style={{ flexShrink: 0 }} />
               Admin
+            </NavLink>
+          )}
+
+          {/* Schedule — owner-only, same gating as Admin */}
+          {user?.id === ADMIN_USER_ID && (
+            <NavLink
+              to="/schedule"
+              style={({ isActive }) => ({
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '12px 14px',
+                borderRadius: '10px',
+                marginBottom: '4px',
+                textDecoration: 'none',
+                background: isActive ? 'var(--green-bg)' : 'transparent',
+                color: isActive ? 'var(--brand)' : 'var(--text-soft)',
+                fontFamily: 'Inter, sans-serif',
+                fontSize: '15px',
+                fontWeight: isActive ? '500' : '400',
+              })}
+            >
+              <CalendarClock size={16} strokeWidth={1.8} style={{ flexShrink: 0 }} />
+              Schedule
             </NavLink>
           )}
         </nav>

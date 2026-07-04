@@ -16,6 +16,7 @@ import PrivacyPolicy from './pages/PrivacyPolicy'
 import RefundPolicy from './pages/RefundPolicy'
 import AdminUsers from './pages/admin/AdminUsers'
 import AdminUserDetail from './pages/admin/AdminUserDetail'
+import Schedule from './pages/Schedule'
 import { supabase } from './supabaseClient'
 import { SidebarProvider } from './SidebarContext'
 import { PaddleProvider } from './PaddleContext'
@@ -75,6 +76,7 @@ function App() {
               <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
               <Route path="/admin/users" element={<ProtectedRoute><RequireAdmin><AdminUsers /></RequireAdmin></ProtectedRoute>} />
               <Route path="/admin/users/:userId" element={<ProtectedRoute><RequireAdmin><AdminUserDetail /></RequireAdmin></ProtectedRoute>} />
+              <Route path="/schedule" element={<ProtectedRoute><RequireAdmin><Schedule /></RequireAdmin></ProtectedRoute>} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/refund-policy" element={<RefundPolicy />} />
