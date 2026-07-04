@@ -66,7 +66,7 @@ function nextCycleStartDate() {
 }
 
 // Trading-eligible weekdays (used for the rotation logic / pattern generator).
-const ALL_WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri']
+//const ALL_WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri']
 // Full calendar week shown in the grids — Sat/Sun included for context only,
 // never part of primary_days/secondary_days and never selectable as trading days.
 const ALL_CALENDAR_DAYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
