@@ -14,7 +14,7 @@ import { supabase } from '../supabaseClient'
 import { useSidebar } from '../SidebarContext'
 
 function computeStats(trades) {
-  if (!trades || trades.length === 0) return { totalPnl: 0, tradeCount: 0, winRate: 0, profitFactor: 0, todayPnl: 0, dayCount: 0 }
+  if (!trades || trades.length === 0) return { totalPnl: 0, tradeCount: 0, winRate: 0, profitFactor: 0, todayPnl: 0, dayCount: 0, bestTrade: null, worstTrade: null, avgRR: 0 }
   const total = trades.reduce((s, t) => s + (t.pnl || 0), 0)
   const wins = trades.filter(t => t.outcome === 'win')
   const losses = trades.filter(t => t.outcome === 'loss')
@@ -24,6 +24,10 @@ function computeStats(trades) {
   const today = new Date().toISOString().slice(0, 10)
   const todayPnl = trades.filter(t => t.date === today).reduce((s, t) => s + (t.pnl || 0), 0)
   const days = new Set(trades.map(t => t.date)).size
+  const bestTrade = wins.length > 0 ? Math.max(...wins.map(t => t.pnl)) : null
+  const worstTrade = losses.length > 0 ? Math.min(...losses.map(t => t.pnl)) : null
+  const withRR = trades.filter(t => t.rr != null)
+  const avgRR = withRR.length > 0 ? withRR.reduce((s, t) => s + parseFloat(t.rr), 0) / withRR.length : 0
   return {
     totalPnl: total,
     tradeCount: trades.length,
@@ -31,6 +35,9 @@ function computeStats(trades) {
     profitFactor: pf,
     todayPnl,
     dayCount: days,
+    bestTrade,
+    worstTrade,
+    avgRR,
   }
 }
 
@@ -45,10 +52,10 @@ function fmtNum(n) {
   return parseFloat(n).toFixed(2)
 }
 function pnlColorModal(n) {
-  if (n == null) return '#777'
-  if (parseFloat(n) > 0) return '#1bba7c'
-  if (parseFloat(n) < 0) return '#c03535'
-  return '#999'
+  if (n == null) return 'var(--text-faint)'
+  if (parseFloat(n) > 0) return 'var(--brand)'
+  if (parseFloat(n) < 0) return 'var(--red)'
+  return 'var(--text-muted)'
 }
 function dirBadgeModal(dir) {
   const isLong = dir === 'long'
@@ -56,18 +63,18 @@ function dirBadgeModal(dir) {
     <span style={{
       fontSize: '10px', fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.08em',
       textTransform: 'uppercase', padding: '2px 8px', borderRadius: '4px',
-      background: isLong ? '#0f2219' : '#1e0d0d',
-      color: isLong ? '#1bba7c' : '#c03535',
-      border: `0.5px solid ${isLong ? '#1a3826' : '#2e1515'}`,
+      background: isLong ? 'var(--green-bg)' : 'var(--red-bg-2)',
+      color: isLong ? 'var(--brand)' : 'var(--red)',
+      border: `0.5px solid ${isLong ? 'var(--green-bg-2)' : 'var(--red-bg)'}`,
     }}>{isLong ? 'Buy' : 'Sell'}</span>
   )
 }
 function outcomeBadgeModal(outcome) {
   const map = {
-    win:         { label: 'WIN',         bg: '#0f2219', color: '#1bba7c', border: '#1a3826' },
-    loss:        { label: 'LOSS',        bg: '#1e0d0d', color: '#c03535', border: '#2e1515' },
-    be:          { label: 'BE',          bg: '#141414', color: '#aaa',    border: '#2a2a2a' },
-    in_progress: { label: 'IN PROGRESS', bg: '#0f1a2e', color: '#4d9fff', border: '#1a3050' },
+    win:         { label: 'WIN',         bg: 'var(--green-bg)', color: 'var(--brand)', border: 'var(--green-bg-2)' },
+    loss:        { label: 'LOSS',        bg: 'var(--red-bg-2)', color: 'var(--red)', border: 'var(--red-bg)' },
+    be:          { label: 'BE',          bg: 'var(--bg-surface-2)', color: 'var(--text-soft)',    border: 'var(--border-color-2)' },
+    in_progress: { label: 'IN PROGRESS', bg: 'var(--blue-bg-2)', color: 'var(--blue)', border: 'var(--blue-bg)' },
   }
   const s = map[outcome]
   if (!s) return null
@@ -83,11 +90,344 @@ function sessionLabel(s) {
   return { london: 'London', new_york: 'NY', asian: 'Asian' }[s] || s || '—'
 }
 
+// ─── Date Range Picker ───────────────────────────────────────────────────────
+function DateRangePicker({ dateRange, onChange }) {
+  const [open, setOpen] = useState(false)
+  const [hoverDate, setHoverDate] = useState(null)
+  const [selecting, setSelecting] = useState(null) // 'start' | 'end'
+  const [leftMonth, setLeftMonth] = useState(() => {
+    const d = new Date(); d.setDate(1); return d
+  })
+  const ref = { current: null }
+
+  const rightMonth = new Date(leftMonth.getFullYear(), leftMonth.getMonth() + 1, 1)
+
+  function prevMonth() { setLeftMonth(m => new Date(m.getFullYear(), m.getMonth() - 1, 1)) }
+  function nextMonth() { setLeftMonth(m => new Date(m.getFullYear(), m.getMonth() + 1, 1)) }
+
+  function handleDayClick(dateStr) {
+    if (!selecting || selecting === 'start') {
+      onChange({ start: dateStr, end: null })
+      setSelecting('end')
+    } else {
+      if (dateStr < dateRange.start) {
+        onChange({ start: dateStr, end: dateRange.start })
+      } else {
+        onChange({ start: dateRange.start, end: dateStr })
+      }
+      setSelecting(null)
+      setOpen(false)
+    }
+  }
+
+  function reset() { onChange({ start: null, end: null }); setSelecting(null); setOpen(false) }
+
+  const label = dateRange.start && dateRange.end
+    ? `${dateRange.start} → ${dateRange.end}`
+    : dateRange.start ? `${dateRange.start} → …` : 'Date range'
+
+  const isActive = dateRange.start || dateRange.end
+
+  return (
+    <div style={{ position: 'relative' }} ref={r => ref.current = r}>
+      <button
+        onClick={() => { setOpen(o => !o); if (!open) setSelecting('start') }}
+        style={{
+          display: 'flex', alignItems: 'center', gap: '6px',
+          background: isActive ? 'var(--bg-surface-2)' : 'var(--bg-surface)',
+          border: `0.5px solid ${isActive ? 'var(--border-color-2)' : 'var(--border-color)'}`,
+          borderRadius: '8px', padding: '7px 12px', cursor: 'pointer',
+          color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
+          fontFamily: 'DM Sans, sans-serif', fontSize: '13px', whiteSpace: 'nowrap',
+        }}
+      >
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+          <rect x="1" y="2" width="14" height="13" rx="2" stroke="currentColor" strokeWidth="1.2"/>
+          <path d="M1 6h14" stroke="currentColor" strokeWidth="1.2"/>
+          <path d="M5 1v2M11 1v2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+        </svg>
+        {label}
+        {isActive && (
+          <span
+            onClick={e => { e.stopPropagation(); reset() }}
+            style={{ marginLeft: '2px', color: 'var(--text-faint)', fontSize: '14px', lineHeight: 1, cursor: 'pointer' }}
+          >×</span>
+        )}
+      </button>
+
+      {open && (
+        <>
+          <div onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 99 }} />
+          <div style={{
+            position: 'absolute', top: 'calc(100% + 8px)', right: 0,
+            background: 'var(--bg-surface)', border: '0.5px solid var(--border-color-2)',
+            borderRadius: '12px', padding: '16px', zIndex: 100,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+            display: 'flex', gap: '20px',
+          }}>
+            <CalendarMonth
+              month={leftMonth} dateRange={dateRange} hoverDate={hoverDate}
+              onDayClick={handleDayClick} onHover={setHoverDate}
+              onPrev={prevMonth} onNext={null}
+            />
+            <CalendarMonth
+              month={rightMonth} dateRange={dateRange} hoverDate={hoverDate}
+              onDayClick={handleDayClick} onHover={setHoverDate}
+              onPrev={null} onNext={nextMonth}
+            />
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+function CalendarMonth({ month, dateRange, hoverDate, onDayClick, onHover, onPrev, onNext }) {
+  const DAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
+  const year = month.getFullYear()
+  const mon = month.getMonth()
+  const firstDow = new Date(year, mon, 1).getDay()
+  const daysInMonth = new Date(year, mon + 1, 0).getDate()
+  const monthLabel = month.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+
+  function toStr(d) {
+    return `${year}-${String(mon + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+  }
+
+  function inRange(str) {
+    const s = dateRange.start, e = dateRange.end || hoverDate
+    if (!s) return false
+    const lo = s < e ? s : e
+    const hi = s < e ? e : s
+    return str > lo && str < hi
+  }
+
+  const cells = []
+  for (let i = 0; i < firstDow; i++) cells.push(null)
+  for (let d = 1; d <= daysInMonth; d++) cells.push(d)
+
+  return (
+    <div style={{ width: '196px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+        <button onClick={onPrev} disabled={!onPrev} style={{ background: 'none', border: 'none', color: onPrev ? 'var(--text-muted)' : 'transparent', cursor: onPrev ? 'pointer' : 'default', fontSize: '16px', padding: '2px 6px' }}>‹</button>
+        <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '12px', fontWeight: '600', color: 'var(--text-primary)' }}>{monthLabel}</span>
+        <button onClick={onNext} disabled={!onNext} style={{ background: 'none', border: 'none', color: onNext ? 'var(--text-muted)' : 'transparent', cursor: onNext ? 'pointer' : 'default', fontSize: '16px', padding: '2px 6px' }}>›</button>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px' }}>
+        {DAYS.map(d => (
+          <div key={d} style={{ textAlign: 'center', fontSize: '10px', color: 'var(--text-faint)', fontFamily: 'DM Sans, sans-serif', padding: '3px 0' }}>{d}</div>
+        ))}
+        {cells.map((d, i) => {
+          if (!d) return <div key={`e${i}`} />
+          const str = toStr(d)
+          const isStart = str === dateRange.start
+          const isEnd = str === dateRange.end
+          const isSelected = isStart || isEnd
+          const isIn = inRange(str)
+          return (
+            <div
+              key={d}
+              onClick={() => onDayClick(str)}
+              onMouseEnter={() => onHover(str)}
+              onMouseLeave={() => onHover(null)}
+              style={{
+                textAlign: 'center', fontSize: '11px', padding: '5px 2px', borderRadius: '6px',
+                cursor: 'pointer', fontFamily: 'DM Mono, monospace',
+                background: isSelected ? 'var(--brand)' : isIn ? 'var(--green-bg)' : 'transparent',
+                color: isSelected ? '#000' : isIn ? 'var(--brand)' : 'var(--text-primary)',
+                fontWeight: isSelected ? '700' : '400',
+                transition: 'background 0.1s',
+              }}
+            >{d}</div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ─── New top metrics strip ──────────────────────────────────────────────────
+// ─── Metric card mini-visuals ─────────────────────────────────────────────────
+
+function Sparkline({ trades, color }) {
+  if (!trades || trades.length === 0) {
+    return <svg width="90" height="44" viewBox="0 0 90 44" />
+  }
+  const sorted = [...trades].sort((a, b) => new Date(a.date) - new Date(b.date))
+  let cum = 0
+  const series = sorted.map(t => { cum += (t.pnl || 0); return cum })
+  const min = Math.min(0, ...series)
+  const max = Math.max(0, ...series)
+  const range = max - min || 1
+  const w = 90, h = 44, pad = 3
+  const stepX = series.length > 1 ? (w - pad * 2) / (series.length - 1) : 0
+  const pts = series.map((v, i) => {
+    const x = pad + i * stepX
+    const y = h - pad - ((v - min) / range) * (h - pad * 2)
+    return { x, y }
+  })
+  const lineStr = pts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')
+  const areaStr = `${pad},${(h - pad).toFixed(1)} ${lineStr} ${pts[pts.length - 1].x.toFixed(1)},${(h - pad).toFixed(1)}`
+
+  return (
+    <svg width="90" height="44" viewBox={`0 0 ${w} ${h}`}>
+      <polygon points={areaStr} fill={color} opacity="0.12" />
+      <polyline points={lineStr} fill="none" stroke={color} strokeWidth="1.6" strokeLinejoin="round" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function ArcGauge({ pct, color }) {
+  // Semicircle gauge, 180° sweep from left to right
+  const r = 30, cx = 36, cy = 34
+  const clamped = Math.max(0, Math.min(100, pct))
+  const sweep = (clamped / 100) * Math.PI
+  const startX = cx - r, startY = cy
+  const endX = cx - r * Math.cos(sweep)
+  const endY = cy - r * Math.sin(sweep)
+  const trackPath = `M ${startX} ${startY} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`
+  const valuePath = clamped > 0
+    ? `M ${startX} ${startY} A ${r} ${r} 0 ${sweep > Math.PI / 2 ? 1 : 0} 1 ${endX.toFixed(2)} ${endY.toFixed(2)}`
+    : null
+
+  return (
+    <svg width="72" height="40" viewBox="0 0 72 40">
+      <path d={trackPath} fill="none" stroke="var(--border-color-2)" strokeWidth="6" strokeLinecap="round" />
+      {valuePath && <path d={valuePath} fill="none" stroke={color} strokeWidth="6" strokeLinecap="round" />}
+    </svg>
+  )
+}
+
+function ProgressRing({ pct, color }) {
+  const r = 18, cx = 22, cy = 22
+  const circumference = 2 * Math.PI * r
+  const clamped = Math.max(0, Math.min(100, pct))
+  const offset = circumference * (1 - clamped / 100)
+
+  return (
+    <svg width="44" height="44" viewBox="0 0 44 44">
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--border-color-2)" strokeWidth="5" />
+      <circle
+        cx={cx} cy={cy} r={r} fill="none" stroke={color} strokeWidth="5"
+        strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round"
+        transform={`rotate(-90 ${cx} ${cy})`}
+      />
+    </svg>
+  )
+}
+
+function RRBar({ value, max = 4 }) {
+  const clamped = Math.max(0, Math.min(max, value))
+  const pct = (clamped / max) * 100
+  return (
+    <div style={{ width: '76px', height: '44px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', paddingTop: '15px', boxSizing: 'border-box' }}>
+      <div style={{ position: 'relative', height: '5px', background: 'var(--bg-surface-2)', borderRadius: '3px' }}>
+        <div style={{ position: 'absolute', inset: 0, width: `${pct}%`, background: 'var(--brand)', borderRadius: '3px' }} />
+        <div style={{
+          position: 'absolute', top: '-3px', left: `calc(${pct}% - 1px)`,
+          width: '2px', height: '11px', background: 'var(--text-primary)', borderRadius: '1px',
+        }} />
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px' }}>
+        <span style={{ fontSize: '8px', color: 'var(--text-faint)', fontFamily: 'DM Mono, monospace' }}>0</span>
+        <span style={{ fontSize: '8px', color: 'var(--text-faint)', fontFamily: 'DM Mono, monospace' }}>{max}R</span>
+      </div>
+    </div>
+  )
+}
+
+function MetricCard({ label, value, color, visual, visualProps = {} }) {
+  return (
+    <div style={{
+      background: 'var(--bg-surface)', border: '0.5px solid var(--border-color-2)', borderRadius: '12px',
+      padding: '18px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px',
+    }}>
+      <div style={{ minWidth: 0 }}>
+        <p style={{ color: 'var(--text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 8px 0' }}>{label}</p>
+        <p style={{ color: color || 'var(--text-primary)', fontFamily: 'DM Mono, monospace', fontSize: '22px', fontWeight: '600', margin: 0 }}>{value}</p>
+      </div>
+      <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}>
+        {visual === 'sparkline' && <Sparkline {...visualProps} />}
+        {visual === 'gauge' && <ArcGauge {...visualProps} />}
+        {visual === 'ring' && <ProgressRing {...visualProps} />}
+        {visual === 'rrbar' && <RRBar {...visualProps} />}
+      </div>
+    </div>
+  )
+}
+
+// Resolving an in_progress trade: the stored pnl is already the projected
+// risk×RR profit. Win keeps it as-is. Loss derives the original risk amount
+// from pnl/rr (since risk% itself isn't stored per-trade) and negates it,
+// falling back to mirroring the magnitude if rr is missing/zero.
+function resolvedPnl(trade, newOutcome) {
+  const projected = trade.pnl_gross != null ? parseFloat(trade.pnl_gross) : (trade.pnl != null ? parseFloat(trade.pnl) : null)
+  if (newOutcome === 'win') return projected
+  if (newOutcome === 'loss') {
+    const rr = parseFloat(trade.rr)
+    if (projected != null && rr) return -Math.abs(projected / rr)
+    if (projected != null) return -Math.abs(projected)
+    return null
+  }
+  return projected
+}
+
 // ─── Trade Detail Modal ───────────────────────────────────────────────────────
-function TradeDetailModal({ trade, onClose, isMobile }) {
+function TradeDetailModal({ trade, onClose, isMobile, onResolve }) {
+  const [resolving, setResolving] = useState(false)
   if (!trade) return null
 
   const pnlVal = trade.pnl != null ? parseFloat(trade.pnl) : null
+  const isOpen = trade.outcome === 'in_progress'
+
+  async function handleResolve(newOutcome) {
+    if (resolving) return
+    setResolving(true)
+    try {
+      await onResolve(trade, newOutcome)
+    } finally {
+      setResolving(false)
+    }
+  }
+
+  const resolveSection = isOpen && (
+    <div style={{
+      background: 'var(--blue-bg-2)', border: '0.5px solid var(--blue-bg)',
+      borderRadius: isMobile ? '8px' : '10px', padding: isMobile ? '12px' : '16px 18px',
+      display: 'flex', flexDirection: isMobile ? 'column' : 'row',
+      alignItems: isMobile ? 'stretch' : 'center', justifyContent: 'space-between', gap: isMobile ? '10px' : '16px',
+    }}>
+      <div style={{ fontSize: isMobile ? '11px' : '13px', color: 'var(--blue)', fontFamily: 'Inter, sans-serif', fontWeight: 500 }}>
+        This trade is still open — mark the outcome to log the final P&L
+      </div>
+      <div style={{ display: 'flex', gap: '8px' }}>
+        <button
+          disabled={resolving}
+          onClick={() => handleResolve('win')}
+          style={{
+            flex: isMobile ? 1 : undefined, padding: isMobile ? '9px 14px' : '8px 18px',
+            borderRadius: '8px', border: '0.5px solid var(--green-bg-2)',
+            background: 'var(--green-bg)', color: 'var(--brand)',
+            fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', fontWeight: 600,
+            textTransform: 'uppercase', letterSpacing: '0.06em',
+            cursor: resolving ? 'default' : 'pointer', opacity: resolving ? 0.6 : 1,
+          }}
+        >Win</button>
+        <button
+          disabled={resolving}
+          onClick={() => handleResolve('loss')}
+          style={{
+            flex: isMobile ? 1 : undefined, padding: isMobile ? '9px 14px' : '8px 18px',
+            borderRadius: '8px', border: '0.5px solid var(--red-bg)',
+            background: 'var(--red-bg-2)', color: 'var(--red)',
+            fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', fontWeight: 600,
+            textTransform: 'uppercase', letterSpacing: '0.06em',
+            cursor: resolving ? 'default' : 'pointer', opacity: resolving ? 0.6 : 1,
+          }}
+        >Loss</button>
+      </div>
+    </div>
+  )
 
   if (isMobile) {
     return (
@@ -95,25 +435,26 @@ function TradeDetailModal({ trade, onClose, isMobile }) {
         <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000, backdropFilter: 'blur(2px)' }} />
         <div style={{
           position: 'fixed', bottom: 0, left: 0, right: 0,
-          background: '#0d0d0d', borderRadius: '16px 16px 0 0',
+          background: 'var(--bg-surface)', borderRadius: '16px 16px 0 0',
           zIndex: 1001, maxHeight: '85vh', display: 'flex', flexDirection: 'column',
-          border: '0.5px solid #1e1e1e',
+          border: '0.5px solid var(--border-color)',
         }}>
           {/* Handle */}
           <div style={{ display: 'flex', justifyContent: 'center', padding: '10px 0 6px' }}>
-            <div style={{ width: '32px', height: '3px', background: '#555', borderRadius: '2px' }} />
+            <div style={{ width: '32px', height: '3px', background: 'var(--text-faint-2)', borderRadius: '2px' }} />
           </div>
           {/* Header */}
-          <div style={{ padding: '0 16px 12px', borderBottom: '0.5px solid #1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ padding: '0 16px 12px', borderBottom: '0.5px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '17px', fontWeight: '700', color: '#fff' }}>{trade.pair}</span>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '17px', fontWeight: '700', color: 'var(--text-primary)' }}>{trade.pair}</span>
               {dirBadgeModal(trade.direction)}
               {outcomeBadgeModal(trade.outcome)}
             </div>
-            <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#777', cursor: 'pointer', fontSize: '22px', lineHeight: 1 }}>×</button>
+            <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: '22px', lineHeight: 1 }}>×</button>
           </div>
           {/* Body */}
           <div style={{ overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {resolveSection}
             {/* Stats row */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
               {[
@@ -122,32 +463,32 @@ function TradeDetailModal({ trade, onClose, isMobile }) {
                 { label: 'Session', value: sessionLabel(trade.session) },
                 { label: 'Date',    value: trade.date || '—' },
               ].map(s => (
-                <div key={s.label} style={{ background: '#111', border: '0.5px solid #1a1a1a', borderRadius: '8px', padding: '10px 12px' }}>
-                  <div style={{ fontSize: '9px', color: '#777', fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '5px' }}>{s.label}</div>
-                  <div style={{ fontSize: '15px', fontFamily: 'JetBrains Mono, monospace', fontWeight: '600', color: s.color || '#e0e0e0' }}>{s.value}</div>
+                <div key={s.label} style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '8px', padding: '10px 12px' }}>
+                  <div style={{ fontSize: '9px', color: 'var(--text-faint)', fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '5px' }}>{s.label}</div>
+                  <div style={{ fontSize: '15px', fontFamily: 'JetBrains Mono, monospace', fontWeight: '600', color: s.color || 'var(--text-secondary)' }}>{s.value}</div>
                 </div>
               ))}
             </div>
             {/* Price levels */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
               {[{ label: 'Entry', value: fmtNum(trade.entry) }, { label: 'Stop Loss', value: fmtNum(trade.stop_loss) }, { label: 'Take Profit', value: fmtNum(trade.take_profit) }].map(item => (
-                <div key={item.label} style={{ background: '#111', border: '0.5px solid #1a1a1a', borderRadius: '8px', padding: '10px 12px' }}>
-                  <div style={{ fontSize: '9px', color: '#777', fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '5px' }}>{item.label}</div>
-                  <div style={{ fontSize: '12px', fontFamily: 'JetBrains Mono, monospace', color: '#ccc' }}>{item.value}</div>
+                <div key={item.label} style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '8px', padding: '10px 12px' }}>
+                  <div style={{ fontSize: '9px', color: 'var(--text-faint)', fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '5px' }}>{item.label}</div>
+                  <div style={{ fontSize: '12px', fontFamily: 'JetBrains Mono, monospace', color: 'var(--text-soft)' }}>{item.value}</div>
                 </div>
               ))}
             </div>
             {/* Screenshot */}
             {trade.screenshot_url && (
-              <div style={{ borderRadius: '8px', overflow: 'hidden', border: '0.5px solid #1e1e1e' }}>
-                <img src={trade.screenshot_url} alt="Chart" style={{ width: '100%', display: 'block', maxHeight: '220px', objectFit: 'contain', background: '#0a0a0a' }} />
+              <div style={{ borderRadius: '8px', overflow: 'hidden', border: '0.5px solid var(--border-color)' }}>
+                <img src={trade.screenshot_url} alt="Chart" style={{ width: '100%', display: 'block', maxHeight: '220px', objectFit: 'contain', background: 'var(--bg-page)' }} />
               </div>
             )}
             {/* Notes */}
             {trade.notes && (
-              <div style={{ background: '#111', border: '0.5px solid #1a1a1a', borderRadius: '8px', padding: '12px' }}>
-                <div style={{ fontSize: '9px', color: '#777', fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px' }}>Notes</div>
-                <div style={{ color: '#999', fontSize: '13px', fontFamily: 'Inter, sans-serif', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>{trade.notes}</div>
+              <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '8px', padding: '12px' }}>
+                <div style={{ fontSize: '9px', color: 'var(--text-faint)', fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px' }}>Notes</div>
+                <div style={{ color: 'var(--text-muted)', fontSize: '13px', fontFamily: 'Inter, sans-serif', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>{trade.notes}</div>
               </div>
             )}
           </div>
@@ -163,47 +504,48 @@ function TradeDetailModal({ trade, onClose, isMobile }) {
       <div style={{
         position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
         width: 'min(820px, 92vw)', maxHeight: '88vh',
-        background: '#0d0d0d', border: '0.5px solid #1e1e1e',
+        background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)',
         borderRadius: '16px', zIndex: 1001, display: 'flex', flexDirection: 'column', overflowY: 'auto',
       }}>
         {/* Header */}
         <div style={{
-          padding: '24px 28px 20px', borderBottom: '0.5px solid #1a1a1a',
+          padding: '24px 28px 20px', borderBottom: '0.5px solid var(--border-color)',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          position: 'sticky', top: 0, background: '#0d0d0d', zIndex: 1,
+          position: 'sticky', top: 0, background: 'var(--bg-surface)', zIndex: 1,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '20px', fontWeight: '700', color: '#fff' }}>{trade.pair}</span>
+            <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '20px', fontWeight: '700', color: 'var(--text-primary)' }}>{trade.pair}</span>
             {dirBadgeModal(trade.direction)}
             {outcomeBadgeModal(trade.outcome)}
-            <span style={{ fontSize: '12px', fontFamily: 'JetBrains Mono, monospace', color: '#777' }}>{trade.date}</span>
+            <span style={{ fontSize: '12px', fontFamily: 'JetBrains Mono, monospace', color: 'var(--text-faint)' }}>{trade.date}</span>
           </div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#777', cursor: 'pointer', fontSize: '24px', lineHeight: 1, padding: '2px 4px' }}>×</button>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: '24px', lineHeight: 1, padding: '2px 4px' }}>×</button>
         </div>
         {/* Body */}
         <div style={{ padding: '28px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          {resolveSection}
           {/* Stats strip */}
-          <div style={{ display: 'flex', gap: '1px', background: '#1a1a1a', borderRadius: '10px', overflow: 'hidden', border: '0.5px solid #1a1a1a' }}>
+          <div style={{ display: 'flex', gap: '1px', background: 'var(--border-color)', borderRadius: '10px', overflow: 'hidden', border: '0.5px solid var(--border-color)' }}>
             {[
               { label: 'P&L',     value: pnlVal != null ? `${pnlVal >= 0 ? '+' : ''}$${Math.abs(pnlVal).toFixed(2)}` : '—', color: pnlColorModal(pnlVal) },
               { label: 'R:R',     value: trade.rr ? `${trade.rr}R` : '—' },
               { label: 'Session', value: sessionLabel(trade.session) },
               { label: 'Entry',   value: fmtNum(trade.entry) },
             ].map(s => (
-              <div key={s.label} style={{ flex: 1, padding: '16px 20px', background: '#0f0f0f' }}>
-                <div style={{ fontSize: '10px', fontFamily: 'JetBrains Mono, monospace', color: '#777', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>{s.label}</div>
-                <div style={{ fontSize: '20px', fontFamily: 'Inter, sans-serif', fontWeight: '600', color: s.color || '#e0e0e0' }}>{s.value}</div>
+              <div key={s.label} style={{ flex: 1, padding: '16px 20px', background: 'var(--bg-surface-2)' }}>
+                <div style={{ fontSize: '10px', fontFamily: 'JetBrains Mono, monospace', color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>{s.label}</div>
+                <div style={{ fontSize: '20px', fontFamily: 'Inter, sans-serif', fontWeight: '600', color: s.color || 'var(--text-secondary)' }}>{s.value}</div>
               </div>
             ))}
           </div>
           {/* Price levels */}
           <div>
-            <div style={{ fontSize: '10px', fontFamily: 'JetBrains Mono, monospace', color: '#999', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '12px' }}>Price Levels</div>
+            <div style={{ fontSize: '10px', fontFamily: 'JetBrains Mono, monospace', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '12px' }}>Price Levels</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
               {[{ label: 'Entry', value: fmtNum(trade.entry) }, { label: 'Stop Loss', value: fmtNum(trade.stop_loss) }, { label: 'Take Profit', value: fmtNum(trade.take_profit) }].map(item => (
-                <div key={item.label} style={{ background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '10px', padding: '14px 16px' }}>
-                  <div style={{ fontSize: '10px', fontFamily: 'JetBrains Mono, monospace', color: '#777', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px' }}>{item.label}</div>
-                  <div style={{ fontSize: '15px', fontFamily: 'JetBrains Mono, monospace', color: '#ccc' }}>{item.value}</div>
+                <div key={item.label} style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px', padding: '14px 16px' }}>
+                  <div style={{ fontSize: '10px', fontFamily: 'JetBrains Mono, monospace', color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px' }}>{item.label}</div>
+                  <div style={{ fontSize: '15px', fontFamily: 'JetBrains Mono, monospace', color: 'var(--text-soft)' }}>{item.value}</div>
                 </div>
               ))}
             </div>
@@ -211,17 +553,17 @@ function TradeDetailModal({ trade, onClose, isMobile }) {
           {/* Screenshot */}
           {trade.screenshot_url && (
             <div>
-              <div style={{ fontSize: '10px', fontFamily: 'JetBrains Mono, monospace', color: '#999', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '12px' }}>Chart Screenshot</div>
-              <div style={{ borderRadius: '10px', overflow: 'hidden', border: '0.5px solid #1e1e1e', background: '#111' }}>
-                <img src={trade.screenshot_url} alt="Trade chart" style={{ width: '100%', display: 'block', maxHeight: '460px', objectFit: 'contain', background: '#0a0a0a' }} />
+              <div style={{ fontSize: '10px', fontFamily: 'JetBrains Mono, monospace', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '12px' }}>Chart Screenshot</div>
+              <div style={{ borderRadius: '10px', overflow: 'hidden', border: '0.5px solid var(--border-color)', background: 'var(--bg-surface)' }}>
+                <img src={trade.screenshot_url} alt="Trade chart" style={{ width: '100%', display: 'block', maxHeight: '460px', objectFit: 'contain', background: 'var(--bg-page)' }} />
               </div>
             </div>
           )}
           {/* Notes */}
           {trade.notes && (
             <div>
-              <div style={{ fontSize: '10px', fontFamily: 'JetBrains Mono, monospace', color: '#999', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '12px' }}>Notes</div>
-              <div style={{ background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '10px', padding: '16px 18px', color: '#999', fontSize: '14px', fontFamily: 'Inter, sans-serif', lineHeight: '1.65', whiteSpace: 'pre-wrap' }}>{trade.notes}</div>
+              <div style={{ fontSize: '10px', fontFamily: 'JetBrains Mono, monospace', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '12px' }}>Notes</div>
+              <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px', padding: '16px 18px', color: 'var(--text-muted)', fontSize: '14px', fontFamily: 'Inter, sans-serif', lineHeight: '1.65', whiteSpace: 'pre-wrap' }}>{trade.notes}</div>
             </div>
           )}
         </div>
@@ -238,10 +580,10 @@ function DayTradesModal({ date, trades, onClose, onSelectTrade, isMobile }) {
   const formattedDate = new Date(date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
 
   const outcomeMap = {
-    win:         { label: 'WIN',     bg: '#0f2219', color: '#1bba7c', border: '#1a3826' },
-    loss:        { label: 'LOSS',    bg: '#1e0d0d', color: '#c03535', border: '#2e1515' },
-    be:          { label: 'BE',      bg: '#1a1400', color: '#c97a00', border: '#2a2000' },
-    in_progress: { label: 'IN PROG', bg: '#0f1a2e', color: '#4d9fff', border: '#1a3050' },
+    win:         { label: 'WIN',     bg: 'var(--green-bg)', color: 'var(--brand)', border: 'var(--green-bg-2)' },
+    loss:        { label: 'LOSS',    bg: 'var(--red-bg-2)', color: 'var(--red)', border: 'var(--red-bg)' },
+    be:          { label: 'BE',      bg: 'var(--amber-bg-2)', color: 'var(--amber)', border: 'var(--amber-bg)' },
+    in_progress: { label: 'IN PROG', bg: 'var(--blue-bg-2)', color: 'var(--blue)', border: 'var(--blue-bg)' },
   }
 
   const rows = dayTrades.map(t => {
@@ -254,26 +596,26 @@ function DayTradesModal({ date, trades, onClose, onSelectTrade, isMobile }) {
         style={{
           display: 'flex', alignItems: 'center', gap: '12px',
           padding: isMobile ? '10px 16px' : '12px 24px',
-          borderBottom: '0.5px solid #161616',
+          borderBottom: '0.5px solid var(--border-color)',
           cursor: 'pointer', transition: 'background 0.1s',
         }}
-        onMouseEnter={e => e.currentTarget.style.background = '#111'}
+        onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-surface)'}
         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
       >
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '3px' }}>
-            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: isMobile ? '13px' : '14px', fontWeight: '500', color: '#e0e0e0' }}>{t.pair}</span>
+            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: isMobile ? '13px' : '14px', fontWeight: '500', color: 'var(--text-secondary)' }}>{t.pair}</span>
             {ob && <span style={{ fontSize: '9px', padding: '1px 5px', borderRadius: '3px', background: ob.bg, color: ob.color, border: `0.5px solid ${ob.border}`, fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase' }}>{ob.label}</span>}
-            <span style={{ fontSize: '9px', padding: '1px 5px', borderRadius: '3px', background: isLong ? '#0f2219' : '#1e0d0d', color: isLong ? '#1bba7c' : '#c03535', border: `0.5px solid ${isLong ? '#1a3826' : '#2e1515'}`, fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase' }}>{isLong ? 'BUY' : 'SELL'}</span>
+            <span style={{ fontSize: '9px', padding: '1px 5px', borderRadius: '3px', background: isLong ? 'var(--green-bg)' : 'var(--red-bg-2)', color: isLong ? 'var(--brand)' : 'var(--red)', border: `0.5px solid ${isLong ? 'var(--green-bg-2)' : 'var(--red-bg)'}`, fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase' }}>{isLong ? 'BUY' : 'SELL'}</span>
           </div>
-          <div style={{ fontSize: '10px', color: '#777', fontFamily: 'JetBrains Mono, monospace' }}>{sessionLabel(t.session)}{t.rr ? ` · ${t.rr}R` : ''}</div>
+          <div style={{ fontSize: '10px', color: 'var(--text-faint)', fontFamily: 'JetBrains Mono, monospace' }}>{sessionLabel(t.session)}{t.rr ? ` · ${t.rr}R` : ''}</div>
         </div>
         <div style={{ textAlign: 'right', flexShrink: 0 }}>
           <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '14px', fontWeight: '500', color: pnlColorModal(pnlVal) }}>
             {pnlVal != null ? `${pnlVal >= 0 ? '+' : ''}$${Math.abs(pnlVal).toFixed(2)}` : '—'}
           </div>
         </div>
-        <span style={{ color: '#555', fontSize: '14px', flexShrink: 0 }}>›</span>
+        <span style={{ color: 'var(--text-faint-2)', fontSize: '14px', flexShrink: 0 }}>›</span>
       </div>
     )
   })
@@ -284,22 +626,22 @@ function DayTradesModal({ date, trades, onClose, onSelectTrade, isMobile }) {
         <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000, backdropFilter: 'blur(2px)' }} />
         <div style={{
           position: 'fixed', bottom: 0, left: 0, right: 0,
-          background: '#0d0d0d', borderRadius: '16px 16px 0 0',
+          background: 'var(--bg-surface)', borderRadius: '16px 16px 0 0',
           zIndex: 1001, maxHeight: '75vh', display: 'flex', flexDirection: 'column',
-          border: '0.5px solid #1e1e1e',
+          border: '0.5px solid var(--border-color)',
         }}>
           <div style={{ display: 'flex', justifyContent: 'center', padding: '10px 0 6px' }}>
-            <div style={{ width: '32px', height: '3px', background: '#555', borderRadius: '2px' }} />
+            <div style={{ width: '32px', height: '3px', background: 'var(--text-faint-2)', borderRadius: '2px' }} />
           </div>
-          <div style={{ padding: '0 16px 12px', borderBottom: '0.5px solid #1a1a1a', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+          <div style={{ padding: '0 16px 12px', borderBottom: '0.5px solid var(--border-color)', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
             <div>
-              <div style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: '600', color: '#e0e0e0' }}>{formattedDate}</div>
-              <div style={{ fontSize: '11px', fontFamily: 'JetBrains Mono, monospace', marginTop: '3px', color: '#777' }}>
+              <div style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: '600', color: 'var(--text-secondary)' }}>{formattedDate}</div>
+              <div style={{ fontSize: '11px', fontFamily: 'JetBrains Mono, monospace', marginTop: '3px', color: 'var(--text-faint)' }}>
                 {dayTrades.length} trade{dayTrades.length !== 1 ? 's' : ''} ·{' '}
                 <span style={{ color: pnlColorModal(dayPnl) }}>{dayPnl >= 0 ? '+' : ''}${Math.abs(dayPnl).toFixed(2)}</span>
               </div>
             </div>
-            <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#777', cursor: 'pointer', fontSize: '22px', lineHeight: 1 }}>×</button>
+            <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: '22px', lineHeight: 1 }}>×</button>
           </div>
           <div style={{ overflowY: 'auto' }}>{rows}</div>
         </div>
@@ -313,22 +655,22 @@ function DayTradesModal({ date, trades, onClose, onSelectTrade, isMobile }) {
       <div style={{
         position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
         width: 'min(540px, 92vw)', maxHeight: '80vh',
-        background: '#0d0d0d', border: '0.5px solid #1e1e1e',
+        background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)',
         borderRadius: '16px', zIndex: 1001, display: 'flex', flexDirection: 'column', overflowY: 'auto',
       }}>
         <div style={{
-          padding: '24px 28px 18px', borderBottom: '0.5px solid #1a1a1a',
+          padding: '24px 28px 18px', borderBottom: '0.5px solid var(--border-color)',
           display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
-          position: 'sticky', top: 0, background: '#0d0d0d', zIndex: 1,
+          position: 'sticky', top: 0, background: 'var(--bg-surface)', zIndex: 1,
         }}>
           <div>
-            <div style={{ fontFamily: 'Inter, sans-serif', fontSize: '17px', fontWeight: '700', color: '#fff', marginBottom: '4px' }}>{formattedDate}</div>
-            <div style={{ fontSize: '12px', fontFamily: 'JetBrains Mono, monospace', color: '#777' }}>
+            <div style={{ fontFamily: 'Inter, sans-serif', fontSize: '17px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '4px' }}>{formattedDate}</div>
+            <div style={{ fontSize: '12px', fontFamily: 'JetBrains Mono, monospace', color: 'var(--text-faint)' }}>
               {dayTrades.length} trade{dayTrades.length !== 1 ? 's' : ''} ·{' '}
               <span style={{ color: pnlColorModal(dayPnl) }}>{dayPnl >= 0 ? '+' : ''}${Math.abs(dayPnl).toFixed(2)}</span>
             </div>
           </div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#777', cursor: 'pointer', fontSize: '24px', lineHeight: 1 }}>×</button>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: '24px', lineHeight: 1 }}>×</button>
         </div>
         <div>{rows}</div>
       </div>
@@ -362,7 +704,7 @@ export default function Dashboard() {
   const [detailTrade, setDetailTrade] = useState(null)
   const [dayModal, setDayModal] = useState(null)
   const [userName, setUserName] = useState('')
-
+  const [dateRange, setDateRange] = useState({ start: null, end: null })
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       const meta = data?.user?.user_metadata
@@ -414,61 +756,82 @@ export default function Dashboard() {
     }
   }
 
+  async function handleResolveTrade(trade, newOutcome) {
+    const newPnlGross = resolvedPnl(trade, newOutcome)
+    try {
+      const { error } = await supabase
+        .from('trades')
+        .update({ outcome: newOutcome, pnl: newPnlGross })
+        .eq('id', trade.id)
+      if (error) throw error
+
+      const swap = parseFloat(trade.swap) || 0
+      const commission = parseFloat(trade.commission) || 0
+      const hasAdjustments = trade.swap != null || trade.commission != null
+      const updated = {
+        ...trade,
+        outcome: newOutcome,
+        pnl_gross: hasAdjustments ? newPnlGross : undefined,
+        pnl: hasAdjustments ? (parseFloat(newPnlGross) || 0) + swap + commission : newPnlGross,
+      }
+
+      setTrades(prev => prev.map(t => (t.id === trade.id ? updated : t)))
+      setDetailTrade(updated)
+    } catch (err) {
+      console.error('Failed to resolve trade:', err)
+      alert('Could not save the trade outcome. Please try again.')
+    }
+  }
+
   // ─── MOBILE LAYOUT ───────────────────────────────────────────────────────────
   if (isMobile) {
     const stats = computeStats(trades)
 
     return (
-      <div style={{ background: '#0a0a0a', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-        <Sidebar />
-        <div style={{
-          position: 'fixed', top: 0, left: '14px', right: '14px', height: '52px',
-          display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
-          zIndex: 201, pointerEvents: 'none',
-        }}>
-          <div style={{ pointerEvents: 'auto' }}>
+      <div style={{ background: 'var(--bg-page)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <Sidebar
+          mobileTopBarRight={
             <AccountSwitcher
+              mobile
+              compact
+              showBalance={false}
+              showSelectedNameOnMobile
               onSwitch={(acc) => {
                 setActiveAccount(acc)
                 if (acc?.id) localStorage.setItem('activeAccountId', acc.id)
               }}
-              mobile
-              showBalance={false}
-              compact
-              showSelectedNameOnMobile
               defaultAccountId={defaultAccountId}
             />
-          </div>
-        </div>
-
-        <main style={{ paddingTop: '52px', paddingBottom: '60px', flex: 1, overflowY: 'auto' }}>
-          <div style={{ padding: '12px 16px 0' }}>
-            <span style={{ color: '#fff', fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: '600' }}>
+          }
+        />
+        <main style={{ flex: 1, display: 'flex', flexDirection: 'column', paddingTop: '52px', paddingBottom: 'calc(60px + env(safe-area-inset-bottom))' }}>
+          <div style={{ padding: '16px 16px 0', display: 'flex', alignItems: 'center' }}>
+            <span style={{ color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: '600' }}>
               Hi{userName ? `, ${userName}` : ''}
             </span>
-            <span style={{ color: '#999', fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', marginLeft: '8px' }}>
+            <span style={{ color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', marginLeft: '8px' }}>
               {todayLabel}
             </span>
           </div>
           {paymentToast && (
             <div style={{
               margin: '12px 14px 0',
-              background: '#0f2219', border: '0.5px solid #1a3826',
+              background: 'var(--green-bg)', border: '0.5px solid var(--green-bg-2)',
               borderRadius: '10px', padding: '12px 16px',
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             }}>
-              <span style={{ color: '#1bba7c', fontFamily: 'Inter, sans-serif', fontSize: '13px' }}>
+              <span style={{ color: 'var(--brand)', fontFamily: 'Inter, sans-serif', fontSize: '13px' }}>
                 ✓ Payment confirmed — your plan is now active!
               </span>
-              <button onClick={() => setPaymentToast(false)} style={{ background: 'none', border: 'none', color: '#1bba7c', cursor: 'pointer', fontSize: '16px', lineHeight: 1 }}>×</button>
+              <button onClick={() => setPaymentToast(false)} style={{ background: 'none', border: 'none', color: 'var(--brand)', cursor: 'pointer', fontSize: '16px', lineHeight: 1 }}>×</button>
             </div>
           )}
-          <div style={{ padding: '14px 16px 12px', borderBottom: '0.5px solid #111' }}>
-            <div style={{ fontSize: '11px', color: '#777', marginBottom: '3px', fontFamily: 'Inter, sans-serif' }}>Total PnL</div>
-            <div style={{ fontSize: '36px', fontWeight: '500', color: stats.totalPnl >= 0 ? '#1bba7c' : '#c03535', lineHeight: 1, marginBottom: '5px', fontFamily: 'Inter, sans-serif' }}>
+          <div style={{ padding: '14px 16px 12px', borderBottom: '0.5px solid var(--bg-surface)' }}>
+            <div style={{ fontSize: '11px', color: 'var(--text-faint)', marginBottom: '3px', fontFamily: 'Inter, sans-serif' }}>Total PnL</div>
+            <div style={{ fontSize: '36px', fontWeight: '500', color: stats.totalPnl >= 0 ? 'var(--brand)' : 'var(--red)', lineHeight: 1, marginBottom: '5px', fontFamily: 'Inter, sans-serif' }}>
               {fmt(stats.totalPnl)}
             </div>
-            <div style={{ fontSize: '11px', color: '#999', fontFamily: 'Inter, sans-serif' }}>
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'Inter, sans-serif' }}>
               {stats.tradeCount} trades · {stats.dayCount} days
             </div>
           </div>
@@ -476,22 +839,22 @@ export default function Dashboard() {
           <div style={{ margin: '10px 14px 0' }}>
             <ChallengeCard account={activeAccount} trades={trades} loading={loading} mobile />
           </div>
-          <div style={{ margin: '8px 14px 0', background: '#111', border: '0.5px solid #1a1a1a', borderRadius: '10px' }}>
+          <div style={{ margin: '8px 14px 0', background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px' }}>
             <PnLChart trades={trades} account={activeAccount} noMargin mobile />
           </div>
-          <div style={{ margin: '8px 14px 0', background: '#111', border: '0.5px solid #1a1a1a', borderRadius: '10px' }}>
+          <div style={{ margin: '8px 14px 0', background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px' }}>
             <DailyBarChart trades={trades} mobile />
           </div>
-          <div style={{ margin: '8px 14px 0', background: '#111', border: '0.5px solid #1a1a1a', borderRadius: '10px' }}>
+          <div style={{ margin: '8px 14px 0', background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px' }}>
             <WinLossDonut trades={trades} mobile />
           </div>
-          <div style={{ margin: '8px 14px 0', background: '#111', border: '0.5px solid #1a1a1a', borderRadius: '10px' }}>
+          <div style={{ margin: '8px 14px 0', background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px' }}>
             <StreakCard trades={trades} mobile />
           </div>
-          <div style={{ margin: '8px 14px 0', background: '#111', border: '0.5px solid #1a1a1a', borderRadius: '10px' }}>
+          <div style={{ margin: '8px 14px 0', background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px' }}>
             <CalendarPnL trades={trades} account={activeAccount} mobile onDayClick={date => setDayModal(date)} />
           </div>
-          <div style={{ margin: '8px 14px 16px', background: '#111', border: '0.5px solid #1a1a1a', borderRadius: '10px' }}>
+          <div style={{ margin: '8px 14px 16px', background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px' }}>
             <RecentTrades trades={trades} loading={loading} mobile onTradeClick={t => setDetailTrade(t)} />
           </div>
         </main>
@@ -510,6 +873,7 @@ export default function Dashboard() {
             trade={detailTrade}
             isMobile
             onClose={() => setDetailTrade(null)}
+            onResolve={handleResolveTrade}
           />
         )}
       </div>
@@ -517,73 +881,112 @@ export default function Dashboard() {
   }
 
   // ─── DESKTOP LAYOUT ──────────────────────────────────────────────────────────
+  const filteredTrades = trades.filter(t => {
+    if (dateRange.start && t.date < dateRange.start) return false
+    if (dateRange.end && t.date > dateRange.end) return false
+    return true
+  })
+  const stats = computeStats(filteredTrades)
+
   return (
-    <div style={{ display: 'flex', background: '#0a0a0a', minHeight: '100vh' }}>
+    <div style={{ display: 'flex', background: 'var(--bg-page)', minHeight: '100vh' }}>
       <Sidebar />
       <main style={{ marginLeft: collapsed ? '60px' : '220px', transition: 'margin-left 0.2s ease', flex: 1, padding: '32px', isolation: 'isolate' }}>
-        <div style={{ marginBottom: '12px' }}>
+        <div style={{ marginBottom: '20px' }}>
           <div style={{ marginBottom: '4px' }}>
-            <span style={{ color: '#fff', fontFamily: 'Inter, sans-serif', fontSize: '15px', fontWeight: '600' }}>
+            <span style={{ color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontSize: '15px', fontWeight: '600' }}>
               Hi{userName ? `, ${userName}` : ''}
             </span>
-            <span style={{ color: '#999', fontFamily: 'JetBrains Mono, monospace', fontSize: '12px', marginLeft: '10px' }}>
+            <span style={{ color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace', fontSize: '12px', marginLeft: '10px' }}>
               {todayLabel}
             </span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <h1 style={{ color: '#fff', fontFamily: 'Inter, sans-serif', fontSize: '22px', fontWeight: '600', margin: 0 }}>Dashboard</h1>
-            <AccountSwitcher
-              onSwitch={(acc) => {
-                setActiveAccount(acc)
-                if (acc?.id) localStorage.setItem('activeAccountId', acc.id)
-              }}
-              defaultAccountId={defaultAccountId}
-            />
+            <h1 style={{ color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontSize: '22px', fontWeight: '600', margin: 0 }}>Dashboard</h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <DateRangePicker dateRange={dateRange} onChange={setDateRange} />
+              <AccountSwitcher
+                onSwitch={(acc) => {
+                  setActiveAccount(acc)
+                  if (acc?.id) localStorage.setItem('activeAccountId', acc.id)
+                }}
+                defaultAccountId={defaultAccountId}
+              />
+            </div>
           </div>
         </div>
         {paymentToast && (
           <div style={{
             marginBottom: '24px',
-            background: '#0f2219', border: '0.5px solid #1a3826',
+            background: 'var(--green-bg)', border: '0.5px solid var(--green-bg-2)',
             borderRadius: '10px', padding: '14px 18px',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           }}>
-            <span style={{ color: '#1bba7c', fontFamily: 'Inter, sans-serif', fontSize: '14px' }}>
+            <span style={{ color: 'var(--brand)', fontFamily: 'Inter, sans-serif', fontSize: '14px' }}>
               ✓ Payment confirmed — your plan is now active!
             </span>
-            <button onClick={() => setPaymentToast(false)} style={{ background: 'none', border: 'none', color: '#1bba7c', cursor: 'pointer', fontSize: '18px', lineHeight: 1 }}>×</button>
+            <button onClick={() => setPaymentToast(false)} style={{ background: 'none', border: 'none', color: 'var(--brand)', cursor: 'pointer', fontSize: '18px', lineHeight: 1 }}>×</button>
           </div>
         )}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '24px' }}>
+          <MetricCard
+            label="Net P&L"
+            value={fmt(stats.totalPnl)}
+            color={stats.tradeCount === 0 ? undefined : stats.totalPnl >= 0 ? 'var(--brand)' : 'var(--red)'}
+            visual="sparkline"
+            visualProps={{ trades: filteredTrades, color: stats.tradeCount === 0 ? 'var(--text-faint)' : stats.totalPnl >= 0 ? 'var(--brand)' : 'var(--red)' }}
+          />
+          <MetricCard
+            label="Win Rate"
+            value={`${stats.winRate}%`}
+            color={stats.tradeCount === 0 ? undefined : stats.winRate >= 50 ? 'var(--brand)' : 'var(--red)'}
+            visual="gauge"
+            visualProps={{ pct: stats.winRate, color: stats.tradeCount === 0 ? 'var(--text-faint)' : stats.winRate >= 50 ? 'var(--brand)' : 'var(--red)' }}
+          />
+          <MetricCard
+            label="Profit Factor"
+            value={stats.tradeCount === 0 ? '0.00' : isFinite(stats.profitFactor) ? stats.profitFactor.toFixed(2) : '∞'}
+            color={stats.tradeCount === 0 ? undefined : (stats.profitFactor >= 1 || !isFinite(stats.profitFactor)) ? 'var(--brand)' : 'var(--red)'}
+            visual="ring"
+            visualProps={{ pct: stats.tradeCount === 0 ? 0 : Math.min(100, (stats.profitFactor / 3) * 100), color: stats.tradeCount === 0 ? 'var(--text-faint)' : (stats.profitFactor >= 1 || !isFinite(stats.profitFactor)) ? 'var(--brand)' : 'var(--red)' }}
+          />
+          <MetricCard
+            label="Avg RR"
+            value={stats.tradeCount === 0 ? '0.00R' : `${stats.avgRR.toFixed(2)}R`}
+            visual="rrbar"
+            visualProps={{ value: stats.avgRR, max: 4 }}
+          />
+        </div>
         <div style={{ display: 'flex', gap: '20px', alignItems: 'stretch', marginBottom: '24px' }}>
           <div style={{ flex: '0 0 30%', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-            <ScoreCard trades={trades} />
+            <ScoreCard trades={filteredTrades} />
           </div>
           <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-            <ChallengeCard account={activeAccount} trades={trades} loading={loading} />
+            <ChallengeCard account={activeAccount} trades={filteredTrades} loading={loading} />
           </div>
         </div>
         <div style={{ display: 'flex', gap: '20px', alignItems: 'stretch', marginBottom: '24px' }}>
           <div style={{ flex: '0 0 65%', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-            <PnLChart trades={trades} account={activeAccount} noMargin />
+            <DailyBarChart trades={filteredTrades} />
           </div>
           <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-            <WinLossDonut trades={trades} />
+            <WinLossDonut trades={filteredTrades} />
           </div>
         </div>
         <div style={{ display: 'flex', gap: '20px', alignItems: 'stretch', marginBottom: '24px' }}>
           <div style={{ flex: '0 0 65%', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-            <DailyBarChart trades={trades} />
+            <PnLChart trades={filteredTrades} account={activeAccount} noMargin />
           </div>
           <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-            <StreakCard trades={trades} />
+            <StreakCard trades={filteredTrades} />
           </div>
         </div>
         <div style={{ display: 'flex', gap: '20px', alignItems: 'stretch', marginBottom: '24px' }}>
           <div style={{ flex: '0 0 65%', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-            <CalendarPnL trades={trades} account={activeAccount} onDayClick={date => setDayModal(date)} />
+            <CalendarPnL trades={filteredTrades} account={activeAccount} onDayClick={date => setDayModal(date)} />
           </div>
           <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-            <RecentTrades trades={trades} loading={loading} onTradeClick={t => setDetailTrade(t)} />
+            <RecentTrades trades={filteredTrades} loading={loading} onTradeClick={t => setDetailTrade(t)} />
           </div>
         </div>
       </main>
@@ -600,6 +1003,7 @@ export default function Dashboard() {
         <TradeDetailModal
           trade={detailTrade}
           onClose={() => setDetailTrade(null)}
+          onResolve={handleResolveTrade}
         />
       )}
     </div>

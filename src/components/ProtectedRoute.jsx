@@ -3,13 +3,12 @@ import { Navigate, useNavigate } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 
 export default function ProtectedRoute({ children }) {
-  const [session, setSession] = useState(undefined)
-  const [trialExpired, setTrialExpired] = useState(false)
+  const [user, setUser] = useState(undefined)
   const [checking, setChecking] = useState(true)
   const navigate = useNavigate()
 
-  const checkTrial = async (session) => {
-    if (!session) {
+  const checkTrial = async (user) => {
+    if (!user) {
       setChecking(false)
       return
     }
@@ -17,13 +16,13 @@ export default function ProtectedRoute({ children }) {
     const { data: userData } = await supabase
       .from('users')
       .select('trial_start, plan, plan_expires_at')
-      .eq('id', session.user.id)
+      .eq('id', user.id)
       .single()
 
     if (userData) {
       const now = new Date()
       if (userData.plan_expires_at && new Date(userData.plan_expires_at) > now) {
-        setTrialExpired(false)
+        // active plan, do nothing
       } else {
         const trialStart = new Date(userData.trial_start)
         const trialEnd = new Date(trialStart)
@@ -38,22 +37,27 @@ export default function ProtectedRoute({ children }) {
   }
 
   useEffect(() => {
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session)
-      await checkTrial(session)
+    // getUser() validates the token against Supabase (and refreshes if needed)
+    // instead of trusting whatever's cached in local storage. getSession() was
+    // causing false logouts on cold load when the cached access token had expired.
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      setUser(user)
+      await checkTrial(user)
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
-        setSession(session)
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        setUser(session?.user ?? null)
+      }
+      if (event === 'SIGNED_OUT') {
+        setUser(null)
       }
     })
 
     return () => subscription.unsubscribe()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (session === undefined || checking) return null
-  if (!session) return <Navigate to="/login" replace />
-  if (trialExpired) return null
+  if (user === undefined || checking) return null
+  if (!user) return <Navigate to="/login" replace />
   return children
 }

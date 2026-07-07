@@ -49,7 +49,9 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
 
   const dayData = useMemo(() => {
     const map = {}
-    trades.filter(t => t.pnl != null).forEach(t => {
+    // Exclude in_progress trades: their pnl is a projected risk×RR figure,
+    // not a realized result, so it shouldn't count toward a day's P&L yet.
+    trades.filter(t => t.pnl != null && t.outcome !== 'in_progress').forEach(t => {
       // normalise: trade dates may come as "2026-05-06T..." or "2026-05-06"
       const dateKey = t.date ? t.date.slice(0, 10) : null
       if (!dateKey) return
@@ -81,14 +83,14 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
     const isLoss = hasTrade && pnl < 0
     const isBE   = hasTrade && pnl === 0
 
-    let bg = '#141414'
-    let border = '0.5px solid #1e1e1e'
-    let color = '#999'
+    let bg = 'var(--bg-surface-2)'
+    let border = '0.5px solid var(--border-color-2)'
+    let color = 'var(--text-muted)'
 
-    if (isWin)  { bg = '#0f2219'; border = '0.5px solid #1a3826'; color = '#1db97b' }
-    if (isLoss) { bg = '#1e0d0d'; border = '0.5px solid #2e1515'; color = '#c03535' }
-    if (isBE)   { bg = '#1a1400'; border = '0.5px solid #2a2000'; color = '#c97a00' }
-    if (isToday && !hasTrade) { border = '0.5px solid #1db97b55'; color = '#1db97b' }
+    if (isWin)  { bg = 'var(--green-bg)'; border = '0.5px solid var(--green-bg-2)'; color = 'var(--brand)' }
+    if (isLoss) { bg = 'var(--red-bg-2)'; border = '0.5px solid var(--red-bg)'; color = 'var(--red)' }
+    if (isBE)   { bg = 'var(--amber-bg-2)'; border = '0.5px solid var(--amber-bg)'; color = 'var(--amber)' }
+    if (isToday && !hasTrade) { border = '0.5px solid color-mix(in srgb, var(--brand), transparent 67%)'; color = 'var(--brand)' }
 
     return { bg, border, color, isToday, hasTrade, isWin, isLoss, isBE, dateStr, data }
   }
@@ -99,17 +101,17 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
       <div style={{ padding: '10px 14px 12px' }}>
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-          <button onClick={prevMonth} style={{ background: 'transparent', border: 'none', color: '#777', cursor: 'pointer', fontSize: '14px', padding: '2px 4px', lineHeight: 1 }}>←</button>
-          <span style={{ color: '#aaa', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+          <button onClick={prevMonth} style={{ background: 'transparent', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: '14px', padding: '2px 4px', lineHeight: 1 }}>←</button>
+          <span style={{ color: 'var(--text-soft)', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
             {MONTHS_SHORT[current.month].toUpperCase()} {current.year}
           </span>
-          <button onClick={nextMonth} style={{ background: 'transparent', border: 'none', color: '#777', cursor: 'pointer', fontSize: '14px', padding: '2px 4px', lineHeight: 1 }}>→</button>
+          <button onClick={nextMonth} style={{ background: 'transparent', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: '14px', padding: '2px 4px', lineHeight: 1 }}>→</button>
         </div>
 
         {/* Day headers */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px', marginBottom: '3px' }}>
           {DAYS_SHORT.map((d, i) => (
-            <div key={i} style={{ color: '#999', fontFamily: 'DM Mono, monospace', fontSize: '9px', textAlign: 'center' }}>{d}</div>
+            <div key={i} style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace', fontSize: '9px', textAlign: 'center' }}>{d}</div>
           ))}
         </div>
 
@@ -120,8 +122,8 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
             const { bg, border, hasTrade, data } = cell
             const pnl = hasTrade ? data.pnl : null
             const count = hasTrade ? data.count : null
-            const pnlColor = hasTrade && pnl > 0 ? '#1db97b' : hasTrade && pnl < 0 ? '#c03535' : '#c97a00'
-            const dayColor = cell.isToday ? '#1db97b' : hasTrade ? pnlColor : '#777'
+            const pnlColor = hasTrade && pnl > 0 ? 'var(--brand)' : hasTrade && pnl < 0 ? 'var(--red)' : 'var(--amber)'
+            const dayColor = cell.isToday ? 'var(--brand)' : hasTrade ? pnlColor : 'var(--text-faint)'
             return (
               <div key={i} style={{
                 background: day ? bg : 'transparent',
@@ -179,7 +181,7 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
                         left: '4px',
                         fontFamily: 'DM Mono, monospace',
                         fontSize: '7px',
-                        color: '#777',
+                        color: 'var(--text-faint)',
                         lineHeight: 1,
                         WebkitFontSmoothing: 'antialiased',
                       }}>
@@ -195,10 +197,10 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
 
         {/* Legend */}
         <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
-          {[{ color: '#1db97b', label: 'Profit' }, { color: '#c03535', label: 'Loss' }, { color: '#c97a00', label: 'BE' }].map(l => (
+          {[{ color: 'var(--brand)', label: 'Profit' }, { color: 'var(--red)', label: 'Loss' }, { color: 'var(--amber)', label: 'BE' }].map(l => (
             <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               <div style={{ width: '7px', height: '7px', borderRadius: '1px', background: l.color }} />
-              <span style={{ color: '#777', fontFamily: 'DM Sans, sans-serif', fontSize: '9px' }}>{l.label}</span>
+              <span style={{ color: 'var(--text-faint)', fontFamily: 'DM Sans, sans-serif', fontSize: '9px' }}>{l.label}</span>
             </div>
           ))}
         </div>
@@ -209,21 +211,21 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
   // ── DESKTOP ───────────────────────────────────────────────────────────────
   return (
     <div style={{
-      background: '#111', border: '0.5px solid #1e1e1e',
+      background: 'var(--bg-surface)', border: '0.5px solid var(--border-color-2)',
       borderRadius: '12px', padding: '24px', marginBottom: '0',
       flex: 1,
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h2 style={{ color: '#fff', fontFamily: 'Syne, sans-serif', fontSize: '15px', fontWeight: '600', margin: 0 }}>Calendar P&L</h2>
+        <h2 style={{ color: 'var(--text-primary)', fontFamily: 'Syne, sans-serif', fontSize: '15px', fontWeight: '600', margin: 0 }}>Calendar P&L</h2>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <button onClick={prevMonth} style={{ background: 'transparent', border: '0.5px solid #1e1e1e', borderRadius: '6px', color: '#999', padding: '4px 10px', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', fontSize: '13px' }}>←</button>
-          <span style={{ color: '#fff', fontFamily: 'DM Sans, sans-serif', fontSize: '13px' }}>{MONTHS[current.month]} {current.year}</span>
-          <button onClick={nextMonth} style={{ background: 'transparent', border: '0.5px solid #1e1e1e', borderRadius: '6px', color: '#999', padding: '4px 10px', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', fontSize: '13px' }}>→</button>
+          <button onClick={prevMonth} style={{ background: 'transparent', border: '0.5px solid var(--border-color-2)', borderRadius: '6px', color: 'var(--text-muted)', padding: '4px 10px', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', fontSize: '13px' }}>←</button>
+          <span style={{ color: 'var(--text-primary)', fontFamily: 'DM Sans, sans-serif', fontSize: '13px' }}>{MONTHS[current.month]} {current.year}</span>
+          <button onClick={nextMonth} style={{ background: 'transparent', border: '0.5px solid var(--border-color-2)', borderRadius: '6px', color: 'var(--text-muted)', padding: '4px 10px', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', fontSize: '13px' }}>→</button>
         </div>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', marginBottom: '4px' }}>
         {DAYS_FULL.map(d => (
-          <div key={d} style={{ color: '#999', fontFamily: 'DM Mono, monospace', fontSize: '11px', textAlign: 'center', padding: '4px 0' }}>{d}</div>
+          <div key={d} style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace', fontSize: '11px', textAlign: 'center', padding: '4px 0' }}>{d}</div>
         ))}
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px' }}>
@@ -238,12 +240,12 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
           const isLoss = hasTrade && pnl < 0
           const isBE   = hasTrade && pnl === 0
 
-          let bg = day ? (isToday ? '#0f2219' : '#0a0a0a') : 'transparent'
-          let borderColor = day ? (isToday ? '#1a3826' : '#1a1a1a') : 'none'
-          if (isWin)  { bg = '#0f2219'; borderColor = '#1a3826' }
-          if (isLoss) { bg = '#1e0d0d'; borderColor = '#2e1515' }
-          if (isBE)   { bg = '#141008'; borderColor = '#2a2a00' }
-          const pnlColor = isWin ? '#1db97b' : isLoss ? '#c03535' : '#c97a00'
+          let bg = day ? (isToday ? 'var(--green-bg)' : 'var(--bg-page)') : 'transparent'
+          let borderColor = day ? (isToday ? 'var(--green-bg-2)' : 'var(--border-color)') : 'none'
+          if (isWin)  { bg = 'var(--green-bg)'; borderColor = 'var(--green-bg-2)' }
+          if (isLoss) { bg = 'var(--red-bg-2)'; borderColor = 'var(--red-bg)' }
+          if (isBE)   { bg = 'var(--amber-bg-2)'; borderColor = 'var(--amber-bg)' }
+          const pnlColor = isWin ? 'var(--brand)' : isLoss ? 'var(--red)' : 'var(--amber)'
 
           return (
             <div key={i} style={{
@@ -261,13 +263,13 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
             >
               {day && (
                 <>
-                  <span style={{ position: 'absolute', top: '6px', left: '7px', color: isToday ? '#1db97b' : '#999', fontFamily: 'DM Mono, monospace', fontSize: '11px', fontWeight: '600' }}>{day}</span>
+                  <span style={{ position: 'absolute', top: '6px', left: '7px', color: isToday ? 'var(--brand)' : 'var(--text-muted)', fontFamily: 'DM Mono, monospace', fontSize: '11px', fontWeight: '600' }}>{day}</span>
                   {hasTrade && (
                     <>
                       <span style={{ color: pnlColor, fontFamily: 'DM Mono, monospace', fontSize: '15px', fontWeight: '400', textAlign: 'center', lineHeight: 1.2 }}>
                         {pnl >= 0 ? '+' : ''}${Math.abs(pnl).toFixed(0)}
                       </span>
-                      <span style={{ position: 'absolute', bottom: '6px', left: '7px', color: '#999', fontFamily: 'DM Mono, monospace', fontSize: '9px' }}>
+                      <span style={{ position: 'absolute', bottom: '6px', left: '7px', color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace', fontSize: '9px' }}>
                         {count} trade{count !== 1 ? 's' : ''}
                       </span>
                     </>
@@ -279,10 +281,10 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
         })}
       </div>
       <div style={{ display: 'flex', gap: '16px', marginTop: '16px' }}>
-        {[{ color: '#1db97b', label: 'Profit' }, { color: '#c03535', label: 'Loss' }, { color: '#c97a00', label: 'Breakeven' }].map(l => (
+        {[{ color: 'var(--brand)', label: 'Profit' }, { color: 'var(--red)', label: 'Loss' }, { color: 'var(--amber)', label: 'Breakeven' }].map(l => (
           <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <div style={{ width: '10px', height: '10px', borderRadius: '2px', background: l.color }} />
-            <span style={{ color: '#777', fontFamily: 'DM Sans, sans-serif', fontSize: '12px' }}>{l.label}</span>
+            <span style={{ color: 'var(--text-faint)', fontFamily: 'DM Sans, sans-serif', fontSize: '12px' }}>{l.label}</span>
           </div>
         ))}
       </div>

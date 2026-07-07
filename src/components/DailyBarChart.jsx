@@ -1,5 +1,6 @@
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, Cell } from 'recharts'
 import { useMemo, useState } from 'react'
+import { useTheme } from '../ThemeContext'
 
 function toLocalDateStr(d) {
   const yyyy = d.getFullYear()
@@ -54,10 +55,10 @@ function getLast30Data(trades) {
 }
 
 const toggleStyle = (active) => ({
-  background: active ? '#1a1a1a' : 'transparent',
-  border: `0.5px solid ${active ? '#2a2a2a' : '#1e1e1e'}`,
+  background: active ? 'var(--border-color)' : 'transparent',
+  border: `0.5px solid var(--border-color-2)`,
   borderRadius: '6px',
-  color: active ? '#fff' : '#777',
+  color: active ? 'var(--text-primary)' : 'var(--text-faint)',
   padding: '3px 10px',
   cursor: 'pointer',
   fontFamily: 'DM Mono, monospace',
@@ -67,9 +68,19 @@ const toggleStyle = (active) => ({
 })
 
 export default function DailyBarChart({ trades = [], mobile = false }) {
+  const { isLight } = useTheme()
   const [view, setView] = useState('30d')
   const data = useMemo(() => view === '7d' ? getLast7Data(trades) : getLast30Data(trades), [trades, view])
   const hasData = data.some(d => d.pnl !== 0)
+
+  // Resolved hex for Recharts direct props (these don't go through CSS, so var() won't resolve here)
+  const chart = {
+    brand: isLight ? '#169c69' : '#1db97b',
+    red: isLight ? '#e0524f' : '#c03535',
+    neutral: isLight ? '#d8d8da' : '#222222',
+    axisStroke: isLight ? '#a8a8ab' : '#555555',
+    tickFill: isLight ? '#8a8a8d' : '#777777',
+  }
 
   // ── MOBILE ────────────────────────────────────────────────────────────────
   if (mobile) {
@@ -77,7 +88,7 @@ export default function DailyBarChart({ trades = [], mobile = false }) {
       <div style={{ padding: '10px 14px 10px' }}>
         {/* Header row: label + toggle */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-          <span style={{ fontSize: '11px', color: '#777', fontFamily: 'DM Sans, sans-serif' }}>Daily PnL</span>
+          <span style={{ fontSize: '11px', color: 'var(--text-faint)', fontFamily: 'DM Sans, sans-serif' }}>Daily PnL</span>
           <div style={{ display: 'flex', gap: '4px' }}>
             <button style={toggleStyle(view === '7d')} onClick={() => setView('7d')}>7d</button>
             <button style={toggleStyle(view === '30d')} onClick={() => setView('30d')}>30d</button>
@@ -85,16 +96,16 @@ export default function DailyBarChart({ trades = [], mobile = false }) {
         </div>
 
         {!hasData ? (
-          <div style={{ height: '52px', display: 'flex', alignItems: 'center', color: '#555', fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>
+          <div style={{ height: '52px', display: 'flex', alignItems: 'center', color: 'var(--text-faint-2)', fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>
             No trades in the last {view === '7d' ? '7' : '30'} days
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={52} style={{ WebkitTapHighlightColor: "transparent", outline: "none" }}>
             <BarChart data={data} barSize={view === '30d' ? 6 : 16} margin={{ top: 2, right: 0, bottom: 0, left: 0 }}>
-              <ReferenceLine y={0} stroke="#222" />
+              <ReferenceLine y={0} stroke={chart.neutral} />
               <Bar dataKey="pnl" radius={[0, 0, 0, 0]}>
                 {data.map((entry, i) => (
-                  <Cell key={i} fill={entry.pnl > 0 ? '#1db97b' : entry.pnl < 0 ? '#c03535' : '#222'} fillOpacity={0.8} />
+                  <Cell key={i} fill={entry.pnl > 0 ? chart.brand : entry.pnl < 0 ? chart.red : chart.neutral} fillOpacity={0.8} />
                 ))}
               </Bar>
             </BarChart>
@@ -107,12 +118,12 @@ export default function DailyBarChart({ trades = [], mobile = false }) {
   // ── DESKTOP ───────────────────────────────────────────────────────────────
   return (
     <div style={{
-      background: '#111', border: '0.5px solid #1e1e1e',
+      background: 'var(--bg-surface)', border: '0.5px solid var(--border-color-2)',
       borderRadius: '12px', padding: '24px',
       flex: 1, display: 'flex', flexDirection: 'column',
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h2 style={{ color: '#fff', fontFamily: 'Syne, sans-serif', fontSize: '15px', fontWeight: '600', margin: 0 }}>
+        <h2 style={{ color: 'var(--text-primary)', fontFamily: 'Syne, sans-serif', fontSize: '15px', fontWeight: '600', margin: 0 }}>
           Daily P&L — {view === '7d' ? 'Last 7 Days' : 'Last 30 Days'}
         </h2>
         <div style={{ display: 'flex', gap: '6px' }}>
@@ -121,26 +132,26 @@ export default function DailyBarChart({ trades = [], mobile = false }) {
         </div>
       </div>
       {!hasData ? (
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#555', fontFamily: 'DM Mono, monospace', fontSize: '13px' }}>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-faint-2)', fontFamily: 'DM Mono, monospace', fontSize: '13px' }}>
           No trades in the last {view === '7d' ? '7' : '30'} days
         </div>
       ) : (
         <ResponsiveContainer width="100%" height={180} style={{ WebkitTapHighlightColor: "transparent", outline: "none" }}>
           <BarChart data={data} barSize={view === '30d' ? 14 : 36}>
-            <XAxis dataKey="label" stroke="#555" tick={{ fill: '#777', fontSize: 11, fontFamily: 'DM Mono, monospace' }} />
-            <YAxis stroke="#555" tick={{ fill: '#777', fontSize: 11, fontFamily: 'DM Mono, monospace' }} tickFormatter={v => `$${v}`} />
+            <XAxis dataKey="label" stroke={chart.axisStroke} tick={{ fill: chart.tickFill, fontSize: 11, fontFamily: 'DM Mono, monospace' }} />
+            <YAxis stroke={chart.axisStroke} tick={{ fill: chart.tickFill, fontSize: 11, fontFamily: 'DM Mono, monospace' }} tickFormatter={v => `$${v}`} />
             <Tooltip
               cursor={false}
-              contentStyle={{ background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '8px', fontFamily: 'DM Mono, monospace', fontSize: '12px' }}
-              itemStyle={{ color: '#fff' }}
-              labelStyle={{ color: '#aaa' }}
+              contentStyle={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color-2)', borderRadius: '8px', fontFamily: 'DM Mono, monospace', fontSize: '12px' }}
+              itemStyle={{ color: 'var(--text-primary)' }}
+              labelStyle={{ color: 'var(--text-soft)' }}
               formatter={(v, _name, props) => [`$${v}`, props.payload.date]}
               labelFormatter={() => ''}
             />
-            <ReferenceLine y={0} stroke="#222" />
+            <ReferenceLine y={0} stroke={chart.neutral} />
             <Bar dataKey="pnl" radius={[0, 0, 0, 0]}>
               {data.map((entry, i) => (
-                <Cell key={i} fill={entry.pnl > 0 ? '#1db97b' : entry.pnl < 0 ? '#c03535' : '#222'} />
+                <Cell key={i} fill={entry.pnl > 0 ? chart.brand : entry.pnl < 0 ? chart.red : chart.neutral} />
               ))}
             </Bar>
           </BarChart>

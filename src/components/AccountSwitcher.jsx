@@ -4,7 +4,6 @@ import { supabase } from '../supabaseClient'
 export default function AccountSwitcher({
   onSwitch,
   mobile = false,
-  showBalance = true,
   compact = false,
   showSelectedNameOnMobile = false,
   defaultAccountId = null,
@@ -12,7 +11,6 @@ export default function AccountSwitcher({
   const [accounts, setAccounts] = useState([])
   const [active, setActive] = useState(null)
   const [open, setOpen] = useState(false)
-  const [totalBalance, setTotalBalance] = useState(null)
   const dropdownRef = useRef(null)
 
   useEffect(() => {
@@ -40,9 +38,10 @@ export default function AccountSwitcher({
 
         if (data) {
           setAccounts(data)
+          const visibleData = data.filter(a => !a.is_hidden)
           const preferred = defaultAccountId
-            ? (data.find(a => a.id === defaultAccountId) || data[0])
-            : data[0]
+            ? (visibleData.find(a => a.id === defaultAccountId) || visibleData[0])
+            : visibleData[0]
           setActive(preferred || null)
           if (onSwitch) onSwitch(preferred)
         }
@@ -56,24 +55,6 @@ export default function AccountSwitcher({
     fetchAccounts()
     return () => { cancelled = true }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Fetch total balance (account_size + sum of pnl) for any active account
-  useEffect(() => {
-    if (!active) {
-      setTotalBalance(null)
-      return
-    }
-    const fetchBalance = async () => {
-      const { data } = await supabase
-        .from('trades')
-        .select('pnl, swap, commission')
-        .eq('account_id', active.id)
-      const totalPnl = (data || []).reduce((sum, t) =>
-        sum + (Number(t.pnl) || 0) + (Number(t.swap) || 0) + (Number(t.commission) || 0), 0)
-      setTotalBalance((Number(active.account_size) || 0) + totalPnl)
-    }
-    fetchBalance()
-  }, [active])
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -93,12 +74,12 @@ export default function AccountSwitcher({
     if (onSwitch) onSwitch(account)
   }
 
-  const personal = accounts.filter(a => a.type === 'personal')
+  const personal = accounts.filter(a => a.type === 'personal' && !a.is_hidden)
   const challenges = accounts.filter(a => a.type !== 'personal')
 
   const groupLabelStyle = {
     display: 'block',
-    color: '#3a3a3a',
+    color: 'var(--text-faint-2)',
     fontFamily: 'DM Mono, monospace',
     fontSize: '9px',
     fontWeight: '500',
@@ -112,10 +93,10 @@ export default function AccountSwitcher({
     alignItems: 'center',
     justifyContent: 'space-between',
     width: '100%',
-    background: isActive ? '#0f2219' : 'transparent',
+    background: isActive ? 'var(--green-bg)' : 'transparent',
     border: 'none',
     padding: '9px 12px',
-    color: isActive ? '#1db97b' : '#ccc',
+    color: isActive ? 'var(--brand)' : 'var(--text-soft)',
     fontFamily: 'DM Sans, sans-serif',
     fontSize: '13px',
     fontWeight: isActive ? '500' : '400',
@@ -125,7 +106,7 @@ export default function AccountSwitcher({
   })
 
   return (
-    <div style={{ marginBottom: mobile ? '0' : '24px', width: mobile && !compact ? '100%' : 'auto' }}>
+    <div style={{ width: mobile && !compact ? '100%' : 'auto' }}>
       <div style={{
         display: 'flex',
         alignItems: mobile && !compact ? 'stretch' : 'center',
@@ -142,33 +123,27 @@ export default function AccountSwitcher({
               display: 'flex',
               alignItems: 'center',
               gap: '10px',
-              background: '#111',
-              border: '0.5px solid #1e1e1e',
+              background: 'var(--bg-surface)',
+              border: '0.5px solid var(--border-color)',
               borderRadius: '10px',
               padding: compact ? '7px 10px' : mobile ? '10px 12px' : '9px 14px',
-              color: '#fff',
+              color: 'var(--text-primary)',
               fontFamily: 'DM Sans, sans-serif',
               fontSize: compact ? '12px' : '13px',
               fontWeight: '500',
               cursor: 'pointer',
-              minWidth: compact ? 'unset' : mobile ? '0' : '180px',
+              minWidth: mobile ? '0' : 'unset',
               width: mobile && !compact ? '100%' : 'auto',
             }}
           >
-            <span style={{ flex: 1, textAlign: 'left' }}>
-              {mobile && showSelectedNameOnMobile
-                ? (active?.name || active?.firm_name || 'Select account')
-                : active?.type === 'personal'
-                  ? 'Personal Account'
-                  : active
-                    ? 'Challenge Account'
-                    : 'Select account'}
+            <span style={{ textAlign: 'left', whiteSpace: 'nowrap' }}>
+              {active?.name || active?.firm_name || 'Select account'}
             </span>
             <svg
               width="10" height="6" viewBox="0 0 10 6" fill="none"
               style={{ flexShrink: 0, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }}
             >
-              <path d="M1 1l4 4 4-4" stroke="#777" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M1 1l4 4 4-4" stroke="var(--text-faint)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
 
@@ -179,8 +154,8 @@ export default function AccountSwitcher({
               left: 0,
               minWidth: mobile && !compact ? '100%' : '220px',
               width: mobile && !compact ? '100%' : 'auto',
-              background: '#111',
-              border: '0.5px solid #1e1e1e',
+              background: 'var(--bg-surface)',
+              border: '0.5px solid var(--border-color)',
               borderRadius: '10px',
               zIndex: 100,
               overflow: 'hidden',
@@ -194,7 +169,7 @@ export default function AccountSwitcher({
                       <span>{acc.name}</span>
                       {active?.id === acc.id && (
                         <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                          <path d="M2 6l3 3 5-5" stroke="#1db97b" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M2 6l3 3 5-5" stroke="var(--brand)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       )}
                     </button>
@@ -203,7 +178,7 @@ export default function AccountSwitcher({
               )}
 
               {personal.length > 0 && challenges.length > 0 && (
-                <div style={{ height: '0.5px', background: '#1a1a1a', margin: '4px 0' }} />
+                <div style={{ height: '0.5px', background: 'var(--border-color)', margin: '4px 0' }} />
               )}
 
               {/* + New Account */}
@@ -211,7 +186,7 @@ export default function AccountSwitcher({
                 onClick={() => { setOpen(false); window.location.href = '/settings?section=personal-accounts' }}
                 style={{
                   display: 'block', width: '100%', background: 'transparent', border: 'none',
-                  padding: '9px 12px', color: '#777', fontFamily: 'DM Sans, sans-serif',
+                  padding: '9px 12px', color: 'var(--text-faint)', fontFamily: 'DM Sans, sans-serif',
                   fontSize: '12px', cursor: 'pointer', textAlign: 'left', boxSizing: 'border-box',
                 }}
               >
@@ -219,7 +194,7 @@ export default function AccountSwitcher({
               </button>
 
               {personal.length > 0 && challenges.length > 0 && (
-                <div style={{ height: '0.5px', background: '#1a1a1a', margin: '4px 0' }} />
+                <div style={{ height: '0.5px', background: 'var(--border-color)', margin: '4px 0' }} />
               )}
 
               {challenges.length > 0 && (
@@ -230,7 +205,7 @@ export default function AccountSwitcher({
                       <span>{acc.name}</span>
                       {active?.id === acc.id && (
                         <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                          <path d="M2 6l3 3 5-5" stroke="#1db97b" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M2 6l3 3 5-5" stroke="var(--brand)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       )}
                     </button>
@@ -238,12 +213,12 @@ export default function AccountSwitcher({
                 </>
               )}
 
-              <div style={{ height: '0.5px', background: '#1a1a1a', margin: '4px 0' }} />
+              <div style={{ height: '0.5px', background: 'var(--border-color)', margin: '4px 0' }} />
               <button
                 onClick={() => { setOpen(false); window.location.href = '/challenges' }}
                 style={{
                   display: 'block', width: '100%', background: 'transparent', border: 'none',
-                  padding: '9px 12px', color: '#777', fontFamily: 'DM Sans, sans-serif',
+                  padding: '9px 12px', color: 'var(--text-faint)', fontFamily: 'DM Sans, sans-serif',
                   fontSize: '12px', cursor: 'pointer', textAlign: 'left', boxSizing: 'border-box',
                 }}
               >
@@ -252,33 +227,6 @@ export default function AccountSwitcher({
             </div>
           )}
         </div>
-
-        {/* Balance pill — all account types */}
-        {showBalance && totalBalance !== null && (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            background: '#0f0f0f',
-            border: '0.5px solid #1a1a1a',
-            borderRadius: '10px',
-            padding: mobile ? '10px 12px' : '9px 14px',
-            width: mobile ? '100%' : 'auto',
-            boxSizing: 'border-box',
-          }}>
-            <span style={{ color: '#777', fontFamily: 'DM Sans, sans-serif', fontSize: '11px' }}>
-              Balance
-            </span>
-            <span style={{
-              color: totalBalance >= (Number(active.account_size) || 0) ? '#1db97b' : '#c03535',
-              fontFamily: 'DM Mono, monospace',
-              fontSize: '13px',
-              fontWeight: '500',
-            }}>
-              ${totalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </span>
-          </div>
-        )}
 
       </div>
     </div>

@@ -1,133 +1,191 @@
 import { useState, useEffect, useMemo } from 'react'
 import Sidebar from '../components/Sidebar'
-import AccountSwitcher from '../components/AccountSwitcher'
 import { supabase } from '../supabaseClient'
 import { useSidebar } from '../SidebarContext'
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Cell,
-  ScatterChart, Scatter, ZAxis,
-  AreaChart, Area, ReferenceLine,
-} from 'recharts'
+import { computeAccountMetrics } from '../lib/accountMetrics'
 
-// ─── Design tokens ─────────────────────────────────────────────────
+// ─── Design tokens (matches rest of app) ────────────────────────────
 const T = {
-  bg:         '#0a0a0a',
-  card:       '#111',
-  cardBorder: '#1e1e1e',
-  stat:       '#0f0f0f',
-  statBorder: '#1a1a1a',
-  green:      '#1db97b',
-  red:        '#c03535',
-  amber:      '#c97a00',
-  blue:       '#4d9fff',
-  muted:      '#777',
-  sub:        '#aaa',
-  text:       '#e8e8e8',
+  bg:         'var(--bg-page)',
+  card:       'var(--bg-surface)',
+  cardBorder: 'var(--border-color)',
+  stat:       'var(--bg-hover)',
+  statBorder: 'var(--border-color)',
+  green:      'var(--brand)',
+  red:        'var(--red)',
+  amber:      'var(--amber)',
+  blue:       'var(--blue)',
+  muted:      'var(--text-faint)',
+  sub:        'var(--text-muted)',
+  text:       'var(--text-secondary)',
 }
 
 const font = {
-  heading: "'Syne', sans-serif",
-  body:    "'DM Sans', sans-serif",
-  mono:    "'DM Mono', monospace",
+  heading: "'Inter', sans-serif",
+  body:    "'Inter', sans-serif",
+  mono:    "'JetBrains Mono', monospace",
 }
+
+// Groups (pair/session) with fewer trades than this render amber, not
+// green/red — too early to call a trend. Tune freely.
+const LOW_SAMPLE_THRESHOLD = 5
 
 // ─── Helpers ───────────────────────────────────────────────────────
 function pnlColor(v) { return v > 0 ? T.green : v < 0 ? T.red : T.muted }
 
-function fmtPnl(v) {
-  if (v == null) return '—'
-  const abs = Math.abs(v).toFixed(2)
-  return (v >= 0 ? '+$' : '-$') + abs
+function fmtPct(v, decimals = 1) {
+  if (v == null || !isFinite(v)) return '—'
+  return (v >= 0 ? '+' : '') + v.toFixed(decimals) + '%'
 }
-function fmtRR(v)  { return v == null ? '—' : v.toFixed(2) + 'R' }
 
-function calcStats(trades) {
-  if (!trades.length) return null
-  const wins    = trades.filter(t => t.pnl > 0)
-  const losses  = trades.filter(t => t.pnl < 0)
-  const bes     = trades.filter(t => t.pnl === 0)
-  const gw      = wins.reduce((s, t) => s + t.pnl, 0)
-  const gl      = Math.abs(losses.reduce((s, t) => s + t.pnl, 0))
-  const net     = trades.reduce((s, t) => s + (t.pnl || 0), 0)
-  const wr      = wins.length / trades.length
-  const avgWin  = wins.length   ? gw / wins.length   : 0
-  const avgLoss = losses.length ? gl / losses.length : 0
-  const expectancy = (wr * avgWin) - ((1 - wr) * avgLoss)
-  const avgRR   = trades.reduce((s, t) => s + (t.rr || 0), 0) / trades.length
+function fmtPF(v) {
+  if (v == null) return '—'
+  return isFinite(v) ? v.toFixed(2) : '∞'
+}
 
-  // best / worst
-  const best  = Math.max(...trades.map(t => t.pnl || 0))
-  const worst = Math.min(...trades.map(t => t.pnl || 0))
+function fmtSigned(v, decimals = 1) {
+  if (v == null || !isFinite(v)) return '—'
+  return (v >= 0 ? '+' : '') + v.toFixed(decimals)
+}
 
-  // consecutive wins/losses
-  let maxConsecW = 0, maxConsecL = 0, curW = 0, curL = 0
-  trades.forEach(t => {
-    if (t.pnl > 0) { curW++; curL = 0; maxConsecW = Math.max(maxConsecW, curW) }
-    else if (t.pnl < 0) { curL++; curW = 0; maxConsecL = Math.max(maxConsecL, curL) }
-    else { curW = 0; curL = 0 }
+// health status → badge styling (matches ChallengeTracker statusBadge)
+const HEALTH = {
+  healthy: { label: 'Healthy', bg: 'var(--green-bg)',   color: 'var(--brand)', border: 'var(--green-bg-2)' },
+  neutral: { label: 'Neutral', bg: 'var(--blue-bg-2)',  color: 'var(--blue)',  border: 'var(--blue-bg)'    },
+  risk:    { label: 'At Risk', bg: 'var(--red-bg-2)',   color: 'var(--red)',   border: 'var(--red-bg)'     },
+}
+
+// ── Calendar-aligned date ranges (Mon–Sun / 1st–end of month) ───────
+function ymd(d) {
+  const y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, '0'), day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+function startOfWeek(d) {
+  const date = new Date(d)
+  const day = date.getDay()
+  const diff = day === 0 ? -6 : 1 - day
+  date.setDate(date.getDate() + diff)
+  return date
+}
+function endOfWeek(d) {
+  const s = startOfWeek(d)
+  const e = new Date(s)
+  e.setDate(e.getDate() + 6)
+  return e
+}
+function startOfMonth(d) { const date = new Date(d); return new Date(date.getFullYear(), date.getMonth(), 1) }
+function endOfMonth(d)   { const date = new Date(d); return new Date(date.getFullYear(), date.getMonth() + 1, 0) }
+
+function getRanges(period, now = new Date()) {
+  if (period === 'month') {
+    const curStart = startOfMonth(now), curEnd = endOfMonth(now)
+    const prevAnchor = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+    return { curStart, curEnd, prevStart: startOfMonth(prevAnchor), prevEnd: endOfMonth(prevAnchor) }
+  }
+  const curStart = startOfWeek(now), curEnd = endOfWeek(now)
+  const prevAnchor = new Date(now); prevAnchor.setDate(prevAnchor.getDate() - 7)
+  return { curStart, curEnd, prevStart: startOfWeek(prevAnchor), prevEnd: endOfWeek(prevAnchor) }
+}
+
+function tradesInRange(trades, start, end) {
+  const s = ymd(start), e = ymd(end)
+  return trades.filter(t => t.date >= s && t.date <= e)
+}
+
+function weekdayShort(dateStr) {
+  try { return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short' }) }
+  catch { return '' }
+}
+
+// % P&L of a single trade, relative to its OWN account's size — this is
+// what makes trades comparable across pairs/sessions/accounts with
+// different risk sizing (per master prompt: use % not RR).
+function tradePct(trade, account) {
+  const size = parseFloat(account?.account_size) || 0
+  if (!size || trade.pnl == null) return 0
+  return (parseFloat(trade.pnl) / size) * 100
+}
+
+// ── Aggregate stats for a set of trades (period comparison, account-level avg win/loss) ──
+function computeStats(trades, accountsById) {
+  const withPnl = trades.filter(t => t.pnl != null)
+  let bestTrade = null, worstTrade = null
+  const pcts = []
+  withPnl.forEach(t => {
+    const pct = tradePct(t, accountsById[t.account_id])
+    pcts.push(pct)
+    if (!bestTrade || pct > bestTrade.pct) bestTrade = { pct, pair: t.pair, weekday: weekdayShort(t.date) }
+    if (!worstTrade || pct < worstTrade.pct) worstTrade = { pct, pair: t.pair, weekday: weekdayShort(t.date) }
   })
-
-  // green days %
-  const dayMap = {}
-  trades.forEach(t => {
-    if (!t.date) return
-    const d = t.date.slice(0, 10)
-    if (!dayMap[d]) dayMap[d] = 0
-    dayMap[d] += (t.pnl || 0)
-  })
-  const days = Object.values(dayMap)
-  const greenDaysPct = days.length ? (days.filter(d => d > 0).length / days.length) * 100 : 0
-
-  // avg trades/day
-  const avgTradesPerDay = days.length ? trades.length / days.length : 0
-
+  const wins = pcts.filter(p => p > 0)
+  const losses = pcts.filter(p => p < 0)
+  const netPnlPct = pcts.reduce((s, p) => s + p, 0)
+  const grossWinPct = wins.reduce((s, p) => s + p, 0)
+  const grossLossPct = Math.abs(losses.reduce((s, p) => s + p, 0))
+  const profitFactor = grossLossPct > 0 ? grossWinPct / grossLossPct : (grossWinPct > 0 ? Infinity : 0)
   return {
-    total: trades.length, wins: wins.length, losses: losses.length, bes: bes.length,
-    net, wr, avgWin, avgLoss, expectancy, avgRR, best, worst,
-    maxConsecW, maxConsecL, greenDaysPct, avgTradesPerDay,
+    tradeCount: withPnl.length,
+    winRate: withPnl.length ? (wins.length / withPnl.length) * 100 : 0,
+    netPnlPct, profitFactor,
+    avgWin: wins.length ? grossWinPct / wins.length : 0,
+    avgLoss: losses.length ? losses.reduce((s, p) => s + p, 0) / losses.length : 0,
+    winsCount: wins.length, lossesCount: losses.length,
+    bestTrade, worstTrade,
   }
 }
 
+// ── Group breakdown (by pair / by session) ──────────────────────────
+function computeGroupBreakdown(trades, accountsById, keyFn) {
+  const groups = {}
+  trades.forEach(t => {
+    if (t.pnl == null) return
+    const key = keyFn(t)
+    if (!key) return
+    if (!groups[key]) groups[key] = []
+    groups[key].push(t)
+  })
+  return Object.entries(groups).map(([key, list]) => {
+    const pcts = list.map(t => tradePct(t, accountsById[t.account_id]))
+    const wins = pcts.filter(p => p > 0)
+    const losses = pcts.filter(p => p < 0)
+    const netPnlPct = pcts.reduce((s, p) => s + p, 0)
+    const grossWinPct = wins.reduce((s, p) => s + p, 0)
+    const grossLossPct = Math.abs(losses.reduce((s, p) => s + p, 0))
+    return {
+      key,
+      count: list.length,
+      winRate: list.length ? (wins.length / list.length) * 100 : 0,
+      avgWin: wins.length ? grossWinPct / wins.length : 0,
+      avgLoss: losses.length ? losses.reduce((s, p) => s + p, 0) / losses.length : 0,
+      profitFactor: grossLossPct > 0 ? grossWinPct / grossLossPct : (grossWinPct > 0 ? Infinity : 0),
+      netPnlPct,
+      lowSample: list.length < LOW_SAMPLE_THRESHOLD,
+    }
+  }).sort((a, b) => b.netPnlPct - a.netPnlPct)
+}
+
+// ── Lifetime equity sparkline points (handwritten SVG, no axes) ─────
+function buildSparklinePoints(trades, width = 280, height = 44) {
+  const withPnl = trades.filter(t => t.pnl != null).slice().sort((a, b) => new Date(a.date) - new Date(b.date))
+  if (!withPnl.length) return null
+  let cum = 0
+  const series = withPnl.map(t => { cum += parseFloat(t.pnl); return cum })
+  const min = Math.min(0, ...series), max = Math.max(0, ...series)
+  const range = (max - min) || 1
+  const n = series.length
+  return series.map((v, i) => {
+    const x = n === 1 ? width : (i / (n - 1)) * width
+    const y = height - ((v - min) / range) * height
+    return `${x.toFixed(1)},${y.toFixed(1)}`
+  }).join(' ')
+}
+
 // ─── Sub-components ────────────────────────────────────────────────
-function StatCard({ label, value, valueColor, sub, mobile = false }) {
-  return (
-    <div style={{
-      background: T.stat, border: `0.5px solid ${T.statBorder}`,
-      borderRadius: mobile ? 8 : 10,
-      padding: mobile ? '10px 10px' : '18px 20px',
-      flex: 1, minWidth: 0,
-    }}>
-      <div style={{ fontFamily: font.mono, fontSize: mobile ? 9 : 10, color: T.sub,
-                    letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: mobile ? 5 : 8 }}>
-        {label}
-      </div>
-      <div style={{ fontFamily: font.heading, fontSize: mobile ? 15 : 21, fontWeight: 600,
-                    color: valueColor || T.text, lineHeight: 1.1 }}>
-        {value}
-      </div>
-      {sub && (
-        <div style={{ fontFamily: font.mono, fontSize: 9, color: T.muted, marginTop: 4 }}>{sub}</div>
-      )}
-    </div>
-  )
-}
-
-function SectionTitle({ children, mobile = false }) {
-  return (
-    <div style={{ fontFamily: font.heading, fontSize: mobile ? 12 : 13, fontWeight: 600,
-                  color: T.sub, letterSpacing: '0.06em', textTransform: 'uppercase',
-                  marginBottom: mobile ? 12 : 16 }}>
-      {children}
-    </div>
-  )
-}
-
 function Card({ children, style, mobile = false }) {
   return (
     <div style={{
       background: T.card, border: `0.5px solid ${T.cardBorder}`,
-      borderRadius: mobile ? 10 : 12,
+      borderRadius: mobile ? 12 : 14,
       padding: mobile ? '14px' : '24px',
       ...style,
     }}>
@@ -136,55 +194,17 @@ function Card({ children, style, mobile = false }) {
   )
 }
 
-const tooltipStyle = {
-  background: '#161616', border: `0.5px solid #1e1e1e`,
-  borderRadius: 8, padding: '10px 14px',
-  fontFamily: font.mono, fontSize: 11, color: T.text,
-}
-
-function PnLTooltip({ active, payload, label }) {
-  if (!active || !payload?.length) return null
-  const v = payload[0].value
+function SectionTitle({ children, mobile = false, style }) {
   return (
-    <div style={tooltipStyle}>
-      <div style={{ color: T.sub, marginBottom: 4 }}>{label}</div>
-      <div style={{ color: pnlColor(v), fontWeight: 600 }}>{fmtPnl(v)}</div>
+    <div style={{ fontFamily: font.heading, fontSize: mobile ? 12 : 13, fontWeight: 600,
+                  color: T.sub, letterSpacing: '0.06em', textTransform: 'uppercase',
+                  marginBottom: mobile ? 12 : 16, ...style }}>
+      {children}
     </div>
   )
 }
 
-function MultiTooltip({ active, payload, label }) {
-  if (!active || !payload?.length) return null
-  return (
-    <div style={tooltipStyle}>
-      <div style={{ color: T.sub, marginBottom: 6 }}>{label}</div>
-      {payload.map((p, i) => (
-        <div key={i} style={{ color: p.color || T.text, marginBottom: 2 }}>
-          {p.name}: {typeof p.value === 'number' && p.name?.includes('P&L')
-            ? fmtPnl(p.value)
-            : typeof p.value === 'number' && p.name?.includes('%')
-            ? p.value.toFixed(1) + '%'
-            : p.value}
-        </div>
-      ))}
-    </div>
-  )
-}
-
-function ScatterTooltip({ active, payload }) {
-  if (!active || !payload?.length) return null
-  const d = payload[0]?.payload
-  if (!d) return null
-  return (
-    <div style={tooltipStyle}>
-      <div style={{ color: T.sub, marginBottom: 4 }}>{d.pair || ''}</div>
-      <div>RR: <span style={{ color: T.blue }}>{d.rr != null ? d.rr.toFixed(2) + 'R' : '—'}</span></div>
-      <div>P&L: <span style={{ color: pnlColor(d.pnl) }}>{fmtPnl(d.pnl)}</span></div>
-    </div>
-  )
-}
-
-function EmptyState({ message = 'No trades logged yet.' }) {
+function EmptyState({ message = 'No challenge accounts yet.' }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center',
                   justifyContent: 'center', padding: '48px 0', color: T.muted }}>
@@ -198,169 +218,267 @@ function Skeleton({ h = 20, w = '100%', r = 8, mb = 0 }) {
   return (
     <div style={{
       height: h, width: w, borderRadius: r, marginBottom: mb,
-      background: 'linear-gradient(90deg, #161616 25%, #1c1c1c 50%, #161616 75%)',
+      background: 'linear-gradient(90deg, var(--border-color) 25%, var(--bg-surface-2) 50%, var(--border-color) 75%)',
       backgroundSize: '200% 100%', animation: 'shimmer 1.4s infinite',
     }} />
   )
 }
 
-// ─── Hour × Day Heatmap ────────────────────────────────────────────
-function HourDayHeatmap({ trades, mobile }) {
-  const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
+function Divider({ label, mobile }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 14, margin: mobile ? '12px 0' : '16px 0' }}>
+      <div style={{ flex: 1, height: 0.5, background: T.cardBorder }} />
+      <div style={{ fontFamily: font.mono, fontSize: 11, color: T.muted, whiteSpace: 'nowrap' }}>{label}</div>
+      <div style={{ flex: 1, height: 0.5, background: T.cardBorder }} />
+    </div>
+  )
+}
 
-  const tradeHours = trades
-    .filter(t => t.date && t.time)
-    .map(t => new Date(t.date + 'T' + t.time).getHours())
-  const minHour = tradeHours.length ? Math.max(0,  Math.min(...tradeHours) - 1) : 6
-  const maxHour = tradeHours.length ? Math.min(23, Math.max(...tradeHours) + 1) : 16
-  const hours = Array.from({ length: maxHour - minHour + 1 }, (_, i) => i + minHour)
+// ── Period Comparison (8-stat grid, week/month toggle) ───────────────
+// `period` / `onPeriodChange` are controlled by the parent so By Pair / By
+// Session (rendered separately) can share the same week/month window.
+function PeriodComparison({ trades, accountsById, mobile, period, onPeriodChange, periodLabel = 'vs last' }) {
+  const { curStart, curEnd, prevStart, prevEnd } = useMemo(() => getRanges(period), [period])
 
-  const grid = useMemo(() => {
-    const map = {}
-    trades.forEach(t => {
-      if (!t.date || !t.time) return
-      const d = new Date(t.date + 'T' + t.time)
-      const dow = d.getDay()
-      const hr  = d.getHours()
-      const dayName = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dow]
-      if (!DAYS.includes(dayName)) return
-      const key = `${dayName}-${hr}`
-      if (!map[key]) map[key] = { pnl: 0, count: 0 }
-      map[key].pnl   += (t.pnl || 0)
-      map[key].count += 1
-    })
-    return map
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [trades])
+  const curStats = useMemo(() => computeStats(tradesInRange(trades, curStart, curEnd), accountsById), [trades, accountsById, curStart, curEnd])
+  const prevStats = useMemo(() => computeStats(tradesInRange(trades, prevStart, prevEnd), accountsById), [trades, accountsById, prevStart, prevEnd])
 
-  const allPnls = Object.values(grid).map(v => v.pnl).filter(Boolean)
-  const maxAbs  = allPnls.length ? Math.max(...allPnls.map(Math.abs)) : 1
-  const cellH   = mobile ? 18 : 24
+  const unitLabel = period === 'week' ? 'week' : 'month'
+  const subLabel = period === 'week'
+    ? `This week (Mon–Sun) ${periodLabel} week`
+    : `This month (1st–end) ${periodLabel} month`
 
-  function cellColor(pnl, count) {
-    if (!count) return '#161616'
-    const intensity = Math.min(Math.abs(pnl) / maxAbs, 1)
-    if (pnl > 0) return `rgba(29,185,123,${0.15 + intensity * 0.75})`
-    return `rgba(192,53,53,${0.15 + intensity * 0.75})`
-  }
+  const Toggle = ({ value, children }) => (
+    <div
+      onClick={() => onPeriodChange(value)}
+      style={{
+        padding: '6px 16px', cursor: 'pointer', fontFamily: font.mono, fontSize: 12,
+        color: period === value ? T.blue : T.sub,
+        background: period === value ? 'rgba(59,130,196,0.15)' : 'transparent',
+      }}
+    >
+      {children}
+    </div>
+  )
 
-  // best hour by total pnl
-  const hourTotals = {}
-  Object.entries(grid).forEach(([key, val]) => {
-    const hr = key.split('-')[1]
-    if (!hourTotals[hr]) hourTotals[hr] = 0
-    hourTotals[hr] += val.pnl
-  })
-  const bestHr  = Object.entries(hourTotals).sort((a,b) => b[1]-a[1])[0]
-  const worstHr = Object.entries(hourTotals).sort((a,b) => a[1]-b[1])[0]
+  const deltaNum = (curr, prev) => curr - prev
+  const deltaColor = (d) => d > 0 ? T.green : d < 0 ? T.red : T.muted
 
-  // best day by total pnl
-  const dayTotals = {}
-  DAYS.forEach(d => { dayTotals[d] = 0 })
-  Object.entries(grid).forEach(([key, val]) => {
-    const day = key.split('-')[0]
-    dayTotals[day] = (dayTotals[day] || 0) + val.pnl
-  })
-  const bestDay  = Object.entries(dayTotals).sort((a,b) => b[1]-a[1])[0]
-  const worstDay = Object.entries(dayTotals).sort((a,b) => a[1]-b[1])[0]
-
-  const fmt = (hr) => {
-    const h = parseInt(hr)
-    return (h < 10 ? '0'+h : h) + ':00'
-  }
+  const stats = [
+    {
+      label: 'Net P&L',
+      value: fmtPct(curStats.netPnlPct), valueColor: pnlColor(curStats.netPnlPct),
+      delta: (() => { const d = deltaNum(curStats.netPnlPct, prevStats.netPnlPct); return { text: `${fmtSigned(d)}% ${periodLabel} ${unitLabel}`, color: deltaColor(d) } })(),
+    },
+    {
+      label: 'Win rate',
+      value: `${curStats.winRate.toFixed(0)}%`, valueColor: T.text,
+      delta: (() => { const d = deltaNum(curStats.winRate, prevStats.winRate); return { text: `${fmtSigned(d, 0)}% ${periodLabel} ${unitLabel}`, color: deltaColor(d) } })(),
+    },
+    {
+      label: 'Trades taken',
+      value: curStats.tradeCount, valueColor: T.text,
+      delta: (() => { const d = curStats.tradeCount - prevStats.tradeCount; return { text: `${fmtSigned(d, 0)} ${periodLabel} ${unitLabel}`, color: deltaColor(d) } })(),
+    },
+    {
+      label: 'Profit factor',
+      value: fmtPF(curStats.profitFactor), valueColor: T.text,
+      delta: (() => { const d = isFinite(curStats.profitFactor) && isFinite(prevStats.profitFactor) ? curStats.profitFactor - prevStats.profitFactor : 0; return { text: `${fmtSigned(d, 2)} ${periodLabel} ${unitLabel}`, color: deltaColor(d) } })(),
+    },
+    {
+      label: 'Avg win',
+      value: fmtPct(curStats.avgWin), valueColor: T.green,
+      delta: { text: `${curStats.winsCount} winner${curStats.winsCount === 1 ? '' : 's'}`, color: T.muted },
+    },
+    {
+      label: 'Avg loss',
+      value: fmtPct(curStats.avgLoss), valueColor: T.red,
+      delta: { text: `${curStats.lossesCount} loser${curStats.lossesCount === 1 ? '' : 's'}`, color: T.muted },
+    },
+    {
+      label: 'Best trade',
+      value: curStats.bestTrade ? fmtPct(curStats.bestTrade.pct) : '—', valueColor: T.green,
+      delta: { text: curStats.bestTrade ? `${curStats.bestTrade.pair || '—'}, ${curStats.bestTrade.weekday}` : '—', color: T.muted },
+    },
+    {
+      label: 'Worst trade',
+      value: curStats.worstTrade ? fmtPct(curStats.worstTrade.pct) : '—', valueColor: T.red,
+      delta: { text: curStats.worstTrade ? `${curStats.worstTrade.pair || '—'}, ${curStats.worstTrade.weekday}` : '—', color: T.muted },
+    },
+  ]
 
   return (
-    <div style={{ display: 'flex', gap: mobile ? 12 : 32, flexDirection: mobile ? 'column' : 'row' }}>
-      {/* Heatmap grid */}
-      <div style={{ flex: 1, minWidth: 0, overflowX: mobile ? 'auto' : 'visible', WebkitOverflowScrolling: 'touch' }}>
-        <div style={{ minWidth: mobile ? 320 : 'auto' }}>
-        <div style={{ display: 'flex', marginLeft: 32, marginBottom: 4 }}>
-          {hours.map(h => (
-            <div key={h} style={{ flex: 1, textAlign: 'center',
-              fontFamily: font.mono, fontSize: 8, color: T.muted }}>
-              {h < 10 ? '0'+h : h}
-            </div>
-          ))}
-        </div>
-        {DAYS.map(day => (
-          <div key={day} style={{ display: 'flex', alignItems: 'center', marginBottom: 3 }}>
-            <div style={{ width: 32, fontFamily: font.mono, fontSize: 9,
-                          color: T.sub, flexShrink: 0 }}>{day}</div>
-            {hours.map(hr => {
-              const k = `${day}-${hr}`
-              const cell = grid[k] || { pnl: 0, count: 0 }
-              return (
-                <div key={hr}
-                  title={cell.count ? `${fmtPnl(cell.pnl)} (${cell.count} trades)` : ''}
-                  style={{
-                    flex: 1, height: cellH, marginRight: 2,
-                    borderRadius: 3, background: cellColor(cell.pnl, cell.count),
-                    border: cell.count ? 'none' : '0.5px solid #1c1c1c',
-                  }} />
-              )
-            })}
-          </div>
-        ))}
-        {/* Legend */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 10 }}>
-          <div style={{ fontFamily: font.mono, fontSize: 9, color: T.muted }}>Loss</div>
-          {[0.8, 0.5, 0.2].map(a => (
-            <div key={a} style={{ width: 10, height: 10, borderRadius: 2,
-              background: `rgba(192,53,53,${a})` }} />
-          ))}
-          <div style={{ width: 10, height: 10, borderRadius: 2,
-            background: '#161616', border: '0.5px solid #1c1c1c' }} />
-          {[0.2, 0.5, 0.8].map(a => (
-            <div key={a} style={{ width: 10, height: 10, borderRadius: 2,
-              background: `rgba(29,185,123,${a})` }} />
-          ))}
-          <div style={{ fontFamily: font.mono, fontSize: 9, color: T.muted }}>Profit</div>
-        </div>
+    <Card mobile={mobile}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 10 }}>
+        <SectionTitle mobile={mobile} style={{ marginBottom: 0 }}>Period Comparison</SectionTitle>
+        <div style={{ display: 'flex', border: `0.5px solid ${T.cardBorder}`, borderRadius: 8, overflow: 'hidden', fontFamily: font.mono, fontSize: 12 }}>
+          <Toggle value="week">Week</Toggle>
+          <div style={{ width: 0.5, background: T.cardBorder }} />
+          <Toggle value="month">Month</Toggle>
         </div>
       </div>
+      <div style={{ fontFamily: font.mono, fontSize: 11, color: T.muted, marginBottom: 14 }}>{subLabel}</div>
+      <div style={{ display: 'grid', gridTemplateColumns: mobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: mobile ? '16px 12px' : 20 }}>
+        {stats.map(s => (
+          <div key={s.label}>
+            <div style={{ fontFamily: font.mono, fontSize: 10, color: T.muted, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 6 }}>{s.label}</div>
+            <div style={{ fontFamily: font.mono, fontSize: mobile ? 16 : 18, fontWeight: 600, color: s.valueColor, marginBottom: 4 }}>{s.value}</div>
+            <div style={{ fontFamily: font.mono, fontSize: 10.5, color: s.delta.color }}>{s.delta.text}</div>
+          </div>
+        ))}
+      </div>
+    </Card>
+  )
+}
 
-      {/* Right side stats */}
-      {!mobile && (
-        <div style={{ width: 160, display: 'flex', flexDirection: 'column', gap: 12, justifyContent: 'center' }}>
-          {[
-            { label: 'Best Hour',  value: bestHr  ? fmt(bestHr[0])  : '—', sub: bestHr  ? fmtPnl(bestHr[1])  : '', color: T.green },
-            { label: 'Worst Hour', value: worstHr ? fmt(worstHr[0]) : '—', sub: worstHr ? fmtPnl(worstHr[1]) : '', color: T.red   },
-            { label: 'Best Day',   value: bestDay  ? bestDay[0]  : '—', sub: bestDay  ? fmtPnl(bestDay[1])  : '', color: T.green },
-            { label: 'Worst Day',  value: worstDay ? worstDay[0] : '—', sub: worstDay ? fmtPnl(worstDay[1]) : '', color: T.red   },
-          ].map(item => (
-            <div key={item.label} style={{
-              background: T.stat, border: `0.5px solid ${T.statBorder}`,
-              borderRadius: 8, padding: '10px 14px',
-            }}>
-              <div style={{ fontFamily: font.mono, fontSize: 9, color: T.muted,
-                            textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 5 }}>
-                {item.label}
+// ── By Pair / By Session table ───────────────────────────────────────
+function GroupTable({ title, breakdown, mobile, footnote, scopeLabel }) {
+  return (
+    <Card mobile={mobile}>
+      <SectionTitle mobile={mobile} style={{ marginBottom: scopeLabel ? 4 : undefined }}>{title}</SectionTitle>
+      {scopeLabel && <div style={{ fontFamily: font.mono, fontSize: 11, color: T.muted, marginBottom: 14 }}>{scopeLabel}</div>}
+      {breakdown.length === 0 ? (
+        <EmptyState message={`No ${title.toLowerCase()} data yet.`} />
+      ) : mobile ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {breakdown.map(g => (
+            <div key={g.key} style={{ background: 'var(--bg-surface-2)', border: '0.5px solid var(--border-color)', borderRadius: '10px', padding: '10px 12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                <span style={{ fontFamily: font.body, fontSize: 13, color: T.text, fontWeight: 500 }}>{g.key}</span>
+                <span style={{ fontFamily: font.mono, fontSize: 13, fontWeight: 500, color: g.lowSample ? T.amber : pnlColor(g.netPnlPct) }}>{fmtPct(g.netPnlPct)}</span>
               </div>
-              <div style={{ fontFamily: font.heading, fontSize: 16, fontWeight: 600, color: item.color }}>
-                {item.value}
+              <div style={{ display: 'flex', gap: 16, fontFamily: font.mono, fontSize: 11, color: T.muted }}>
+                <span>{g.count} trades</span>
+                <span style={{ color: g.lowSample ? T.amber : T.sub }}>{g.winRate.toFixed(0)}% WR</span>
+                <span style={{ color: g.lowSample ? T.amber : T.sub }}>{fmtPF(g.profitFactor)} PF</span>
               </div>
-              {item.sub && (
-                <div style={{ fontFamily: font.mono, fontSize: 10, color: T.muted, marginTop: 2 }}>
-                  {item.sub}
-                </div>
-              )}
             </div>
           ))}
         </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {(() => {
+            const maxAbs = Math.max(1, ...breakdown.map(g => Math.abs(g.netPnlPct)))
+            return breakdown.map((g, i) => {
+              const widthPct = Math.min(100, (Math.abs(g.netPnlPct) / maxAbs) * 100)
+              const barColor = g.lowSample ? T.amber : pnlColor(g.netPnlPct)
+              return (
+                <div key={g.key} style={{
+                  display: 'flex', alignItems: 'center', gap: 14, padding: '10px 0',
+                  borderBottom: i < breakdown.length - 1 ? `0.5px solid ${T.cardBorder}` : 'none',
+                }}>
+                  <div style={{ width: 76, flexShrink: 0, fontFamily: font.body, fontSize: 13, fontWeight: 500, color: T.text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{g.key}</div>
+                  <div style={{ flex: 1, height: 8, background: 'var(--bg-hover)', borderRadius: 4, overflow: 'hidden' }}>
+                    <div style={{ width: `${widthPct}%`, height: '100%', background: barColor, borderRadius: 4 }} />
+                  </div>
+                  <div style={{ width: 64, flexShrink: 0, textAlign: 'right', fontFamily: font.mono, fontSize: 13, fontWeight: 600, color: barColor }}>{fmtPct(g.netPnlPct)}</div>
+                  <div style={{ width: 50, flexShrink: 0, textAlign: 'right', fontFamily: font.mono, fontSize: 11, color: g.lowSample ? T.amber : T.muted }}>{g.winRate.toFixed(0)}% WR</div>
+                  <div style={{ width: 50, flexShrink: 0, textAlign: 'right', fontFamily: font.mono, fontSize: 11, color: g.lowSample ? T.amber : T.muted }}>{fmtPF(g.profitFactor)} PF</div>
+                </div>
+              )
+            })
+          })()}
+        </div>
       )}
-    </div>
+      {footnote && breakdown.some(g => g.lowSample) && (
+        <div style={{ fontFamily: font.mono, fontSize: 11, color: T.muted, marginTop: 12 }}>{footnote}</div>
+      )}
+    </Card>
+  )
+}
+
+// ─── Highlight card (Best / Worst) ──────────────────────────────────
+function HighlightCard({ label, metrics, accountTrades, accent, pairLabel, mobile }) {
+  if (!metrics) {
+    return (
+      <Card mobile={mobile}>
+        <SectionTitle mobile={mobile}>{label}</SectionTitle>
+        <EmptyState message="No active accounts to compare yet." />
+      </Card>
+    )
+  }
+  const health = HEALTH[metrics.healthStatus]
+  const sparkPoints = buildSparklinePoints(accountTrades)
+
+  return (
+    <Card mobile={mobile}>
+      <SectionTitle mobile={mobile}>{label}</SectionTitle>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+        <div>
+          <div style={{ fontFamily: font.heading, fontSize: mobile ? 16 : 18, fontWeight: 600, color: T.text }}>
+            {metrics.name}
+          </div>
+          <div style={{ fontFamily: font.body, fontSize: 12, color: T.muted, marginTop: 2 }}>
+            {metrics.firmName || '—'}
+          </div>
+        </div>
+        <span style={{ background: health.bg, border: `0.5px solid ${health.border}`, borderRadius: '20px', padding: '4px 12px', color: health.color, fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: '500', whiteSpace: 'nowrap' }}>{health.label}</span>
+      </div>
+
+      {sparkPoints && (
+        <div style={{ marginBottom: 18 }}>
+          <div style={{ fontFamily: font.mono, fontSize: 10, color: T.muted, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            Equity curve · lifetime
+          </div>
+          <svg width="100%" height="44" viewBox="0 0 280 44" preserveAspectRatio="none" style={{ display: 'block' }}>
+            <polyline points={sparkPoints} fill="none" stroke={accent} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+            {(() => {
+              const last = sparkPoints.split(' ').pop().split(',')
+              return <circle cx={last[0]} cy={last[1]} r="3" fill={accent} />
+            })()}
+          </svg>
+        </div>
+      )}
+
+      <div style={{ display: 'grid', gridTemplateColumns: mobile ? '1fr 1fr' : 'repeat(3, 1fr)', gap: '14px 16px' }}>
+        <div>
+          <div style={{ fontFamily: font.mono, fontSize: 9, color: T.muted, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 4 }}>Net P&L</div>
+          <div style={{ fontFamily: font.mono, fontSize: 18, fontWeight: 600, color: accent }}>{fmtPct(metrics.netPnlPct)}</div>
+        </div>
+        <div>
+          <div style={{ fontFamily: font.mono, fontSize: 9, color: T.muted, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 4 }}>Win Rate</div>
+          <div style={{ fontFamily: font.mono, fontSize: 18, fontWeight: 600, color: T.text }}>{metrics.winRate.toFixed(0)}%</div>
+        </div>
+        <div>
+          <div style={{ fontFamily: font.mono, fontSize: 9, color: T.muted, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 4 }}>Profit Factor</div>
+          <div style={{ fontFamily: font.mono, fontSize: 18, fontWeight: 600, color: T.text }}>{fmtPF(metrics.profitFactor)}</div>
+        </div>
+        <div>
+          <div style={{ fontFamily: font.mono, fontSize: 9, color: T.muted, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 4 }}>Avg Win / Loss</div>
+          <div style={{ fontFamily: font.mono, fontSize: 13 }}>
+            <span style={{ color: T.green }}>{fmtPct(metrics.avgWin)}</span> / <span style={{ color: T.red }}>{fmtPct(metrics.avgLoss)}</span>
+          </div>
+        </div>
+        <div>
+          <div style={{ fontFamily: font.mono, fontSize: 9, color: T.muted, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 4 }}>{pairLabel}</div>
+          {metrics.pairTag ? (
+            <span style={{
+              display: 'inline-block', fontFamily: font.mono, fontSize: 12, fontWeight: 500,
+              color: pnlColor(metrics.pairTag.netPnlPct), border: `0.5px solid ${T.statBorder}`,
+              borderRadius: 6, padding: '3px 8px',
+            }}>
+              {metrics.pairTag.key} {fmtPct(metrics.pairTag.netPnlPct)}
+            </span>
+          ) : <span style={{ fontFamily: font.mono, fontSize: 13, color: T.muted }}>—</span>}
+        </div>
+        <div>
+          <div style={{ fontFamily: font.mono, fontSize: 9, color: T.muted, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 4 }}>Drawdown Used</div>
+          <div style={{ fontFamily: font.mono, fontSize: 18, fontWeight: 600, color: metrics.ddConsumedPct >= 60 ? T.red : T.text }}>
+            {metrics.ddConsumedPct.toFixed(0)}%
+          </div>
+        </div>
+      </div>
+    </Card>
   )
 }
 
 // ─── Main Page ─────────────────────────────────────────────────────
 export default function Analytics() {
   const { collapsed } = useSidebar()
-  const [selectedId, setSelectedId]   = useState(null)
-  const [activeAccount, setActiveAccount] = useState(null)
-  const savedAccountId = localStorage.getItem('activeAccountId')
-  const [trades, setTrades]           = useState([])
-  const [loading, setLoading]         = useState(false)
-  const [isMobile, setIsMobile]       = useState(window.innerWidth <= 768)
+  const [accounts, setAccounts] = useState([])
+  const [trades, setTrades]     = useState([])
+  const [loading, setLoading]   = useState(true)
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth <= 768)
@@ -369,600 +487,281 @@ export default function Analytics() {
   }, [])
 
   useEffect(() => {
-    if (!selectedId) return
-    async function loadTrades() {
+    async function load() {
       setLoading(true)
       try {
-        const { data } = await supabase
-          .from('trades')
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+
+        // All non-archived accounts (challenge + personal) in one query —
+        // split by type client-side so we can render both sections without
+        // a second round trip.
+        const { data: accountsData, error: accErr } = await supabase
+          .from('accounts')
           .select('*')
-          .eq('account_id', selectedId)
-          .order('date', { ascending: true })
-        setTrades(data || [])
+          .eq('user_id', user.id)
+          .eq('is_archived', false)
+        if (accErr) throw accErr
+
+        const ids = (accountsData || []).map(a => a.id)
+        let tradesData = []
+        if (ids.length) {
+          const { data, error: tradeErr } = await supabase
+            .from('trades')
+            .select('*')
+            .in('account_id', ids)
+          if (tradeErr) throw tradeErr
+          tradesData = data || []
+        }
+
+        setAccounts(accountsData || [])
+        setTrades(tradesData)
       } catch (e) {
         console.error('Analytics fetch error:', e)
       } finally {
         setLoading(false)
       }
     }
-    loadTrades()
-  }, [selectedId])
+    load()
+  }, [])
 
-  // ── Derived data ─────────────────────────────────────────────────
-  const stats = useMemo(() => calcStats(trades), [trades])
+  // ── Split by type ──────────────────────────────────────────────────
+  const challengeAccounts = useMemo(() => accounts.filter(a => a.type !== 'personal'), [accounts])
+  const personalAccounts  = useMemo(() => accounts.filter(a => a.type === 'personal'), [accounts])
+  const accountsById = useMemo(() => Object.fromEntries(accounts.map(a => [a.id, a])), [accounts])
 
-  // 1. Drawdown curve
-  const drawdownData = useMemo(() => {
-    let peak = 0, running = 0
-    return trades.map(t => {
-      running += (t.pnl || 0)
-      if (running > peak) peak = running
-      const dd = peak > 0 ? ((running - peak) / peak) * 100 : 0
-      return { date: t.date, drawdown: parseFloat(dd.toFixed(2)) }
-    })
-  }, [trades])
+  const challengeIds = useMemo(() => new Set(challengeAccounts.map(a => a.id)), [challengeAccounts])
+  const personalIds  = useMemo(() => new Set(personalAccounts.map(a => a.id)), [personalAccounts])
+  const challengeTrades = useMemo(() => trades.filter(t => challengeIds.has(t.account_id)), [trades, challengeIds])
+  const personalTrades   = useMemo(() => trades.filter(t => personalIds.has(t.account_id)), [trades, personalIds])
 
-  // 2. P&L by day of week
-  const dowData = useMemo(() => {
-    const days = { Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0 }
-    trades.forEach(t => {
-      const d    = new Date(t.date)
-      const name = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]
-      if (days[name] !== undefined)
-        days[name] = parseFloat((days[name] + (t.pnl || 0)).toFixed(2))
-    })
-    return Object.entries(days).map(([day, pnl]) => ({ day, pnl }))
-  }, [trades])
+  // ── Challenge account-level metrics (reuses accountMetrics.js) ──────
+  const metrics = useMemo(() => {
+    return challengeAccounts.map(acc =>
+      computeAccountMetrics(acc, challengeTrades.filter(t => t.account_id === acc.id))
+    )
+  }, [challengeAccounts, challengeTrades])
 
-  // 3. P&L + win rate by session
-  const sessionData = useMemo(() => {
-    const sess = { london: [], new_york: [], asian: [] }
-    trades.forEach(t => {
-      const s = t.session?.toLowerCase()
-      if (sess[s]) sess[s].push(t)
-    })
-    return Object.entries(sess).map(([s, ts]) => ({
-      session: s === 'new_york' ? 'New York' : s.charAt(0).toUpperCase() + s.slice(1),
-      pnl:     parseFloat(ts.reduce((a, t) => a + (t.pnl || 0), 0).toFixed(2)),
-      winRate: ts.length ? parseFloat(((ts.filter(t => t.pnl > 0).length / ts.length) * 100).toFixed(1)) : 0,
-      trades:  ts.length,
-    }))
-  }, [trades])
+  const activeMetrics = useMemo(() => metrics.filter(m => m.status === 'active'), [metrics])
 
-  // 4. RR vs P&L scatter
-  const scatterData = useMemo(() =>
-    trades
-      .filter(t => t.rr != null && t.pnl != null)
-      .map(t => ({ rr: parseFloat((t.rr || 0).toFixed(2)), pnl: parseFloat((t.pnl || 0).toFixed(2)), pair: t.pair || '' }))
-  , [trades])
+  const best = useMemo(() => {
+    if (!activeMetrics.length) return null
+    return [...activeMetrics].sort((a, b) => b.profitProgressPct - a.profitProgressPct)[0]
+  }, [activeMetrics])
 
-  // 5. Long vs Short grouped bar
-  const dirData = useMemo(() => {
-    const side = (ts) => ({
-      count:   ts.length,
-      winRate: ts.length ? parseFloat(((ts.filter(t => t.pnl > 0).length / ts.length) * 100).toFixed(1)) : 0,
-      pnl:     parseFloat(ts.reduce((s, t) => s + (t.pnl || 0), 0).toFixed(2)),
-    })
-    return [
-      { dir: 'Long',  ...side(trades.filter(t => t.direction === 'long'))  },
-      { dir: 'Short', ...side(trades.filter(t => t.direction === 'short')) },
-    ]
-  }, [trades])
+  const worst = useMemo(() => {
+    if (!activeMetrics.length) return null
+    return [...activeMetrics].sort((a, b) => b.ddConsumedPct - a.ddConsumedPct)[0]
+  }, [activeMetrics])
 
-  // 6. P&L distribution histogram
-  const histData = useMemo(() => {
-    if (!trades.length) return []
-    const pnls = trades.map(t => t.pnl || 0)
-    const mn = Math.floor(Math.min(...pnls))
-    const mx = Math.ceil(Math.max(...pnls))
-    const range = mx - mn || 1
-    const bucketCount = Math.min(12, Math.max(6, Math.floor(trades.length / 3)))
-    const step = range / bucketCount
-    const buckets = Array.from({ length: bucketCount }, (_, i) => {
-      const lo = mn + i * step
-      const hi = lo + step
-      const label = `${lo >= 0 ? '+' : ''}${lo.toFixed(0)}`
-      const count = pnls.filter(p => p >= lo && (i === bucketCount - 1 ? p <= hi : p < hi)).length
-      const color = lo >= 0 ? T.green : T.red
-      return { label, count, color }
-    })
-    return buckets
-  }, [trades])
+  // Extend best/worst with avg win/loss + best/worst pair tag for the highlight cards
+  const bestExtended = useMemo(() => {
+    if (!best) return null
+    const accTrades = challengeTrades.filter(t => t.account_id === best.accountId)
+    const stats = computeStats(accTrades, accountsById)
+    const pairs = computeGroupBreakdown(accTrades, accountsById, t => t.pair ? t.pair.toUpperCase() : null)
+    return { ...best, avgWin: stats.avgWin, avgLoss: stats.avgLoss, pairTag: pairs[0] || null }
+  }, [best, challengeTrades, accountsById])
 
-  // 7. Pair performance
-  const pairData = useMemo(() => {
-    const map = {}
-    trades.forEach(t => {
-      if (!t.pair) return
-      if (!map[t.pair]) map[t.pair] = []
-      map[t.pair].push(t)
-    })
-    return Object.entries(map).map(([pair, ts]) => {
-      const wins   = ts.filter(t => t.pnl > 0).length
-      const net    = parseFloat(ts.reduce((s, t) => s + (t.pnl || 0), 0).toFixed(2))
-      const avgRR  = parseFloat((ts.reduce((s, t) => s + (t.rr || 0), 0) / ts.length).toFixed(2))
-      return { pair, trades: ts.length, winRate: ts.length ? ((wins / ts.length) * 100).toFixed(1) : 0, net, avgRR }
-    }).sort((a, b) => b.net - a.net)
-  }, [trades])
+  const worstExtended = useMemo(() => {
+    if (!worst) return null
+    const accTrades = challengeTrades.filter(t => t.account_id === worst.accountId)
+    const stats = computeStats(accTrades, accountsById)
+    const pairs = computeGroupBreakdown(accTrades, accountsById, t => t.pair ? t.pair.toUpperCase() : null)
+    return { ...worst, avgWin: stats.avgWin, avgLoss: stats.avgLoss, pairTag: pairs[pairs.length - 1] || null }
+  }, [worst, challengeTrades, accountsById])
 
-  // ── Render ───────────────────────────────────────────────────────
+  const bestAccTrades = useMemo(() => best ? challengeTrades.filter(t => t.account_id === best.accountId) : [], [best, challengeTrades])
+  const worstAccTrades = useMemo(() => worst ? challengeTrades.filter(t => t.account_id === worst.accountId) : [], [worst, challengeTrades])
+
+  // ── Period state — one toggle per section, shared between Period
+  // Comparison and By Pair / By Session so they always show the same window ──
+  const [challengePeriod, setChallengePeriod] = useState('week')
+  const [personalPeriod, setPersonalPeriod] = useState('week')
+
+  const challengeRange = useMemo(() => getRanges(challengePeriod), [challengePeriod])
+  const personalRange = useMemo(() => getRanges(personalPeriod), [personalPeriod])
+
+  const scopeLabel = (period, range) => period === 'week'
+    ? `This week (Mon–Sun, ${range.curStart.getMonth() + 1}/${range.curStart.getDate()}\u2013${range.curEnd.getMonth() + 1}/${range.curEnd.getDate()})`
+    : `This month (${range.curStart.toLocaleDateString('en-US', { month: 'short' })} ${range.curStart.getDate()}\u2013${range.curEnd.getDate()})`
+
+  // ── By Pair / By Session — pooled across all active challenge accounts,
+  // scoped to the same week/month window as Period Comparison above ──
+  const challengePeriodTrades = useMemo(() => tradesInRange(challengeTrades, challengeRange.curStart, challengeRange.curEnd), [challengeTrades, challengeRange])
+  const byPair = useMemo(() => computeGroupBreakdown(challengePeriodTrades, accountsById, t => t.pair ? t.pair.toUpperCase() : null), [challengePeriodTrades, accountsById])
+  const bySession = useMemo(() => computeGroupBreakdown(challengePeriodTrades, accountsById, t => t.session || null), [challengePeriodTrades, accountsById])
+
+  // ── Personal account breakdowns (isolated, no drawdown framing), same
+  // period-scoping treatment ──
+  const personalPeriodTrades = useMemo(() => tradesInRange(personalTrades, personalRange.curStart, personalRange.curEnd), [personalTrades, personalRange])
+  const personalByPair = useMemo(() => computeGroupBreakdown(personalPeriodTrades, accountsById, t => t.pair ? t.pair.toUpperCase() : null), [personalPeriodTrades, accountsById])
+  const personalBySession = useMemo(() => computeGroupBreakdown(personalPeriodTrades, accountsById, t => t.session || null), [personalPeriodTrades, accountsById])
+
+  const lowSampleFootnote = `Low sample sizes (under ~${LOW_SAMPLE_THRESHOLD} trades) shown in amber — too early to call a trend.`
+
   return (
     <>
-      <style>{`
-        @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        * { box-sizing: border-box; }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: #0a0a0a; }
-        ::-webkit-scrollbar-thumb { background: #222; border-radius: 4px; }
-      `}</style>
-
-      <div style={{ display: 'flex', background: T.bg, minHeight: '100vh' }}>
+      <style>{`@keyframes shimmer { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }`}</style>
+      <div style={{ display: 'flex', minHeight: '100vh', background: T.bg }}>
         <Sidebar />
         <main style={{
+          flex: 1,
           marginLeft: isMobile ? 0 : (collapsed ? 60 : 220),
-          transition: 'margin-left 0.2s ease',
-          flex: 1, minHeight: '100vh',
-          padding: isMobile ? '60px 12px calc(60px + env(safe-area-inset-bottom) + 24px)' : '32px 36px',
-          maxWidth: '100%',
+          padding: isMobile ? '64px 16px 80px' : '40px',
+          transition: 'margin-left 0.2s',
         }}>
+          <div style={{ marginBottom: isMobile ? 20 : 32 }}>
+            <h1 style={{ fontFamily: 'Inter, sans-serif', fontSize: isMobile ? 20 : 22, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 4px 0' }}>
+              Analytics
+            </h1>
+            <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: 'var(--text-muted)', margin: 0 }}>
+              Where your edge is, and where it isn't.
+            </p>
+          </div>
 
-          {/* Mobile header */}
-          {isMobile && (
-            <>
-              <div style={{
-                position: 'fixed', top: 0, left: 0, right: 0, height: 52,
-                display: 'flex', alignItems: 'center',
-                paddingLeft: 52, paddingRight: 14,
-                zIndex: 201, pointerEvents: 'none',
-              }}>
-                <span style={{ fontFamily: font.body, fontSize: 15, fontWeight: 500, color: '#e0e0e0' }}>
-                  Analytics
-                </span>
+          {loading ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+              <div style={{ background: T.card, border: `0.5px solid ${T.cardBorder}`, borderRadius: 12, padding: 24 }}>
+                <Skeleton h={12} w="160px" mb={16} />
+                <Skeleton h={60} />
               </div>
-              <div style={{
-                position: 'fixed', top: 0, right: 14, height: 52,
-                display: 'flex', alignItems: 'center', zIndex: 202,
-              }}>
-                <AccountSwitcher
-                  onSwitch={(acc) => { setSelectedId(acc?.id || null); setActiveAccount(acc) }}
-                  defaultAccountId={savedAccountId}
-                  mobile showBalance={false} compact showSelectedNameOnMobile
-                />
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 20 }}>
+                {[0, 1].map(i => (
+                  <div key={i} style={{ background: T.card, border: `0.5px solid ${T.cardBorder}`, borderRadius: 12, padding: 24 }}>
+                    <Skeleton h={12} w="100px" mb={16} />
+                    <Skeleton h={40} w="60%" />
+                  </div>
+                ))}
               </div>
-            </>
-          )}
-
-          {/* Desktop header */}
-          {!isMobile && (
-            <>
-              <div style={{ marginBottom: 28 }}>
-                <h1 style={{ fontFamily: font.heading, fontSize: 22, fontWeight: 700,
-                             color: T.text, margin: 0, marginBottom: 4 }}>
-                  Analytics
-                </h1>
-                <div style={{ fontFamily: font.body, fontSize: 13, color: T.sub }}>
-                  Deep performance analysis — edge, risk, and consistency
-                </div>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center',
-                            justifyContent: 'space-between', marginBottom: 24 }}>
-                <div>
-                  {activeAccount && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                      <span style={{ fontFamily: font.heading, fontSize: 18, fontWeight: 700, color: T.text }}>
-                        {activeAccount.name || activeAccount.firm_name || 'Account'}
-                      </span>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        {activeAccount.account_size && (
-                          <span style={{ fontFamily: font.mono, fontSize: 11, color: T.sub }}>
-                            ${Number(activeAccount.account_size).toLocaleString()}
-                          </span>
-                        )}
-                        {activeAccount.created_at && (
-                          <span style={{ fontFamily: font.mono, fontSize: 11, color: T.muted }}>
-                            Since {new Date(activeAccount.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <AccountSwitcher
-                  onSwitch={(acc) => { setSelectedId(acc?.id || null); setActiveAccount(acc) }}
-                  defaultAccountId={savedAccountId}
-                  showBalance={false}
-                />
-              </div>
-            </>
-          )}
-
-          {!selectedId ? (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: 60 }}>
-              <span style={{ fontFamily: font.mono, fontSize: 12, color: '#999' }}>
-                Select an account to view analytics
-              </span>
             </div>
-          ) : loading ? (
-            <LoadingSkeleton />
-          ) : trades.length === 0 ? (
+          ) : accounts.length === 0 ? (
             <Card mobile={isMobile}>
-              <EmptyState message="No trades logged for this account yet." />
+              <EmptyState message="No accounts yet — add one from Challenge Tracker to see analytics here." />
             </Card>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? 12 : 24 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? 16 : 24 }}>
 
-              {/* ── 1. Stat Cards (8) ── */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)',
-                gap: isMobile ? 8 : 12,
-              }}>
-                <StatCard
-                  label="Expectancy"
-                  value={stats ? (stats.expectancy >= 0 ? '+$' : '-$') + Math.abs(stats.expectancy).toFixed(2) : '—'}
-                  valueColor={stats ? pnlColor(stats.expectancy) : T.text}
-                  sub="per trade"
-                  mobile={isMobile}
-                />
-                <StatCard
-                  label="Avg RR"
-                  value={stats ? fmtRR(stats.avgRR) : '—'}
-                  valueColor={stats && stats.avgRR >= 1 ? T.green : T.amber}
-                  mobile={isMobile}
-                />
-                <StatCard
-                  label="Best Trade"
-                  value={stats ? fmtPnl(stats.best) : '—'}
-                  valueColor={T.green}
-                  mobile={isMobile}
-                />
-                <StatCard
-                  label="Worst Trade"
-                  value={stats ? fmtPnl(stats.worst) : '—'}
-                  valueColor={T.red}
-                  mobile={isMobile}
-                />
-              </div>
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)',
-                gap: isMobile ? 8 : 12,
-              }}>
-                <StatCard
-                  label="Avg Win"
-                  value={stats ? '+$' + stats.avgWin.toFixed(2) : '—'}
-                  valueColor={T.green}
-                  mobile={isMobile}
-                />
-                <StatCard
-                  label="Avg Loss"
-                  value={stats ? '-$' + stats.avgLoss.toFixed(2) : '—'}
-                  valueColor={T.red}
-                  mobile={isMobile}
-                />
-                <StatCard
-                  label="Max Consec. Wins"
-                  value={stats ? stats.maxConsecW : '—'}
-                  valueColor={T.green}
-                  mobile={isMobile}
-                />
-                <StatCard
-                  label="Max Consec. Losses"
-                  value={stats ? stats.maxConsecL : '—'}
-                  valueColor={T.red}
-                  mobile={isMobile}
-                />
-              </div>
+              {challengeAccounts.length > 0 && (
+                <>
+                  {personalAccounts.length > 0 && (
+                    <div style={{ fontFamily: font.heading, fontSize: isMobile ? 12 : 13, fontWeight: 600, color: T.sub, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                      Challenge Accounts
+                    </div>
+                  )}
 
-              {/* ── 2. Drawdown Curve ── */}
-              <Card mobile={isMobile}>
-                <SectionTitle mobile={isMobile}>Drawdown Curve</SectionTitle>
-                <ResponsiveContainer width="100%" height={180}>
-                  <AreaChart data={drawdownData} margin={{ top: 4, right: 12, left: 0, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="ddGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%"  stopColor={T.red} stopOpacity={0.3} />
-                        <stop offset="95%" stopColor={T.red} stopOpacity={0.02} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid stroke="#181818" strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="date"
-                           tick={{ fontFamily: font.mono, fontSize: 10, fill: T.muted }}
-                           tickLine={false} axisLine={false} />
-                    <YAxis tick={{ fontFamily: font.mono, fontSize: 10, fill: T.muted }}
-                           tickLine={false} axisLine={false}
-                           tickFormatter={v => `${v}%`} width={40} />
-                    <ReferenceLine y={0} stroke="#333" strokeDasharray="3 3" />
-                    <Tooltip
-                      content={({ active, payload, label }) => {
-                        if (!active || !payload?.length) return null
-                        return (
-                          <div style={tooltipStyle}>
-                            <div style={{ color: T.sub, marginBottom: 4 }}>{label}</div>
-                            <div style={{ color: T.red, fontWeight: 600 }}>
-                              {payload[0].value.toFixed(2)}%
-                            </div>
-                          </div>
-                        )
-                      }}
-                    />
-                    <Area type="monotone" dataKey="drawdown"
-                          stroke={T.red} strokeWidth={1.5}
-                          fill="url(#ddGrad)" dot={false}
-                          activeDot={{ r: 4, fill: T.red, stroke: T.bg }} />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </Card>
+                  {/* ── 1. Period Comparison ── */}
+                  <PeriodComparison trades={challengeTrades} accountsById={accountsById} mobile={isMobile} period={challengePeriod} onPeriodChange={setChallengePeriod} />
 
-              {/* ── 3. P&L by Day + P&L by Session ── */}
-              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? 12 : 24 }}>
-
-                <Card mobile={isMobile}>
-                  <SectionTitle mobile={isMobile}>P&L by Day of Week</SectionTitle>
-                  <ResponsiveContainer width="100%" height={200}>
-                    <BarChart data={dowData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-                      <CartesianGrid stroke="#181818" strokeDasharray="3 3" vertical={false} />
-                      <XAxis dataKey="day"
-                             tick={{ fontFamily: font.mono, fontSize: 10, fill: T.muted }}
-                             tickLine={false} axisLine={false} />
-                      <YAxis tick={{ fontFamily: font.mono, fontSize: 10, fill: T.muted }}
-                             tickLine={false} axisLine={false}
-                             tickFormatter={v => `$${v}`} width={44} />
-                      <Tooltip content={<PnLTooltip />} />
-                      <Bar dataKey="pnl" name="Net P&L" radius={[4, 4, 0, 0]} maxBarSize={48}>
-                        {dowData.map((entry, i) => (
-                          <Cell key={i} fill={entry.pnl >= 0 ? T.green : T.red} />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </Card>
-
-                <Card mobile={isMobile}>
-                  <SectionTitle mobile={isMobile}>P&L by Session</SectionTitle>
-                  <ResponsiveContainer width="100%" height={150}>
-                    <BarChart data={sessionData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-                      <CartesianGrid stroke="#181818" strokeDasharray="3 3" vertical={false} />
-                      <XAxis dataKey="session"
-                             tick={{ fontFamily: font.mono, fontSize: 10, fill: T.muted }}
-                             tickLine={false} axisLine={false} />
-                      <YAxis tick={{ fontFamily: font.mono, fontSize: 10, fill: T.muted }}
-                             tickLine={false} axisLine={false}
-                             tickFormatter={v => `$${v}`} width={44} />
-                      <Tooltip content={<PnLTooltip />} />
-                      <Bar dataKey="pnl" name="Net P&L" radius={[4, 4, 0, 0]} maxBarSize={52}>
-                        {sessionData.map((entry, i) => (
-                          <Cell key={i} fill={entry.pnl >= 0 ? T.green : T.red} />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                  {/* Win rate row */}
-                  <div style={{ display: 'flex', justifyContent: 'space-around', marginTop: 10 }}>
-                    {sessionData.map((s, i) => (
-                      <div key={i} style={{ textAlign: 'center' }}>
-                        <div style={{ fontFamily: font.mono, fontSize: 9, color: T.muted,
-                                      textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 3 }}>
-                          Win Rate
-                        </div>
-                        <div style={{ fontFamily: font.heading, fontSize: 13, fontWeight: 600,
-                                      color: s.winRate >= 50 ? T.green : T.amber }}>
-                          {s.winRate}%
-                        </div>
-                        <div style={{ fontFamily: font.mono, fontSize: 9, color: T.muted, marginTop: 2 }}>
-                          {s.trades} trade{s.trades !== 1 ? 's' : ''}
-                        </div>
-                      </div>
-                    ))}
+                  {/* ── 2. Best / Needs Attention ── */}
+                  <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? 16 : 24 }}>
+                    <HighlightCard label="Best Performing Account" metrics={bestExtended} accountTrades={bestAccTrades} accent={T.green} pairLabel="Best Pair" mobile={isMobile} />
+                    <HighlightCard label="Needs Attention" metrics={worstExtended} accountTrades={worstAccTrades} accent={T.red} pairLabel="Worst Pair" mobile={isMobile} />
                   </div>
-                </Card>
-              </div>
 
-              {/* ── 4. RR vs P&L Scatter ── */}
-              <Card mobile={isMobile}>
-                <SectionTitle mobile={isMobile}>RR vs P&L — Scatter</SectionTitle>
-                {scatterData.length < 2 ? (
-                  <EmptyState message="Need more trades with RR data." />
-                ) : (
-                  <ResponsiveContainer width="100%" height={220}>
-                    <ScatterChart margin={{ top: 4, right: 12, left: 0, bottom: 0 }}>
-                      <CartesianGrid stroke="#181818" strokeDasharray="3 3" />
-                      <XAxis dataKey="rr" name="RR" type="number"
-                             tick={{ fontFamily: font.mono, fontSize: 10, fill: T.muted }}
-                             tickLine={false} axisLine={false}
-                             label={{ value: 'RR', position: 'insideBottomRight', offset: -4,
-                                      style: { fontFamily: font.mono, fontSize: 9, fill: T.muted } }} />
-                      <YAxis dataKey="pnl" name="P&L" type="number"
-                             tick={{ fontFamily: font.mono, fontSize: 10, fill: T.muted }}
-                             tickLine={false} axisLine={false}
-                             tickFormatter={v => `$${v}`} width={50} />
-                      <ZAxis range={[40, 40]} />
-                      <ReferenceLine y={0} stroke="#333" strokeDasharray="3 3" />
-                      <ReferenceLine x={0} stroke="#333" strokeDasharray="3 3" />
-                      <Tooltip content={<ScatterTooltip />} />
-                      <Scatter data={scatterData} shape={(props) => {
-                        const { cx, cy, payload } = props
-                        return <circle cx={cx} cy={cy} r={5}
-                          fill={payload.pnl >= 0 ? T.green : T.red}
-                          fillOpacity={0.7} stroke="none" />
-                      }} />
-                    </ScatterChart>
-                  </ResponsiveContainer>
-                )}
-              </Card>
+                  {/* ── 3. By Pair (same week/month window as Period Comparison above) ── */}
+                  <GroupTable title="By Pair" breakdown={byPair} mobile={isMobile} footnote={lowSampleFootnote} scopeLabel={scopeLabel(challengePeriod, challengeRange)} />
 
-              {/* ── 5. Hour × Day Heatmap ── */}
-              <Card mobile={isMobile}>
-                <SectionTitle mobile={isMobile}>Best Trading Hours</SectionTitle>
-                <HourDayHeatmap trades={trades} mobile={isMobile} />
-              </Card>
+                  {/* ── 4. By Session ── */}
+                  <GroupTable title="By Session" breakdown={bySession} mobile={isMobile} footnote={lowSampleFootnote} scopeLabel={scopeLabel(challengePeriod, challengeRange)} />
 
-              {/* ── 6. Long vs Short ── */}
-              <Card mobile={isMobile}>
-                <SectionTitle mobile={isMobile}>Long vs Short</SectionTitle>
-                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? 16 : 32 }}>
-                  <ResponsiveContainer width="100%" height={180}>
-                    <BarChart data={dirData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-                      <CartesianGrid stroke="#181818" strokeDasharray="3 3" vertical={false} />
-                      <XAxis dataKey="dir"
-                             tick={{ fontFamily: font.mono, fontSize: 10, fill: T.muted }}
-                             tickLine={false} axisLine={false} />
-                      <YAxis tick={{ fontFamily: font.mono, fontSize: 10, fill: T.muted }}
-                             tickLine={false} axisLine={false}
-                             tickFormatter={v => `$${v}`} width={44} />
-                      <Tooltip content={<MultiTooltip />} />
-                      <Bar dataKey="pnl" name="Net P&L" radius={[4, 4, 0, 0]} maxBarSize={60}>
-                        <Cell fill={T.green} />
-                        <Cell fill={T.red} />
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                  {/* Stats table */}
-                  <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 16 }}>
-                    {dirData.map(d => (
-                      <div key={d.dir}>
-                        <div style={{ fontFamily: font.mono, fontSize: 10, color: T.sub,
-                                      textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
-                          {d.dir}
-                        </div>
-                        <div style={{ display: 'flex', gap: isMobile ? 16 : 24 }}>
-                          {[
-                            { label: 'Trades',  value: d.count,             color: T.text },
-                            { label: 'Win %',   value: d.winRate + '%',     color: d.winRate >= 50 ? T.green : T.amber },
-                            { label: 'P&L',     value: fmtPnl(d.pnl),      color: pnlColor(d.pnl) },
-                          ].map(item => (
-                            <div key={item.label}>
-                              <div style={{ fontFamily: font.mono, fontSize: 9, color: T.muted,
-                                            textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 3 }}>
-                                {item.label}
+                  {/* ── 5. Account Comparison ── */}
+                  <Card mobile={isMobile}>
+                    <SectionTitle mobile={isMobile}>Account Comparison</SectionTitle>
+                    {activeMetrics.length === 0 ? (
+                      <EmptyState message="No active accounts right now." />
+                    ) : isMobile ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                        {activeMetrics.map(m => {
+                          const health = HEALTH[m.healthStatus]
+                          return (
+                            <div key={m.accountId} style={{
+                              background: 'var(--bg-surface-2)', border: '0.5px solid var(--border-color)',
+                              borderRadius: '10px', padding: '12px 14px',
+                            }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
+                                <div>
+                                  <div style={{ fontFamily: font.body, fontSize: 13, color: T.text, fontWeight: 500 }}>{m.name}</div>
+                                  <div style={{ fontFamily: font.mono, fontSize: 10, color: T.muted, marginTop: 2 }}>{m.firmName || '—'}</div>
+                                </div>
+                                <span style={{ background: health.bg, border: `0.5px solid ${health.border}`, borderRadius: '20px', padding: '4px 12px', color: health.color, fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: '500', whiteSpace: 'nowrap', flexShrink: 0, marginLeft: 8 }}>{health.label}</span>
                               </div>
-                              <div style={{ fontFamily: font.heading, fontSize: 15, fontWeight: 600, color: item.color }}>
-                                {item.value}
+                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 16px' }}>
+                                <div>
+                                  <div style={{ fontFamily: font.mono, fontSize: 9, color: T.muted, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 3 }}>P&L</div>
+                                  <div style={{ fontFamily: font.mono, fontSize: 13, fontWeight: 500, color: pnlColor(m.netPnl) }}>{fmtPct(m.netPnlPct)}</div>
+                                </div>
+                                <div>
+                                  <div style={{ fontFamily: font.mono, fontSize: 9, color: T.muted, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 3 }}>Win Rate</div>
+                                  <div style={{ fontFamily: font.mono, fontSize: 13, color: m.winRate >= 50 ? T.green : T.amber }}>{m.winRate.toFixed(0)}%</div>
+                                </div>
+                                <div>
+                                  <div style={{ fontFamily: font.mono, fontSize: 9, color: T.muted, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 3 }}>Profit Factor</div>
+                                  <div style={{ fontFamily: font.mono, fontSize: 13, color: m.profitFactor >= 1 ? T.green : T.red }}>{fmtPF(m.profitFactor)}</div>
+                                </div>
+                                <div>
+                                  <div style={{ fontFamily: font.mono, fontSize: 9, color: T.muted, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 3 }}>Drawdown</div>
+                                  <div style={{ fontFamily: font.mono, fontSize: 13, fontWeight: 500, color: m.ddConsumedPct >= 60 ? T.red : T.sub }}>
+                                    {m.ddConsumedPct.toFixed(0)}% <span style={{ color: T.muted, fontWeight: 400 }}>of limit</span>
+                                  </div>
+                                </div>
                               </div>
                             </div>
-                          ))}
-                        </div>
+                          )
+                        })}
                       </div>
-                    ))}
-                  </div>
-                </div>
-              </Card>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        {(() => {
+                          const maxAbs = Math.max(1, ...activeMetrics.map(m => Math.abs(m.netPnlPct)))
+                          return activeMetrics.map((m, i) => {
+                            const health = HEALTH[m.healthStatus]
+                            const widthPct = Math.min(100, (Math.abs(m.netPnlPct) / maxAbs) * 100)
+                            const barColor = pnlColor(m.netPnl)
+                            return (
+                              <div key={m.accountId} style={{
+                                display: 'flex', alignItems: 'center', gap: 14, padding: '12px 0',
+                                borderBottom: i < activeMetrics.length - 1 ? `0.5px solid ${T.cardBorder}` : 'none',
+                              }}>
+                                <div style={{ width: 120, flexShrink: 0 }}>
+                                  <div style={{ fontFamily: font.body, fontSize: 13, fontWeight: 500, color: T.text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.name}</div>
+                                  <div style={{ fontFamily: font.mono, fontSize: 10, color: T.muted, marginTop: 1 }}>{m.firmName || '—'}</div>
+                                </div>
+                                <div style={{ flex: 1, height: 8, background: 'var(--bg-hover)', borderRadius: 4, overflow: 'hidden' }}>
+                                  <div style={{ width: `${widthPct}%`, height: '100%', background: barColor, borderRadius: 4 }} />
+                                </div>
+                                <div style={{ width: 64, flexShrink: 0, textAlign: 'right', fontFamily: font.mono, fontSize: 13, fontWeight: 600, color: barColor }}>{fmtPct(m.netPnlPct)}</div>
+                                <div style={{ width: 46, flexShrink: 0, textAlign: 'right', fontFamily: font.mono, fontSize: 11, color: m.winRate >= 50 ? T.green : T.amber }}>{m.winRate.toFixed(0)}% WR</div>
+                                <div style={{ width: 90, flexShrink: 0, textAlign: 'right' }}>
+                                  <div style={{ fontFamily: font.mono, fontSize: 11, color: m.ddConsumedPct >= 60 ? T.red : T.muted }}>{m.ddConsumedPct.toFixed(0)}% DD</div>
+                                </div>
+                                <span style={{ background: health.bg, border: `0.5px solid ${health.border}`, borderRadius: '20px', padding: '4px 10px', color: health.color, fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: '500', whiteSpace: 'nowrap', flexShrink: 0 }}>{health.label}</span>
+                              </div>
+                            )
+                          })
+                        })()}
+                      </div>
+                    )}
+                  </Card>
+                </>
+              )}
 
-              {/* ── 7. P&L Distribution Histogram ── */}
-              <Card mobile={isMobile}>
-                <SectionTitle mobile={isMobile}>P&L Distribution</SectionTitle>
-                <ResponsiveContainer width="100%" height={200}>
-                  <BarChart data={histData} margin={{ top: 4, right: 12, left: 0, bottom: 0 }}>
-                    <CartesianGrid stroke="#181818" strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="label"
-                           tick={{ fontFamily: font.mono, fontSize: 9, fill: T.muted }}
-                           tickLine={false} axisLine={false} />
-                    <YAxis tick={{ fontFamily: font.mono, fontSize: 10, fill: T.muted }}
-                           tickLine={false} axisLine={false}
-                           allowDecimals={false} width={28} />
-                    <Tooltip
-                      content={({ active, payload, label }) => {
-                        if (!active || !payload?.length) return null
-                        return (
-                          <div style={tooltipStyle}>
-                            <div style={{ color: T.sub, marginBottom: 4 }}>Range: {label}</div>
-                            <div style={{ color: T.text }}>{payload[0].value} trade{payload[0].value !== 1 ? 's' : ''}</div>
-                          </div>
-                        )
-                      }}
-                    />
-                    <Bar dataKey="count" name="Trades" radius={[4, 4, 0, 0]} maxBarSize={36}>
-                      {histData.map((entry, i) => (
-                        <Cell key={i} fill={entry.color} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </Card>
-
-              {/* ── 8. Pair Performance table ── */}
-              <Card mobile={isMobile} style={{ marginBottom: isMobile ? 0 : 40 }}>
-                <SectionTitle mobile={isMobile}>Pair Performance</SectionTitle>
-                {pairData.length === 0 ? (
-                  <EmptyState message="No pair data available." />
-                ) : (
-                  <div style={{ width: '100%', overflowX: isMobile ? 'auto' : 'visible', WebkitOverflowScrolling: 'touch' }}>
-                    <table style={{ width: '100%', minWidth: isMobile ? 480 : '100%', borderCollapse: 'collapse' }}>
-                      <thead>
-                        <tr>
-                          {['Pair', 'Trades', 'Win Rate', 'Net P&L', 'Avg RR'].map(h => (
-                            <th key={h} style={{
-                              fontFamily: font.mono, fontSize: 10, color: T.sub,
-                              textAlign: 'left', padding: '0 0 12px',
-                              letterSpacing: '0.07em', textTransform: 'uppercase',
-                              borderBottom: `0.5px solid ${T.cardBorder}`,
-                            }}>{h}</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {pairData.map((row, i) => (
-                          <tr key={row.pair} style={{
-                            borderBottom: i < pairData.length - 1
-                              ? `0.5px solid ${T.cardBorder}` : 'none',
-                          }}>
-                            <td style={{ padding: '12px 0', fontFamily: font.mono,
-                                         fontSize: 13, color: T.text, fontWeight: 500 }}>
-                              {row.pair}
-                            </td>
-                            <td style={{ padding: '12px 0', fontFamily: font.mono,
-                                         fontSize: 12, color: T.sub }}>{row.trades}</td>
-                            <td style={{ padding: '12px 0', fontFamily: font.mono,
-                                         fontSize: 12, color: parseFloat(row.winRate) >= 50 ? T.green : T.amber }}>
-                              {row.winRate}%
-                            </td>
-                            <td style={{ padding: '12px 0', fontFamily: font.mono,
-                                         fontSize: 12, color: pnlColor(row.net), fontWeight: 500 }}>
-                              {fmtPnl(row.net)}
-                            </td>
-                            <td style={{ padding: '12px 0', fontFamily: font.mono,
-                                         fontSize: 12, color: T.sub }}>{row.avgRR}R</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+              {/* ── 6. Personal Account section (isolated, no challenge rules) ── */}
+              {personalAccounts.length > 0 && (
+                <>
+                  <Divider label="Personal account — no challenge rules" mobile={isMobile} />
+                  <PeriodComparison trades={personalTrades} accountsById={accountsById} mobile={isMobile} period={personalPeriod} onPeriodChange={setPersonalPeriod} />
+                  <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? 16 : 24 }}>
+                    <GroupTable title="By Pair" breakdown={personalByPair} mobile={isMobile} footnote={lowSampleFootnote} scopeLabel={scopeLabel(personalPeriod, personalRange)} />
+                    <GroupTable title="By Session" breakdown={personalBySession} mobile={isMobile} footnote={lowSampleFootnote} scopeLabel={scopeLabel(personalPeriod, personalRange)} />
                   </div>
-                )}
-              </Card>
+                </>
+              )}
 
             </div>
           )}
         </main>
       </div>
     </>
-  )
-}
-
-// ─── Loading Skeleton ──────────────────────────────────────────────
-function LoadingSkeleton() {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
-        {[...Array(8)].map((_, i) => (
-          <div key={i} style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: 10, padding: '18px 20px' }}>
-            <Skeleton h={10} w="60%" mb={10} />
-            <Skeleton h={22} w="80%" />
-          </div>
-        ))}
-      </div>
-      <div style={{ background: '#111', border: '0.5px solid #1e1e1e', borderRadius: 12, padding: 24 }}>
-        <Skeleton h={12} w="140px" mb={16} />
-        <Skeleton h={180} />
-      </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
-        {[0, 1, 2, 3].map(i => (
-          <div key={i} style={{ background: '#111', border: '0.5px solid #1e1e1e', borderRadius: 12, padding: 24 }}>
-            <Skeleton h={12} w="140px" mb={16} />
-            <Skeleton h={200} />
-          </div>
-        ))}
-      </div>
-    </div>
   )
 }

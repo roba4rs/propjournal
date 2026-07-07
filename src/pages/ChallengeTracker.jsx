@@ -170,11 +170,11 @@ function EditChallengeModal({ challenge, onClose, onSaved, onDeleted }) {
 
   const inputStyle = {
     width: '100%',
-    background: '#0d0d0d',
-    border: '0.5px solid #222',
+    background: 'var(--bg-surface)',
+    border: '0.5px solid var(--border-color-2)',
     borderRadius: '8px',
     padding: '10px 14px',
-    color: '#fff',
+    color: 'var(--text-primary)',
     fontFamily: 'Inter, sans-serif',
     fontSize: '13px',
     outline: 'none',
@@ -182,7 +182,7 @@ function EditChallengeModal({ challenge, onClose, onSaved, onDeleted }) {
   }
   const labelStyle = {
     display: 'block',
-    color: '#777',
+    color: 'var(--text-faint)',
     fontFamily: 'JetBrains Mono, monospace',
     fontSize: '10px',
     fontWeight: '500',
@@ -190,9 +190,9 @@ function EditChallengeModal({ challenge, onClose, onSaved, onDeleted }) {
     textTransform: 'uppercase',
     marginBottom: '6px',
   }
-  const hintStyle = { color: 'oklch(0.72 0.17 152)', fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', marginTop: '4px' }
+  const hintStyle = { color: 'var(--brand)', fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', marginTop: '4px' }
   const sectionLabel = {
-    color: 'oklch(0.72 0.17 152)',
+    color: 'var(--brand)',
     fontFamily: 'JetBrains Mono, monospace',
     fontSize: '10px',
     fontWeight: '600',
@@ -203,14 +203,14 @@ function EditChallengeModal({ challenge, onClose, onSaved, onDeleted }) {
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-      <div style={{ background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '12px', padding: '28px 32px', width: '100%', maxWidth: '560px', maxHeight: '90vh', overflowY: 'auto' }}>
+      <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '12px', padding: '28px 32px', width: '100%', maxWidth: '560px', maxHeight: '90vh', overflowY: 'auto' }}>
 
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-          <h2 style={{ color: '#fff', fontFamily: 'Inter, sans-serif', fontSize: '18px', fontWeight: '700', margin: 0, letterSpacing: '0.03em' }}>
+          <h2 style={{ color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontSize: '18px', fontWeight: '700', margin: 0, letterSpacing: '0.03em' }}>
             Edit Challenge
           </h2>
-          <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: '#777', fontSize: '20px', cursor: 'pointer', lineHeight: 1 }}>×</button>
+          <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: 'var(--text-faint)', fontSize: '20px', cursor: 'pointer', lineHeight: 1 }}>×</button>
         </div>
 
         {/* ── Section: Firm & Account ── */}
@@ -282,18 +282,18 @@ function EditChallengeModal({ challenge, onClose, onSaved, onDeleted }) {
         </div>
 
         {error && (
-          <div style={{ background: '#1e0d0d', border: '0.5px solid #2e1515', borderRadius: '8px', padding: '12px', marginBottom: '16px', color: '#c03535', fontSize: '13px', fontFamily: 'Inter, sans-serif' }}>
+          <div style={{ background: 'var(--red-bg-2)', border: '0.5px solid var(--red-bg)', borderRadius: '8px', padding: '12px', marginBottom: '16px', color: 'var(--red)', fontSize: '13px', fontFamily: 'Inter, sans-serif' }}>
             {error}
           </div>
         )}
 
         <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
-          <button onClick={onClose} style={{ flex: 1, background: 'transparent', border: '0.5px solid #1e1e1e', borderRadius: '8px', padding: '11px', color: '#999', fontFamily: 'Inter, sans-serif', fontSize: '13px', cursor: 'pointer' }}>
+          <button onClick={onClose} style={{ flex: 1, background: 'transparent', border: '0.5px solid var(--border-color)', borderRadius: '8px', padding: '11px', color: 'var(--text-muted)', fontFamily: 'Inter, sans-serif', fontSize: '13px', cursor: 'pointer' }}>
             Cancel
           </button>
-          <button onClick={handleSave} disabled={loading} style={{ flex: 2, background: 'oklch(0.72 0.17 152)', border: 'none', borderRadius: '8px', padding: '11px', color: '#000', fontFamily: 'Inter, sans-serif', fontWeight: '600', fontSize: '13px', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1, transition: 'background 0.15s' }}
-            onMouseEnter={e => { if (!loading) e.currentTarget.style.background = 'oklch(0.78 0.17 152)' }}
-            onMouseLeave={e => { if (!loading) e.currentTarget.style.background = 'oklch(0.72 0.17 152)' }}
+          <button onClick={handleSave} disabled={loading} style={{ flex: 2, background: 'var(--brand)', border: 'none', borderRadius: '8px', padding: '11px', color: 'var(--brand-fg)', fontFamily: 'Inter, sans-serif', fontWeight: '600', fontSize: '13px', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1, transition: 'background 0.15s' }}
+            onMouseEnter={e => { if (!loading) e.currentTarget.style.background = 'var(--brand-hover)' }}
+            onMouseLeave={e => { if (!loading) e.currentTarget.style.background = 'var(--brand)' }}
           >
             {loading ? 'Saving...' : 'Save Changes'}
           </button>
@@ -301,53 +301,53 @@ function EditChallengeModal({ challenge, onClose, onSaved, onDeleted }) {
 
         {/* ── Manual Fail Override ── */}
         {challenge.failure_reason ? (
-          <div style={{ background: '#1e0d0d', border: '0.5px solid #2e1515', borderRadius: '8px', padding: '16px', marginBottom: '16px' }}>
-            <p style={{ color: '#c03535', fontFamily: 'JetBrains Mono, monospace', fontSize: '10px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 6px 0' }}>Marked as Failed</p>
-            <p style={{ color: '#aaa', fontFamily: 'Inter, sans-serif', fontSize: '13px', margin: '0 0 4px 0' }}>Reason: <span style={{ color: '#ccc' }}>{challenge.failure_reason}</span></p>
-            {challenge.failure_notes && <p style={{ color: '#999', fontFamily: 'Inter, sans-serif', fontSize: '12px', margin: 0 }}>{challenge.failure_notes}</p>}
+          <div style={{ background: 'var(--red-bg-2)', border: '0.5px solid var(--red-bg)', borderRadius: '8px', padding: '16px', marginBottom: '16px' }}>
+            <p style={{ color: 'var(--red)', fontFamily: 'JetBrains Mono, monospace', fontSize: '10px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 6px 0' }}>Marked as Failed</p>
+            <p style={{ color: 'var(--text-soft)', fontFamily: 'Inter, sans-serif', fontSize: '13px', margin: '0 0 4px 0' }}>Reason: <span style={{ color: 'var(--text-soft)' }}>{challenge.failure_reason}</span></p>
+            {challenge.failure_notes && <p style={{ color: 'var(--text-muted)', fontFamily: 'Inter, sans-serif', fontSize: '12px', margin: 0 }}>{challenge.failure_notes}</p>}
           </div>
         ) : (
-          <div style={{ border: '0.5px solid #1e1e1e', borderRadius: '8px', padding: '16px', marginBottom: '16px' }}>
-            <p style={{ color: '#777', fontFamily: 'JetBrains Mono, monospace', fontSize: '10px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 6px 0' }}>Rule Violation / Manual Fail</p>
-            <p style={{ color: '#999', fontFamily: 'Inter, sans-serif', fontSize: '12px', margin: '0 0 12px 0' }}>
+          <div style={{ border: '0.5px solid var(--border-color)', borderRadius: '8px', padding: '16px', marginBottom: '16px' }}>
+            <p style={{ color: 'var(--text-faint)', fontFamily: 'JetBrains Mono, monospace', fontSize: '10px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 6px 0' }}>Rule Violation / Manual Fail</p>
+            <p style={{ color: 'var(--text-muted)', fontFamily: 'Inter, sans-serif', fontSize: '12px', margin: '0 0 12px 0' }}>
               Use this if the prop firm failed your account due to a rule violation not captured by drawdown numbers.
             </p>
             {!manualFail ? (
-              <button onClick={() => setManualFail(true)} style={{ background: 'transparent', border: '0.5px solid #2e1515', borderRadius: '6px', padding: '8px 16px', color: '#c03535', fontFamily: 'Inter, sans-serif', fontSize: '12px', cursor: 'pointer' }}>
+              <button onClick={() => setManualFail(true)} style={{ background: 'transparent', border: '0.5px solid var(--red-bg)', borderRadius: '6px', padding: '8px 16px', color: 'var(--red)', fontFamily: 'Inter, sans-serif', fontSize: '12px', cursor: 'pointer' }}>
                 Mark as Failed
               </button>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <div>
-                  <label style={{ display: 'block', color: '#777', fontFamily: 'JetBrains Mono, monospace', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px' }}>Reason *</label>
+                  <label style={{ display: 'block', color: 'var(--text-faint)', fontFamily: 'JetBrains Mono, monospace', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px' }}>Reason *</label>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                     {FAIL_REASONS.map(r => (
                       <button key={r} onClick={() => setFailReason(r)} style={{
                         padding: '6px 12px', borderRadius: '6px', cursor: 'pointer',
                         fontFamily: 'JetBrains Mono, monospace', fontSize: '11px',
-                        background: failReason === r ? '#1e0d0d' : 'transparent',
-                        border: `0.5px solid ${failReason === r ? '#c03535' : '#2a2a2a'}`,
-                        color: failReason === r ? '#c03535' : '#777',
+                        background: failReason === r ? 'var(--red-bg-2)' : 'transparent',
+                        border: `0.5px solid ${failReason === r ? 'var(--red)' : 'var(--border-color-2)'}`,
+                        color: failReason === r ? 'var(--red)' : 'var(--text-faint)',
                         transition: 'all 0.15s',
                       }}>{r}</button>
                     ))}
                   </div>
                 </div>
                 <div>
-                  <label style={{ display: 'block', color: '#777', fontFamily: 'JetBrains Mono, monospace', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px' }}>Notes (optional)</label>
+                  <label style={{ display: 'block', color: 'var(--text-faint)', fontFamily: 'JetBrains Mono, monospace', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px' }}>Notes (optional)</label>
                   <textarea
                     value={failNotes}
                     onChange={e => setFailNotes(e.target.value)}
                     placeholder="e.g. Traded XAUUSD 5 min before NFP..."
                     rows={3}
-                    style={{ width: '100%', background: '#0d0d0d', border: '0.5px solid #222', borderRadius: '8px', padding: '10px 14px', color: '#ccc', fontFamily: 'Inter, sans-serif', fontSize: '13px', outline: 'none', resize: 'vertical', boxSizing: 'border-box' }}
+                    style={{ width: '100%', background: 'var(--bg-surface)', border: '0.5px solid var(--border-color-2)', borderRadius: '8px', padding: '10px 14px', color: 'var(--text-soft)', fontFamily: 'Inter, sans-serif', fontSize: '13px', outline: 'none', resize: 'vertical', boxSizing: 'border-box' }}
                   />
                 </div>
                 <div style={{ display: 'flex', gap: '8px' }}>
-                  <button onClick={() => setManualFail(false)} style={{ background: 'transparent', border: '0.5px solid #1e1e1e', borderRadius: '6px', padding: '8px 14px', color: '#777', fontFamily: 'Inter, sans-serif', fontSize: '12px', cursor: 'pointer' }}>
+                  <button onClick={() => setManualFail(false)} style={{ background: 'transparent', border: '0.5px solid var(--border-color)', borderRadius: '6px', padding: '8px 14px', color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '12px', cursor: 'pointer' }}>
                     Cancel
                   </button>
-                  <button onClick={handleManualFail} disabled={savingFail} style={{ background: '#c03535', border: 'none', borderRadius: '6px', padding: '8px 16px', color: '#fff', fontFamily: 'Inter, sans-serif', fontWeight: '600', fontSize: '12px', cursor: savingFail ? 'not-allowed' : 'pointer', opacity: savingFail ? 0.7 : 1 }}>
+                  <button onClick={handleManualFail} disabled={savingFail} style={{ background: 'var(--red)', border: 'none', borderRadius: '6px', padding: '8px 16px', color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontWeight: '600', fontSize: '12px', cursor: savingFail ? 'not-allowed' : 'pointer', opacity: savingFail ? 0.7 : 1 }}>
                     {savingFail ? 'Saving...' : 'Confirm Failure'}
                   </button>
                 </div>
@@ -357,11 +357,11 @@ function EditChallengeModal({ challenge, onClose, onSaved, onDeleted }) {
         )}
 
         {/* Archive */}
-        <div style={{ border: '0.5px solid #1e1e1e', borderRadius: '8px', padding: '16px', marginBottom: '12px' }}>
-          <p style={{ color: '#777', fontFamily: 'JetBrains Mono, monospace', fontSize: '10px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 6px 0' }}>
+        <div style={{ border: '0.5px solid var(--border-color)', borderRadius: '8px', padding: '16px', marginBottom: '12px' }}>
+          <p style={{ color: 'var(--text-faint)', fontFamily: 'JetBrains Mono, monospace', fontSize: '10px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 6px 0' }}>
             {challenge.is_archived ? 'Archived' : 'Archive Challenge'}
           </p>
-          <p style={{ color: '#777', fontFamily: 'Inter, sans-serif', fontSize: '12px', margin: '0 0 12px 0' }}>
+          <p style={{ color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '12px', margin: '0 0 12px 0' }}>
             {challenge.is_archived
               ? 'This challenge is archived and hidden from the tracker and account switcher.'
               : 'Hide this challenge from the tracker and account switcher without deleting it.'}
@@ -371,10 +371,10 @@ function EditChallengeModal({ challenge, onClose, onSaved, onDeleted }) {
             disabled={archiving}
             style={{
               background: 'transparent',
-              border: `0.5px solid ${challenge.is_archived ? '#1a3826' : '#2a2a2a'}`,
+              border: `0.5px solid ${challenge.is_archived ? 'var(--green-bg-2)' : 'var(--border-color-2)'}`,
               borderRadius: '6px',
               padding: '8px 16px',
-              color: challenge.is_archived ? '#1bba7c' : '#999',
+              color: challenge.is_archived ? 'var(--brand)' : 'var(--text-muted)',
               fontFamily: 'Inter, sans-serif',
               fontSize: '12px',
               cursor: archiving ? 'not-allowed' : 'pointer',
@@ -386,22 +386,22 @@ function EditChallengeModal({ challenge, onClose, onSaved, onDeleted }) {
         </div>
 
         {/* Danger Zone */}
-        <div style={{ background: '#0e0a0a', border: '0.5px solid #2e1515', borderRadius: '8px', padding: '16px' }}>
-          <p style={{ color: '#c03535', fontFamily: 'JetBrains Mono, monospace', fontSize: '10px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 6px 0' }}>Danger Zone</p>
-          <p style={{ color: '#777', fontFamily: 'Inter, sans-serif', fontSize: '12px', margin: '0 0 12px 0' }}>
+        <div style={{ background: 'var(--red-bg)', border: '0.5px solid var(--red-bg-2)', borderRadius: '8px', padding: '16px' }}>
+          <p style={{ color: 'var(--red)', fontFamily: 'JetBrains Mono, monospace', fontSize: '10px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 6px 0' }}>Danger Zone</p>
+          <p style={{ color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '12px', margin: '0 0 12px 0' }}>
             Deleting this challenge will permanently remove all associated trades.
           </p>
           {!confirmDelete ? (
-            <button onClick={() => setConfirmDelete(true)} style={{ background: 'transparent', border: '0.5px solid #2e1515', borderRadius: '6px', padding: '8px 16px', color: '#c03535', fontFamily: 'Inter, sans-serif', fontSize: '12px', cursor: 'pointer' }}>
+            <button onClick={() => setConfirmDelete(true)} style={{ background: 'transparent', border: '0.5px solid var(--red-bg)', borderRadius: '6px', padding: '8px 16px', color: 'var(--red)', fontFamily: 'Inter, sans-serif', fontSize: '12px', cursor: 'pointer' }}>
               Delete Challenge
             </button>
           ) : (
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <span style={{ color: '#999', fontFamily: 'Inter, sans-serif', fontSize: '12px' }}>Are you sure?</span>
-              <button onClick={handleDelete} disabled={deleting} style={{ background: '#c03535', border: 'none', borderRadius: '6px', padding: '8px 16px', color: '#fff', fontFamily: 'Inter, sans-serif', fontSize: '12px', fontWeight: '600', cursor: deleting ? 'not-allowed' : 'pointer' }}>
+              <span style={{ color: 'var(--text-muted)', fontFamily: 'Inter, sans-serif', fontSize: '12px' }}>Are you sure?</span>
+              <button onClick={handleDelete} disabled={deleting} style={{ background: 'var(--red)', border: 'none', borderRadius: '6px', padding: '8px 16px', color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontSize: '12px', fontWeight: '600', cursor: deleting ? 'not-allowed' : 'pointer' }}>
                 {deleting ? 'Deleting...' : 'Yes, delete'}
               </button>
-              <button onClick={() => setConfirmDelete(false)} style={{ background: 'transparent', border: '0.5px solid #1e1e1e', borderRadius: '6px', padding: '8px 16px', color: '#777', fontFamily: 'Inter, sans-serif', fontSize: '12px', cursor: 'pointer' }}>
+              <button onClick={() => setConfirmDelete(false)} style={{ background: 'transparent', border: '0.5px solid var(--border-color)', borderRadius: '6px', padding: '8px 16px', color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '12px', cursor: 'pointer' }}>
                 Cancel
               </button>
             </div>
@@ -414,15 +414,15 @@ function EditChallengeModal({ challenge, onClose, onSaved, onDeleted }) {
 }
 
 const statusBadge = {
-  active: { bg: '#0f1a2e', color: '#4d9fff', border: '#1a3050', label: 'In Progress' },
-  funded: { bg: '#141f0d', color: '#7dc93f', border: '#1e2e10', label: 'Funded' },
-  passed: { bg: '#0f2219', color: 'oklch(0.72 0.17 152)', border: '#1a3826', label: 'Passed' },
-  failed: { bg: '#1e0d0d', color: '#c03535', border: '#2e1515', label: 'Failed' },
+  active: { bg: 'var(--blue-bg-2)', color: 'var(--blue)', border: 'var(--blue-bg)', label: 'In Progress' },
+  funded: { bg: 'var(--funded-bg)', color: 'var(--funded)', border: 'var(--funded-bg-2)', label: 'Funded' },
+  passed: { bg: 'var(--green-bg)', color: 'var(--brand)', border: 'var(--green-bg-2)', label: 'Passed' },
+  failed: { bg: 'var(--red-bg-2)', color: 'var(--red)', border: 'var(--red-bg)', label: 'Failed' },
 }
 
 function computeStats(trades) {
   const withPnl = trades.filter(t => t.pnl != null)
-  const netPnl = withPnl.reduce((s, t) => s + parseFloat(t.pnl), 0)
+  const netPnl = withPnl.reduce((s, t) => s + parseFloat(t.pnl) + (parseFloat(t.swap) || 0) + (parseFloat(t.commission) || 0), 0)
   const closed = trades.filter(t => t.outcome && t.outcome !== 'in_progress')
   const wins = closed.filter(t => t.outcome === 'win')
   const losses = closed.filter(t => t.outcome === 'loss')
@@ -433,7 +433,7 @@ function computeStats(trades) {
 
 function computeProgress(trades, account) {
   const withPnl = trades.filter(t => t.pnl != null)
-  const netPnl = withPnl.reduce((s, t) => s + parseFloat(t.pnl), 0)
+  const netPnl = withPnl.reduce((s, t) => s + parseFloat(t.pnl) + (parseFloat(t.swap) || 0) + (parseFloat(t.commission) || 0), 0)
   const accountSize = parseFloat(account.account_size) || 0
   const profitTarget = parseFloat(account.profit_target) || 0
   const maxDD = parseFloat(account.max_drawdown) || 0
@@ -485,19 +485,19 @@ function computeStatus(trades, account) {
   const minDays = account.min_trading_days || 0
   const accountSize = parseFloat(account.account_size) || 0
 
-  const netPnl = withPnl.reduce((s, t) => s + parseFloat(t.pnl), 0)
+  const netPnl = withPnl.reduce((s, t) => s + parseFloat(t.pnl) + (parseFloat(t.swap) || 0) + (parseFloat(t.commission) || 0), 0)
 
   let balance = accountSize
   let lowestBalance = accountSize
   for (const t of withPnl) {
-    balance += parseFloat(t.pnl)
+    balance += parseFloat(t.pnl) + (parseFloat(t.swap) || 0) + (parseFloat(t.commission) || 0)
     if (balance < lowestBalance) lowestBalance = balance
   }
   const maxDrawdownUsed = Math.max(0, accountSize - lowestBalance)
 
   const byDay = {}
   withPnl.forEach(t => {
-    byDay[t.date] = (byDay[t.date] || 0) + parseFloat(t.pnl)
+    byDay[t.date] = (byDay[t.date] || 0) + parseFloat(t.pnl) + (parseFloat(t.swap) || 0) + (parseFloat(t.commission) || 0)
   })
   const worstDayLoss = Object.values(byDay).length > 0
     ? Math.max(0, ...Object.values(byDay).map(v => -v))
@@ -520,16 +520,203 @@ function computeStatus(trades, account) {
 
 function ProgressBlock({ label, barPct, barColor, leftLabel, rightLabel }) {
   return (
-    <div style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '10px', padding: '14px' }}>
-      <p style={{ color: '#999', fontFamily: 'Inter, sans-serif', fontSize: '11px', textTransform: 'uppercase', margin: '0 0 8px 0', letterSpacing: '0.5px' }}>
+    <div style={{ background: 'var(--bg-surface-2)', border: '0.5px solid var(--border-color)', borderRadius: '10px', padding: '14px' }}>
+      <p style={{ color: 'var(--text-muted)', fontFamily: 'Inter, sans-serif', fontSize: '11px', textTransform: 'uppercase', margin: '0 0 8px 0', letterSpacing: '0.5px' }}>
         {label}
       </p>
-      <div style={{ height: '3px', background: '#181818', borderRadius: '2px', marginBottom: '6px' }}>
+      <div style={{ height: '3px', background: 'var(--bg-surface-2)', borderRadius: '2px', marginBottom: '6px' }}>
         <div style={{ height: '3px', width: `${Math.max(0, Math.min(barPct, 100))}%`, background: barColor, borderRadius: '2px', transition: 'width 0.4s ease' }} />
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         <span style={{ color: barColor, fontFamily: 'JetBrains Mono, monospace', fontSize: '12px' }}>{leftLabel}</span>
-        <span style={{ color: '#999', fontFamily: 'JetBrains Mono, monospace', fontSize: '12px' }}>{rightLabel}</span>
+        <span style={{ color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace', fontSize: '12px' }}>{rightLabel}</span>
+      </div>
+    </div>
+  )
+}
+
+// ─── Preview Modal ────────────────────────────────────────────────────────────
+const previewOutcomeMap = {
+  win:         { label: 'WIN',     bg: 'var(--green-bg)', color: 'var(--brand)', border: 'var(--green-bg-2)' },
+  loss:        { label: 'LOSS',    bg: 'var(--red-bg-2)', color: 'var(--red)', border: 'var(--red-bg)' },
+  be:          { label: 'BE',      bg: 'var(--amber-bg-2)', color: 'var(--amber)', border: 'var(--amber-bg)' },
+  in_progress: { label: 'IN PROG', bg: 'var(--blue-bg-2)', color: 'var(--blue)', border: 'var(--blue-bg)' },
+}
+
+function PreviewModal({ challenge, trades, onClose, navigate, isMobile }) {
+  const s = computeStats(trades)
+  const p = computeProgress(trades, challenge)
+  const computedStatus = computeStatus(trades, challenge)
+  const badge = statusBadge[computedStatus] || statusBadge.active
+
+  const pnlColor = s.netPnl > 0 ? 'var(--brand)' : s.netPnl < 0 ? 'var(--red)' : 'var(--text-primary)'
+  const pnlLabel = trades.length === 0 ? '$0.00'
+    : `${s.netPnl >= 0 ? '+' : ''}$${Math.abs(s.netPnl).toFixed(2)}`
+
+  const recentTrades = [...trades]
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .slice(0, 6)
+
+  const statBlock = (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '18px' }}>
+      {[
+        { label: 'P&L', value: pnlLabel, color: trades.length === 0 ? 'var(--text-primary)' : pnlColor },
+        { label: 'Win Rate', value: s.total === 0 ? '0%' : `${s.winRate.toFixed(1)}%`, color: 'var(--text-primary)' },
+        { label: 'Trades', value: String(s.total), color: 'var(--text-primary)' },
+        { label: 'W/L/BE', value: `${s.wins}/${s.losses}/${s.be}`, color: 'var(--text-primary)' },
+      ].map(stat => (
+        <div key={stat.label} style={{ background: 'var(--bg-surface-2)', border: '0.5px solid var(--border-color)', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
+          <p style={{ color: stat.color, fontFamily: 'JetBrains Mono, monospace', fontSize: '13px', margin: '0 0 4px 0' }}>{stat.value}</p>
+          <p style={{ color: 'var(--text-faint)', fontSize: '10px', margin: 0, textTransform: 'uppercase', letterSpacing: '0.4px' }}>{stat.label}</p>
+        </div>
+      ))}
+    </div>
+  )
+
+  const progressBlock = (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: isMobile ? '20px' : 0, flex: isMobile ? 'none' : 1, justifyContent: isMobile ? 'flex-start' : 'space-between' }}>
+      <ProgressBlock
+        label="Profit Target"
+        barPct={p.profitPct}
+        barColor="var(--brand)"
+        leftLabel={`${p.netPnlPct >= 0 ? '+' : ''}${p.netPnlPct.toFixed(2)}%`}
+        rightLabel={`target ${p.accountSize > 0 ? (p.profitTarget / p.accountSize * 100).toFixed(1) : '—'}%`}
+      />
+      <ProgressBlock
+        label="Max Drawdown"
+        barPct={p.maxDDBarPct}
+        barColor="var(--red)"
+        leftLabel={`${p.maxDDUsedPct.toFixed(2)}%`}
+        rightLabel={`max ${p.maxDDLimitPct.toFixed(1)}%`}
+      />
+      <ProgressBlock
+        label="Daily Drawdown"
+        barPct={p.dailyDDBarPct}
+        barColor="var(--amber)"
+        leftLabel={`${p.dailyDDUsedPct.toFixed(2)}%`}
+        rightLabel={`max ${p.dailyDDLimitPct.toFixed(1)}%`}
+      />
+      <ProgressBlock
+        label="Min Trading Days"
+        barPct={p.minDaysBarPct}
+        barColor="var(--blue)"
+        leftLabel={String(p.tradingDays)}
+        rightLabel={`need ${p.minDays || '—'}`}
+      />
+    </div>
+  )
+
+  const tradesBlock = (
+    <div style={{ marginBottom: isMobile ? '20px' : 0, flex: isMobile ? 'none' : 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+      {isMobile && (
+        <p style={{ color: 'var(--text-faint)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 10px 0' }}>Recent Trades</p>
+      )}
+      {recentTrades.length === 0 ? (
+        <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-faint-2)', fontSize: '12px', background: 'var(--bg-surface-2)', border: '0.5px solid var(--border-color)', borderRadius: '8px' }}>
+          No trades logged yet
+        </div>
+      ) : (
+        <div style={{ background: 'var(--bg-surface-2)', border: '0.5px solid var(--border-color)', borderRadius: '8px', overflow: isMobile ? 'hidden' : 'auto', flex: isMobile ? 'none' : 1, minHeight: 0, marginBottom: isMobile ? 0 : '4px' }}>
+          {recentTrades.map((t, i) => {
+            const pnlVal = t.pnl != null ? parseFloat(t.pnl) : null
+            const ob = previewOutcomeMap[t.outcome]
+            const isLong = t.direction === 'long'
+            return (
+              <div key={t.id} style={{
+                display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px',
+                borderBottom: i < recentTrades.length - 1 ? '0.5px solid var(--border-color)' : 'none',
+              }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '13px', fontWeight: '500', color: 'var(--text-secondary)' }}>{t.pair}</span>
+                  <div style={{ fontSize: '10px', color: 'var(--text-faint)', marginTop: '3px' }}>{t.date}</div>
+                </div>
+                <div style={{ width: '52px', flexShrink: 0, textAlign: 'center' }}>
+                  {ob && <span style={{ fontSize: '9px', padding: '1px 5px', borderRadius: '3px', background: ob.bg, color: ob.color, border: `0.5px solid ${ob.border}`, fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase' }}>{ob.label}</span>}
+                </div>
+                <div style={{ width: '52px', flexShrink: 0, textAlign: 'center' }}>
+                  <span style={{ fontSize: '9px', padding: '1px 5px', borderRadius: '3px', background: isLong ? 'var(--green-bg)' : 'var(--red-bg-2)', color: isLong ? 'var(--brand)' : 'var(--red)', border: `0.5px solid ${isLong ? 'var(--green-bg-2)' : 'var(--red-bg)'}`, fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase' }}>{isLong ? 'BUY' : 'SELL'}</span>
+                </div>
+                <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '13px', fontWeight: '500', color: pnlVal == null ? 'var(--text-faint)' : pnlVal >= 0 ? 'var(--brand)' : 'var(--red)', flexShrink: 0, width: '70px', textAlign: 'right' }}>
+                  {pnlVal != null ? `${pnlVal >= 0 ? '+' : ''}$${Math.abs(pnlVal).toFixed(2)}` : '—'}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+
+  const dashboardButton = (
+    <button
+      onClick={() => navigate(`/dashboard?account=${challenge.id}`)}
+      style={{ background: 'var(--brand)', border: 'none', borderRadius: '8px', padding: '10px 14px', color: 'var(--brand-fg)', fontWeight: '600', fontSize: '12px', cursor: 'pointer', width: '100%', marginTop: isMobile ? 0 : '20px', flexShrink: 0 }}
+    >
+      Go to Full Dashboard →
+    </button>
+  )
+
+  const header = (
+    <div style={{ marginBottom: '18px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <h2 style={{ color: 'var(--text-primary)', fontSize: '16px', fontWeight: '600', margin: 0 }}>{challenge.firm_name}</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ background: badge.bg, border: `0.5px solid ${badge.border}`, borderRadius: '20px', padding: '4px 12px', color: badge.color, fontSize: '11px', fontWeight: '500', whiteSpace: 'nowrap' }}>
+            {badge.label}
+          </span>
+          <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: 'var(--text-faint)', fontSize: '20px', cursor: 'pointer', lineHeight: 1, padding: 0 }}>×</button>
+        </div>
+      </div>
+      {isMobile ? (
+        <p style={{ color: 'var(--text-faint)', fontSize: '12px', margin: '4px 0 0 0' }}>
+          {challenge.phase?.replace('_', ' ').toUpperCase()} · ${Number(challenge.account_size).toLocaleString()}
+        </p>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '28px', marginTop: '4px' }}>
+          <p style={{ color: 'var(--text-faint)', fontSize: '12px', margin: 0 }}>
+            {challenge.phase?.replace('_', ' ').toUpperCase()} · ${Number(challenge.account_size).toLocaleString()}
+          </p>
+          <p style={{ color: 'var(--text-faint)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: 0 }}>Recent Trades</p>
+        </div>
+      )}
+    </div>
+  )
+
+  return (
+    <div
+      onClick={onClose}
+      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '16px' }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={isMobile
+          ? { background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '14px', padding: '24px', width: '100%', maxWidth: '480px', maxHeight: '85vh', overflowY: 'auto', fontFamily: 'Inter, sans-serif' }
+          : { background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '14px', padding: '28px 28px 32px', width: '100%', maxWidth: '860px', height: '88vh', maxHeight: '780px', fontFamily: 'Inter, sans-serif', display: 'flex', flexDirection: 'column', overflow: 'hidden' }
+        }
+      >
+        {header}
+
+        {isMobile ? (
+          <>
+            {statBlock}
+            {progressBlock}
+            {tradesBlock}
+            {dashboardButton}
+          </>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '28px', flex: 1, minHeight: 0 }}>
+            {/* Left column: stats + progress bars, stretched to match right column height */}
+            <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+              {statBlock}
+              {progressBlock}
+            </div>
+            {/* Right column: recent trades + dashboard button */}
+            <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+              {tradesBlock}
+              {dashboardButton}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -544,6 +731,7 @@ export default function ChallengeTracker() {
   const [filter, setFilter] = useState('All')
   const [showModal, setShowModal] = useState(false)
   const [editingChallenge, setEditingChallenge] = useState(null)
+  const [previewChallenge, setPreviewChallenge] = useState(null)
   const [loading, setLoading] = useState(true)
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
   const [viewMode, setViewMode] = useState('compact') // 'cards' | 'compact'
@@ -627,12 +815,12 @@ export default function ChallengeTracker() {
     const mobileFilterTabs = ['All', 'Active', 'Funded', 'Passed', 'Failed', 'Archived']
 
     const tabStyle = (active) => ({
-      background: active ? '#0f2219' : 'transparent',
-      border: `0.5px solid ${active ? '#1a3826' : '#1e1e1e'}`,
+      background: active ? 'var(--green-bg)' : 'transparent',
+      border: `0.5px solid ${active ? 'var(--green-bg-2)' : 'var(--border-color)'}`,
       borderRadius: '4px',
       padding: '4px 10px',
       fontSize: '11px',
-      color: active ? '#1bba7c' : '#777',
+      color: active ? 'var(--brand)' : 'var(--text-faint)',
       fontFamily: "'Inter', sans-serif",
       whiteSpace: 'nowrap',
       flexShrink: 0,
@@ -640,7 +828,7 @@ export default function ChallengeTracker() {
     })
 
     return (
-      <div style={{ background: '#0a0a0a', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ background: 'var(--bg-page)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
 
         {/* Sidebar handles hamburger + drawer + bottom tabs */}
         <Sidebar />
@@ -654,23 +842,25 @@ export default function ChallengeTracker() {
         }}>
           <span style={{
             fontFamily: "'Inter', sans-serif", fontSize: '15px',
-            fontWeight: '600', color: '#fff', pointerEvents: 'none',
+            fontWeight: '600', color: 'var(--text-primary)', pointerEvents: 'none',
           }}>Challenges</span>
           <button
             onClick={() => setShowModal(true)}
             style={{
-              background: '#fff', border: 'none', borderRadius: '5px',
+              background: 'var(--brand)', border: 'none', borderRadius: '6px',
               padding: '5px 11px', fontSize: '12px', fontWeight: '600',
-              color: '#000', cursor: 'pointer', fontFamily: "'Inter', sans-serif",
-              pointerEvents: 'auto',
+              color: 'var(--brand-fg)', cursor: 'pointer', fontFamily: "'Inter', sans-serif",
+              pointerEvents: 'auto', transition: 'background 0.15s',
             }}
+            onMouseEnter={e => e.currentTarget.style.background = 'var(--brand-hover)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'var(--brand)'}
           >+ New</button>
         </div>
 
         {/* Filter tabs */}
         <div style={{
           position: 'fixed', top: '52px', left: 0, right: 0,
-          background: '#0a0a0a', borderBottom: '0.5px solid #111',
+          background: 'var(--bg-page)', borderBottom: '0.5px solid var(--bg-surface)',
           padding: '6px 10px', zIndex: 199,
           display: 'flex', alignItems: 'center', gap: '5px', overflowX: 'auto', scrollbarWidth: 'none',
         }}>
@@ -683,17 +873,17 @@ export default function ChallengeTracker() {
           <div style={{ marginLeft: 'auto', display: 'flex', gap: '2px', flexShrink: 0 }}>
             <button onClick={() => setMobileView('grid')} style={{ background: 'transparent', border: 'none', padding: '4px 5px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
               <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                <rect x="0.5" y="0.5" width="5" height="5" rx="1" fill={mobileView === 'grid' ? '#fff' : '#444'} />
-                <rect x="7.5" y="0.5" width="5" height="5" rx="1" fill={mobileView === 'grid' ? '#fff' : '#444'} />
-                <rect x="0.5" y="7.5" width="5" height="5" rx="1" fill={mobileView === 'grid' ? '#fff' : '#444'} />
-                <rect x="7.5" y="7.5" width="5" height="5" rx="1" fill={mobileView === 'grid' ? '#fff' : '#444'} />
+                <rect x="0.5" y="0.5" width="5" height="5" rx="1" fill={mobileView === 'grid' ? 'var(--text-primary)' : 'var(--text-faint-2)'} />
+                <rect x="7.5" y="0.5" width="5" height="5" rx="1" fill={mobileView === 'grid' ? 'var(--text-primary)' : 'var(--text-faint-2)'} />
+                <rect x="0.5" y="7.5" width="5" height="5" rx="1" fill={mobileView === 'grid' ? 'var(--text-primary)' : 'var(--text-faint-2)'} />
+                <rect x="7.5" y="7.5" width="5" height="5" rx="1" fill={mobileView === 'grid' ? 'var(--text-primary)' : 'var(--text-faint-2)'} />
               </svg>
             </button>
             <button onClick={() => setMobileView('list')} style={{ background: 'transparent', border: 'none', padding: '4px 5px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
               <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                <rect x="0.5" y="1.5" width="12" height="2" rx="1" fill={mobileView === 'list' ? '#fff' : '#444'} />
-                <rect x="0.5" y="5.5" width="12" height="2" rx="1" fill={mobileView === 'list' ? '#fff' : '#444'} />
-                <rect x="0.5" y="9.5" width="12" height="2" rx="1" fill={mobileView === 'list' ? '#fff' : '#444'} />
+                <rect x="0.5" y="1.5" width="12" height="2" rx="1" fill={mobileView === 'list' ? 'var(--text-primary)' : 'var(--text-faint-2)'} />
+                <rect x="0.5" y="5.5" width="12" height="2" rx="1" fill={mobileView === 'list' ? 'var(--text-primary)' : 'var(--text-faint-2)'} />
+                <rect x="0.5" y="9.5" width="12" height="2" rx="1" fill={mobileView === 'list' ? 'var(--text-primary)' : 'var(--text-faint-2)'} />
               </svg>
             </button>
           </div>
@@ -702,11 +892,11 @@ export default function ChallengeTracker() {
         {/* Scrollable card list */}
         <main style={{ paddingTop: '94px', paddingBottom: '68px', flex: 1, overflowY: 'auto' }}>
           {loading ? (
-            <div style={{ padding: '48px', textAlign: 'center', color: '#999', fontSize: '13px', fontFamily: "'JetBrains Mono', monospace" }}>
+            <div style={{ padding: '48px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px', fontFamily: "'JetBrains Mono', monospace" }}>
               Loading...
             </div>
           ) : filtered.length === 0 ? (
-            <div style={{ padding: '48px', textAlign: 'center', color: '#555', fontSize: '13px', fontFamily: "'Inter', sans-serif" }}>
+            <div style={{ padding: '48px', textAlign: 'center', color: 'var(--text-faint-2)', fontSize: '13px', fontFamily: "'Inter', sans-serif" }}>
               No challenges yet — tap "+ New" to get started
             </div>
           ) : mobileView === 'grid' ? (
@@ -719,7 +909,7 @@ export default function ChallengeTracker() {
                 const p = computeProgress(trades, challenge)
                 const computedStatus = computeStatus(trades, challenge)
                 const badge = statusBadge[computedStatus] || statusBadge.active
-                const pnlColor = s.netPnl > 0 ? '#1bba7c' : s.netPnl < 0 ? '#c03535' : '#e0e0e0'
+                const pnlColor = s.netPnl > 0 ? 'var(--brand)' : s.netPnl < 0 ? 'var(--red)' : 'var(--text-secondary)'
                 const pnlLabel = `${s.netPnl >= 0 ? '+' : ''}$${Math.abs(s.netPnl).toFixed(0)}`
                 const isActive = computedStatus === 'active'
                 const isFailed = computedStatus === 'failed'
@@ -729,8 +919,8 @@ export default function ChallengeTracker() {
 
                 return (
                   <div key={challenge.id} style={{
-                    background: '#111',
-                    border: `0.5px solid ${isFailed ? '#2e1515' : '#1e1e1e'}`,
+                    background: 'var(--bg-surface)',
+                    border: `0.5px solid ${isFailed ? 'var(--red-bg)' : 'var(--border-color)'}`,
                     borderRadius: '8px',
                     padding: '10px',
                     display: 'flex',
@@ -741,61 +931,62 @@ export default function ChallengeTracker() {
                   }}>
                     {/* Header */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <div style={{ minWidth: 0 }}>
-                        <div style={{ fontSize: '12px', fontWeight: '700', color: '#fff', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <div style={{ minWidth: 0, display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        <div style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-primary)', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {challenge.firm_name}
                         </div>
-                        <div style={{ fontSize: '9px', color: '#999', fontFamily: "'Inter', sans-serif", marginTop: '2px' }}>
-                          {phaseLabel} · ${Number(challenge.account_size).toLocaleString()}
-                        </div>
+                        <button onClick={() => setEditingChallenge(challenge)} style={{ background: 'transparent', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: '10px', padding: '1px 2px', lineHeight: 1, flexShrink: 0 }}>✏️</button>
                       </div>
                       <span style={{ background: badge.bg, border: `0.5px solid ${badge.border}`, borderRadius: '4px', padding: '2px 6px', fontSize: '8px', color: badge.color, fontFamily: "'JetBrains Mono', monospace", whiteSpace: 'nowrap', flexShrink: 0, marginLeft: '4px' }}>
                         {badge.label}
                       </span>
                     </div>
+                    <div style={{ fontSize: '9px', color: 'var(--text-muted)', fontFamily: "'Inter', sans-serif", marginTop: '-6px' }}>
+                      {phaseLabel} · ${Number(challenge.account_size).toLocaleString()}
+                    </div>
 
                     {/* P&L */}
                     <div>
-                      <div style={{ fontSize: '8px', color: '#777', marginBottom: '2px', textTransform: 'uppercase', letterSpacing: '0.04em', fontFamily: "'JetBrains Mono', monospace" }}>P&L</div>
+                      <div style={{ fontSize: '8px', color: 'var(--text-faint)', marginBottom: '2px', textTransform: 'uppercase', letterSpacing: '0.04em', fontFamily: "'JetBrains Mono', monospace" }}>P&L</div>
                       <div style={{ fontSize: '18px', fontWeight: '700', color: pnlColor, fontFamily: "'JetBrains Mono', monospace", lineHeight: 1 }}>{pnlLabel}</div>
                     </div>
 
                     {/* Win Rate */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '8px', color: '#777', textTransform: 'uppercase', letterSpacing: '0.04em', fontFamily: "'JetBrains Mono', monospace" }}>Win Rate</span>
-                      <span style={{ fontSize: '13px', color: '#e0e0e0', fontFamily: "'JetBrains Mono', monospace" }}>{s.total === 0 ? '0%' : `${s.winRate.toFixed(0)}%`}</span>
+                      <span style={{ fontSize: '8px', color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.04em', fontFamily: "'JetBrains Mono', monospace" }}>Win Rate</span>
+                      <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontFamily: "'JetBrains Mono', monospace" }}>{s.total === 0 ? '0%' : `${s.winRate.toFixed(0)}%`}</span>
                     </div>
 
                     {/* Progress bars — all statuses */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                       <div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
-                          <span style={{ fontSize: '7px', color: '#555', fontFamily: "'JetBrains Mono', monospace" }}>Profit</span>
-                          <span style={{ fontSize: '7px', color: 'oklch(0.72 0.17 152)', fontFamily: "'JetBrains Mono', monospace" }}>
+                          <span style={{ fontSize: '7px', color: 'var(--text-faint-2)', fontFamily: "'JetBrains Mono', monospace" }}>Profit</span>
+                          <span style={{ fontSize: '7px', color: 'var(--brand)', fontFamily: "'JetBrains Mono', monospace" }}>
                             {isActive ? `${p.netPnlPct >= 0 ? p.netPnlPct.toFixed(1) : '0.0'}% / ${p.accountSize > 0 ? (p.profitTarget / p.accountSize * 100).toFixed(0) : '—'}%` : (isFailed ? '—' : '100%')}
                           </span>
                         </div>
-                        <div style={{ height: '2px', background: '#181818', borderRadius: '2px' }}>
-                          <div style={{ height: '100%', borderRadius: '2px', background: 'oklch(0.72 0.17 152)', width: isActive ? `${p.netPnlPct >= 0 ? Math.min(p.profitPct, 100) : 0}%` : isFailed ? '0%' : '100%' }} />
+                        <div style={{ height: '2px', background: 'var(--bg-surface-2)', borderRadius: '2px' }}>
+                          <div style={{ height: '100%', borderRadius: '2px', background: 'var(--brand)', width: isActive ? `${p.netPnlPct >= 0 ? Math.min(p.profitPct, 100) : 0}%` : isFailed ? '0%' : '100%' }} />
                         </div>
                       </div>
                       <div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
-                          <span style={{ fontSize: '7px', color: '#555', fontFamily: "'JetBrains Mono', monospace" }}>Max DD</span>
-                          <span style={{ fontSize: '7px', color: '#c03535', fontFamily: "'JetBrains Mono', monospace" }}>
+                          <span style={{ fontSize: '7px', color: 'var(--text-faint-2)', fontFamily: "'JetBrains Mono', monospace" }}>Max DD</span>
+                          <span style={{ fontSize: '7px', color: 'var(--red)', fontFamily: "'JetBrains Mono', monospace" }}>
                             {isActive ? `${p.maxDDUsedPct.toFixed(1)}% / ${p.maxDDLimitPct.toFixed(0)}%` : isFailed ? '100%' : '—'}
                           </span>
                         </div>
-                        <div style={{ height: '2px', background: '#181818', borderRadius: '2px' }}>
-                          <div style={{ height: '100%', borderRadius: '2px', background: '#c03535', width: isActive ? `${Math.min(p.maxDDBarPct, 100)}%` : isFailed ? '100%' : '0%' }} />
+                        <div style={{ height: '2px', background: 'var(--bg-surface-2)', borderRadius: '2px' }}>
+                          <div style={{ height: '100%', borderRadius: '2px', background: 'var(--red)', width: isActive ? `${Math.min(p.maxDDBarPct, 100)}%` : isFailed ? '100%' : '0%' }} />
                         </div>
                       </div>
                     </div>
 
                     {/* Actions */}
                     <div style={{ display: 'flex', gap: '4px', marginTop: 'auto' }}>
-                      <button onClick={() => setEditingChallenge(challenge)} style={{ background: 'transparent', border: '0.5px solid #1e1e1e', borderRadius: '4px', padding: '5px 7px', fontSize: '11px', color: '#999', cursor: 'pointer', flexShrink: 0 }}>✏️</button>
-                      <button onClick={() => navigate(`/dashboard?account=${challenge.id}`)} style={{ flex: 1, background: 'transparent', border: `0.5px solid ${isFailed ? '#2e1515' : '#1e1e1e'}`, borderRadius: '4px', padding: '5px', fontSize: '10px', color: '#999', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Dashboard →</button>
+                      <button onClick={() => setPreviewChallenge(challenge)} style={{ background: 'transparent', border: '0.5px solid var(--border-color)', borderRadius: '4px', padding: '5px 7px', fontSize: '11px', color: 'var(--text-muted)', cursor: 'pointer', flexShrink: 0 }}>👁</button>
+                      <button onClick={() => navigate(`/dashboard?account=${challenge.id}`)} style={{ flex: 1, background: 'transparent', border: `0.5px solid ${isFailed ? 'var(--red-bg)' : 'var(--border-color)'}`, borderRadius: '4px', padding: '5px', fontSize: '10px', color: 'var(--text-muted)', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Dashboard →</button>
                     </div>
                   </div>
                 )
@@ -812,7 +1003,7 @@ export default function ChallengeTracker() {
               const computedStatus = computeStatus(trades, challenge)
               const badge = statusBadge[computedStatus] || statusBadge.active
 
-              const pnlColor = s.netPnl > 0 ? '#1bba7c' : s.netPnl < 0 ? '#c03535' : '#e0e0e0'
+              const pnlColor = s.netPnl > 0 ? 'var(--brand)' : s.netPnl < 0 ? 'var(--red)' : 'var(--text-secondary)'
               const pnlLabel = `${s.netPnl >= 0 ? '+' : ''}$${Math.abs(s.netPnl).toFixed(0)}`
 
               const isActive = computedStatus === 'active'
@@ -828,8 +1019,8 @@ export default function ChallengeTracker() {
               return (
                 <div key={challenge.id} style={{
                   margin: '8px 10px 0',
-                  background: '#111',
-                  border: `0.5px solid ${isFailed ? '#2e1515' : '#1e1e1e'}`,
+                  background: 'var(--bg-surface)',
+                  border: `0.5px solid ${isFailed ? 'var(--red-bg)' : 'var(--border-color)'}`,
                   borderRadius: '8px',
                   padding: '12px',
                 }}>
@@ -837,10 +1028,10 @@ export default function ChallengeTracker() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
                     <div>
                       <span style={{
-                        fontSize: '14px', fontWeight: '700', color: '#fff',
+                        fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)',
                         fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.5px',
                       }}>{challenge.firm_name}</span>
-                      <div style={{ fontSize: '10px', color: '#999', marginTop: '3px', fontFamily: "'Inter', sans-serif" }}>
+                      <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '3px', fontFamily: "'Inter', sans-serif" }}>
                         {phaseLabel} · ${Number(challenge.account_size).toLocaleString()} · Started {startFormatted}
                       </div>
                     </div>
@@ -854,13 +1045,13 @@ export default function ChallengeTracker() {
 
                   {/* 2 stat cards: P&L + Win Rate */}
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px', margin: '8px 0 10px' }}>
-                    <div style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '5px', padding: '7px 8px' }}>
-                      <div style={{ fontSize: '8px', color: '#777', marginBottom: '3px', textTransform: 'uppercase', letterSpacing: '0.04em', fontFamily: "'JetBrains Mono', monospace" }}>P&L</div>
+                    <div style={{ background: 'var(--bg-surface-2)', border: '0.5px solid var(--border-color)', borderRadius: '5px', padding: '7px 8px' }}>
+                      <div style={{ fontSize: '8px', color: 'var(--text-faint)', marginBottom: '3px', textTransform: 'uppercase', letterSpacing: '0.04em', fontFamily: "'JetBrains Mono', monospace" }}>P&L</div>
                       <div style={{ fontSize: '13px', color: pnlColor, fontFamily: "'JetBrains Mono', monospace" }}>{pnlLabel}</div>
                     </div>
-                    <div style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '5px', padding: '7px 8px' }}>
-                      <div style={{ fontSize: '8px', color: '#777', marginBottom: '3px', textTransform: 'uppercase', letterSpacing: '0.04em', fontFamily: "'JetBrains Mono', monospace" }}>Win Rate</div>
-                      <div style={{ fontSize: '13px', color: '#e0e0e0', fontFamily: "'JetBrains Mono', monospace" }}>
+                    <div style={{ background: 'var(--bg-surface-2)', border: '0.5px solid var(--border-color)', borderRadius: '5px', padding: '7px 8px' }}>
+                      <div style={{ fontSize: '8px', color: 'var(--text-faint)', marginBottom: '3px', textTransform: 'uppercase', letterSpacing: '0.04em', fontFamily: "'JetBrains Mono', monospace" }}>Win Rate</div>
+                      <div style={{ fontSize: '13px', color: 'var(--text-secondary)', fontFamily: "'JetBrains Mono', monospace" }}>
                         {s.total === 0 ? '0%' : `${s.winRate.toFixed(0)}%`}
                       </div>
                     </div>
@@ -872,50 +1063,60 @@ export default function ChallengeTracker() {
                       {/* Profit Target bar */}
                       <div style={{ marginBottom: '6px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
-                          <span style={{ fontSize: '8px', color: '#777', fontFamily: "'Inter', sans-serif" }}>Profit Target</span>
-                          <span style={{ fontSize: '8px', color: p.netPnlPct >= 0 ? '#1bba7c' : '#777', fontFamily: "'JetBrains Mono', monospace" }}>
+                          <span style={{ fontSize: '8px', color: 'var(--text-faint)', fontFamily: "'Inter', sans-serif" }}>Profit Target</span>
+                          <span style={{ fontSize: '8px', color: p.netPnlPct >= 0 ? 'var(--brand)' : 'var(--text-faint)', fontFamily: "'JetBrains Mono', monospace" }}>
                             {p.netPnlPct >= 0 ? p.netPnlPct.toFixed(1) : '0.0'}% / {p.accountSize > 0 ? (p.profitTarget / p.accountSize * 100).toFixed(0) : '—'}%
                           </span>
                         </div>
-                        <div style={{ height: '3px', background: '#181818', borderRadius: '2px' }}>
-                          <div style={{ height: '100%', width: `${p.netPnlPct >= 0 ? Math.min(p.profitPct, 100) : 0}%`, background: p.netPnlPct >= 0 ? '#1bba7c' : '#c03535', borderRadius: '2px' }} />
+                        <div style={{ height: '3px', background: 'var(--bg-surface-2)', borderRadius: '2px' }}>
+                          <div style={{ height: '100%', width: `${p.netPnlPct >= 0 ? Math.min(p.profitPct, 100) : 0}%`, background: p.netPnlPct >= 0 ? 'var(--brand)' : 'var(--red)', borderRadius: '2px' }} />
                         </div>
                       </div>
 
                       {/* Max Drawdown bar */}
                       <div style={{ marginBottom: '10px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
-                          <span style={{ fontSize: '8px', color: '#777', fontFamily: "'Inter', sans-serif" }}>Max Drawdown</span>
-                          <span style={{ fontSize: '8px', color: '#c03535', fontFamily: "'JetBrains Mono', monospace" }}>
+                          <span style={{ fontSize: '8px', color: 'var(--text-faint)', fontFamily: "'Inter', sans-serif" }}>Max Drawdown</span>
+                          <span style={{ fontSize: '8px', color: 'var(--red)', fontFamily: "'JetBrains Mono', monospace" }}>
                             {p.maxDDUsedPct.toFixed(1)}% / {p.maxDDLimitPct.toFixed(0)}%
                           </span>
                         </div>
-                        <div style={{ height: '3px', background: '#181818', borderRadius: '2px' }}>
-                          <div style={{ height: '100%', width: `${Math.min(p.maxDDBarPct, 100)}%`, background: '#c03535', borderRadius: '2px' }} />
+                        <div style={{ height: '3px', background: 'var(--bg-surface-2)', borderRadius: '2px' }}>
+                          <div style={{ height: '100%', width: `${Math.min(p.maxDDBarPct, 100)}%`, background: 'var(--red)', borderRadius: '2px' }} />
                         </div>
                       </div>
                     </>
                   )}
 
-                  {/* Bottom row: Edit + Go to Dashboard */}
+                  {/* Bottom row: Edit + Preview + Go to Dashboard */}
                   <div style={{ display: 'flex', gap: '6px' }}>
                     <button
                       onClick={() => setEditingChallenge(challenge)}
                       style={{
                         background: 'transparent',
-                        border: '0.5px solid #1e1e1e',
+                        border: '0.5px solid var(--border-color)',
                         borderRadius: '5px', padding: '6px 10px',
-                        fontSize: '13px', color: '#999', cursor: 'pointer',
+                        fontSize: '13px', color: 'var(--text-muted)', cursor: 'pointer',
                         flexShrink: 0,
                       }}
                     >✏️</button>
                     <button
+                      onClick={() => setPreviewChallenge(challenge)}
+                      style={{
+                        background: 'transparent',
+                        border: '0.5px solid var(--border-color)',
+                        borderRadius: '5px', padding: '6px 10px',
+                        fontSize: '13px', color: 'var(--text-muted)', cursor: 'pointer',
+                        flexShrink: 0,
+                      }}
+                    >👁</button>
+                    <button
                       onClick={() => navigate(`/dashboard?account=${challenge.id}`)}
                       style={{
                         flex: 1, background: 'transparent',
-                        border: `0.5px solid ${isFailed ? '#2e1515' : '#1e1e1e'}`,
+                        border: `1px solid ${isFailed ? 'var(--red-bg)' : 'var(--border-color)'}`,
                         borderRadius: '5px', padding: '6px',
-                        fontSize: '11px', color: '#999', cursor: 'pointer',
+                        fontSize: '11px', color: 'var(--text-secondary)', cursor: 'pointer',
                         fontFamily: "'Inter', sans-serif",
                       }}
                     >Go to Dashboard →</button>
@@ -939,27 +1140,36 @@ export default function ChallengeTracker() {
             onDeleted={fetchChallenges}
           />
         )}
+        {previewChallenge && (
+          <PreviewModal
+            challenge={previewChallenge}
+            trades={tradesByAccount[previewChallenge.id] || []}
+            onClose={() => setPreviewChallenge(null)}
+            navigate={navigate}
+            isMobile={true}
+          />
+        )}
       </div>
     )
   }
 
   // ── DESKTOP LAYOUT ────────────────────────────────────────────────────────────
   return (
-    <div style={{ display: 'flex', background: '#0a0a0a', minHeight: '100vh' }}>
+    <div style={{ display: 'flex', background: 'var(--bg-page)', minHeight: '100vh' }}>
       <Sidebar />
       <main style={{ marginLeft: collapsed ? '60px' : '220px', transition: 'margin-left 0.2s ease', flex: 1, padding: '32px' }}>
 
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-          <h1 style={{ color: '#fff', fontFamily: 'Inter, sans-serif', fontSize: '22px', fontWeight: '600', margin: 0 }}>Challenge Tracker</h1>
+          <h1 style={{ color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontSize: '22px', fontWeight: '600', margin: 0 }}>Challenge Tracker</h1>
           <button onClick={() => setShowModal(true)} style={{
-            background: 'oklch(0.72 0.17 152)', border: 'none', borderRadius: '8px',
-            padding: '10px 18px', color: '#000',
+            background: 'var(--brand)', border: 'none', borderRadius: '8px',
+            padding: '10px 18px', color: 'var(--brand-fg)',
             fontFamily: 'Inter, sans-serif', fontWeight: '600', fontSize: '13px', cursor: 'pointer',
             transition: 'background 0.15s',
           }}
-          onMouseEnter={e => e.currentTarget.style.background = 'oklch(0.78 0.17 152)'}
-          onMouseLeave={e => e.currentTarget.style.background = 'oklch(0.72 0.17 152)'}
+          onMouseEnter={e => e.currentTarget.style.background = 'var(--brand-hover)'}
+          onMouseLeave={e => e.currentTarget.style.background = 'var(--brand)'}
           >+ New Challenge</button>
         </div>
 
@@ -968,32 +1178,32 @@ export default function ChallengeTracker() {
           <div style={{ display: 'flex', gap: '4px' }}>
             {FILTERS.map(f => (
               <button key={f} onClick={() => setFilter(f)} style={{
-                background: filter === f ? '#0f2219' : 'transparent',
-                border: '0.5px solid', borderColor: filter === f ? '#1a3826' : '#1e1e1e',
+                background: filter === f ? 'var(--green-bg)' : 'transparent',
+                border: '0.5px solid', borderColor: filter === f ? 'var(--green-bg-2)' : 'var(--border-color)',
                 borderRadius: '6px', padding: '6px 14px',
-                color: filter === f ? '#1bba7c' : '#777',
+                color: filter === f ? 'var(--brand)' : 'var(--text-faint)',
                 fontFamily: 'Inter, sans-serif', fontSize: '13px', cursor: 'pointer',
               }}>{f}</button>
             ))}
           </div>
 
           {/* View Mode Toggle */}
-          <div style={{ display: 'flex', background: '#0d0d0d', border: '0.5px solid #1e1e1e', borderRadius: '8px', padding: '3px', gap: '2px' }}>
+          <div style={{ display: 'flex', background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '8px', padding: '3px', gap: '2px' }}>
             {/* Compact view — grid/tiles icon */}
             <button
               onClick={() => setViewMode('compact')}
               title="Grid"
               style={{
-                background: viewMode === 'compact' ? '#1a1a1a' : 'transparent',
-                border: viewMode === 'compact' ? '0.5px solid #2a2a2a' : '0.5px solid transparent',
+                background: viewMode === 'compact' ? 'var(--border-color)' : 'transparent',
+                border: viewMode === 'compact' ? '0.5px solid var(--border-color-2)' : '0.5px solid transparent',
                 borderRadius: '6px', padding: '6px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}
             >
               <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-                <rect x="1" y="1" width="6" height="6" rx="1.5" fill={viewMode === 'compact' ? '#fff' : '#999'} />
-                <rect x="8" y="1" width="6" height="6" rx="1.5" fill={viewMode === 'compact' ? '#fff' : '#999'} />
-                <rect x="1" y="8" width="6" height="6" rx="1.5" fill={viewMode === 'compact' ? '#fff' : '#999'} />
-                <rect x="8" y="8" width="6" height="6" rx="1.5" fill={viewMode === 'compact' ? '#fff' : '#999'} />
+                <rect x="1" y="1" width="6" height="6" rx="1.5" fill={viewMode === 'compact' ? 'var(--text-primary)' : 'var(--text-muted)'} />
+                <rect x="8" y="1" width="6" height="6" rx="1.5" fill={viewMode === 'compact' ? 'var(--text-primary)' : 'var(--text-muted)'} />
+                <rect x="1" y="8" width="6" height="6" rx="1.5" fill={viewMode === 'compact' ? 'var(--text-primary)' : 'var(--text-muted)'} />
+                <rect x="8" y="8" width="6" height="6" rx="1.5" fill={viewMode === 'compact' ? 'var(--text-primary)' : 'var(--text-muted)'} />
               </svg>
             </button>
             {/* Cards view — lines icon (wide detailed rows) */}
@@ -1001,15 +1211,15 @@ export default function ChallengeTracker() {
               onClick={() => setViewMode('cards')}
               title="Detailed"
               style={{
-                background: viewMode === 'cards' ? '#1a1a1a' : 'transparent',
-                border: viewMode === 'cards' ? '0.5px solid #2a2a2a' : '0.5px solid transparent',
+                background: viewMode === 'cards' ? 'var(--border-color)' : 'transparent',
+                border: viewMode === 'cards' ? '0.5px solid var(--border-color-2)' : '0.5px solid transparent',
                 borderRadius: '6px', padding: '6px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}
             >
               <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-                <rect x="1" y="2" width="13" height="2" rx="1" fill={viewMode === 'cards' ? '#fff' : '#999'} />
-                <rect x="1" y="6.5" width="13" height="2" rx="1" fill={viewMode === 'cards' ? '#fff' : '#999'} />
-                <rect x="1" y="11" width="13" height="2" rx="1" fill={viewMode === 'cards' ? '#fff' : '#999'} />
+                <rect x="1" y="2" width="13" height="2" rx="1" fill={viewMode === 'cards' ? 'var(--text-primary)' : 'var(--text-muted)'} />
+                <rect x="1" y="6.5" width="13" height="2" rx="1" fill={viewMode === 'cards' ? 'var(--text-primary)' : 'var(--text-muted)'} />
+                <rect x="1" y="11" width="13" height="2" rx="1" fill={viewMode === 'cards' ? 'var(--text-primary)' : 'var(--text-muted)'} />
               </svg>
             </button>
           </div>
@@ -1017,10 +1227,10 @@ export default function ChallengeTracker() {
 
         {/* Challenge List */}
         {loading ? (
-          <p style={{ color: '#999', fontFamily: 'Inter, sans-serif', fontSize: '13px' }}>Loading...</p>
+          <p style={{ color: 'var(--text-muted)', fontFamily: 'Inter, sans-serif', fontSize: '13px' }}>Loading...</p>
         ) : filtered.length === 0 ? (
-          <div style={{ background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '12px', padding: '48px', textAlign: 'center' }}>
-            <p style={{ color: '#555', fontFamily: 'Inter, sans-serif', fontSize: '14px', margin: 0 }}>
+          <div style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '12px', padding: '48px', textAlign: 'center' }}>
+            <p style={{ color: 'var(--text-faint-2)', fontFamily: 'Inter, sans-serif', fontSize: '14px', margin: 0 }}>
               No challenges yet — click "+ New Challenge" to get started
             </p>
           </div>
@@ -1034,20 +1244,20 @@ export default function ChallengeTracker() {
               const p = computeProgress(trades, challenge)
               const computedStatus = computeStatus(trades, challenge)
               const badge = statusBadge[computedStatus] || statusBadge.active
-              const pnlColor = s.netPnl > 0 ? '#1bba7c' : s.netPnl < 0 ? '#c03535' : '#fff'
+              const pnlColor = s.netPnl > 0 ? 'var(--brand)' : s.netPnl < 0 ? 'var(--red)' : 'var(--text-primary)'
               const pnlLabel = trades.length === 0 ? '$0.00' : `${s.netPnl >= 0 ? '+' : ''}$${Math.abs(s.netPnl).toFixed(2)}`
 
               return (
-                <div key={challenge.id} style={{ background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '14px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div key={challenge.id} style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '14px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
                   {/* Header: firm name + edit left, badge right — same row; meta below */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div style={{ minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px' }}>
-                        <p style={{ color: '#fff', fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: '600', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{challenge.firm_name}</p>
-                        <button onClick={() => setEditingChallenge(challenge)} style={{ background: 'transparent', border: 'none', color: '#777', cursor: 'pointer', fontSize: '11px', padding: '1px 2px', lineHeight: 1, flexShrink: 0 }}>✏️</button>
+                        <p style={{ color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: '600', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{challenge.firm_name}</p>
+                        <button onClick={() => setEditingChallenge(challenge)} style={{ background: 'transparent', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: '11px', padding: '1px 2px', lineHeight: 1, flexShrink: 0 }}>✏️</button>
                       </div>
-                      <span style={{ color: '#777', fontFamily: 'Inter, sans-serif', fontSize: '11px' }}>{challenge.phase?.replace('_', ' ').toUpperCase()} · ${Number(challenge.account_size).toLocaleString()}</span>
+                      <span style={{ color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '11px' }}>{challenge.phase?.replace('_', ' ').toUpperCase()} · ${Number(challenge.account_size).toLocaleString()}</span>
                     </div>
                     <span style={{ background: badge.bg, border: `0.5px solid ${badge.border}`, borderRadius: '20px', padding: '3px 10px', color: badge.color, fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: '500', whiteSpace: 'nowrap', flexShrink: 0 }}>{badge.label}</span>
                   </div>
@@ -1055,14 +1265,14 @@ export default function ChallengeTracker() {
                   {/* 4-column stat strip, centered */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', textAlign: 'center' }}>
                     {[
-                      { value: pnlLabel, label: 'P&L', color: trades.length === 0 ? '#fff' : pnlColor },
-                      { value: s.total === 0 ? '0%' : `${s.winRate.toFixed(1)}%`, label: 'Win rate', color: '#fff' },
-                      { value: String(s.total), label: 'Trades', color: '#fff' },
-                      { value: `${s.wins}W·${s.losses}L·${s.be}BE`, label: 'W/L/BE', color: '#fff' },
+                      { value: pnlLabel, label: 'P&L', color: trades.length === 0 ? 'var(--text-primary)' : pnlColor },
+                      { value: s.total === 0 ? '0%' : `${s.winRate.toFixed(1)}%`, label: 'Win rate', color: 'var(--text-primary)' },
+                      { value: String(s.total), label: 'Trades', color: 'var(--text-primary)' },
+                      { value: `${s.wins}W·${s.losses}L·${s.be}BE`, label: 'W/L/BE', color: 'var(--text-primary)' },
                     ].map((stat) => (
                       <div key={stat.label}>
                         <p style={{ color: stat.color, fontFamily: 'Inter, sans-serif', fontSize: '15px', fontWeight: '600', margin: '0 0 2px 0' }}>{stat.value}</p>
-                        <p style={{ color: '#777', fontFamily: 'Inter, sans-serif', fontSize: '10px', margin: 0 }}>{stat.label}</p>
+                        <p style={{ color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '10px', margin: 0 }}>{stat.label}</p>
                       </div>
                     ))}
                   </div>
@@ -1070,29 +1280,34 @@ export default function ChallengeTracker() {
                   {/* Progress bars */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#777', marginBottom: '4px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text-faint)', marginBottom: '4px' }}>
                         <span>Profit</span>
                         <span>{`${p.netPnlPct >= 0 ? '+' : ''}${p.netPnlPct.toFixed(1)}% / ${p.accountSize > 0 ? (p.profitTarget / p.accountSize * 100).toFixed(1) : '—'}%`}</span>
                       </div>
-                      <div style={{ height: '3px', background: '#181818', borderRadius: '2px' }}>
-                        <div style={{ height: '3px', width: `${Math.max(0, Math.min(p.profitPct, 100))}%`, background: 'oklch(0.72 0.17 152)', borderRadius: '2px' }} />
+                      <div style={{ height: '3px', background: 'var(--bg-surface-2)', borderRadius: '2px' }}>
+                        <div style={{ height: '3px', width: `${Math.max(0, Math.min(p.profitPct, 100))}%`, background: 'var(--brand)', borderRadius: '2px' }} />
                       </div>
                     </div>
                     <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#777', marginBottom: '4px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text-faint)', marginBottom: '4px' }}>
                         <span>Max DD</span>
                         <span>{`${p.maxDDUsedPct.toFixed(1)}% / ${p.maxDDLimitPct.toFixed(1)}%`}</span>
                       </div>
-                      <div style={{ height: '3px', background: '#181818', borderRadius: '2px' }}>
-                        <div style={{ height: '3px', width: `${Math.max(0, Math.min(p.maxDDBarPct, 100))}%`, background: '#c03535', borderRadius: '2px' }} />
+                      <div style={{ height: '3px', background: 'var(--bg-surface-2)', borderRadius: '2px' }}>
+                        <div style={{ height: '3px', width: `${Math.max(0, Math.min(p.maxDDBarPct, 100))}%`, background: 'var(--red)', borderRadius: '2px' }} />
                       </div>
                     </div>
                   </div>
 
-                  {/* Go to Dashboard */}
-                  <button onClick={() => navigate(`/dashboard?account=${challenge.id}`)} style={{ background: 'transparent', border: '0.5px solid #1e1e1e', borderRadius: '8px', padding: '8px 14px', color: '#999', fontFamily: 'Inter, sans-serif', fontSize: '12px', cursor: 'pointer', width: '100%' }}>
-                    Go to Dashboard →
-                  </button>
+                  {/* Preview + Go to Dashboard */}
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button onClick={() => setPreviewChallenge(challenge)} style={{ background: 'transparent', border: '0.5px solid var(--border-color)', borderRadius: '8px', padding: '8px 14px', color: 'var(--text-muted)', fontFamily: 'Inter, sans-serif', fontSize: '12px', cursor: 'pointer', flex: 1 }}>
+                      Preview
+                    </button>
+                    <button onClick={() => navigate(`/dashboard?account=${challenge.id}`)} style={{ background: 'transparent', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '8px 14px', color: 'var(--text-secondary)', fontFamily: 'Inter, sans-serif', fontSize: '12px', cursor: 'pointer', flex: 1 }}>
+                      Go to Dashboard →
+                    </button>
+                  </div>
 
                 </div>
               )
@@ -1101,8 +1316,8 @@ export default function ChallengeTracker() {
 
         ) : (
 
-          /* ── CARDS VIEW ── */
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          /* ── LIST VIEW ── */
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {filtered.map(challenge => {
               const trades = tradesByAccount[challenge.id] || []
               const s = computeStats(trades)
@@ -1110,80 +1325,109 @@ export default function ChallengeTracker() {
               const computedStatus = computeStatus(trades, challenge)
               const badge = statusBadge[computedStatus] || statusBadge.active
 
-              const pnlColor = s.netPnl > 0 ? '#1bba7c' : s.netPnl < 0 ? '#c03535' : '#fff'
+              const pnlColor = s.netPnl > 0 ? 'var(--brand)' : s.netPnl < 0 ? 'var(--red)' : 'var(--text-primary)'
               const pnlLabel = trades.length === 0 ? '$0.00'
                 : `${s.netPnl >= 0 ? '+' : ''}$${Math.abs(s.netPnl).toFixed(2)}`
+              const statusBarColor = computedStatus === 'failed' ? 'var(--red)' : computedStatus === 'passed' ? 'var(--brand)' : computedStatus === 'funded' ? '#7c3aed' : 'var(--text-faint)'
 
               return (
-                <div key={challenge.id} style={{ background: '#111', border: '0.5px solid #1e1e1e', borderRadius: '14px', padding: '24px' }}>
+                <div
+                  key={challenge.id}
+                  onClick={() => navigate(`/dashboard?account=${challenge.id}`)}
+                  style={{
+                    background: 'var(--bg-surface)',
+                    border: '0.5px solid var(--border-color)',
+                    borderRadius: '12px',
+                    padding: '0',
+                    display: 'flex',
+                    alignItems: 'stretch',
+                    overflow: 'hidden',
+                    cursor: 'pointer',
+                    transition: 'border-color 0.15s',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--border-color-2)'}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-color)'}
+                >
+                  {/* Left status bar */}
+                  <div style={{ width: '3px', flexShrink: 0, background: statusBarColor, borderRadius: '12px 0 0 12px' }} />
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                        <h2 style={{ color: '#fff', fontFamily: 'Inter, sans-serif', fontSize: '16px', fontWeight: '600', margin: 0 }}>
+                  {/* Main content */}
+                  <div style={{ flex: 1, padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '20px', minWidth: 0 }}>
+
+                    {/* Account name + meta */}
+                    <div style={{ minWidth: '180px', flexShrink: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
+                        <span style={{ color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: '600' }}>
                           {challenge.firm_name}
-                        </h2>
-                        <button onClick={() => setEditingChallenge(challenge)} style={{ background: 'transparent', border: 'none', color: '#777', cursor: 'pointer', fontSize: '13px', padding: '2px 4px', lineHeight: 1 }}>✏️</button>
+                        </span>
+                        <button
+                          onClick={e => { e.stopPropagation(); setEditingChallenge(challenge) }}
+                          style={{ background: 'transparent', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: '11px', padding: '1px 2px', lineHeight: 1 }}
+                        >✏️</button>
+                        <span style={{ background: badge.bg, border: `0.5px solid ${badge.border}`, borderRadius: '20px', padding: '2px 8px', color: badge.color, fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: '500' }}>
+                          {badge.label}
+                        </span>
                       </div>
-                      <p style={{ color: '#777', fontFamily: 'Inter, sans-serif', fontSize: '12px', margin: 0 }}>
-                        {challenge.phase?.replace('_', ' ').toUpperCase()} · ${Number(challenge.account_size).toLocaleString()} · Started {challenge.start_date} · {s.total} trade{s.total !== 1 ? 's' : ''}
-                      </p>
+                      <span style={{ color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '11px' }}>
+                        {challenge.firm_name?.toUpperCase()} · {challenge.phase?.replace('_', ' ').toUpperCase()} · ${Number(challenge.account_size).toLocaleString()} · {s.total}T
+                      </span>
                     </div>
-                    <span style={{ background: badge.bg, border: `0.5px solid ${badge.border}`, borderRadius: '20px', padding: '4px 12px', color: badge.color, fontFamily: 'Inter, sans-serif', fontSize: '12px', fontWeight: '500' }}>
-                      {badge.label}
-                    </span>
-                  </div>
 
+                    {/* P&L */}
+                    <div style={{ minWidth: '90px', flexShrink: 0 }}>
+                      <div style={{ color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '2px' }}>P&amp;L</div>
+                      <div style={{ color: pnlColor, fontFamily: 'JetBrains Mono, monospace', fontSize: '15px', fontWeight: '600' }}>{pnlLabel}</div>
+                    </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '20px' }}>
-                    {[
-                      { label: 'P&L', value: pnlLabel, color: trades.length === 0 ? '#fff' : pnlColor },
-                      { label: 'Win Rate', value: s.total === 0 ? '0%' : `${s.winRate.toFixed(1)}%`, color: '#fff' },
-                      { label: 'Trades', value: String(s.total), color: '#fff' },
-                      { label: 'W / L / BE', value: `${s.wins}W · ${s.losses}L · ${s.be}BE`, color: '#fff' },
-                    ].map(stat => (
-                      <div key={stat.label} style={{ background: '#0f0f0f', border: '0.5px solid #1a1a1a', borderRadius: '10px', padding: '14px' }}>
-                        <p style={{ color: '#999', fontFamily: 'Inter, sans-serif', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 6px 0' }}>{stat.label}</p>
-                        <p style={{ color: stat.color, fontFamily: 'JetBrains Mono, monospace', fontSize: '15px', margin: 0 }}>{stat.value}</p>
+                    {/* Win Rate */}
+                    <div style={{ minWidth: '48px', flexShrink: 0 }}>
+                      <div style={{ color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '2px' }}>WR</div>
+                      <div style={{ color: 'var(--text-primary)', fontFamily: 'JetBrains Mono, monospace', fontSize: '13px' }}>{s.total === 0 ? '0%' : `${s.winRate.toFixed(0)}%`}</div>
+                    </div>
+
+                    {/* Progress bars */}
+                    <div style={{ flex: 1, display: 'flex', gap: '16px', alignItems: 'center' }}>
+
+                      {/* Target */}
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                          <span style={{ color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>TARGET</span>
+                          <span style={{ color: p.netPnlPct >= 0 ? 'var(--brand)' : 'var(--red)', fontFamily: 'JetBrains Mono, monospace', fontSize: '11px' }}>
+                            {`${p.netPnlPct >= 0 ? '+' : ''}${p.netPnlPct.toFixed(1)}%`}
+                          </span>
+                        </div>
+                        <div style={{ height: '3px', background: 'var(--bg-surface-2)', borderRadius: '2px' }}>
+                          <div style={{ height: '3px', width: `${Math.max(0, Math.min(p.profitPct, 100))}%`, background: 'var(--brand)', borderRadius: '2px' }} />
+                        </div>
                       </div>
-                    ))}
-                  </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '20px' }}>
-                    <ProgressBlock
-                      label={`Profit Target — ${p.maxDDLimitPct > 0 ? (parseFloat(challenge.profit_target) / parseFloat(challenge.account_size) * 100).toFixed(1) : '—'}%`}
-                      barPct={p.profitPct}
-                      barColor="#1bba7c"
-                      leftLabel={`${p.netPnlPct >= 0 ? '+' : ''}${p.netPnlPct.toFixed(2)}%`}
-                      rightLabel={`target ${p.accountSize > 0 ? (p.profitTarget / p.accountSize * 100).toFixed(1) : '—'}%`}
-                    />
-                    <ProgressBlock
-                      label={`Max Drawdown — ${p.maxDDLimitPct.toFixed(1)}%`}
-                      barPct={p.maxDDBarPct}
-                      barColor="#c03535"
-                      leftLabel={`${p.maxDDUsedPct.toFixed(2)}%`}
-                      rightLabel={`max ${p.maxDDLimitPct.toFixed(1)}%`}
-                    />
-                    <ProgressBlock
-                      label={`Daily Drawdown — ${p.dailyDDLimitPct.toFixed(1)}%`}
-                      barPct={p.dailyDDBarPct}
-                      barColor="#c97a00"
-                      leftLabel={`${p.dailyDDUsedPct.toFixed(2)}%`}
-                      rightLabel={`max ${p.dailyDDLimitPct.toFixed(1)}%`}
-                    />
-                    <ProgressBlock
-                      label={challenge.min_trading_days ? `Min Trading Days — Need ${challenge.min_trading_days}` : 'Min Trading Days'}
-                      barPct={p.minDaysBarPct}
-                      barColor="#4d9fff"
-                      leftLabel={String(p.tradingDays)}
-                      rightLabel={`need ${p.minDays || '—'}`}
-                    />
-                  </div>
+                      {/* DD */}
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                          <span style={{ color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>DD</span>
+                          <span style={{ color: 'var(--red)', fontFamily: 'JetBrains Mono, monospace', fontSize: '11px' }}>{p.maxDDUsedPct.toFixed(1)}%</span>
+                        </div>
+                        <div style={{ height: '3px', background: 'var(--bg-surface-2)', borderRadius: '2px' }}>
+                          <div style={{ height: '3px', width: `${Math.max(0, Math.min(p.maxDDBarPct, 100))}%`, background: 'var(--red)', borderRadius: '2px' }} />
+                        </div>
+                      </div>
 
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <button onClick={() => navigate(`/dashboard?account=${challenge.id}`)} style={{ background: 'transparent', border: '0.5px solid #1e1e1e', borderRadius: '6px', padding: '7px 14px', color: '#999', fontFamily: 'Inter, sans-serif', fontSize: '12px', cursor: 'pointer' }}>
-                      Go to Dashboard →
-                    </button>
+                      {/* Days */}
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                          <span style={{ color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>DAYS</span>
+                          <span style={{ color: 'var(--text-secondary)', fontFamily: 'JetBrains Mono, monospace', fontSize: '11px' }}>{p.tradingDays}/{p.minDays || '—'}</span>
+                        </div>
+                        <div style={{ height: '3px', background: 'var(--bg-surface-2)', borderRadius: '2px' }}>
+                          <div style={{ height: '3px', width: `${Math.max(0, Math.min(p.minDaysBarPct, 100))}%`, background: 'var(--blue)', borderRadius: '2px' }} />
+                        </div>
+                      </div>
+
+                    </div>
+
+                    {/* Arrow */}
+                    <div style={{ color: 'var(--text-faint)', fontSize: '16px', flexShrink: 0, marginLeft: '8px' }}>→</div>
+
                   </div>
                 </div>
               )
@@ -1202,6 +1446,16 @@ export default function ChallengeTracker() {
           onClose={() => setEditingChallenge(null)}
           onSaved={fetchChallenges}
           onDeleted={fetchChallenges}
+        />
+      )}
+
+      {previewChallenge && (
+        <PreviewModal
+          challenge={previewChallenge}
+          trades={tradesByAccount[previewChallenge.id] || []}
+          onClose={() => setPreviewChallenge(null)}
+          navigate={navigate}
+          isMobile={false}
         />
       )}
     </div>
