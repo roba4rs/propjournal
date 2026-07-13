@@ -1038,7 +1038,6 @@ export default function ChallengeTracker() {
                 const badge = statusBadge[computedStatus] || statusBadge.active
                 const pnlColor = s.netPnl > 0 ? 'var(--brand)' : s.netPnl < 0 ? 'var(--red)' : 'var(--text-secondary)'
                 const pnlLabel = `${s.netPnl >= 0 ? '+' : ''}$${Math.abs(s.netPnl).toFixed(0)}`
-                const isActive = computedStatus === 'active'
                 const isFailed = computedStatus === 'failed'
                 const phaseLabel = challenge.phase
                   ? challenge.phase.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())
