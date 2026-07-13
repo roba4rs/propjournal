@@ -25,6 +25,17 @@ function computeStats(trades) {
   return { netPnl, winRate, total: trades.length, avgRR, profitFactor, bestTrade, worstTrade, avgWin, avgLoss, wins: wins.length, losses: losses.length }
 }
 
+// Consistency rule: no single day's profit may exceed consistency_pct% of total net profit.
+function computeConsistency(withPnlTrades, netPnl) {
+  const byDay = {}
+  withPnlTrades.forEach(t => {
+    byDay[t.date] = (byDay[t.date] || 0) + parseFloat(t.pnl)
+  })
+  const bestDay = Object.values(byDay).length > 0 ? Math.max(...Object.values(byDay)) : 0
+  const bestDayPct = netPnl > 0 ? (bestDay / netPnl) * 100 : 0
+  return { bestDay, bestDayPct }
+}
+
 function fmt$(n) {
   if (n == null) return '—'
   const abs = Math.abs(n)
@@ -255,6 +266,14 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
   // ── Daily drawdown (always balance-based from today's open) ──
   const withPnl = trades.filter(t => t.pnl != null)
 
+  // ── Consistency & payout — funded/instant accounts only ──
+  const consistencyPct = account.consistency_pct != null ? parseFloat(account.consistency_pct) : 20
+  const profitSplitPct = account.profit_split_pct != null ? parseFloat(account.profit_split_pct) : 80
+  const { bestDay, bestDayPct } = computeConsistency(withPnl, netPnl)
+  const consistencyMet = netPnl > 0 ? bestDayPct <= consistencyPct : null // null = not applicable yet (no profit)
+  const requiredProfitForConsistency = consistencyPct > 0 ? bestDay / (consistencyPct / 100) : 0
+  const payoutAmount = netPnl > 0 ? netPnl * (profitSplitPct / 100) : 0
+
   // ── Status (type-aware, mirrors ChallengeTracker logic) ──
   function computeStatus() {
     if (account.failure_reason) return 'failed'
@@ -269,12 +288,18 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
     // Max DD breach: use type-aware ddUsed
     if (maxDD > 0 && ddUsed >= maxDD) return 'failed'
 
-    // Pass / fund check
+    const profitMet = profitTarget > 0 && netPnl >= profitTarget
+
+    // Funded/instant accounts: consistency-gated payout, no min-days requirement
+    if (account.phase === 'funded') {
+      if (profitMet && consistencyMet) return 'payout_ready'
+      return 'funded'
+    }
+
+    // Evaluation phases: min trading days requirement still applies
     const tradingDayCount = new Set(trades.map(t => t.date)).size
     const minDaysMet = minDays === 0 || tradingDayCount >= minDays
-    if (profitTarget > 0 && netPnl >= profitTarget && minDaysMet) {
-      return account.phase === 'funded' ? 'funded' : 'passed'
-    }
+    if (profitMet && minDaysMet) return 'passed'
     return 'active'
   }
   const computedStatus = computeStatus()
@@ -284,6 +309,7 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
     passed:  { bg: 'var(--green-bg)', color: 'var(--brand)', border: 'var(--green-bg-2)', label: 'Passed' },
     failed:  { bg: 'var(--red-bg-2)', color: 'var(--red)', border: 'var(--red-bg)', label: 'Failed' },
     funded:  { bg: 'var(--funded-bg)', color: 'var(--funded)', border: 'var(--funded-bg-2)', label: 'Funded' },
+    payout_ready: { bg: 'var(--amber-bg-2)', color: 'var(--amber)', border: 'var(--amber-bg)', label: 'Payout Ready' },
   }
   const badge = statusStyles[computedStatus] || statusStyles.active
 
@@ -361,8 +387,14 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
           <p style={{ color: 'var(--amber)', fontFamily: 'DM Mono, monospace', fontSize: '12px', margin: 0 }}>{dailyDD > 0 ? `${(dailyDD / accountSize * 100).toFixed(0)}%` : '—'}</p>
         </div>
         <div style={{ background: 'var(--bg-page)', border: '0.5px solid var(--border-color)', borderRadius: '6px', padding: '7px 8px', textAlign: 'center' }}>
-          <p style={{ color: 'var(--text-faint-2)', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', margin: '0 0 3px 0' }}>Min Days</p>
-          <p style={{ color: 'var(--text-primary)', fontFamily: 'DM Mono, monospace', fontSize: '12px', margin: 0 }}>{minDays > 0 ? minDays : '—'}</p>
+          <p style={{ color: 'var(--text-faint-2)', fontFamily: 'DM Mono, monospace', fontSize: '9px', textTransform: 'uppercase', margin: '0 0 3px 0' }}>{account.phase === 'funded' ? 'Consistency' : 'Min Days'}</p>
+          {account.phase === 'funded' ? (
+            <p style={{ color: consistencyMet === null ? 'var(--text-faint-2)' : consistencyMet ? 'var(--brand)' : 'var(--red)', fontFamily: 'DM Mono, monospace', fontSize: '12px', margin: 0 }}>
+              {consistencyMet === null ? '—' : consistencyMet ? '✓ Met' : `${bestDayPct.toFixed(0)}%`}
+            </p>
+          ) : (
+            <p style={{ color: 'var(--text-primary)', fontFamily: 'DM Mono, monospace', fontSize: '12px', margin: 0 }}>{minDays > 0 ? minDays : '—'}</p>
+          )}
         </div>
       </div>}
 
@@ -380,7 +412,28 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
           color="var(--red)"
           rightLabel={`${maxDDUsedPct.toFixed(2)}% used · ${floorLabel}`}
         />
+        {account.phase === 'funded' && (
+          <ProgressBar
+            label={`Consistency — max ${consistencyPct}% of profit from one day`}
+            pct={consistencyPct > 0 ? Math.min((bestDayPct / consistencyPct) * 100, 100) : 0}
+            color={consistencyMet ? 'var(--brand)' : 'var(--blue)'}
+            rightLabel={consistencyMet === null ? 'No profit yet' : consistencyMet
+              ? `✓ Met — best day ${bestDayPct.toFixed(1)}%`
+              : `Need $${Math.ceil(requiredProfitForConsistency).toLocaleString()} total for best day ($${Math.round(bestDay).toLocaleString()}) to qualify`}
+          />
+        )}
       </div>
+
+      {account.phase === 'funded' && computedStatus === 'payout_ready' && (
+        <div style={{ marginTop: '12px', background: 'var(--amber-bg-2)', border: '0.5px solid var(--amber-bg)', borderRadius: '10px', padding: '12px 14px', textAlign: 'center' }}>
+          <p style={{ color: 'var(--text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 4px 0' }}>
+            Payout Ready — {profitSplitPct}% split
+          </p>
+          <p style={{ color: 'var(--amber)', fontFamily: 'DM Mono, monospace', fontSize: '19px', fontWeight: '700', margin: 0 }}>
+            ${payoutAmount.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+          </p>
+        </div>
+      )}
     </div>
   )
 }

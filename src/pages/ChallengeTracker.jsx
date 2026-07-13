@@ -418,6 +418,7 @@ const statusBadge = {
   funded: { bg: 'var(--funded-bg)', color: 'var(--funded)', border: 'var(--funded-bg-2)', label: 'Funded' },
   passed: { bg: 'var(--green-bg)', color: 'var(--brand)', border: 'var(--green-bg-2)', label: 'Passed' },
   failed: { bg: 'var(--red-bg-2)', color: 'var(--red)', border: 'var(--red-bg)', label: 'Failed' },
+  payout_ready: { bg: 'var(--amber-bg-2)', color: 'var(--amber)', border: 'var(--amber-bg)', label: 'Payout Ready' },
 }
 
 function computeStats(trades) {
@@ -431,6 +432,54 @@ function computeStats(trades) {
   return { netPnl, winRate, total: trades.length, wins: wins.length, losses: losses.length, be: be.length }
 }
 
+// Shared trailing-drawdown engine — used by funded/instant accounts where the
+// max & daily drawdown floor trails the highest balance reached, instead of
+// staying fixed at the initial account size.
+function computeTrailingDrawdown(withPnlTrades, accountSize) {
+  const sorted = [...withPnlTrades].sort((a, b) => new Date(a.date) - new Date(b.date))
+
+  // Max drawdown: running peak balance vs running balance, worst gap seen.
+  let balance = accountSize
+  let peak = accountSize
+  let maxDrawdownUsed = 0
+  sorted.forEach(t => {
+    balance += parseFloat(t.pnl) + (parseFloat(t.swap) || 0) + (parseFloat(t.commission) || 0)
+    if (balance > peak) peak = balance
+    const dd = peak - balance
+    if (dd > maxDrawdownUsed) maxDrawdownUsed = dd
+  })
+
+  // Daily drawdown: each day's loss measured against that day's OPENING balance,
+  // which itself trails upward as the account grows — worst day on record.
+  let runningBalance = accountSize
+  let worstDailyLoss = 0
+  const dates = [...new Set(sorted.map(t => t.date))].sort()
+  dates.forEach(date => {
+    const dayStart = runningBalance
+    let cur = dayStart
+    let dayLow = dayStart
+    sorted.filter(t => t.date === date).forEach(t => {
+      cur += parseFloat(t.pnl) + (parseFloat(t.swap) || 0) + (parseFloat(t.commission) || 0)
+      if (cur < dayLow) dayLow = cur
+    })
+    worstDailyLoss = Math.max(worstDailyLoss, dayStart - dayLow)
+    runningBalance = cur
+  })
+
+  return { peakBalance: peak, maxDrawdownUsed, worstDailyLoss, finalBalance: balance }
+}
+
+// Consistency rule: no single day's profit may exceed consistency_pct% of total net profit.
+function computeConsistency(withPnlTrades, netPnl) {
+  const byDay = {}
+  withPnlTrades.forEach(t => {
+    byDay[t.date] = (byDay[t.date] || 0) + parseFloat(t.pnl) + (parseFloat(t.swap) || 0) + (parseFloat(t.commission) || 0)
+  })
+  const bestDay = Object.values(byDay).length > 0 ? Math.max(...Object.values(byDay)) : 0
+  const bestDayPct = netPnl > 0 ? (bestDay / netPnl) * 100 : 0
+  return { bestDay, bestDayPct }
+}
+
 function computeProgress(trades, account) {
   const withPnl = trades.filter(t => t.pnl != null)
   const netPnl = withPnl.reduce((s, t) => s + parseFloat(t.pnl) + (parseFloat(t.swap) || 0) + (parseFloat(t.commission) || 0), 0)
@@ -438,6 +487,8 @@ function computeProgress(trades, account) {
   const profitTarget = parseFloat(account.profit_target) || 0
   const maxDD = parseFloat(account.max_drawdown) || 0
   const dailyDD = parseFloat(account.daily_drawdown) || 0
+  const isTrailing = account.phase === 'funded' &&
+    ['trailing', 'trailing_balance', 'trailing_equity'].includes(account.drawdown_type)
 
   const inProfit = netPnl >= 0
 
@@ -445,16 +496,23 @@ function computeProgress(trades, account) {
   const netPnlPct = accountSize > 0 ? (netPnl / accountSize) * 100 : 0
   const profitPct = (inProfit && profitTarget > 0) ? Math.min((netPnl / profitTarget) * 100, 100) : 0
 
-  // Max drawdown: only shows when account is in loss (netPnl < 0)
-  const maxDrawdownUsed = inProfit ? 0 : Math.abs(netPnl)
-  const maxDDUsedPct = inProfit ? 0 : (accountSize > 0 ? (maxDrawdownUsed / accountSize) * 100 : 0)
+  let maxDrawdownUsed, todayLoss
+  if (isTrailing) {
+    const t = computeTrailingDrawdown(withPnl, accountSize)
+    maxDrawdownUsed = t.maxDrawdownUsed
+    todayLoss = t.worstDailyLoss
+  } else {
+    // Max drawdown: only shows when account is in loss (netPnl < 0)
+    maxDrawdownUsed = inProfit ? 0 : Math.abs(netPnl)
+    // Daily drawdown: today's loss only (zero if today is profitable)
+    const today = new Date().toISOString().split('T')[0]
+    const todayPnl = withPnl.filter(t => t.date === today).reduce((s, t) => s + parseFloat(t.pnl), 0)
+    todayLoss = Math.max(0, -todayPnl)
+  }
+  const maxDDUsedPct = accountSize > 0 ? (maxDrawdownUsed / accountSize) * 100 : 0
   const maxDDLimitPct = accountSize > 0 ? (maxDD / accountSize) * 100 : 0
-  const maxDDBarPct = inProfit ? 0 : (maxDD > 0 ? Math.min((maxDrawdownUsed / maxDD) * 100, 100) : 0)
+  const maxDDBarPct = maxDD > 0 ? Math.min((maxDrawdownUsed / maxDD) * 100, 100) : 0
 
-  // Daily drawdown: today's loss only (zero if today is profitable)
-  const today = new Date().toISOString().split('T')[0]
-  const todayPnl = withPnl.filter(t => t.date === today).reduce((s, t) => s + parseFloat(t.pnl), 0)
-  const todayLoss = Math.max(0, -todayPnl)
   const dailyDDUsedPct = accountSize > 0 ? (todayLoss / accountSize) * 100 : 0
   const dailyDDLimitPct = accountSize > 0 ? (dailyDD / accountSize) * 100 : 0
   const dailyDDBarPct = dailyDD > 0 ? Math.min((todayLoss / dailyDD) * 100, 100) : 0
@@ -463,29 +521,71 @@ function computeProgress(trades, account) {
   const minDays = account.min_trading_days || 0
   const minDaysBarPct = minDays > 0 ? Math.min((tradingDays / minDays) * 100, 100) : 0
 
+  // Consistency & payout — funded/instant accounts only
+  const consistencyPct = account.consistency_pct != null ? parseFloat(account.consistency_pct) : 20
+  const { bestDay, bestDayPct } = computeConsistency(withPnl, netPnl)
+  const consistencyBarPct = consistencyPct > 0 ? Math.min((bestDayPct / consistencyPct) * 100, 100) : 0
+  const consistencyMet = netPnl > 0 ? bestDayPct <= consistencyPct : null // null = not yet applicable (no profit yet)
+  // Minimum total net profit needed for the current best day to sit within the consistency limit
+  const requiredProfitForConsistency = consistencyPct > 0 ? bestDay / (consistencyPct / 100) : 0
+  const profitSplitPct = account.profit_split_pct != null ? parseFloat(account.profit_split_pct) : 80
+  const payoutAmount = netPnl > 0 ? netPnl * (profitSplitPct / 100) : 0
+
   return {
     netPnl, netPnlPct, profitPct,
     maxDDUsedPct, maxDDLimitPct, maxDDBarPct,
     dailyDDUsedPct, dailyDDLimitPct, dailyDDBarPct,
     tradingDays, minDays, minDaysBarPct,
     profitTarget, maxDD, dailyDD, accountSize,
+    consistencyPct, bestDay, bestDayPct, consistencyBarPct, consistencyMet, requiredProfitForConsistency,
+    profitSplitPct, payoutAmount,
   }
 }
 
 function computeStatus(trades, account) {
   if (account.failure_reason) return 'failed'
 
-  // Funded phase accounts always show as 'funded' regardless of P&L
-  if (account.phase === 'funded') return 'funded'
-
   const withPnl = trades.filter(t => t.pnl != null)
   const profitTarget = parseFloat(account.profit_target) || 0
   const maxDD = parseFloat(account.max_drawdown) || 0
   const dailyDD = parseFloat(account.daily_drawdown) || 0
-  const minDays = account.min_trading_days || 0
   const accountSize = parseFloat(account.account_size) || 0
-
   const netPnl = withPnl.reduce((s, t) => s + parseFloat(t.pnl) + (parseFloat(t.swap) || 0) + (parseFloat(t.commission) || 0), 0)
+
+  // Funded/instant accounts: trailing drawdown breach check + consistency-gated payout
+  if (account.phase === 'funded') {
+    const isTrailing = ['trailing', 'trailing_balance', 'trailing_equity'].includes(account.drawdown_type)
+    let maxDrawdownUsed, worstDailyLoss
+    if (isTrailing) {
+      const t = computeTrailingDrawdown(withPnl, accountSize)
+      maxDrawdownUsed = t.maxDrawdownUsed
+      worstDailyLoss = t.worstDailyLoss
+    } else {
+      let balance = accountSize, lowestBalance = accountSize
+      withPnl.forEach(t => {
+        balance += parseFloat(t.pnl) + (parseFloat(t.swap) || 0) + (parseFloat(t.commission) || 0)
+        if (balance < lowestBalance) lowestBalance = balance
+      })
+      maxDrawdownUsed = Math.max(0, accountSize - lowestBalance)
+      const byDay = {}
+      withPnl.forEach(t => { byDay[t.date] = (byDay[t.date] || 0) + parseFloat(t.pnl) + (parseFloat(t.swap) || 0) + (parseFloat(t.commission) || 0) })
+      worstDailyLoss = Object.values(byDay).length > 0 ? Math.max(0, ...Object.values(byDay).map(v => -v)) : 0
+    }
+
+    const maxDDBreach   = maxDD > 0 && maxDrawdownUsed >= maxDD
+    const dailyDDBreach = dailyDD > 0 && worstDailyLoss >= dailyDD
+    if (maxDDBreach || dailyDDBreach) return 'failed'
+
+    const profitMet = profitTarget > 0 && netPnl >= profitTarget
+    const consistencyPct = account.consistency_pct != null ? parseFloat(account.consistency_pct) : 20
+    const { bestDayPct } = computeConsistency(withPnl, netPnl)
+    const consistencyMet = netPnl > 0 && bestDayPct <= consistencyPct
+
+    if (profitMet && consistencyMet) return 'payout_ready'
+    return 'funded'
+  }
+
+  const minDays = account.min_trading_days || 0
 
   let balance = accountSize
   let lowestBalance = accountSize
@@ -596,13 +696,40 @@ function PreviewModal({ challenge, trades, onClose, navigate, isMobile }) {
         leftLabel={`${p.dailyDDUsedPct.toFixed(2)}%`}
         rightLabel={`max ${p.dailyDDLimitPct.toFixed(1)}%`}
       />
-      <ProgressBlock
-        label="Min Trading Days"
-        barPct={p.minDaysBarPct}
-        barColor="var(--blue)"
-        leftLabel={String(p.tradingDays)}
-        rightLabel={`need ${p.minDays || '—'}`}
-      />
+      {challenge.phase === 'funded' ? (
+        <>
+          <ProgressBlock
+            label="Consistency"
+            barPct={p.consistencyBarPct}
+            barColor="var(--blue)"
+            leftLabel={`${p.bestDayPct.toFixed(1)}%`}
+            rightLabel={`max ${p.consistencyPct}% / day`}
+          />
+          {p.consistencyMet === false && (
+            <p style={{ color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '11px', margin: '-4px 0 0 2px' }}>
+              Need ${Math.ceil(p.requiredProfitForConsistency).toLocaleString()} total profit for your best day (${Math.round(p.bestDay).toLocaleString()}) to fit the {p.consistencyPct}% limit.
+            </p>
+          )}
+        </>
+      ) : (
+        <ProgressBlock
+          label="Min Trading Days"
+          barPct={p.minDaysBarPct}
+          barColor="var(--blue)"
+          leftLabel={String(p.tradingDays)}
+          rightLabel={`need ${p.minDays || '—'}`}
+        />
+      )}
+      {challenge.phase === 'funded' && computedStatus === 'payout_ready' && (
+        <div style={{ background: 'var(--amber-bg-2)', border: '0.5px solid var(--amber-bg)', borderRadius: '10px', padding: '14px', textAlign: 'center' }}>
+          <p style={{ color: 'var(--text-muted)', fontFamily: 'Inter, sans-serif', fontSize: '11px', textTransform: 'uppercase', margin: '0 0 6px 0', letterSpacing: '0.5px' }}>
+            Payout Ready — {p.profitSplitPct}% split
+          </p>
+          <p style={{ color: 'var(--amber)', fontFamily: 'JetBrains Mono, monospace', fontSize: '20px', fontWeight: '700', margin: 0 }}>
+            ${p.payoutAmount.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+          </p>
+        </div>
+      )}
     </div>
   )
 
@@ -1299,6 +1426,20 @@ export default function ChallengeTracker() {
                     </div>
                   </div>
 
+                  {/* Consistency status — instant/funded accounts only */}
+                  {challenge.phase === 'funded' && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-surface-2)', border: '0.5px solid var(--border-color)', borderRadius: '8px', padding: '8px 12px' }}>
+                      <span style={{ color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '11px' }}>Consistency</span>
+                      {p.consistencyMet === null ? (
+                        <span style={{ color: 'var(--text-faint-2)', fontFamily: 'JetBrains Mono, monospace', fontSize: '11px' }}>—</span>
+                      ) : p.consistencyMet ? (
+                        <span style={{ color: 'var(--brand)', fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', fontWeight: '600' }}>✓ Met ({p.bestDayPct.toFixed(1)}% / {p.consistencyPct}%)</span>
+                      ) : (
+                        <span style={{ color: 'var(--red)', fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', fontWeight: '600' }}>Need ${Math.ceil(p.requiredProfitForConsistency).toLocaleString()} total</span>
+                      )}
+                    </div>
+                  )}
+
                   {/* Preview + Go to Dashboard */}
                   <div style={{ display: 'flex', gap: '8px' }}>
                     <button onClick={() => setPreviewChallenge(challenge)} style={{ background: 'transparent', border: '0.5px solid var(--border-color)', borderRadius: '8px', padding: '8px 14px', color: 'var(--text-muted)', fontFamily: 'Inter, sans-serif', fontSize: '12px', cursor: 'pointer', flex: 1 }}>
@@ -1412,15 +1553,31 @@ export default function ChallengeTracker() {
                         </div>
                       </div>
 
-                      {/* Days */}
+                      {/* Days / Consistency */}
                       <div style={{ flex: 1 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                          <span style={{ color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>DAYS</span>
-                          <span style={{ color: 'var(--text-secondary)', fontFamily: 'JetBrains Mono, monospace', fontSize: '11px' }}>{p.tradingDays}/{p.minDays || '—'}</span>
-                        </div>
-                        <div style={{ height: '3px', background: 'var(--bg-surface-2)', borderRadius: '2px' }}>
-                          <div style={{ height: '3px', width: `${Math.max(0, Math.min(p.minDaysBarPct, 100))}%`, background: 'var(--blue)', borderRadius: '2px' }} />
-                        </div>
+                        {challenge.phase === 'funded' ? (
+                          <>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                              <span style={{ color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>CONSISTENCY</span>
+                              <span style={{ color: p.consistencyMet === null ? 'var(--text-faint-2)' : p.consistencyMet ? 'var(--brand)' : 'var(--red)', fontFamily: 'JetBrains Mono, monospace', fontSize: '11px' }}>
+                                {p.consistencyMet === null ? '—' : p.consistencyMet ? '✓ Met' : `Need $${Math.ceil(p.requiredProfitForConsistency).toLocaleString()}`}
+                              </span>
+                            </div>
+                            <div style={{ height: '3px', background: 'var(--bg-surface-2)', borderRadius: '2px' }}>
+                              <div style={{ height: '3px', width: `${Math.max(0, Math.min(p.consistencyBarPct, 100))}%`, background: p.consistencyMet ? 'var(--brand)' : 'var(--blue)', borderRadius: '2px' }} />
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                              <span style={{ color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>DAYS</span>
+                              <span style={{ color: 'var(--text-secondary)', fontFamily: 'JetBrains Mono, monospace', fontSize: '11px' }}>{p.tradingDays}/{p.minDays || '—'}</span>
+                            </div>
+                            <div style={{ height: '3px', background: 'var(--bg-surface-2)', borderRadius: '2px' }}>
+                              <div style={{ height: '3px', width: `${Math.max(0, Math.min(p.minDaysBarPct, 100))}%`, background: 'var(--blue)', borderRadius: '2px' }} />
+                            </div>
+                          </>
+                        )}
                       </div>
 
                     </div>

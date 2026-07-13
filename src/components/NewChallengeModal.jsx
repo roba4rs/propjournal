@@ -81,6 +81,8 @@ export default function NewChallengeModal({ onClose, onCreated }) {
     min_trading_days:       '',
     min_days_type:          null,
     min_profit_per_day_pct: '',
+    consistency_pct:        '20',
+    profit_split_pct:       '80',
     start_date:             new Date().toISOString().split('T')[0],
   })
 
@@ -125,6 +127,13 @@ export default function NewChallengeModal({ onClose, onCreated }) {
   // ── Derive phases when type selected ──────────────────────
   useEffect(() => {
     if (!selectedType || !presets.length) return
+    // Instant accounts have no evaluation ladder — always funded, regardless of
+    // what the matched preset row says. Structural safeguard, not just a data fix.
+    if (selectedType === 'instant') {
+      setAvailablePhases(['funded'])
+      setSelectedPhase('funded')
+      return
+    }
     const phaseOrder = ['phase_1', 'phase_2', 'phase_3', 'funded']
     const phases = phaseOrder.filter(p =>
       presets.some(r =>
@@ -162,6 +171,7 @@ export default function NewChallengeModal({ onClose, onCreated }) {
       profit_target_pct: '', max_drawdown_pct: '',
       daily_drawdown_pct: '', min_trading_days: '',
       min_days_type: null, min_profit_per_day_pct: '',
+      consistency_pct: '20', profit_split_pct: '80',
     }))
     setAutoFilled(false)
   }
@@ -198,6 +208,9 @@ export default function NewChallengeModal({ onClose, onCreated }) {
         min_trading_days: parseInt(form.min_trading_days) || null,
         start_date:       form.start_date,
         status:           'active',
+        drawdown_type:    isFunded ? 'trailing_equity' : 'static',
+        consistency_pct:  isFunded ? (parseFloat(form.consistency_pct) || 20) : null,
+        profit_split_pct: isFunded ? (parseFloat(form.profit_split_pct) || 80) : null,
       })
       if (insertError) throw insertError
       onCreated(); onClose()
@@ -379,6 +392,7 @@ export default function NewChallengeModal({ onClose, onCreated }) {
 
             {/* Phase — segmented tabs */}
             {(() => {
+              if (selectedType === 'instant') return null // Instant = always funded, no phase to pick
               const phaseList = isOther ? ['phase_1','phase_2','phase_3','funded'] : availablePhases
               const disabled = !isOther && !selectedType
               const PHASE_DESC = { phase_1: 'Phase 1 evaluation', phase_2: 'Phase 2 evaluation', phase_3: 'Phase 3 evaluation', funded: 'Live capital' }
@@ -457,11 +471,20 @@ export default function NewChallengeModal({ onClose, onCreated }) {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 {ruleCard('🎯', 'Profit Target', ['profit_target_pct', form.profit_target_pct], '%', fmt(profitTargetDollar), hintGreen)}
-                {ruleCard('📉', 'Max Drawdown', ['max_drawdown_pct', form.max_drawdown_pct], '%', fmt(maxDDDollar), hintRed)}
-                {ruleCard('🛡', 'Daily Drawdown', ['daily_drawdown_pct', form.daily_drawdown_pct], '%', fmt(dailyDDDollar), hintRed)}
-                {ruleCard('📅', 'Min Trading Days', ['min_trading_days', form.min_trading_days], 'days',
-                  form.min_days_type ? (form.min_days_type === 'profitable' ? 'Profitable days' : 'Any trading days') : null, hintBlue)}
+                {ruleCard('📉', isFunded ? 'Max Drawdown (Trailing)' : 'Max Drawdown', ['max_drawdown_pct', form.max_drawdown_pct], '%', fmt(maxDDDollar), hintRed)}
+                {ruleCard('🛡', isFunded ? 'Daily Drawdown (Trailing)' : 'Daily Drawdown', ['daily_drawdown_pct', form.daily_drawdown_pct], '%', fmt(dailyDDDollar), hintRed)}
+                {isFunded
+                  ? ruleCard('⚖️', 'Consistency', ['consistency_pct', form.consistency_pct], '%', 'Max % of profit from one day', hintBlue)
+                  : ruleCard('📅', 'Min Trading Days', ['min_trading_days', form.min_trading_days], 'days',
+                      form.min_days_type ? (form.min_days_type === 'profitable' ? 'Profitable days' : 'Any trading days') : null, hintBlue)}
               </div>
+
+              {/* Profit split — funded/instant only */}
+              {isFunded && (
+                <div style={{ marginTop: '10px' }}>
+                  {ruleCard('💰', 'Profit Split', ['profit_split_pct', form.profit_split_pct], '%', 'Your share when payout is triggered', hintGreen)}
+                </div>
+              )}
 
               {/* Profitable day min % */}
               {form.min_days_type === 'profitable' && (
