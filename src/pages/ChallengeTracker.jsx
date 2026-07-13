@@ -1090,22 +1090,22 @@ export default function ChallengeTracker() {
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
                           <span style={{ fontSize: '7px', color: 'var(--text-faint-2)', fontFamily: "'JetBrains Mono', monospace" }}>Profit</span>
                           <span style={{ fontSize: '7px', color: 'var(--brand)', fontFamily: "'JetBrains Mono', monospace" }}>
-                            {isActive ? `${p.netPnlPct >= 0 ? p.netPnlPct.toFixed(1) : '0.0'}% / ${p.accountSize > 0 ? (p.profitTarget / p.accountSize * 100).toFixed(0) : '—'}%` : (isFailed ? '—' : '100%')}
+                            {isFailed ? '—' : `${p.netPnlPct >= 0 ? '+' : ''}${p.netPnlPct.toFixed(1)}% / ${p.accountSize > 0 ? (p.profitTarget / p.accountSize * 100).toFixed(0) : '—'}%`}
                           </span>
                         </div>
                         <div style={{ height: '2px', background: 'var(--bg-surface-2)', borderRadius: '2px' }}>
-                          <div style={{ height: '100%', borderRadius: '2px', background: 'var(--brand)', width: isActive ? `${p.netPnlPct >= 0 ? Math.min(p.profitPct, 100) : 0}%` : isFailed ? '0%' : '100%' }} />
+                          <div style={{ height: '100%', borderRadius: '2px', background: 'var(--brand)', width: isFailed ? '0%' : `${Math.max(0, Math.min(p.profitPct, 100))}%` }} />
                         </div>
                       </div>
                       <div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
                           <span style={{ fontSize: '7px', color: 'var(--text-faint-2)', fontFamily: "'JetBrains Mono', monospace" }}>Max DD</span>
                           <span style={{ fontSize: '7px', color: 'var(--red)', fontFamily: "'JetBrains Mono', monospace" }}>
-                            {isActive ? `${p.maxDDUsedPct.toFixed(1)}% / ${p.maxDDLimitPct.toFixed(0)}%` : isFailed ? '100%' : '—'}
+                            {isFailed ? '100%' : `${p.maxDDUsedPct.toFixed(1)}% / ${p.maxDDLimitPct.toFixed(0)}%`}
                           </span>
                         </div>
                         <div style={{ height: '2px', background: 'var(--bg-surface-2)', borderRadius: '2px' }}>
-                          <div style={{ height: '100%', borderRadius: '2px', background: 'var(--red)', width: isActive ? `${Math.min(p.maxDDBarPct, 100)}%` : isFailed ? '100%' : '0%' }} />
+                          <div style={{ height: '100%', borderRadius: '2px', background: 'var(--red)', width: isFailed ? '100%' : `${Math.max(0, Math.min(p.maxDDBarPct, 100))}%` }} />
                         </div>
                       </div>
                     </div>

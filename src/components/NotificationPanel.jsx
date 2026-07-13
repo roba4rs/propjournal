@@ -50,17 +50,23 @@ export default function NotificationPanel({ onClose, onRead, anchorRef }) {
   const panelChannelRef = useRef(null)
 
   useEffect(() => {
-    const channelName = `notifications-panel-${Date.now()}`
+    let cancelled = false
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) return
+      if (!session || cancelled) return
 
-      if (panelChannelRef.current) {
-        supabase.removeChannel(panelChannelRef.current)
-      }
+      const topic = `notifications-panel-${session.user.id}`
+
+      // See Sidebar.jsx for why this stale-channel check is necessary:
+      // supabase.channel(topic) reuses an existing channel for a matching
+      // topic, and .on() cannot be called on one that's already subscribed.
+      const stale = supabase.getChannels().find(c => c.topic === `realtime:${topic}`)
+      if (stale) supabase.removeChannel(stale)
+
+      if (cancelled) return
 
       const channel = supabase
-        .channel(channelName)
+        .channel(topic)
         .on('postgres_changes', {
           event: 'INSERT',
           schema: 'public',
@@ -75,6 +81,7 @@ export default function NotificationPanel({ onClose, onRead, anchorRef }) {
     })
 
     return () => {
+      cancelled = true
       if (panelChannelRef.current) {
         supabase.removeChannel(panelChannelRef.current)
         panelChannelRef.current = null

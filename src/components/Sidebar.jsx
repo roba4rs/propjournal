@@ -96,12 +96,13 @@ export default function Sidebar({ mobileTopBarRight = null }) {
   const notifChannelRef = useRef(null)
 
   useEffect(() => {
-    const channelName = `notifications-sidebar-${Date.now()}`
+    let cancelled = false
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) return
+      if (!session || cancelled) return
 
       const userId = session.user.id
+      const topic = `notifications-sidebar-${userId}`
 
       // Fetch initial unread count
       supabase
@@ -109,15 +110,22 @@ export default function Sidebar({ mobileTopBarRight = null }) {
         .select('*', { count: 'exact', head: true })
         .eq('user_id', userId)
         .eq('read', false)
-        .then(({ count }) => setUnreadCount(count || 0))
+        .then(({ count }) => { if (!cancelled) setUnreadCount(count || 0) })
 
-      // Remove stale channel from previous StrictMode mount if present
-      if (notifChannelRef.current) {
-        supabase.removeChannel(notifChannelRef.current)
-      }
+      // supabase.channel(topic) reuses an existing channel object if one
+      // with this topic is already registered on the client — which happens
+      // on a StrictMode double-invoke or a fast remount before cleanup ran.
+      // Calling .on() on that reused (already-subscribed) channel is what
+      // throws "cannot add postgres_changes callbacks ... after subscribe()".
+      // Removing any stale match first guarantees .channel() gives us a
+      // genuinely fresh, unsubscribed channel.
+      const stale = supabase.getChannels().find(c => c.topic === `realtime:${topic}`)
+      if (stale) supabase.removeChannel(stale)
+
+      if (cancelled) return
 
       const channel = supabase
-        .channel(channelName)
+        .channel(topic)
         .on('postgres_changes', {
           event: 'INSERT',
           schema: 'public',
@@ -132,6 +140,7 @@ export default function Sidebar({ mobileTopBarRight = null }) {
     })
 
     return () => {
+      cancelled = true
       if (notifChannelRef.current) {
         supabase.removeChannel(notifChannelRef.current)
         notifChannelRef.current = null
