@@ -1,7 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { supabase } from '../supabaseClient'
 import { useNavigate, Link } from 'react-router-dom'
+
+// Public Turnstile site key — safe to expose in frontend code
+const TURNSTILE_SITE_KEY = '0x4AAAAAAD1iragUs6EuUVQV'
 
 export default function Signup() {
   const { register, handleSubmit, formState: { errors }, watch } = useForm()
@@ -9,10 +12,73 @@ export default function Signup() {
   const [authError, setAuthError] = useState(null)
   const navigate = useNavigate()
 
+  // ── Turnstile setup (email/password signup only — not Google, not login) ──
+  const turnstileRef = useRef(null)
+  const turnstileWidgetId = useRef(null)
+  const [captchaToken, setCaptchaToken] = useState(null)
+
+  useEffect(() => {
+    // Load the Turnstile script once
+    if (!document.getElementById('cf-turnstile-script')) {
+      const script = document.createElement('script')
+      script.id = 'cf-turnstile-script'
+      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js'
+      script.async = true
+      document.body.appendChild(script)
+    }
+
+    // Render the widget once the script is ready
+    const renderWidget = () => {
+      if (window.turnstile && turnstileRef.current && turnstileWidgetId.current === null) {
+        turnstileWidgetId.current = window.turnstile.render(turnstileRef.current, {
+          sitekey: TURNSTILE_SITE_KEY,
+          callback: (token) => setCaptchaToken(token),
+          'expired-callback': () => setCaptchaToken(null),
+          'error-callback': () => setCaptchaToken(null),
+        })
+      }
+    }
+
+    if (window.turnstile) {
+      renderWidget()
+    } else {
+      const interval = setInterval(() => {
+        if (window.turnstile) {
+          renderWidget()
+          clearInterval(interval)
+        }
+      }, 200)
+      return () => clearInterval(interval)
+    }
+  }, [])
+
   const onSubmit = async (data) => {
-    setLoading(true)
     setAuthError(null)
+
+    if (!captchaToken) {
+      setAuthError('Please complete the verification check before continuing.')
+      return
+    }
+
+    setLoading(true)
     try {
+      // Verify the captcha token server-side before creating the account
+      const verifyRes = await fetch('/api/verify-captcha', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: captchaToken }),
+      })
+      const verifyData = await verifyRes.json()
+
+      if (!verifyData.success) {
+        setAuthError('Verification failed. Please try again.')
+        if (window.turnstile && turnstileWidgetId.current !== null) {
+          window.turnstile.reset(turnstileWidgetId.current)
+        }
+        setCaptchaToken(null)
+        return
+      }
+
       const { error } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
@@ -24,6 +90,10 @@ export default function Signup() {
       navigate('/dashboard')
     } catch (error) {
       setAuthError(error.message)
+      if (window.turnstile && turnstileWidgetId.current !== null) {
+        window.turnstile.reset(turnstileWidgetId.current)
+      }
+      setCaptchaToken(null)
     } finally {
       setLoading(false)
     }
@@ -206,6 +276,8 @@ export default function Signup() {
             )}
           </div>
 
+          <div ref={turnstileRef} style={{ marginBottom: '20px' }} />
+
           {authError && (
             <div style={{
               background: 'var(--red-bg-2)', border: '0.5px solid var(--red-bg)',
@@ -229,7 +301,7 @@ export default function Signup() {
             onMouseEnter={e => { if (!loading) e.currentTarget.style.background = 'var(--brand-hover)' }}
             onMouseLeave={e => { if (!loading) e.currentTarget.style.background = 'var(--brand)' }}
           >
-            {loading ? 'Creating account...' : 'Create account'}
+            {loading ? 'Verifying...' : 'Create account'}
           </button>
         </form>
 
