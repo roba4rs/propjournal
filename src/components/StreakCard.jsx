@@ -127,8 +127,8 @@ export default function StreakCard({ trades = [], mobile = false }) {
               }}>
                 Last {lastTen.length}
               </div>
-              <div style={{ display: 'flex', gap: '5px', flex: 1 }}>
-                {lastTen.map((type, i) => <Dot key={i} type={type} fill />)}
+              <div style={{ display: 'flex', gap: '5px' }}>
+                {lastTen.map((type, i) => <Dot key={i} type={type} />)}
               </div>
             </div>
 
@@ -198,8 +198,8 @@ export default function StreakCard({ trades = [], mobile = false }) {
             }}>
               Last {lastTen.length}
             </div>
-            <div style={{ display: 'flex', gap: '5px', flex: 1 }}>
-              {lastTen.map((type, i) => <Dot key={i} type={type} fill />)}
+            <div style={{ display: 'flex', gap: '5px' }}>
+              {lastTen.map((type, i) => <Dot key={i} type={type} />)}
             </div>
           </div>
 

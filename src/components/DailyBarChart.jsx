@@ -102,6 +102,7 @@ export default function DailyBarChart({ trades = [], mobile = false }) {
         ) : (
           <ResponsiveContainer width="100%" height={52} style={{ WebkitTapHighlightColor: "transparent", outline: "none" }}>
             <BarChart data={data} barSize={view === '30d' ? 6 : 16} margin={{ top: 2, right: 0, bottom: 0, left: 0 }}>
+              <YAxis domain={[(dataMin) => Math.min(0, dataMin), (dataMax) => Math.max(0, dataMax)]} hide />
               <ReferenceLine y={0} stroke={chart.neutral} />
               <Bar dataKey="pnl" radius={[0, 0, 0, 0]}>
                 {data.map((entry, i) => (
@@ -139,7 +140,12 @@ export default function DailyBarChart({ trades = [], mobile = false }) {
         <ResponsiveContainer width="100%" height={180} style={{ WebkitTapHighlightColor: "transparent", outline: "none" }}>
           <BarChart data={data} barSize={view === '30d' ? 14 : 36}>
             <XAxis dataKey="label" stroke={chart.axisStroke} tick={{ fill: chart.tickFill, fontSize: 11, fontFamily: 'DM Mono, monospace' }} />
-            <YAxis stroke={chart.axisStroke} tick={{ fill: chart.tickFill, fontSize: 11, fontFamily: 'DM Mono, monospace' }} tickFormatter={v => `$${v}`} />
+            <YAxis
+              domain={[(dataMin) => Math.min(0, dataMin), (dataMax) => Math.max(0, dataMax)]}
+              stroke={chart.axisStroke}
+              tick={{ fill: chart.tickFill, fontSize: 11, fontFamily: 'DM Mono, monospace' }}
+              tickFormatter={v => `$${v}`}
+            />
             <Tooltip
               cursor={false}
               contentStyle={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color-2)', borderRadius: '8px', fontFamily: 'DM Mono, monospace', fontSize: '12px' }}
