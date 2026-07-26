@@ -71,6 +71,33 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
     return { year: d.getFullYear(), month: d.getMonth() }
   })}
 
+  // weekly + monthly rollups for the desktop view
+  const weeks = useMemo(() => {
+    const rows = []
+    for (let i = 0; i < cells.length; i += 7) rows.push(cells.slice(i, i + 7))
+    return rows
+  }, [cells])
+
+  function summarize(days) {
+    let pnl = 0, wins = 0, losses = 0, breakevens = 0
+    days.forEach(day => {
+      if (!day) return
+      const dateStr = `${current.year}-${pad(current.month + 1)}-${pad(day)}`
+      const data = dayData[dateStr]
+      if (!data) return
+      pnl += data.pnl
+      if (data.pnl > 0) wins++
+      else if (data.pnl < 0) losses++
+      else breakevens++
+    })
+    const tradingDays = wins + losses + breakevens
+    const winRate = tradingDays > 0 ? (wins / tradingDays) * 100 : null
+    return { pnl, tradingDays, winRate }
+  }
+
+  const weekSummaries = useMemo(() => weeks.map(summarize), [weeks, dayData, current])
+  const monthSummary = useMemo(() => summarize(cells), [cells, dayData, current])
+
   // shared cell logic
   function getCellStyle(day) {
     if (!day) return { bg: 'transparent', border: 'none', color: 'transparent' }
@@ -223,13 +250,15 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
           <button onClick={nextMonth} style={{ background: 'transparent', border: '0.5px solid var(--border-color-2)', borderRadius: '6px', color: 'var(--text-muted)', padding: '4px 10px', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', fontSize: '13px' }}>→</button>
         </div>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', marginBottom: '4px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr) 0.9fr', gap: '4px', marginBottom: '4px' }}>
         {DAYS_FULL.map(d => (
           <div key={d} style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace', fontSize: '11px', textAlign: 'center', padding: '4px 0' }}>{d}</div>
         ))}
+        <div style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace', fontSize: '11px', textAlign: 'center', padding: '4px 0' }}>Week</div>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px' }}>
-        {cells.map((day, i) => {
+      {weeks.map((week, w) => (
+      <div key={w} style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr) 0.9fr', gap: '4px', marginBottom: '4px' }}>
+        {week.map((day, i) => {
           const isToday = day === today.getDate() && current.month === today.getMonth() && current.year === today.getFullYear()
           const dateStr = day ? `${current.year}-${pad(current.month + 1)}-${pad(day)}` : null
           const data = dateStr ? dayData[dateStr] : undefined
@@ -279,14 +308,50 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
             </div>
           )
         })}
+        {(() => {
+          const s = weekSummaries[w]
+          const hasData = s.tradingDays > 0
+          const pnlColor = !hasData ? 'var(--text-muted)' : s.pnl > 0 ? 'var(--brand)' : s.pnl < 0 ? 'var(--red)' : 'var(--amber)'
+          return (
+            <div style={{
+              background: 'var(--bg-page)', border: '0.5px solid var(--border-color-2)',
+              borderRadius: '6px', minHeight: '56px', padding: '8px 6px',
+              display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '2px',
+            }}>
+              {hasData ? (
+                <>
+                  <span style={{ color: pnlColor, fontFamily: 'DM Mono, monospace', fontSize: '14px', fontWeight: '500' }}>
+                    {s.pnl >= 0 ? '+' : '-'}${Math.abs(s.pnl).toFixed(0)}
+                  </span>
+                  <span style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace', fontSize: '10px' }}>
+                    {Math.round(s.winRate)}% win
+                  </span>
+                </>
+              ) : (
+                <span style={{ color: 'var(--text-faint)', fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>—</span>
+              )}
+            </div>
+          )
+        })()}
       </div>
-      <div style={{ display: 'flex', gap: '16px', marginTop: '16px' }}>
+      ))}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', marginTop: '16px' }}>
+        <div style={{ display: 'flex', gap: '16px' }}>
         {[{ color: 'var(--brand)', label: 'Profit' }, { color: 'var(--red)', label: 'Loss' }, { color: 'var(--amber)', label: 'Breakeven' }].map(l => (
           <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <div style={{ width: '10px', height: '10px', borderRadius: '2px', background: l.color }} />
             <span style={{ color: 'var(--text-faint)', fontFamily: 'DM Sans, sans-serif', fontSize: '12px' }}>{l.label}</span>
           </div>
         ))}
+        </div>
+        {monthSummary.tradingDays > 0 && (
+          <span style={{
+            color: monthSummary.pnl > 0 ? 'var(--brand)' : monthSummary.pnl < 0 ? 'var(--red)' : 'var(--amber)',
+            fontFamily: 'DM Mono, monospace', fontSize: '12px', fontWeight: '600',
+          }}>
+            Month: {monthSummary.pnl >= 0 ? '+' : '-'}${Math.abs(monthSummary.pnl).toFixed(0)} · {Math.round(monthSummary.winRate)}% win rate
+          </span>
+        )}
       </div>
     </div>
   )
