@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 
 const DAYS_FULL = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const DAYS_SHORT = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
@@ -78,7 +78,7 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
     return rows
   }, [cells])
 
-  function summarize(days) {
+  const summarize = useCallback((days) => {
     let pnl = 0, wins = 0, losses = 0, breakevens = 0
     days.forEach(day => {
       if (!day) return
@@ -93,10 +93,10 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
     const tradingDays = wins + losses + breakevens
     const winRate = tradingDays > 0 ? (wins / tradingDays) * 100 : null
     return { pnl, tradingDays, winRate }
-  }
+  }, [current, dayData])
 
-  const weekSummaries = useMemo(() => weeks.map(summarize), [weeks, dayData, current])
-  const monthSummary = useMemo(() => summarize(cells), [cells, dayData, current])
+  const weekSummaries = useMemo(() => weeks.map(summarize), [weeks, summarize])
+  const monthSummary = useMemo(() => summarize(cells), [cells, summarize])
 
   // shared cell logic
   function getCellStyle(day) {
