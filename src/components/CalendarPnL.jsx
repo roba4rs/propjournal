@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback, Fragment } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 
 const DAYS_FULL = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const DAYS_SHORT = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
@@ -136,27 +136,25 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
         </div>
 
         {/* Day headers */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px', marginBottom: '3px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr) 0.6fr', gap: '2px', marginBottom: '3px' }}>
           {DAYS_SHORT.map((d, i) => (
             <div key={i} style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace', fontSize: '9px', textAlign: 'center' }}>{d}</div>
           ))}
+          <div style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace', fontSize: '9px', textAlign: 'center' }}>Wk</div>
         </div>
 
-        {/* Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '3px' }}>
-          {cells.map((day, i) => {
+        {/* Grid — one row per week */}
+        {weeks.map((week, w) => (
+        <div key={w} style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr) 0.6fr', gap: '3px', marginBottom: '3px' }}>
+          {week.map((day, i) => {
             const cell = getCellStyle(day)
             const { bg, border, hasTrade, data } = cell
             const pnl = hasTrade ? data.pnl : null
             const count = hasTrade ? data.count : null
             const pnlColor = hasTrade && pnl > 0 ? 'var(--brand)' : hasTrade && pnl < 0 ? 'var(--red)' : 'var(--amber)'
             const dayColor = cell.isToday ? 'var(--brand)' : hasTrade ? pnlColor : 'var(--text-faint)'
-            const isWeekEnd = (i + 1) % 7 === 0
-            const weekIndex = Math.floor(i / 7)
-            const weekSummary = isWeekEnd ? weekSummaries[weekIndex] : null
             return (
-              <Fragment key={i}>
-              <div style={{
+              <div key={i} style={{
                 background: day ? bg : 'transparent',
                 border: day ? border : 'none',
                 borderRadius: '3px',
@@ -222,25 +220,35 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
                   </>
                 )}
               </div>
-              {isWeekEnd && weekSummary && weekSummary.tradingDays > 0 && (
-                <div style={{
-                  gridColumn: '1 / -1',
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                  padding: '2px 4px',
-                }}>
-                  <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '8px', color: 'var(--text-faint)' }}>Week {weekIndex + 1}</span>
-                  <span style={{
-                    fontFamily: 'DM Mono, monospace', fontSize: '9px', fontWeight: '700',
-                    color: weekSummary.pnl > 0 ? 'var(--brand)' : weekSummary.pnl < 0 ? 'var(--red)' : 'var(--amber)',
-                  }}>
-                    {weekSummary.pnl >= 0 ? '+' : '-'}${Math.abs(weekSummary.pnl).toFixed(0)} · {Math.round(weekSummary.winRate)}% win
-                  </span>
-                </div>
-              )}
-              </Fragment>
             )
           })}
+          {(() => {
+            const s = weekSummaries[w]
+            const hasData = s.tradingDays > 0
+            const pnlColor = !hasData ? 'var(--text-muted)' : s.pnl > 0 ? 'var(--brand)' : s.pnl < 0 ? 'var(--red)' : 'var(--amber)'
+            return (
+              <div style={{
+                background: 'var(--bg-page)', border: '0.5px solid var(--border-color-2)',
+                borderRadius: '3px', minHeight: '38px', padding: '2px',
+                display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '1px',
+              }}>
+                {hasData ? (
+                  <>
+                    <span style={{ color: pnlColor, fontFamily: 'DM Mono, monospace', fontSize: '8px', fontWeight: '700', lineHeight: 1 }}>
+                      {s.pnl >= 0 ? '+' : '-'}${Math.abs(s.pnl).toFixed(0)}
+                    </span>
+                    <span style={{ color: 'var(--text-faint)', fontFamily: 'DM Mono, monospace', fontSize: '7px', lineHeight: 1 }}>
+                      {Math.round(s.winRate)}%
+                    </span>
+                  </>
+                ) : (
+                  <span style={{ color: 'var(--text-faint)', fontFamily: 'DM Mono, monospace', fontSize: '8px' }}>—</span>
+                )}
+              </div>
+            )
+          })()}
         </div>
+        ))}
 
         {/* Legend */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
