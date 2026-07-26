@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useState, useMemo, useEffect, useCallback, Fragment } from 'react'
 
 const DAYS_FULL = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const DAYS_SHORT = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
@@ -151,8 +151,12 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
             const count = hasTrade ? data.count : null
             const pnlColor = hasTrade && pnl > 0 ? 'var(--brand)' : hasTrade && pnl < 0 ? 'var(--red)' : 'var(--amber)'
             const dayColor = cell.isToday ? 'var(--brand)' : hasTrade ? pnlColor : 'var(--text-faint)'
+            const isWeekEnd = (i + 1) % 7 === 0
+            const weekIndex = Math.floor(i / 7)
+            const weekSummary = isWeekEnd ? weekSummaries[weekIndex] : null
             return (
-              <div key={i} style={{
+              <Fragment key={i}>
+              <div style={{
                 background: day ? bg : 'transparent',
                 border: day ? border : 'none',
                 borderRadius: '3px',
@@ -218,18 +222,44 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
                   </>
                 )}
               </div>
+              {isWeekEnd && weekSummary && weekSummary.tradingDays > 0 && (
+                <div style={{
+                  gridColumn: '1 / -1',
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  padding: '2px 4px',
+                }}>
+                  <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '8px', color: 'var(--text-faint)' }}>Week {weekIndex + 1}</span>
+                  <span style={{
+                    fontFamily: 'DM Mono, monospace', fontSize: '9px', fontWeight: '700',
+                    color: weekSummary.pnl > 0 ? 'var(--brand)' : weekSummary.pnl < 0 ? 'var(--red)' : 'var(--amber)',
+                  }}>
+                    {weekSummary.pnl >= 0 ? '+' : '-'}${Math.abs(weekSummary.pnl).toFixed(0)} · {Math.round(weekSummary.winRate)}% win
+                  </span>
+                </div>
+              )}
+              </Fragment>
             )
           })}
         </div>
 
         {/* Legend */}
-        <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
+          <div style={{ display: 'flex', gap: '12px' }}>
           {[{ color: 'var(--brand)', label: 'Profit' }, { color: 'var(--red)', label: 'Loss' }, { color: 'var(--amber)', label: 'BE' }].map(l => (
             <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               <div style={{ width: '7px', height: '7px', borderRadius: '1px', background: l.color }} />
               <span style={{ color: 'var(--text-faint)', fontFamily: 'DM Sans, sans-serif', fontSize: '9px' }}>{l.label}</span>
             </div>
           ))}
+          </div>
+          {monthSummary.tradingDays > 0 && (
+            <span style={{
+              fontFamily: 'DM Mono, monospace', fontSize: '9px', fontWeight: '700',
+              color: monthSummary.pnl > 0 ? 'var(--brand)' : monthSummary.pnl < 0 ? 'var(--red)' : 'var(--amber)',
+            }}>
+              {monthSummary.pnl >= 0 ? '+' : '-'}${Math.abs(monthSummary.pnl).toFixed(0)} · {Math.round(monthSummary.winRate)}% win
+            </span>
+          )}
         </div>
       </div>
     )
