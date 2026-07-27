@@ -74,36 +74,47 @@ function SplitGradient({ id, zeroPercent, isLight }) {
 
 // Peak equity (all-time-high point) + the single largest peak-to-trough
 // drawdown episode in the series, for annotating the equity curve.
+// Equity starts at 0 (the initial balance) *before* any trade, so the
+// running peak is seeded at 0 — not at the first trade's P&L — otherwise
+// a losing first trade would understate the drawdown by starting the
+// "peak" already negative.
 function computeDrawdownStats(data) {
   if (!data.length) return null
 
-  let runningPeak = data[0].pnl, runningPeakIdx = 0
-  let ddPeakIdx = 0, ddTroughIdx = 0, maxDD = 0
+  const zeroPoint = { date: data[0].date, pnl: 0 }
+  let runningPeak = 0, runningPeakPoint = zeroPoint
+  let ddPeakPoint = zeroPoint, ddTroughIdx = -1, maxDD = 0
   let globalPeakIdx = 0
 
   data.forEach((d, i) => {
-    if (d.pnl > runningPeak) { runningPeak = d.pnl; runningPeakIdx = i }
+    if (d.pnl > runningPeak) { runningPeak = d.pnl; runningPeakPoint = d }
     if (d.pnl > data[globalPeakIdx].pnl) globalPeakIdx = i
     const dd = runningPeak - d.pnl
-    if (dd > maxDD) { maxDD = dd; ddPeakIdx = runningPeakIdx; ddTroughIdx = i }
+    if (dd > maxDD) { maxDD = dd; ddPeakPoint = runningPeakPoint; ddTroughIdx = i }
   })
 
   if (maxDD <= 0) return { peakPoint: data[globalPeakIdx], hasDrawdown: false }
 
-  const ddPeakPoint = data[ddPeakIdx]
   const ddTroughPoint = data[ddTroughIdx]
-  const maxDDPct = ddPeakPoint.pnl !== 0 ? (maxDD / Math.abs(ddPeakPoint.pnl)) * 100 : 0
+  // % is relative to the peak equity level (or the initial balance, i.e. 0
+  // baseline treated as 100% of starting capital isn't knowable here, so we
+  // fall back to the drawdown's dollar size over the peak when peak > 0).
+  const maxDDPct = ddPeakPoint.pnl !== 0 ? (maxDD / Math.abs(ddPeakPoint.pnl)) * 100 : null
   const globalPeakPoint = data[globalPeakIdx]
 
   return {
     peakPoint: globalPeakPoint,
     hasDrawdown: true,
-    samePoint: globalPeakIdx === ddPeakIdx,
     ddPeakPoint,
     ddTroughPoint,
     maxDD,
     maxDDPct,
   }
+}
+
+function formatDD(maxDD, maxDDPct) {
+  const dollar = `-$${maxDD.toFixed(0)}`
+  return maxDDPct == null ? dollar : `${dollar} (${maxDDPct.toFixed(1)}%)`
 }
 
 export default function PnLChart({ trades = [], account, noMargin, mobile, footer }) {
@@ -161,15 +172,32 @@ export default function PnLChart({ trades = [], account, noMargin, mobile, foote
             No trades in this range
           </div>
         ) : (
+          <>
           <ResponsiveContainer width="100%" height={130} style={{ WebkitTapHighlightColor: "transparent", outline: "none" }}>
             <AreaChart data={chartData} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
               <SplitGradient id="splitGradMobile" zeroPercent={zeroPercent} isLight={isLight} />
               <XAxis dataKey="date" stroke="var(--text-faint-2)" tick={{ fill: 'var(--text-faint)', fontSize: 9, fontFamily: 'DM Mono, monospace' }} tickLine={false} axisLine={false} tickFormatter={d => d && d.length >= 10 ? String(parseInt(d.slice(8, 10), 10)) : d} />
               <YAxis stroke="var(--text-faint-2)" tick={{ fill: 'var(--text-faint)', fontSize: 9, fontFamily: 'DM Mono, monospace' }} tickFormatter={v => `$${v}`} tickLine={false} axisLine={false} width={38} />
               <ReferenceLine y={0} stroke="var(--text-faint-2)" strokeDasharray="3 3" />
+              {ddStats && ddStats.hasDrawdown && (
+                <ReferenceArea x1={ddStats.ddPeakPoint.date} x2={ddStats.ddTroughPoint.date} fill="var(--red)" fillOpacity={0.08} />
+              )}
               <Area type="monotone" dataKey="pnl" stroke={lineColor} strokeWidth={2} fill="url(#splitGradMobile)" dot={false} isAnimationActive={false} />
+              {ddStats && ddStats.hasDrawdown && (
+                <>
+                  <ReferenceDot x={ddStats.peakPoint.date} y={ddStats.peakPoint.pnl} r={3} fill="var(--brand)" stroke="var(--bg-surface)" strokeWidth={1.5} />
+                  <ReferenceDot x={ddStats.ddTroughPoint.date} y={ddStats.ddTroughPoint.pnl} r={3} fill="var(--red)" stroke="var(--bg-surface)" strokeWidth={1.5} />
+                </>
+              )}
             </AreaChart>
           </ResponsiveContainer>
+          {ddStats && ddStats.hasDrawdown && (
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', padding: '4px 12px 0' }}>
+              <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '9px', color: 'var(--brand)' }}>Peak ${ddStats.peakPoint.pnl.toFixed(0)}</span>
+              <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '9px', color: 'var(--red)' }}>Max DD {formatDD(ddStats.maxDD, ddStats.maxDDPct)}</span>
+            </div>
+          )}
+          </>
         )}
       </div>
     )
@@ -201,7 +229,7 @@ export default function PnLChart({ trades = [], account, noMargin, mobile, foote
               </div>
               <div style={{ textAlign: 'right' }}>
                 <div style={{ color: 'var(--text-faint)', fontFamily: 'DM Sans, sans-serif', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Max DD</div>
-                <div style={{ color: 'var(--red)', fontFamily: 'DM Mono, monospace', fontSize: '12px', fontWeight: '600' }}>-${ddStats.maxDD.toFixed(0)} ({ddStats.maxDDPct.toFixed(1)}%)</div>
+                <div style={{ color: 'var(--red)', fontFamily: 'DM Mono, monospace', fontSize: '12px', fontWeight: '600' }}>{formatDD(ddStats.maxDD, ddStats.maxDDPct)}</div>
               </div>
             </div>
           )}
@@ -244,7 +272,7 @@ export default function PnLChart({ trades = [], account, noMargin, mobile, foote
                 <ReferenceDot x={ddStats.peakPoint.date} y={ddStats.peakPoint.pnl} r={4} fill="var(--brand)" stroke="var(--bg-surface)" strokeWidth={2}
                   label={{ value: `Peak $${ddStats.peakPoint.pnl.toFixed(0)}`, position: 'top', fill: 'var(--brand)', fontFamily: 'DM Mono, monospace', fontSize: 10 }} />
                 <ReferenceDot x={ddStats.ddTroughPoint.date} y={ddStats.ddTroughPoint.pnl} r={4} fill="var(--red)" stroke="var(--bg-surface)" strokeWidth={2}
-                  label={{ value: `-$${ddStats.maxDD.toFixed(0)} (${ddStats.maxDDPct.toFixed(1)}%)`, position: 'bottom', fill: 'var(--red)', fontFamily: 'DM Mono, monospace', fontSize: 10 }} />
+                  label={{ value: formatDD(ddStats.maxDD, ddStats.maxDDPct), position: 'bottom', fill: 'var(--red)', fontFamily: 'DM Mono, monospace', fontSize: 10 }} />
               </>
             )}
           </AreaChart>
