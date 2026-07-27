@@ -1,4 +1,4 @@
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts'
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, ReferenceDot, ReferenceArea } from 'recharts'
 import { useState, useMemo } from 'react'
 import { useTheme } from '../ThemeContext'
 
@@ -72,6 +72,40 @@ function SplitGradient({ id, zeroPercent, isLight }) {
   )
 }
 
+// Peak equity (all-time-high point) + the single largest peak-to-trough
+// drawdown episode in the series, for annotating the equity curve.
+function computeDrawdownStats(data) {
+  if (!data.length) return null
+
+  let runningPeak = data[0].pnl, runningPeakIdx = 0
+  let ddPeakIdx = 0, ddTroughIdx = 0, maxDD = 0
+  let globalPeakIdx = 0
+
+  data.forEach((d, i) => {
+    if (d.pnl > runningPeak) { runningPeak = d.pnl; runningPeakIdx = i }
+    if (d.pnl > data[globalPeakIdx].pnl) globalPeakIdx = i
+    const dd = runningPeak - d.pnl
+    if (dd > maxDD) { maxDD = dd; ddPeakIdx = runningPeakIdx; ddTroughIdx = i }
+  })
+
+  if (maxDD <= 0) return { peakPoint: data[globalPeakIdx], hasDrawdown: false }
+
+  const ddPeakPoint = data[ddPeakIdx]
+  const ddTroughPoint = data[ddTroughIdx]
+  const maxDDPct = ddPeakPoint.pnl !== 0 ? (maxDD / Math.abs(ddPeakPoint.pnl)) * 100 : 0
+  const globalPeakPoint = data[globalPeakIdx]
+
+  return {
+    peakPoint: globalPeakPoint,
+    hasDrawdown: true,
+    samePoint: globalPeakIdx === ddPeakIdx,
+    ddPeakPoint,
+    ddTroughPoint,
+    maxDD,
+    maxDDPct,
+  }
+}
+
 export default function PnLChart({ trades = [], account, noMargin, mobile, footer }) {
   const { isLight } = useTheme()
   const [activeTab, setActiveTab] = useState('All')
@@ -88,6 +122,7 @@ export default function PnLChart({ trades = [], account, noMargin, mobile, foote
   const isPositive = totalPnl >= 0
   const zeroPercent = getZeroPercent(data)
   const lineColor = isPositive ? 'var(--brand)' : 'var(--red)'
+  const ddStats = useMemo(() => computeDrawdownStats(data), [data])
 
   // ── MOBILE ────────────────────────────────────────────────────────────────
   if (mobile) {
@@ -157,7 +192,20 @@ export default function PnLChart({ trades = [], account, noMargin, mobile, foote
             </span>
           )}
         </div>
-        <div style={{ display: 'flex', gap: '4px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          {ddStats && ddStats.hasDrawdown && (
+            <div style={{ display: 'flex', gap: '16px' }}>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ color: 'var(--text-faint)', fontFamily: 'DM Sans, sans-serif', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Peak</div>
+                <div style={{ color: 'var(--brand)', fontFamily: 'DM Mono, monospace', fontSize: '12px', fontWeight: '600' }}>${ddStats.peakPoint.pnl.toFixed(0)}</div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ color: 'var(--text-faint)', fontFamily: 'DM Sans, sans-serif', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Max DD</div>
+                <div style={{ color: 'var(--red)', fontFamily: 'DM Mono, monospace', fontSize: '12px', fontWeight: '600' }}>-${ddStats.maxDD.toFixed(0)} ({ddStats.maxDDPct.toFixed(1)}%)</div>
+              </div>
+            </div>
+          )}
+          <div style={{ display: 'flex', gap: '4px' }}>
           {tabs.map(tab => (
             <button key={tab} onClick={() => setActiveTab(tab)} style={{
               background: activeTab === tab ? 'var(--green-bg)' : 'transparent',
@@ -168,6 +216,7 @@ export default function PnLChart({ trades = [], account, noMargin, mobile, foote
               fontFamily: 'DM Sans, sans-serif', fontSize: '12px', cursor: 'pointer', WebkitTapHighlightColor: 'transparent', outline: 'none',
             }}>{tab}</button>
           ))}
+          </div>
         </div>
       </div>
 
@@ -186,7 +235,18 @@ export default function PnLChart({ trades = [], account, noMargin, mobile, foote
               formatter={v => [`$${v}`, 'P&L']}
             />
             <ReferenceLine y={0} stroke="var(--text-faint-2)" strokeDasharray="3 3" />
+            {ddStats && ddStats.hasDrawdown && (
+              <ReferenceArea x1={ddStats.ddPeakPoint.date} x2={ddStats.ddTroughPoint.date} fill="var(--red)" fillOpacity={0.08} />
+            )}
             <Area type="monotone" dataKey="pnl" stroke={lineColor} strokeWidth={2} fill="url(#splitGradDesktop)" dot={false} />
+            {ddStats && ddStats.hasDrawdown && (
+              <>
+                <ReferenceDot x={ddStats.peakPoint.date} y={ddStats.peakPoint.pnl} r={4} fill="var(--brand)" stroke="var(--bg-surface)" strokeWidth={2}
+                  label={{ value: `Peak $${ddStats.peakPoint.pnl.toFixed(0)}`, position: 'top', fill: 'var(--brand)', fontFamily: 'DM Mono, monospace', fontSize: 10 }} />
+                <ReferenceDot x={ddStats.ddTroughPoint.date} y={ddStats.ddTroughPoint.pnl} r={4} fill="var(--red)" stroke="var(--bg-surface)" strokeWidth={2}
+                  label={{ value: `-$${ddStats.maxDD.toFixed(0)} (${ddStats.maxDDPct.toFixed(1)}%)`, position: 'bottom', fill: 'var(--red)', fontFamily: 'DM Mono, monospace', fontSize: 10 }} />
+              </>
+            )}
           </AreaChart>
         </ResponsiveContainer>
       )}
