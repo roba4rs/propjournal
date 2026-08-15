@@ -2095,14 +2095,37 @@ useEffect(() => {
         {/* "Trade Log" title — overlaid in the top bar's left area (after hamburger) */}
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, height: '52px',
-          display: 'flex', alignItems: 'center',
-          paddingLeft: '52px',
-          zIndex: 201, pointerEvents: 'none',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          paddingLeft: '52px', paddingRight: '14px',
+          zIndex: 201,
         }}>
           <span style={{
             fontFamily: "'Inter', sans-serif", fontSize: '15px',
             fontWeight: '500', color: 'var(--text-secondary)',
+            pointerEvents: 'none',
           }}>Trade Log</span>
+          <button onClick={() => {
+            const headers = ["Date", "Pair", "Outcome", "Direction", "Entry", "Stop Loss", "Take Profit", "R:R", "Swap", "Commission", "P&L", "Session", "Notes"];
+            const rows = filtered.map(t => [
+              t.date, t.pair, t.outcome ?? "", t.direction,
+              t.entry ?? "", t.stop_loss ?? "", t.take_profit ?? "",
+              t.rr ?? "", t.swap ?? "", t.commission ?? "", t.pnl ?? "",
+              t.session, (t.notes || "").replace(/,/g, " "),
+            ]);
+            const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
+            const blob = new Blob([csv], { type: "text/csv" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `trades-${activeAccount?.name || "export"}-${new Date().toISOString().split("T")[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+          }} style={{
+            width: '28px', height: '28px', borderRadius: '50%', flexShrink: 0,
+            background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', pointerEvents: 'auto',
+          }}><ArrowUp size={14} color="var(--text-faint)" /></button>
         </div>
 
         {/* ── ROW 2: Account dropdown pill (left) + Log Trade button (right) ── */}
