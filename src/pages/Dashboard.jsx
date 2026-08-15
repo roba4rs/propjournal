@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useNavigate } from 'react-router-dom'
+import { Plus } from 'lucide-react'
 import Sidebar from '../components/Sidebar'
 import AccountSwitcher from '../components/AccountSwitcher'
 import ChallengeCard from '../components/ChallengeCard'
@@ -681,6 +682,7 @@ function DayTradesModal({ date, trades, onClose, onSelectTrade, isMobile }) {
 export default function Dashboard() {
   const { collapsed } = useSidebar()
   const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
   const defaultAccountId = searchParams.get('account') || localStorage.getItem('activeAccountId')
 
   const [activeAccount, setActiveAccount] = useState(null)
@@ -904,6 +906,16 @@ export default function Dashboard() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <h1 style={{ color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontSize: '22px', fontWeight: '600', margin: 0 }}>Dashboard</h1>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <button onClick={() => navigate('/trades', { state: { openForm: true } })} style={{
+                display: 'flex', alignItems: 'center', gap: '8px',
+                padding: '10px 16px', background: 'oklch(0.72 0.17 152)', border: 'none',
+                borderRadius: '8px', color: 'var(--brand-fg)',
+                fontFamily: "'Inter', sans-serif", fontSize: '13px', fontWeight: 700,
+                cursor: 'pointer', whiteSpace: 'nowrap', transition: 'background 0.15s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = 'oklch(0.78 0.17 152)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'oklch(0.72 0.17 152)'}
+              ><Plus size={15} /> Add Trade</button>
               <DateRangePicker dateRange={dateRange} onChange={setDateRange} />
               <AccountSwitcher
                 onSwitch={(acc) => {
