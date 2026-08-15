@@ -906,16 +906,6 @@ export default function Dashboard() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <h1 style={{ color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontSize: '22px', fontWeight: '600', margin: 0 }}>Dashboard</h1>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <button onClick={() => navigate('/trades', { state: { openForm: true } })} style={{
-                display: 'flex', alignItems: 'center', gap: '8px',
-                padding: '10px 16px', background: 'oklch(0.72 0.17 152)', border: 'none',
-                borderRadius: '8px', color: 'var(--brand-fg)',
-                fontFamily: "'Inter', sans-serif", fontSize: '13px', fontWeight: 700,
-                cursor: 'pointer', whiteSpace: 'nowrap', transition: 'background 0.15s',
-              }}
-              onMouseEnter={e => e.currentTarget.style.background = 'oklch(0.78 0.17 152)'}
-              onMouseLeave={e => e.currentTarget.style.background = 'oklch(0.72 0.17 152)'}
-              ><Plus size={15} /> Add Trade</button>
               <DateRangePicker dateRange={dateRange} onChange={setDateRange} />
               <AccountSwitcher
                 onSwitch={(acc) => {
@@ -924,6 +914,16 @@ export default function Dashboard() {
                 }}
                 defaultAccountId={defaultAccountId}
               />
+              <button onClick={() => navigate('/trades', { state: { openForm: true } })} style={{
+                width: '36px', height: '36px', borderRadius: '50%', flexShrink: 0,
+                background: 'var(--brand)', border: 'none',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 2px 12px rgba(29,185,123,0.35)',
+                cursor: 'pointer', transition: 'background 0.15s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = 'oklch(0.78 0.17 152)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'var(--brand)'}
+              ><Plus size={18} strokeWidth={2.5} color="var(--bg-page)" /></button>
             </div>
           </div>
         </div>
