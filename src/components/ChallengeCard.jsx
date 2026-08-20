@@ -409,8 +409,8 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
       {account.phase === 'funded' && (
         <div style={{
           marginBottom: '12px',
-          background: consistencyMet === null ? 'var(--bg-page)' : consistencyMet ? 'var(--green-bg)' : 'var(--red-bg-2)',
-          border: `0.5px solid ${consistencyMet === null ? 'var(--border-color)' : consistencyMet ? 'var(--green-bg-2)' : 'var(--red-bg)'}`,
+          background: 'var(--bg-page)',
+          border: '0.5px solid var(--border-color)',
           borderRadius: '10px',
           padding: mobile ? '10px 12px' : '12px 14px',
           display: 'flex',
@@ -427,7 +427,7 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
             </p>
           </div>
           <span style={{
-            background: consistencyMet === null ? 'var(--bg-surface)' : consistencyMet ? 'var(--green-bg-2)' : 'var(--red-bg)',
+            background: 'var(--bg-surface)',
             border: `0.5px solid ${consistencyMet === null ? 'var(--border-color)' : consistencyMet ? 'var(--brand)' : 'var(--red)'}`,
             borderRadius: '6px',
             padding: '4px 10px',
