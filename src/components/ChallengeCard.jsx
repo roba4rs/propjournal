@@ -361,7 +361,7 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
       </div>}
 
       {/* Stats row — desktop only (metrics not already on the top strip) */}
-      {!mobile && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: '12px' }}>
+      {!mobile && <div style={{ display: 'grid', gridTemplateColumns: account.phase === 'funded' ? 'repeat(5, 1fr)' : 'repeat(4, 1fr)', gap: '10px', marginBottom: '12px' }}>
         {loading ? (
           [1,2,3,4].map(i => <div key={i} style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px', padding: '12px' }}><div style={{background:'var(--border-color)',height:'9px',width:'40px',borderRadius:'4px'}}/><div style={{background:'var(--border-color)',height:'18px',width:'70px',borderRadius:'4px',marginTop:'8px'}}/></div>)
         ) : (<>
@@ -369,6 +369,13 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
           <StatCell label="W / L" value={`${s.wins} / ${s.losses}`} />
           <StatCell label="Best Trade" value={s.bestTrade != null ? `+$${s.bestTrade.toFixed(2)}` : '—'} color={s.bestTrade != null ? 'var(--brand)' : 'var(--text-faint)'} />
           <StatCell label="Worst Trade" value={s.worstTrade != null ? `-$${Math.abs(s.worstTrade).toFixed(2)}` : '—'} color={s.worstTrade != null ? 'var(--red)' : 'var(--text-faint)'} />
+          {account.phase === 'funded' && (
+            <StatCell
+              label="Consistency"
+              value={consistencyMet === null ? '—' : consistencyMet ? '✓ Passed' : `Need $${Math.ceil(requiredProfitForConsistency).toLocaleString()}`}
+              color={consistencyMet === null ? 'var(--text-faint)' : consistencyMet ? 'var(--brand)' : 'var(--red)'}
+            />
+          )}
         </>)}
       </div>}
 
@@ -397,6 +404,44 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
           )}
         </div>
       </div>}
+
+      {/* Consistency Score — always-visible eligibility check for funded/instant accounts */}
+      {account.phase === 'funded' && (
+        <div style={{
+          marginBottom: '12px',
+          background: consistencyMet === null ? 'var(--bg-page)' : consistencyMet ? 'var(--green-bg)' : 'var(--red-bg-2)',
+          border: `0.5px solid ${consistencyMet === null ? 'var(--border-color)' : consistencyMet ? 'var(--green-bg-2)' : 'var(--red-bg)'}`,
+          borderRadius: '10px',
+          padding: mobile ? '10px 12px' : '12px 14px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: '10px',
+        }}>
+          <div>
+            <p style={{ color: 'var(--text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: mobile ? '10px' : '11px', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 4px 0' }}>
+              Consistency Score — {consistencyPct}% limit
+            </p>
+            <p style={{ color: 'var(--text-primary)', fontFamily: 'DM Mono, monospace', fontSize: mobile ? '12px' : '13px', margin: 0 }}>
+              Best day ${Math.round(bestDay).toLocaleString()}{netPnl > 0 ? ` — ${bestDayPct.toFixed(1)}% of total profit` : ''}
+            </p>
+          </div>
+          <span style={{
+            background: consistencyMet === null ? 'var(--bg-surface)' : consistencyMet ? 'var(--green-bg-2)' : 'var(--red-bg)',
+            border: `0.5px solid ${consistencyMet === null ? 'var(--border-color)' : consistencyMet ? 'var(--brand)' : 'var(--red)'}`,
+            borderRadius: '6px',
+            padding: '4px 10px',
+            color: consistencyMet === null ? 'var(--text-faint-2)' : consistencyMet ? 'var(--brand)' : 'var(--red)',
+            fontFamily: 'DM Mono, monospace',
+            fontSize: '11px',
+            fontWeight: '600',
+            whiteSpace: 'nowrap',
+            flexShrink: 0,
+          }}>
+            {consistencyMet === null ? 'No Profit Yet' : consistencyMet ? '✓ Eligible' : '✗ Not Eligible'}
+          </span>
+        </div>
+      )}
 
       {/* Progress bars */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
