@@ -2208,7 +2208,7 @@ useEffect(() => {
 
                   {/* P&L */}
                   <div style={{ textAlign: 'right', fontSize: '13px', fontWeight: '500', color: pnlClr, fontFamily: "'JetBrains Mono', monospace" }}>
-                    {pnlVal != null ? `${pnlVal >= 0 ? '+' : ''}$${Math.abs(pnlVal).toFixed(0)}` : '—'}
+                    {pnlVal != null ? `${pnlVal >= 0 ? '+' : ''}$${Math.abs(pnlVal).toFixed(2)}` : '—'}
                   </div>
 
                   {/* Actions */}

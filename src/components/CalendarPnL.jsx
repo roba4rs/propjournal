@@ -198,7 +198,7 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
                         textRendering: 'optimizeLegibility',
                         letterSpacing: '-0.2px',
                       }}>
-                        {pnl >= 0 ? '+' : '-'}${Math.abs(pnl).toFixed(0)}
+                        {pnl >= 0 ? '+' : '-'}${Math.abs(pnl).toFixed(2)}
                       </span>
                     )}
 
@@ -235,7 +235,7 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
                 {hasData ? (
                   <>
                     <span style={{ color: pnlColor, fontFamily: 'DM Mono, monospace', fontSize: '8px', fontWeight: '700', lineHeight: 1 }}>
-                      {s.pnl >= 0 ? '+' : '-'}${Math.abs(s.pnl).toFixed(0)}
+                      {s.pnl >= 0 ? '+' : '-'}${Math.abs(s.pnl).toFixed(2)}
                     </span>
                     <span style={{ color: 'var(--text-faint)', fontFamily: 'DM Mono, monospace', fontSize: '7px', lineHeight: 1 }}>
                       {Math.round(s.winRate)}%
@@ -265,7 +265,7 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
               fontFamily: 'DM Mono, monospace', fontSize: '9px', fontWeight: '700',
               color: monthSummary.pnl > 0 ? 'var(--brand)' : monthSummary.pnl < 0 ? 'var(--red)' : 'var(--amber)',
             }}>
-              {monthSummary.pnl >= 0 ? '+' : '-'}${Math.abs(monthSummary.pnl).toFixed(0)} · {Math.round(monthSummary.winRate)}% win
+              {monthSummary.pnl >= 0 ? '+' : '-'}${Math.abs(monthSummary.pnl).toFixed(2)} · {Math.round(monthSummary.winRate)}% win
             </span>
           )}
         </div>
@@ -334,7 +334,7 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
                   {hasTrade && (
                     <>
                       <span style={{ color: pnlColor, fontFamily: 'DM Mono, monospace', fontSize: '15px', fontWeight: '400', textAlign: 'center', lineHeight: 1.2 }}>
-                        {pnl >= 0 ? '+' : ''}${Math.abs(pnl).toFixed(0)}
+                        {pnl >= 0 ? '+' : ''}${Math.abs(pnl).toFixed(2)}
                       </span>
                       <span style={{ position: 'absolute', bottom: '6px', left: '7px', color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace', fontSize: '9px' }}>
                         {count} trade{count !== 1 ? 's' : ''}
@@ -359,7 +359,7 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
               {hasData ? (
                 <>
                   <span style={{ color: pnlColor, fontFamily: 'DM Mono, monospace', fontSize: '14px', fontWeight: '500' }}>
-                    {s.pnl >= 0 ? '+' : '-'}${Math.abs(s.pnl).toFixed(0)}
+                    {s.pnl >= 0 ? '+' : '-'}${Math.abs(s.pnl).toFixed(2)}
                   </span>
                   <span style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace', fontSize: '10px' }}>
                     {Math.round(s.winRate)}% win
@@ -387,7 +387,7 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
             color: monthSummary.pnl > 0 ? 'var(--brand)' : monthSummary.pnl < 0 ? 'var(--red)' : 'var(--amber)',
             fontFamily: 'DM Mono, monospace', fontSize: '12px', fontWeight: '600',
           }}>
-            Month: {monthSummary.pnl >= 0 ? '+' : '-'}${Math.abs(monthSummary.pnl).toFixed(0)} · {Math.round(monthSummary.winRate)}% win rate
+            Month: {monthSummary.pnl >= 0 ? '+' : '-'}${Math.abs(monthSummary.pnl).toFixed(2)} · {Math.round(monthSummary.winRate)}% win rate
           </span>
         )}
       </div>
