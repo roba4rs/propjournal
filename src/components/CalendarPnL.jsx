@@ -147,7 +147,7 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
         </div>
 
         {/* Day headers */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr) 0.6fr', gap: '2px', marginBottom: '3px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr) 1.2fr', gap: '2px', marginBottom: '3px' }}>
           {DAYS_SHORT.map((d, i) => (
             <div key={i} style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace', fontSize: '9px', textAlign: 'center' }}>{d}</div>
           ))}
@@ -156,7 +156,7 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
 
         {/* Grid — one row per week */}
         {weeks.map((week, w) => (
-        <div key={w} style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr) 0.6fr', gap: '3px', marginBottom: '3px' }}>
+        <div key={w} style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr) 1.2fr', gap: '3px', marginBottom: '3px' }}>
           {week.map((day, i) => {
             const cell = getCellStyle(day)
             const { bg, border, hasTrade, data } = cell
