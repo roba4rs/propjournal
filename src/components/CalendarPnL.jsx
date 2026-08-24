@@ -209,7 +209,7 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
                         textRendering: 'optimizeLegibility',
                         letterSpacing: '-0.2px',
                       }}>
-                        {pnl >= 0 ? '+' : '-'}${formatMoney(Math.abs(pnl))}
+                        ${formatMoney(Math.abs(pnl))}
                       </span>
                     )}
 
@@ -240,13 +240,13 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
             return (
               <div style={{
                 background: 'var(--bg-page)', border: '0.5px solid var(--border-color-2)',
-                borderRadius: '3px', minHeight: '38px', padding: '2px',
+                borderRadius: '3px', height: '38px', padding: '2px', overflow: 'hidden',
                 display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '1px',
               }}>
                 {hasData ? (
                   <>
-                    <span style={{ color: pnlColor, fontFamily: 'DM Mono, monospace', fontSize: '8px', fontWeight: '700', lineHeight: 1 }}>
-                      {s.pnl >= 0 ? '+' : '-'}${formatMoney(Math.abs(s.pnl))}
+                    <span style={{ color: pnlColor, fontFamily: 'DM Mono, monospace', fontSize: '8px', fontWeight: '700', lineHeight: 1, whiteSpace: 'nowrap' }}>
+                      ${formatMoney(Math.abs(s.pnl))}
                     </span>
                     <span style={{ color: 'var(--text-faint)', fontFamily: 'DM Mono, monospace', fontSize: '7px', lineHeight: 1 }}>
                       {Math.round(s.winRate)}%
@@ -276,7 +276,7 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
               fontFamily: 'DM Mono, monospace', fontSize: '9px', fontWeight: '700',
               color: monthSummary.pnl > 0 ? 'var(--brand)' : monthSummary.pnl < 0 ? 'var(--red)' : 'var(--amber)',
             }}>
-              {monthSummary.pnl >= 0 ? '+' : '-'}${formatMoney(Math.abs(monthSummary.pnl))} · {Math.round(monthSummary.winRate)}% win
+              ${formatMoney(Math.abs(monthSummary.pnl))} · {Math.round(monthSummary.winRate)}% win
             </span>
           )}
         </div>
