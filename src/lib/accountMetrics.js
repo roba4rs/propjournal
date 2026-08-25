@@ -54,13 +54,9 @@ export function calcDrawdown(trades, accountSize, maxDD, drawdownType) {
       const closeBalance = balance + pnl
 
       // extreme_balance is the furthest the account balance touched while
-      // this trade was open. If not logged, we can't know it — fall back
-      // to the closing balance, which is a SAFE lower bound for the peak
-      // (can't overstate how high it went) but NOT safe for breach
-      // detection (can't know if it dipped through the floor and
-      // recovered). That's the tradeoff of only logging extremes
-      // selectively — undetected mid-trade breaches are the risk you're
-      // accepting in exchange for not logging every trade.
+      // this trade was open. Only applied to the peak/floor if it's a new
+      // high — if not, it can't have changed anything, so we don't need
+      // it. Left null on a trade, it just falls back to closed balance.
       const extreme = t.extreme_balance != null ? parseFloat(t.extreme_balance) : null
 
       const candidatePeak = extreme != null ? Math.max(extreme, closeBalance) : closeBalance
