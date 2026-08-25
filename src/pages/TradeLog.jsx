@@ -121,6 +121,7 @@ function makeEmptyForm() {
     notes: "",
     screenshot_url: null,
     outcome: null,
+    extreme_balance: "",
   };
 }
 
@@ -291,6 +292,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
     notes: editTrade.notes || "",
     screenshot_url: editTrade.screenshot_url || null,
     outcome: editTrade.outcome ?? null,
+    extreme_balance: editTrade.extreme_balance != null && editTrade.extreme_balance !== "" ? String(editTrade.extreme_balance) : "",
   } : makeEmptyForm();
 
   // Pre-calculate risk $ from pnl for edit mode — must exactly invert calcPnl()
@@ -689,6 +691,15 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
             <textarea value={form.notes} onChange={e => set("notes", e.target.value)}
               placeholder="Trade rationale, confluences, lessons learned…" rows={5}
               style={{ ...inputStyle, resize: "vertical", minHeight: "100px", fontFamily: "'Inter', sans-serif", lineHeight: "1.6", fontSize: "14px" }} />
+          </Card>
+
+          {/* Extreme balance card — instant/trailing-DD accounts only, optional */}
+          <Card label="Extreme Balance (optional)">
+            <Field hint="Only fill this in if the account balance touched a new all-time high, or dipped through the DD floor, while this trade was still open — e.g. price ran 2R further than your close before reversing. Leave blank otherwise.">
+              <input type="number" step="0.01" value={form.extreme_balance}
+                onChange={e => set("extreme_balance", e.target.value)}
+                placeholder="e.g. 10450.00" style={inputStyle} />
+            </Field>
           </Card>
 
           {/* Screenshot card */}
@@ -1866,6 +1877,7 @@ useEffect(() => {
           notes: form.notes,
           screenshot_url: sharedScreenshotUrl,
           outcome: form.outcome || null,
+          extreme_balance: form.extreme_balance !== "" && form.extreme_balance != null ? parseFloat(form.extreme_balance) : null,
         }).eq("id", editTrade.id);
         if (error) throw error;
 
@@ -1896,6 +1908,7 @@ useEffect(() => {
               notes: form.notes,
               screenshot_url: null,
               outcome: form.outcome || null,
+              extreme_balance: form.extreme_balance !== "" && form.extreme_balance != null ? parseFloat(form.extreme_balance) : null,
             })
             .select()
             .single();
@@ -2577,6 +2590,7 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
     notes: editTrade.notes || "",
     screenshot_url: editTrade.screenshot_url || null,
     outcome: editTrade.outcome ?? null,
+    extreme_balance: editTrade.extreme_balance != null ? String(editTrade.extreme_balance) : "",
   } : makeEmptyForm();
 
   // Pre-calculate risk $ from pnl for edit mode — must exactly invert calcPnl()
@@ -2970,6 +2984,15 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
             <textarea value={form.notes} onChange={e => set('notes', e.target.value)}
               placeholder="Trade rationale, confluences…" rows={3}
               style={{ ...mobileInput, resize: 'vertical', minHeight: '70px', fontFamily: "'Inter', sans-serif", lineHeight: '1.5' }} />
+          </div>
+
+          {/* Extreme balance — optional, instant/trailing-DD accounts */}
+          <div style={{ padding: '10px 16px', borderBottom: '0.5px solid var(--bg-surface)' }}>
+            <span style={formLbl}>Extreme Balance (optional)</span>
+            <input type="number" step="0.01" value={form.extreme_balance}
+              onChange={e => set('extreme_balance', e.target.value)}
+              placeholder="Fill in only if this trade hit a new high or breached the floor before closing"
+              style={mobileInput} />
           </div>
 
           {/* Screenshot */}
