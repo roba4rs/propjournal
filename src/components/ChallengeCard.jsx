@@ -1,3 +1,5 @@
+import { calcDrawdown } from '../lib/accountMetrics'
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function computeStats(trades) {
   const withPnl = trades.filter(t => t.pnl != null)
@@ -93,48 +95,6 @@ function ProgressBar({ label, pct, color, rightLabel }) {
       )}
     </div>
   )
-}
-
-// ─── Drawdown calculation ─────────────────────────────────────────────────────
-//
-// drawdown_type meanings:
-//   'static'           — floor = accountSize - maxDD (fixed forever)
-//                        If currentBalance > accountSize → DD used = 0
-//   'trailing_balance' — floor trails highest *closed* balance
-//                        peak rises as balance grows, never falls
-//   'trailing_equity'  — same as trailing_balance (we treat identically
-//                        since we don't have intra-candle equity data)
-//
-// Returns: { ddUsed, ddFloor, ddRoom }
-//   ddUsed  — dollar amount of drawdown consumed (always >= 0)
-//   ddFloor — the current hard floor in dollars
-//   ddRoom  — dollars remaining before account blows (currentBalance - floor)
-//
-function calcDrawdown(trades, accountSize, maxDD, drawdownType) {
-  const withPnl = trades.filter(t => t.pnl != null)
-
-  if (drawdownType === 'trailing_balance' || drawdownType === 'trailing_equity') {
-    // Replay trades to find peak running balance
-    let balance = accountSize
-    let peakBalance = accountSize
-    for (const t of withPnl) {
-      balance += parseFloat(t.pnl)
-      if (balance > peakBalance) peakBalance = balance
-    }
-    const floor = peakBalance - maxDD
-    const ddUsed = Math.max(0, peakBalance - balance)
-    const ddRoom = Math.max(0, balance - floor)
-    return { ddUsed, ddFloor: floor, ddRoom, peakBalance }
-  }
-
-  // static (default)
-  // floor = accountSize - maxDD, fixed forever
-  const floor = accountSize - maxDD
-  const currentBalance = accountSize + withPnl.reduce((s, t) => s + parseFloat(t.pnl), 0)
-  // If in profit above starting balance, DD used = 0
-  const ddUsed = Math.max(0, accountSize - currentBalance)
-  const ddRoom = Math.max(0, currentBalance - floor)
-  return { ddUsed, ddFloor: floor, ddRoom, peakBalance: null }
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -255,7 +215,7 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
   const profitPct = profitTarget > 0 ? Math.min((netPnl / profitTarget) * 100, 100) : 0
 
   // ── Max drawdown (type-aware) ──
-  const { ddUsed, ddFloor } = calcDrawdown(trades, accountSize, maxDD, drawdownType)
+  const { ddUsed, ddFloor, breached } = calcDrawdown(trades, accountSize, maxDD, drawdownType)
 
   // As % of account size for display
   const maxDDUsedPct    = accountSize > 0 ? (ddUsed / accountSize) * 100 : 0
@@ -277,6 +237,11 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
   // ── Status (type-aware, mirrors ChallengeTracker logic) ──
   function computeStatus() {
     if (account.failure_reason) return 'failed'
+
+    // Instant accounts: a floating extreme breached the floor mid-trade,
+    // even if the trade closed fine — fails immediately, same as the
+    // firm would treat it.
+    if (drawdownType === 'trailing_instant' && breached) return 'failed'
 
     // Daily DD breach: check worst single day ever
     const byDay = {}
@@ -316,6 +281,7 @@ export default function ChallengeCard({ account, trades = [], loading = false, m
   // ── DD label (show drawdown type for transparency) ──
   const ddTypeLabel = drawdownType === 'trailing_balance' ? 'Trailing (Balance)'
     : drawdownType === 'trailing_equity' ? 'Trailing (Equity)'
+    : drawdownType === 'trailing_instant' ? 'Trailing (Instant)'
     : 'Static'
 
   // Floor dollar label for right-side hint
