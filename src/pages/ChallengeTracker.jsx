@@ -10,6 +10,24 @@ const FILTERS = ['All', 'In Progress', 'Funded', 'Passed', 'Failed', 'Archived']
 const FIRMS = ['FTMO', 'MyForexFunds', 'The5ers', 'Funded Next', 'True Forex Funds', 'E8 Funding', 'Other']
 const PHASES = ['Phase 1', 'Phase 2', 'Funded']
 
+
+// Small label shown on challenges that were shared with the current user (read-only)
+function SharedBadge({ challenge, compact = false }) {
+  if (!challenge._shared) return null
+  const owner = challenge._ownerName || 'a user'
+  return (
+    <span
+      title={`Shared by ${owner} (read-only)`}
+      style={{
+        background: 'var(--blue-bg)', border: '0.5px solid var(--border-color)',
+        borderRadius: '20px', padding: compact ? '1px 6px' : '2px 8px', color: 'var(--blue)',
+        fontFamily: 'Inter, sans-serif', fontSize: compact ? '9px' : '11px', fontWeight: '500',
+        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: compact ? '110px' : '180px', flexShrink: 0,
+      }}
+    >Shared by {owner}</span>
+  )
+}
+
 // ─── Edit Modal ───────────────────────────────────────────────────────────────
 function EditChallengeModal({ challenge, onClose, onSaved, onDeleted }) {
   const [loading, setLoading] = useState(false)
@@ -80,6 +98,7 @@ function EditChallengeModal({ challenge, onClose, onSaved, onDeleted }) {
   ]
 
   const handleManualFail = async () => {
+    if (challenge._shared) return
     if (!failReason) { setError('Select a reason for failure'); return }
     setSavingFail(true)
     setError(null)
@@ -106,6 +125,7 @@ function EditChallengeModal({ challenge, onClose, onSaved, onDeleted }) {
   const dailyDDDollar = ((parseFloat(form.daily_drawdown_pct) || 0) / 100) * size
 
   const handleSave = async () => {
+    if (challenge._shared) return
     const firmName = form.firm_name === 'Other' ? form.custom_firm : form.firm_name
     if (!firmName || !form.account_size || !form.profit_target_pct || !form.max_drawdown_pct || !form.daily_drawdown_pct) {
       setError('Please fill in all required fields')
@@ -139,6 +159,7 @@ function EditChallengeModal({ challenge, onClose, onSaved, onDeleted }) {
   }
 
   const handleDelete = async () => {
+    if (challenge._shared) return
     setDeleting(true)
     try {
       await supabase.from('accounts').delete().eq('id', challenge.id)
@@ -152,6 +173,7 @@ function EditChallengeModal({ challenge, onClose, onSaved, onDeleted }) {
   }
 
   const handleArchive = async () => {
+    if (challenge._shared) return
     setArchiving(true)
     setError(null)
     try {
@@ -775,7 +797,7 @@ function PreviewModal({ challenge, trades, onClose, navigate, isMobile }) {
     </div>
   )
 
-  const dashboardButton = (
+  const dashboardButton = challenge._shared ? null : (
     <button
       onClick={() => navigate(`/dashboard?account=${challenge.id}`)}
       style={{ background: 'var(--brand)', border: 'none', borderRadius: '8px', padding: '10px 14px', color: 'var(--brand-fg)', fontWeight: '600', fontSize: '12px', cursor: 'pointer', width: '100%', marginTop: isMobile ? 0 : '20px', flexShrink: 0 }}
@@ -872,41 +894,96 @@ export default function ChallengeTracker() {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
+  const openDash = c => {
+    if (c._shared) setPreviewChallenge(c) // shared accounts have no personal dashboard
+    else navigate(`/dashboard?account=${c.id}`)
+  }
+
   const fetchChallenges = async () => {
     setLoading(true)
     try {
       const { data: { session } } = await supabase.auth.getSession()
+      const myId = session.user.id
 
+      // (a) my own challenges: unchanged, strictly scoped to me
       const { data: accounts, error: accErr } = await supabase
         .from('accounts')
         .select('*')
-        .eq('user_id', session.user.id)
+        .eq('user_id', myId)
         .eq('type', 'challenge')
         .order('created_at', { ascending: false })
         // archived challenges are fetched too so the "Archived" filter works;
         // they are excluded from the default view via the `filtered` logic below
       if (accErr) throw accErr
 
-      setChallenges(accounts || [])
+      const own = accounts || []
+      const grouped = {}
+      own.forEach(a => { grouped[a.id] = [] })
 
-      if (accounts && accounts.length > 0) {
-        const accountIds = accounts.map(a => a.id)
+      if (own.length > 0) {
         const { data: trades, error: tradeErr } = await supabase
           .from('trades')
           .select('*')
-          .in('account_id', accountIds)
+          .in('account_id', own.map(a => a.id))
           .order('date', { ascending: true })
         if (tradeErr) throw tradeErr
-
-        const grouped = {}
-        accountIds.forEach(id => { grouped[id] = [] })
         ;(trades || []).forEach(t => {
           if (grouped[t.account_id]) grouped[t.account_id].push(t)
         })
-        setTradesByAccount(grouped)
-      } else {
-        setTradesByAccount({})
       }
+
+      // (b) challenges shared with me (read-only). A failure here must never break my own list.
+      let shared = []
+      try {
+        const { data: shareRows, error: shErr } = await supabase
+          .from('account_shares')
+          .select('account_id')
+          .eq('shared_with_user_id', myId)
+        if (shErr) throw shErr
+        const sharedIds = (shareRows || []).map(r => r.account_id)
+
+        if (sharedIds.length > 0) {
+          const { data: sAccounts, error: saErr } = await supabase
+            .from('accounts')
+            .select('*')
+            .in('id', sharedIds)
+            .neq('user_id', myId)
+            .eq('type', 'challenge')
+            .order('created_at', { ascending: false })
+          if (saErr) throw saErr
+
+          const { data: owners } = await supabase.rpc('get_share_owners', { p_account_ids: sharedIds })
+          const ownerByAccount = {}
+          ;(owners || []).forEach(o => { ownerByAccount[o.account_id] = o })
+
+          shared = (sAccounts || []).map(a => ({
+            ...a,
+            _shared: true,
+            _ownerName: ownerByAccount[a.id]?.name || ownerByAccount[a.id]?.email || null,
+          }))
+
+          const sIds = shared.map(a => a.id)
+          shared.forEach(a => { grouped[a.id] = [] })
+          if (sIds.length > 0) {
+            // trades of shared accounts carry the OWNER's user_id, so filter by account_id only
+            const { data: sTrades, error: stErr } = await supabase
+              .from('trades')
+              .select('*')
+              .in('account_id', sIds)
+              .order('date', { ascending: true })
+            if (stErr) throw stErr
+            ;(sTrades || []).forEach(t => {
+              if (grouped[t.account_id]) grouped[t.account_id].push(t)
+            })
+          }
+        }
+      } catch (sharedErr) {
+        console.error('Could not load shared challenges', sharedErr)
+        shared = []
+      }
+
+      setChallenges([...own, ...shared])
+      setTradesByAccount(grouped)
     } catch (err) {
       console.error(err)
     } finally {
@@ -1063,7 +1140,8 @@ export default function ChallengeTracker() {
                         <div style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-primary)', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {challenge.firm_name}
                         </div>
-                        <button onClick={() => setEditingChallenge(challenge)} style={{ background: 'transparent', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: '10px', padding: '1px 2px', lineHeight: 1, flexShrink: 0 }}>✏️</button>
+                        {!challenge._shared && <button onClick={() => setEditingChallenge(challenge)} style={{ background: 'transparent', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: '10px', padding: '1px 2px', lineHeight: 1, flexShrink: 0 }}>✏️</button>}
+                        <SharedBadge challenge={challenge} compact />
                         {!challenge._shared && <button onClick={e => { e.stopPropagation(); setSharingChallenge(challenge) }} title="Share (read-only)" style={{ background: 'transparent', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: '10px', padding: '1px 2px', lineHeight: 1, flexShrink: 0 }}>🔗</button>}
                       </div>
                       <span style={{ background: badge.bg, border: `0.5px solid ${badge.border}`, borderRadius: '4px', padding: '2px 6px', fontSize: '8px', color: badge.color, fontFamily: "'JetBrains Mono', monospace", whiteSpace: 'nowrap', flexShrink: 0, marginLeft: '4px' }}>
@@ -1115,7 +1193,7 @@ export default function ChallengeTracker() {
                     {/* Actions */}
                     <div style={{ display: 'flex', gap: '4px', marginTop: 'auto' }}>
                       <button onClick={() => setPreviewChallenge(challenge)} style={{ background: 'transparent', border: '0.5px solid var(--border-color)', borderRadius: '4px', padding: '5px 7px', fontSize: '11px', color: 'var(--text-muted)', cursor: 'pointer', flexShrink: 0 }}>👁</button>
-                      <button onClick={() => navigate(`/dashboard?account=${challenge.id}`)} style={{ flex: 1, background: 'transparent', border: `0.5px solid ${isFailed ? 'var(--red-bg)' : 'var(--border-color)'}`, borderRadius: '4px', padding: '5px', fontSize: '10px', color: 'var(--text-muted)', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Dashboard →</button>
+                      <button onClick={() => openDash(challenge)} style={{ flex: 1, background: 'transparent', border: `0.5px solid ${isFailed ? 'var(--red-bg)' : 'var(--border-color)'}`, borderRadius: '4px', padding: '5px', fontSize: '10px', color: 'var(--text-muted)', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Dashboard →</button>
                     </div>
                   </div>
                 )
@@ -1219,6 +1297,7 @@ export default function ChallengeTracker() {
 
                   {/* Bottom row: Edit + Preview + Go to Dashboard */}
                   <div style={{ display: 'flex', gap: '6px' }}>
+                    {!challenge._shared && (
                     <button
                       onClick={() => setEditingChallenge(challenge)}
                       style={{
@@ -1229,6 +1308,8 @@ export default function ChallengeTracker() {
                         flexShrink: 0,
                       }}
                     >✏️</button>
+                    )}
+                    <SharedBadge challenge={challenge} compact />
                     {!challenge._shared && (
                       <button
                         onClick={() => setSharingChallenge(challenge)}
@@ -1253,7 +1334,7 @@ export default function ChallengeTracker() {
                       }}
                     >👁</button>
                     <button
-                      onClick={() => navigate(`/dashboard?account=${challenge.id}`)}
+                      onClick={() => openDash(challenge)}
                       style={{
                         flex: 1, background: 'transparent',
                         border: `1px solid ${isFailed ? 'var(--red-bg)' : 'var(--border-color)'}`,
@@ -1274,7 +1355,7 @@ export default function ChallengeTracker() {
         {showModal && (
           <NewChallengeModal onClose={() => setShowModal(false)} onCreated={fetchChallenges} />
         )}
-        {editingChallenge && (
+        {editingChallenge && !editingChallenge._shared && (
           <EditChallengeModal
             challenge={editingChallenge}
             onClose={() => setEditingChallenge(null)}
@@ -1400,7 +1481,8 @@ export default function ChallengeTracker() {
                     <div style={{ minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px' }}>
                         <p style={{ color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: '600', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{challenge.firm_name}</p>
-                        <button onClick={() => setEditingChallenge(challenge)} style={{ background: 'transparent', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: '11px', padding: '1px 2px', lineHeight: 1, flexShrink: 0 }}>✏️</button>
+                        {!challenge._shared && <button onClick={() => setEditingChallenge(challenge)} style={{ background: 'transparent', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: '11px', padding: '1px 2px', lineHeight: 1, flexShrink: 0 }}>✏️</button>}
+                        <SharedBadge challenge={challenge} compact />
                         {!challenge._shared && <button onClick={e => { e.stopPropagation(); setSharingChallenge(challenge) }} title="Share (read-only)" style={{ background: 'transparent', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: '11px', padding: '1px 2px', lineHeight: 1, flexShrink: 0 }}>🔗</button>}
                       </div>
                       <span style={{ color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '11px' }}>{challenge.phase?.replace('_', ' ').toUpperCase()} · ${Number(challenge.account_size).toLocaleString()}</span>
@@ -1464,7 +1546,7 @@ export default function ChallengeTracker() {
                     <button onClick={() => setPreviewChallenge(challenge)} style={{ background: 'transparent', border: '0.5px solid var(--border-color)', borderRadius: '8px', padding: '8px 14px', color: 'var(--text-muted)', fontFamily: 'Inter, sans-serif', fontSize: '12px', cursor: 'pointer', flex: 1 }}>
                       Preview
                     </button>
-                    <button onClick={() => navigate(`/dashboard?account=${challenge.id}`)} style={{ background: 'transparent', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '8px 14px', color: 'var(--text-secondary)', fontFamily: 'Inter, sans-serif', fontSize: '12px', cursor: 'pointer', flex: 1 }}>
+                    <button onClick={() => openDash(challenge)} style={{ background: 'transparent', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '8px 14px', color: 'var(--text-secondary)', fontFamily: 'Inter, sans-serif', fontSize: '12px', cursor: 'pointer', flex: 1 }}>
                       Go to Dashboard →
                     </button>
                   </div>
@@ -1493,7 +1575,7 @@ export default function ChallengeTracker() {
               return (
                 <div
                   key={challenge.id}
-                  onClick={() => navigate(`/dashboard?account=${challenge.id}`)}
+                  onClick={() => openDash(challenge)}
                   style={{
                     background: 'var(--bg-surface)',
                     border: '0.5px solid var(--border-color)',
@@ -1520,10 +1602,13 @@ export default function ChallengeTracker() {
                         <span style={{ color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: '600' }}>
                           {challenge.firm_name}
                         </span>
+                        {!challenge._shared && (
                         <button
                           onClick={e => { e.stopPropagation(); setEditingChallenge(challenge) }}
                           style={{ background: 'transparent', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: '11px', padding: '1px 2px', lineHeight: 1 }}
                         >✏️</button>
+                        )}
+                        <SharedBadge challenge={challenge} />
                         {!challenge._shared && (
                           <button
                             onClick={e => { e.stopPropagation(); setSharingChallenge(challenge) }}
@@ -1623,7 +1708,7 @@ export default function ChallengeTracker() {
         <NewChallengeModal onClose={() => setShowModal(false)} onCreated={fetchChallenges} />
       )}
 
-      {editingChallenge && (
+      {editingChallenge && !editingChallenge._shared && (
         <EditChallengeModal
           challenge={editingChallenge}
           onClose={() => setEditingChallenge(null)}
