@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { supabase } from '../supabaseClient'
 import { useNavigate, Link } from 'react-router-dom'
 import { Fingerprint } from 'lucide-react'
-import { passkeysSupported, passkeyErrorMessage, deviceHasPasskey } from '../components/PasskeySettings'
+import { passkeysSupported, passkeyErrorMessage } from '../components/PasskeySettings'
 
 export default function Login() {
   const { register, handleSubmit, formState: { errors } } = useForm()
