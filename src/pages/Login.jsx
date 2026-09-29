@@ -108,7 +108,9 @@ export default function Login() {
     </button>
   )
 
-  const passkeyHome = deviceHasPasskey() && !showEmailForm && !showReset
+  // /login?layout=c previews the fingerprint layout on any device (for testing)
+  const previewLayoutC = new URLSearchParams(window.location.search).get('layout') === 'c'
+  const passkeyHome = (deviceHasPasskey() || previewLayoutC) && !showEmailForm && !showReset
 
   const inputStyle = {
     width: '100%',
