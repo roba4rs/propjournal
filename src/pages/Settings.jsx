@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import Sidebar from '../components/Sidebar'
 import { supabase } from '../supabaseClient'
 import { useSidebar } from '../SidebarContext'
+import PasskeySettings from '../components/PasskeySettings'
 
 // ─── Toast ───────────────────────────────────────────────────────────────────
 function Toast({ message, type, onClose, mobile = false }) {
@@ -837,6 +838,7 @@ export default function Settings() {
                     <option value="Asia/Singapore">Asia/Singapore (UTC+8)</option>
                   </select>
                 </div>
+                <PasskeySettings />
               </Card>
             )}
 
@@ -1088,6 +1090,7 @@ export default function Settings() {
                 <option value="Asia/Singapore">Asia/Singapore (UTC+8)</option>
               </select>
             </div>
+            <PasskeySettings />
           </Card>
 
           {/* ── Personal Accounts ── */}

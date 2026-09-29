@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { supabase } from '../supabaseClient'
 import { useNavigate, Link } from 'react-router-dom'
+import { Fingerprint } from 'lucide-react'
+import { passkeysSupported, passkeyErrorMessage } from '../components/PasskeySettings'
 
 export default function Login() {
   const { register, handleSubmit, formState: { errors } } = useForm()
@@ -44,6 +46,21 @@ export default function Login() {
       setAuthError(error.message)
     } finally {
       setResetLoading(false)
+    }
+  }
+
+  const handlePasskeySignIn = async () => {
+    setLoading(true)
+    setAuthError(null)
+    try {
+      const { error } = await supabase.auth.signInWithPasskey()
+      if (error) throw error
+      navigate('/dashboard')
+    } catch (error) {
+      console.error(error)
+      setAuthError(passkeyErrorMessage(error, 'Fingerprint sign-in failed. Use email or Google instead.'))
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -130,6 +147,23 @@ export default function Login() {
           </svg>
           Continue with Google
         </button>
+
+        {passkeysSupported() && (
+          <button
+            type="button"
+            onClick={handlePasskeySignIn}
+            disabled={loading}
+            style={{
+              width: '100%', background: 'transparent', border: '0.5px solid var(--border-color-2)',
+              borderRadius: '8px', padding: '12px', color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif',
+              fontSize: '14px', cursor: loading ? 'default' : 'pointer', display: 'flex', alignItems: 'center',
+              justifyContent: 'center', gap: '10px', marginTop: '-12px', marginBottom: '24px', minHeight: '44px',
+            }}
+          >
+            <Fingerprint size={18} />
+            Sign in with fingerprint
+          </button>
+        )}
 
         <div style={{
           display: 'flex',

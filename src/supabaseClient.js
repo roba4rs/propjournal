@@ -5,6 +5,7 @@ const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
+    experimental: { passkey: true }, // Supabase passkeys (beta) need an explicit opt-in
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
