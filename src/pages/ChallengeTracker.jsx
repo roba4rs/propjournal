@@ -797,7 +797,7 @@ function PreviewModal({ challenge, trades, onClose, navigate, isMobile }) {
     </div>
   )
 
-  const dashboardButton = challenge._shared ? null : (
+  const dashboardButton = (
     <button
       onClick={() => navigate(`/dashboard?account=${challenge.id}`)}
       style={{ background: 'var(--brand)', border: 'none', borderRadius: '8px', padding: '10px 14px', color: 'var(--brand-fg)', fontWeight: '600', fontSize: '12px', cursor: 'pointer', width: '100%', marginTop: isMobile ? 0 : '20px', flexShrink: 0 }}
@@ -894,10 +894,7 @@ export default function ChallengeTracker() {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  const openDash = c => {
-    if (c._shared) setPreviewChallenge(c) // shared accounts have no personal dashboard
-    else navigate(`/dashboard?account=${c.id}`)
-  }
+  const openDash = c => navigate(`/dashboard?account=${c.id}`)
 
   const fetchChallenges = async () => {
     setLoading(true)

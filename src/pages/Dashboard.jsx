@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { Plus } from 'lucide-react'
 import Sidebar from '../components/Sidebar'
@@ -391,7 +391,7 @@ function TradeDetailModal({ trade, onClose, isMobile, onResolve }) {
     }
   }
 
-  const resolveSection = isOpen && (
+  const resolveSection = isOpen && onResolve && (
     <div style={{
       background: 'var(--blue-bg-2)', border: '0.5px solid var(--blue-bg)',
       borderRadius: isMobile ? '8px' : '10px', padding: isMobile ? '12px' : '16px 18px',
@@ -679,6 +679,32 @@ function DayTradesModal({ date, trades, onClose, onSelectTrade, isMobile }) {
   )
 }
 
+
+// Shown instead of the account switcher when viewing an account that was shared with me (read-only)
+function SharedViewBadge({ account, onBack, compact = false }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+      <span
+        title={`${account.name} - shared by ${account._ownerName || 'a user'} (read-only)`}
+        style={{
+          background: 'var(--blue-bg)', border: '0.5px solid var(--border-color)', borderRadius: '20px',
+          padding: compact ? '3px 8px' : '5px 12px', color: 'var(--blue)', fontFamily: 'Inter, sans-serif',
+          fontSize: compact ? '10px' : '12px', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden',
+          textOverflow: 'ellipsis', maxWidth: compact ? '150px' : '320px',
+        }}
+      >Shared by {account._ownerName || 'a user'} · read-only</span>
+      <button
+        onClick={onBack}
+        style={{
+          background: 'transparent', border: '0.5px solid var(--border-color)', borderRadius: '6px',
+          padding: compact ? '3px 8px' : '5px 10px', color: 'var(--text-muted)', fontFamily: 'Inter, sans-serif',
+          fontSize: compact ? '10px' : '12px', cursor: 'pointer', flexShrink: 0,
+        }}
+      >Back</button>
+    </div>
+  )
+}
+
 export default function Dashboard() {
   const { collapsed } = useSidebar()
   const [searchParams] = useSearchParams()
@@ -686,6 +712,47 @@ export default function Dashboard() {
   const defaultAccountId = searchParams.get('account') || localStorage.getItem('activeAccountId')
 
   const [activeAccount, setActiveAccount] = useState(null)
+
+  // Read-only view of an account another user shared with me. Kept separate from
+  // activeAccount so it never reaches the account switcher or localStorage.
+  const requestedAccountId = searchParams.get('account')
+  const [sharedAccount, setSharedAccount] = useState(null)
+  const [sharedChecked, setSharedChecked] = useState(!requestedAccountId)
+  const readOnly = !!sharedAccount
+  const viewAccount = sharedAccount || activeAccount
+  const viewIdRef = useRef(null)
+
+  useEffect(() => {
+    if (!requestedAccountId) { setSharedChecked(true); return }
+    let cancelled = false
+    ;(async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        const { data: share } = await supabase
+          .from('account_shares')
+          .select('account_id')
+          .eq('account_id', requestedAccountId)
+          .eq('shared_with_user_id', session.user.id)
+          .maybeSingle()
+        if (!share) return
+        const { data: acc } = await supabase
+          .from('accounts')
+          .select('*')
+          .eq('id', requestedAccountId)
+          .neq('user_id', session.user.id)
+          .maybeSingle()
+        if (!acc || cancelled) return
+        const { data: owners } = await supabase.rpc('get_share_owners', { p_account_ids: [acc.id] })
+        const owner = (owners || [])[0]
+        setSharedAccount({ ...acc, _shared: true, _ownerName: owner?.name || owner?.email || null })
+      } catch (err) {
+        console.error('Could not load shared account', err)
+      } finally {
+        if (!cancelled) setSharedChecked(true)
+      }
+    })()
+    return () => { cancelled = true }
+  }, [requestedAccountId])
   const [paymentToast, setPaymentToast] = useState(searchParams.get('payment') === 'success')
 
   useEffect(() => {
@@ -724,9 +791,10 @@ export default function Dashboard() {
   }, [])
 
   useEffect(() => {
-    if (!activeAccount) return
-    fetchTrades(activeAccount.id)
-  }, [activeAccount])
+    if (!sharedChecked || !viewAccount) return
+    viewIdRef.current = viewAccount.id
+    fetchTrades(viewAccount.id)
+  }, [viewAccount, sharedChecked]) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function fetchTrades(accountId) {
     setLoading(true)
@@ -737,6 +805,7 @@ export default function Dashboard() {
         .eq('account_id', accountId)
         .order('date', { ascending: true })
       if (error) throw error
+      if (viewIdRef.current !== accountId) return // a newer account was selected meanwhile
       // Fold swap + commission into pnl so every stat/chart on the dashboard
       // reflects the true net result of each trade. Trades with no pnl,
       // swap, or commission at all (e.g. still in_progress) are left as-is
@@ -759,6 +828,7 @@ export default function Dashboard() {
   }
 
   async function handleResolveTrade(trade, newOutcome) {
+    if (readOnly) return
     const newPnlGross = resolvedPnl(trade, newOutcome)
     try {
       const { error } = await supabase
@@ -793,6 +863,9 @@ export default function Dashboard() {
       <div style={{ background: 'var(--bg-page)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <Sidebar
           mobileTopBarRight={
+            readOnly ? (
+              <SharedViewBadge account={sharedAccount} compact onBack={() => navigate('/challenges')} />
+            ) : (
             <AccountSwitcher
               mobile
               compact
@@ -804,6 +877,7 @@ export default function Dashboard() {
               }}
               defaultAccountId={defaultAccountId}
             />
+            )
           }
         />
         <main style={{ flex: 1, display: 'flex', flexDirection: 'column', paddingTop: '52px', paddingBottom: 'calc(60px + env(safe-area-inset-bottom))' }}>
@@ -839,10 +913,10 @@ export default function Dashboard() {
           </div>
 
           <div style={{ margin: '10px 14px 0' }}>
-            <ChallengeCard account={activeAccount} trades={trades} loading={loading} mobile />
+            <ChallengeCard account={viewAccount} trades={trades} loading={loading} mobile />
           </div>
           <div style={{ margin: '8px 14px 0', background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px' }}>
-            <PnLChart trades={trades} account={activeAccount} noMargin mobile />
+            <PnLChart trades={trades} account={viewAccount} noMargin mobile />
           </div>
           <div style={{ margin: '8px 14px 0', background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px' }}>
             <DailyBarChart trades={trades} mobile />
@@ -854,7 +928,7 @@ export default function Dashboard() {
             <StreakCard trades={trades} mobile />
           </div>
           <div style={{ margin: '8px 14px 0', background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px' }}>
-            <CalendarPnL trades={trades} account={activeAccount} mobile onDayClick={date => setDayModal(date)} />
+            <CalendarPnL trades={trades} account={viewAccount} mobile onDayClick={date => setDayModal(date)} />
           </div>
           <div style={{ margin: '8px 14px 16px', background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)', borderRadius: '10px' }}>
             <RecentTrades trades={trades} loading={loading} mobile onTradeClick={t => setDetailTrade(t)} />
@@ -875,7 +949,7 @@ export default function Dashboard() {
             trade={detailTrade}
             isMobile
             onClose={() => setDetailTrade(null)}
-            onResolve={handleResolveTrade}
+            onResolve={readOnly ? null : handleResolveTrade}
           />
         )}
       </div>
@@ -907,6 +981,9 @@ export default function Dashboard() {
             <h1 style={{ color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontSize: '22px', fontWeight: '600', margin: 0 }}>Dashboard</h1>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <DateRangePicker dateRange={dateRange} onChange={setDateRange} />
+              {readOnly ? (
+                <SharedViewBadge account={sharedAccount} onBack={() => navigate('/challenges')} />
+              ) : (
               <AccountSwitcher
                 onSwitch={(acc) => {
                   setActiveAccount(acc)
@@ -914,7 +991,8 @@ export default function Dashboard() {
                 }}
                 defaultAccountId={defaultAccountId}
               />
-              <button onClick={() => navigate('/trades', { state: { openForm: true } })} style={{
+              )}
+              {!readOnly && <button onClick={() => navigate('/trades', { state: { openForm: true } })} style={{
                 width: '36px', height: '36px', borderRadius: '50%', flexShrink: 0,
                 background: 'var(--brand)', border: 'none',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -923,7 +1001,7 @@ export default function Dashboard() {
               }}
               onMouseEnter={e => e.currentTarget.style.background = 'oklch(0.78 0.17 152)'}
               onMouseLeave={e => e.currentTarget.style.background = 'var(--brand)'}
-              ><Plus size={18} strokeWidth={2.5} color="var(--bg-page)" /></button>
+              ><Plus size={18} strokeWidth={2.5} color="var(--bg-page)" /></button>}
             </div>
           </div>
         </div>
@@ -974,7 +1052,7 @@ export default function Dashboard() {
             <ScoreCard trades={filteredTrades} />
           </div>
           <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-            <ChallengeCard account={activeAccount} trades={filteredTrades} loading={loading} />
+            <ChallengeCard account={viewAccount} trades={filteredTrades} loading={loading} />
           </div>
         </div>
         <div style={{ display: 'flex', gap: '20px', alignItems: 'stretch', marginBottom: '24px' }}>
@@ -987,7 +1065,7 @@ export default function Dashboard() {
         </div>
         <div style={{ display: 'flex', gap: '20px', alignItems: 'stretch', marginBottom: '24px' }}>
           <div style={{ flex: '0 0 65%', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-            <PnLChart trades={filteredTrades} account={activeAccount} noMargin />
+            <PnLChart trades={filteredTrades} account={viewAccount} noMargin />
           </div>
           <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
             <StreakCard trades={filteredTrades} />
@@ -995,7 +1073,7 @@ export default function Dashboard() {
         </div>
         <div style={{ display: 'flex', gap: '20px', alignItems: 'stretch', marginBottom: '24px' }}>
           <div style={{ flex: '0 0 65%', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-            <CalendarPnL trades={filteredTrades} account={activeAccount} onDayClick={date => setDayModal(date)} />
+            <CalendarPnL trades={filteredTrades} account={viewAccount} onDayClick={date => setDayModal(date)} />
           </div>
           <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
             <RecentTrades trades={filteredTrades} loading={loading} onTradeClick={t => setDetailTrade(t)} />
@@ -1015,7 +1093,7 @@ export default function Dashboard() {
         <TradeDetailModal
           trade={detailTrade}
           onClose={() => setDetailTrade(null)}
-          onResolve={handleResolveTrade}
+          onResolve={readOnly ? null : handleResolveTrade}
         />
       )}
     </div>
