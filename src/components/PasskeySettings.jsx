@@ -17,7 +17,7 @@ export function passkeyErrorMessage(err, fallback) {
 }
 
 // Register / list / remove fingerprint (passkey) sign-in for the logged-in user
-export default function PasskeySettings() {
+export default function PasskeySettings({ standalone = false }) {
   const supported = passkeysSupported()
   const [passkeys, setPasskeys] = useState([])
   const [loading, setLoading] = useState(true)
@@ -38,7 +38,16 @@ export default function PasskeySettings() {
 
   useEffect(() => { if (supported) load(); else setLoading(false) }, [supported, load])
 
-  if (!supported) return null
+  if (!supported) {
+    return (
+      <div style={standalone ? {} : { marginTop: '18px', paddingTop: '16px', borderTop: '0.5px solid var(--border-color)' }}>
+        <p style={{ color: 'var(--text-muted)', fontFamily: ff, fontSize: '11px', margin: '0 0 6px 0' }}>Fingerprint / Face ID login</p>
+        <p style={{ color: 'var(--text-faint)', fontFamily: ff, fontSize: '12px', margin: 0 }}>
+          This browser or device doesn't support fingerprint login. Try Chrome or Safari, and make sure a screen lock is set on your phone.
+        </p>
+      </div>
+    )
+  }
 
   const add = async () => {
     setBusy(true); setMsg(null)
@@ -66,7 +75,7 @@ export default function PasskeySettings() {
   }
 
   return (
-    <div style={{ marginTop: '18px', paddingTop: '16px', borderTop: '0.5px solid var(--border-color)' }}>
+    <div style={standalone ? {} : { marginTop: '18px', paddingTop: '16px', borderTop: '0.5px solid var(--border-color)' }}>
       <p style={{ color: 'var(--text-muted)', fontFamily: ff, fontSize: '11px', margin: '0 0 6px 0' }}>Fingerprint / Face ID login</p>
       <p style={{ color: 'var(--text-faint)', fontFamily: ff, fontSize: '11px', margin: '0 0 10px 0' }}>
         Sign in with your phone's fingerprint or face instead of typing. Set it up once on each device.
