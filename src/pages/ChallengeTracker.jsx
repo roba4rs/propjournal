@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import Sidebar from '../components/Sidebar'
 import NewChallengeModal from '../components/NewChallengeModal'
+import ShareAccountPanel from '../components/ShareAccountPanel'
 import { useSidebar } from '../SidebarContext'
 
 const FILTERS = ['All', 'In Progress', 'Funded', 'Passed', 'Failed', 'Archived']
@@ -858,6 +859,7 @@ export default function ChallengeTracker() {
   const [filter, setFilter] = useState('All')
   const [showModal, setShowModal] = useState(false)
   const [editingChallenge, setEditingChallenge] = useState(null)
+  const [sharingChallenge, setSharingChallenge] = useState(null)
   const [previewChallenge, setPreviewChallenge] = useState(null)
   const [loading, setLoading] = useState(true)
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
@@ -1062,6 +1064,7 @@ export default function ChallengeTracker() {
                           {challenge.firm_name}
                         </div>
                         <button onClick={() => setEditingChallenge(challenge)} style={{ background: 'transparent', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: '10px', padding: '1px 2px', lineHeight: 1, flexShrink: 0 }}>✏️</button>
+                        {!challenge._shared && <button onClick={e => { e.stopPropagation(); setSharingChallenge(challenge) }} title="Share (read-only)" style={{ background: 'transparent', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: '10px', padding: '1px 2px', lineHeight: 1, flexShrink: 0 }}>🔗</button>}
                       </div>
                       <span style={{ background: badge.bg, border: `0.5px solid ${badge.border}`, borderRadius: '4px', padding: '2px 6px', fontSize: '8px', color: badge.color, fontFamily: "'JetBrains Mono', monospace", whiteSpace: 'nowrap', flexShrink: 0, marginLeft: '4px' }}>
                         {badge.label}
@@ -1226,6 +1229,19 @@ export default function ChallengeTracker() {
                         flexShrink: 0,
                       }}
                     >✏️</button>
+                    {!challenge._shared && (
+                      <button
+                        onClick={() => setSharingChallenge(challenge)}
+                        title="Share (read-only)"
+                        style={{
+                          background: 'transparent',
+                          border: '0.5px solid var(--border-color)',
+                          borderRadius: '5px', padding: '6px 10px',
+                          fontSize: '13px', color: 'var(--text-muted)', cursor: 'pointer',
+                          flexShrink: 0,
+                        }}
+                      >🔗</button>
+                    )}
                     <button
                       onClick={() => setPreviewChallenge(challenge)}
                       style={{
@@ -1265,6 +1281,9 @@ export default function ChallengeTracker() {
             onSaved={fetchChallenges}
             onDeleted={fetchChallenges}
           />
+        )}
+        {sharingChallenge && (
+          <ShareAccountPanel account={sharingChallenge} onClose={() => setSharingChallenge(null)} />
         )}
         {previewChallenge && (
           <PreviewModal
@@ -1382,6 +1401,7 @@ export default function ChallengeTracker() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px' }}>
                         <p style={{ color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: '600', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{challenge.firm_name}</p>
                         <button onClick={() => setEditingChallenge(challenge)} style={{ background: 'transparent', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: '11px', padding: '1px 2px', lineHeight: 1, flexShrink: 0 }}>✏️</button>
+                        {!challenge._shared && <button onClick={e => { e.stopPropagation(); setSharingChallenge(challenge) }} title="Share (read-only)" style={{ background: 'transparent', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: '11px', padding: '1px 2px', lineHeight: 1, flexShrink: 0 }}>🔗</button>}
                       </div>
                       <span style={{ color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '11px' }}>{challenge.phase?.replace('_', ' ').toUpperCase()} · ${Number(challenge.account_size).toLocaleString()}</span>
                     </div>
@@ -1504,6 +1524,13 @@ export default function ChallengeTracker() {
                           onClick={e => { e.stopPropagation(); setEditingChallenge(challenge) }}
                           style={{ background: 'transparent', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: '11px', padding: '1px 2px', lineHeight: 1 }}
                         >✏️</button>
+                        {!challenge._shared && (
+                          <button
+                            onClick={e => { e.stopPropagation(); setSharingChallenge(challenge) }}
+                            title="Share (read-only)"
+                            style={{ background: 'transparent', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: '11px', padding: '1px 2px', lineHeight: 1 }}
+                          >🔗</button>
+                        )}
                         <span style={{ background: badge.bg, border: `0.5px solid ${badge.border}`, borderRadius: '20px', padding: '2px 8px', color: badge.color, fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: '500' }}>
                           {badge.label}
                         </span>
@@ -1603,6 +1630,10 @@ export default function ChallengeTracker() {
           onSaved={fetchChallenges}
           onDeleted={fetchChallenges}
         />
+      )}
+
+      {sharingChallenge && (
+        <ShareAccountPanel account={sharingChallenge} onClose={() => setSharingChallenge(null)} />
       )}
 
       {previewChallenge && (
