@@ -4,6 +4,16 @@ import { supabase } from '../supabaseClient'
 
 const ff = 'DM Sans, sans-serif'
 
+const DEVICE_FLAG = 'pj_passkey_device'
+
+// Remember on this device that fingerprint login was set up (drives the login screen layout)
+export function deviceHasPasskey() {
+  try { return passkeysSupported() && localStorage.getItem(DEVICE_FLAG) === '1' } catch { return false }
+}
+export function markDevicePasskey(on) {
+  try { if (on) localStorage.setItem(DEVICE_FLAG, '1'); else localStorage.removeItem(DEVICE_FLAG) } catch { /* storage unavailable */ }
+}
+
 export function passkeysSupported() {
   return typeof window !== 'undefined' && !!window.PublicKeyCredential
 }
@@ -29,6 +39,7 @@ export default function PasskeySettings({ standalone = false }) {
       const { data, error } = await supabase.auth.passkey.list()
       if (error) throw error
       setPasskeys(data || [])
+      if ((data || []).length === 0) markDevicePasskey(false)
     } catch (err) {
       console.error('Could not load passkeys', err)
     } finally {
@@ -54,6 +65,7 @@ export default function PasskeySettings({ standalone = false }) {
     try {
       const { error } = await supabase.auth.registerPasskey()
       if (error) throw error
+      markDevicePasskey(true)
       setMsg({ type: 'ok', text: 'Fingerprint login is on for this device.' })
       await load()
     } catch (err) {
