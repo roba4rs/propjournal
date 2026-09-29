@@ -141,7 +141,13 @@ export default function Login() {
         padding: 'clamp(24px, 5vw, 40px)',
         width: '100%',
         maxWidth: '400px',
+        boxSizing: 'border-box',
+        minHeight: 'calc(100dvh - 32px)', // fill the screen height
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
       }}>
+        <div>
         <h1 style={{
           color: 'var(--text-primary)',
           fontFamily: 'Inter, sans-serif',
@@ -430,6 +436,7 @@ export default function Login() {
         )}
           </>
         )}
+        </div>
       </div>
     </div>
   )
