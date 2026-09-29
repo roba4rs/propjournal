@@ -684,15 +684,20 @@ function DayTradesModal({ date, trades, onClose, onSelectTrade, isMobile }) {
 function SharedViewBadge({ account, onBack, compact = false }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+      <span style={{
+        color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontWeight: '600',
+        fontSize: compact ? '13px' : '14px', whiteSpace: 'nowrap', overflow: 'hidden',
+        textOverflow: 'ellipsis', minWidth: 0, flexShrink: 1,
+      }}>{account.name}</span>
       <span
         title={`${account.name} - shared by ${account._ownerName || 'a user'} (read-only)`}
         style={{
           background: 'var(--blue-bg)', border: '0.5px solid var(--border-color)', borderRadius: '20px',
           padding: compact ? '3px 8px' : '5px 12px', color: 'var(--blue)', fontFamily: 'Inter, sans-serif',
           fontSize: compact ? '10px' : '12px', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden',
-          textOverflow: 'ellipsis', maxWidth: compact ? '150px' : '320px',
+          textOverflow: 'ellipsis', maxWidth: compact ? '100px' : '200px', flexShrink: 0,
         }}
-      >Shared by {account._ownerName || 'a user'} · read-only</span>
+      >From {account._ownerName || 'a user'}</span>
       <button
         onClick={onBack}
         style={{

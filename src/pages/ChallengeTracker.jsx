@@ -12,7 +12,7 @@ const PHASES = ['Phase 1', 'Phase 2', 'Funded']
 
 
 // Small label shown on challenges that were shared with the current user (read-only)
-function SharedBadge({ challenge, compact = false }) {
+function SharedBadge({ challenge, compact = false, ownRow = false }) {
   if (!challenge._shared) return null
   const owner = challenge._ownerName || 'a user'
   return (
@@ -22,9 +22,11 @@ function SharedBadge({ challenge, compact = false }) {
         background: 'var(--blue-bg)', border: '0.5px solid var(--border-color)',
         borderRadius: '20px', padding: compact ? '1px 6px' : '2px 8px', color: 'var(--blue)',
         fontFamily: 'Inter, sans-serif', fontSize: compact ? '9px' : '11px', fontWeight: '500',
-        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: compact ? '110px' : '180px', flexShrink: 0,
+        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+        maxWidth: ownRow ? '100%' : (compact ? '110px' : '180px'), flexShrink: 0,
+        display: ownRow ? 'inline-block' : undefined, verticalAlign: 'top', boxSizing: 'border-box',
       }}
-    >Shared by {owner}</span>
+    >From {owner}</span>
   )
 }
 
@@ -1138,7 +1140,6 @@ export default function ChallengeTracker() {
                           {challenge.firm_name}
                         </div>
                         {!challenge._shared && <button onClick={() => setEditingChallenge(challenge)} style={{ background: 'transparent', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: '10px', padding: '1px 2px', lineHeight: 1, flexShrink: 0 }}>✏️</button>}
-                        <SharedBadge challenge={challenge} compact />
                         {!challenge._shared && <button onClick={e => { e.stopPropagation(); setSharingChallenge(challenge) }} title="Share (read-only)" style={{ background: 'transparent', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: '10px', padding: '1px 2px', lineHeight: 1, flexShrink: 0 }}>🔗</button>}
                       </div>
                       <span style={{ background: badge.bg, border: `0.5px solid ${badge.border}`, borderRadius: '4px', padding: '2px 6px', fontSize: '8px', color: badge.color, fontFamily: "'JetBrains Mono', monospace", whiteSpace: 'nowrap', flexShrink: 0, marginLeft: '4px' }}>
@@ -1148,6 +1149,11 @@ export default function ChallengeTracker() {
                     <div style={{ fontSize: '9px', color: 'var(--text-muted)', fontFamily: "'Inter', sans-serif", marginTop: '-6px' }}>
                       {phaseLabel} · ${Number(challenge.account_size).toLocaleString()}
                     </div>
+                    {challenge._shared && (
+                      <div style={{ marginTop: '-4px', minWidth: 0 }}>
+                        <SharedBadge challenge={challenge} compact ownRow />
+                      </div>
+                    )}
 
                     {/* P&L */}
                     <div>
@@ -1238,6 +1244,11 @@ export default function ChallengeTracker() {
                       <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '3px', fontFamily: "'Inter', sans-serif" }}>
                         {phaseLabel} · ${Number(challenge.account_size).toLocaleString()} · Started {startFormatted}
                       </div>
+                      {challenge._shared && (
+                        <div style={{ marginTop: '5px', minWidth: 0 }}>
+                          <SharedBadge challenge={challenge} compact ownRow />
+                        </div>
+                      )}
                     </div>
                     <span style={{
                       background: badge.bg, border: `0.5px solid ${badge.border}`,
@@ -1306,7 +1317,6 @@ export default function ChallengeTracker() {
                       }}
                     >✏️</button>
                     )}
-                    <SharedBadge challenge={challenge} compact />
                     {!challenge._shared && (
                       <button
                         onClick={() => setSharingChallenge(challenge)}
@@ -1479,10 +1489,14 @@ export default function ChallengeTracker() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px' }}>
                         <p style={{ color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: '600', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{challenge.firm_name}</p>
                         {!challenge._shared && <button onClick={() => setEditingChallenge(challenge)} style={{ background: 'transparent', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: '11px', padding: '1px 2px', lineHeight: 1, flexShrink: 0 }}>✏️</button>}
-                        <SharedBadge challenge={challenge} compact />
                         {!challenge._shared && <button onClick={e => { e.stopPropagation(); setSharingChallenge(challenge) }} title="Share (read-only)" style={{ background: 'transparent', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: '11px', padding: '1px 2px', lineHeight: 1, flexShrink: 0 }}>🔗</button>}
                       </div>
                       <span style={{ color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '11px' }}>{challenge.phase?.replace('_', ' ').toUpperCase()} · ${Number(challenge.account_size).toLocaleString()}</span>
+                      {challenge._shared && (
+                        <div style={{ marginTop: '5px' }}>
+                          <SharedBadge challenge={challenge} ownRow />
+                        </div>
+                      )}
                     </div>
                     <span style={{ background: badge.bg, border: `0.5px solid ${badge.border}`, borderRadius: '20px', padding: '3px 10px', color: badge.color, fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: '500', whiteSpace: 'nowrap', flexShrink: 0 }}>{badge.label}</span>
                   </div>
@@ -1605,7 +1619,6 @@ export default function ChallengeTracker() {
                           style={{ background: 'transparent', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: '11px', padding: '1px 2px', lineHeight: 1 }}
                         >✏️</button>
                         )}
-                        <SharedBadge challenge={challenge} />
                         {!challenge._shared && (
                           <button
                             onClick={e => { e.stopPropagation(); setSharingChallenge(challenge) }}
@@ -1620,6 +1633,11 @@ export default function ChallengeTracker() {
                       <span style={{ color: 'var(--text-faint)', fontFamily: 'Inter, sans-serif', fontSize: '11px' }}>
                         {challenge.firm_name?.toUpperCase()} · {challenge.phase?.replace('_', ' ').toUpperCase()} · ${Number(challenge.account_size).toLocaleString()} · {s.total}T
                       </span>
+                      {challenge._shared && (
+                        <div style={{ marginTop: '5px' }}>
+                          <SharedBadge challenge={challenge} ownRow />
+                        </div>
+                      )}
                     </div>
 
                     {/* P&L */}
