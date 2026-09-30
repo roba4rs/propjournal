@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { supabase } from '../supabaseClient'
 import { useNavigate, Link } from 'react-router-dom'
-import { Fingerprint, ArrowLeft } from 'lucide-react'
+import { Fingerprint } from 'lucide-react'
 import { deviceHasPasskey, passkeyErrorMessage } from '../components/PasskeySettings'
 
 export default function Login() {
@@ -67,10 +67,7 @@ export default function Login() {
       navigate('/dashboard')
     } catch (error) {
       console.error(error)
-      const errName = error?.name || error?.cause?.name || ''
-      // cancelling the prompt is not an error: just stay on the fingerprint screen
-      if (errName === 'NotAllowedError' || errName === 'AbortError') setAuthError(null)
-      else setAuthError(passkeyErrorMessage(error, 'Fingerprint sign-in failed. Use email or Google instead.'))
+      setAuthError(passkeyErrorMessage(error, 'Fingerprint sign-in failed. Use email or Google instead.'))
     } finally {
       setLoading(false)
     }
@@ -124,12 +121,6 @@ export default function Login() {
   // fingerprint is only offered on mobile, and only if this device has one registered
   const showFingerprint = isMobile && deviceHasPasskey()
   const passkeyHome = (showFingerprint || previewLayoutC) && !showEmailForm && !showReset
-
-  // open the fingerprint prompt automatically when the page loads (mobile + fingerprint registered)
-  useEffect(() => {
-    if (showFingerprint && !showEmailForm) handlePasskeySignIn()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   const inputStyle = {
     width: '100%',
@@ -209,19 +200,25 @@ export default function Login() {
                 fontFamily: 'Inter, sans-serif', textAlign: 'left',
               }}>{authError}</div>
             )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+              <div style={{ flex: 1, height: '0.5px', background: 'var(--border-color)' }} />
+              <span style={{ color: 'var(--text-muted)', fontSize: '12px', fontFamily: 'Inter, sans-serif' }}>or</span>
+              <div style={{ flex: 1, height: '0.5px', background: 'var(--border-color)' }} />
+            </div>
+            {googleButton}
             <button
               type="button"
               onClick={() => { setShowEmailForm(true); setAuthError(null) }}
               style={{
-                background: 'none', border: 'none', color: 'var(--text-muted)',
-                fontFamily: 'Inter, sans-serif', fontSize: '14px', cursor: 'pointer',
-                padding: '12px', minHeight: '44px', display: 'inline-flex',
-                alignItems: 'center', gap: '6px',
+                width: '100%', background: 'transparent', border: '0.5px solid var(--border-color-2)',
+                borderRadius: '8px', padding: '12px', color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif',
+                fontSize: '14px', cursor: 'pointer', minHeight: '44px',
               }}
-            >
-              <ArrowLeft size={16} />
-              Back
-            </button>
+            >Use email and password</button>
+            <p style={{ color: 'var(--text-muted)', fontFamily: 'Inter, sans-serif', fontSize: '13px', textAlign: 'center', marginTop: '20px' }}>
+              Don't have an account?{' '}
+              <Link to="/signup" style={{ color: 'var(--brand)', textDecoration: 'none' }}>Sign up</Link>
+            </p>
           </div>
         )}
 
