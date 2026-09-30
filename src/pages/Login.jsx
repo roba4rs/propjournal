@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { supabase } from '../supabaseClient'
 import { useNavigate, Link } from 'react-router-dom'
 import { Fingerprint } from 'lucide-react'
-import { passkeysSupported, passkeyErrorMessage } from '../components/PasskeySettings'
+import { deviceHasPasskey, passkeyErrorMessage } from '../components/PasskeySettings'
 
 export default function Login() {
   const { register, handleSubmit, formState: { errors } } = useForm()
@@ -16,6 +16,14 @@ export default function Login() {
   const [resetEmail, setResetEmail] = useState('')
   const navigate = useNavigate()
   const [showEmailForm, setShowEmailForm] = useState(false)
+  const [isMobile, setIsMobile] = useState(() => window.matchMedia('(max-width: 768px)').matches)
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)')
+    const onChange = (e) => setIsMobile(e.matches)
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [])
 
   const onSubmit = async (data) => {
     setLoading(true)
@@ -110,7 +118,9 @@ export default function Login() {
 
   // /login?layout=c previews the fingerprint layout on any device (for testing)
   const previewLayoutC = new URLSearchParams(window.location.search).get('layout') === 'c'
-  const passkeyHome = (passkeysSupported() || previewLayoutC) && !showEmailForm && !showReset
+  // fingerprint is only offered on mobile, and only if this device has one registered
+  const showFingerprint = isMobile && deviceHasPasskey()
+  const passkeyHome = (showFingerprint || previewLayoutC) && !showEmailForm && !showReset
 
   const inputStyle = {
     width: '100%',
@@ -216,7 +226,7 @@ export default function Login() {
           <>
         {googleButton}
 
-        {passkeysSupported() && (
+        {showFingerprint && (
           <button
             type="button"
             onClick={handlePasskeySignIn}
