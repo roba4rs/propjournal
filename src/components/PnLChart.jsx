@@ -254,7 +254,7 @@ export default function PnLChart({ trades = [], account, noMargin, mobile, foote
         </div>
       ) : (
         <ResponsiveContainer width="100%" height={160} style={{ WebkitTapHighlightColor: "transparent", outline: "none" }}>
-          <AreaChart data={chartData}>
+          <AreaChart data={chartData} margin={{ top: 16, right: 24, left: 8, bottom: 8 }}>
             <SplitGradient id="splitGradDesktop" zeroPercent={zeroPercent} isLight={isLight} />
             <XAxis dataKey="date" stroke="var(--text-faint-2)" tick={{ fill: 'var(--text-faint)', fontSize: 11, fontFamily: 'DM Mono, monospace' }} />
             <YAxis stroke="var(--text-faint-2)" tick={{ fill: 'var(--text-faint)', fontSize: 11, fontFamily: 'DM Mono, monospace' }} tickFormatter={v => `$${v}`} />
@@ -270,9 +270,9 @@ export default function PnLChart({ trades = [], account, noMargin, mobile, foote
             {ddStats && ddStats.hasDrawdown && (
               <>
                 <ReferenceDot x={ddStats.peakPoint.date} y={ddStats.peakPoint.pnl} r={4} fill="var(--brand)" stroke="var(--bg-surface)" strokeWidth={2}
-                  label={{ value: `Peak $${ddStats.peakPoint.pnl.toFixed(0)}`, position: 'top', fill: 'var(--brand)', fontFamily: 'DM Mono, monospace', fontSize: 10 }} />
+                  label={{ value: `Peak $${ddStats.peakPoint.pnl.toFixed(0)}`, position: 'right', offset: 10, fill: 'var(--brand)', fontFamily: 'DM Mono, monospace', fontSize: 10 }} />
                 <ReferenceDot x={ddStats.ddTroughPoint.date} y={ddStats.ddTroughPoint.pnl} r={4} fill="var(--red)" stroke="var(--bg-surface)" strokeWidth={2}
-                  label={{ value: formatDD(ddStats.maxDD, ddStats.maxDDPct), position: 'bottom', fill: 'var(--red)', fontFamily: 'DM Mono, monospace', fontSize: 10 }} />
+                  label={{ value: formatDD(ddStats.maxDD, ddStats.maxDDPct), position: 'left', offset: 10, fill: 'var(--red)', fontFamily: 'DM Mono, monospace', fontSize: 10 }} />
               </>
             )}
           </AreaChart>
