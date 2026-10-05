@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import Sidebar from '../components/Sidebar'
 import { supabase } from '../supabaseClient'
 import { useSidebar } from '../SidebarContext'
+import PasskeySettings from '../components/PasskeySettings'
 
 // ─── Toast ───────────────────────────────────────────────────────────────────
 function Toast({ message, type, onClose, mobile = false }) {
@@ -662,7 +663,9 @@ export default function Settings() {
                       ? 'Preferences'
                       : mobileView === 'accounts'
                         ? 'Personal Accounts'
-                        : 'Notifications'}
+                        : mobileView === 'security'
+                          ? 'Fingerprint Login'
+                          : 'Notifications'}
               </span>
               {inMobileSubView ? (
                 <button
@@ -730,6 +733,12 @@ export default function Settings() {
                   <span style={{ color: 'var(--bg-surface-2)', fontSize: '13px', fontFamily: 'DM Sans, sans-serif' }}>
                     {[notifDrawdown, notifDailyLoss, notifChallenge].filter(Boolean).length} on <span style={{ color: 'var(--bg-surface-2)' }}>›</span>
                   </span>
+                </div>
+
+                <SectionLabel style={{ marginTop: '14px', marginBottom: '8px', fontSize: '9px', color: 'var(--text-muted)' }}>Security</SectionLabel>
+                <div onClick={() => setMobileView('security')} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '0.5px solid var(--bg-surface)', cursor: 'pointer' }}>
+                  <span style={{ color: 'var(--text-soft)', fontSize: '13px', fontFamily: 'DM Sans, sans-serif' }}>Fingerprint login</span>
+                  <span style={{ color: 'var(--bg-surface-2)', fontSize: '13px', fontFamily: 'DM Sans, sans-serif' }}>Set up <span style={{ color: 'var(--bg-surface-2)' }}>></span></span>
                 </div>
 
                 <SectionLabel style={{ marginTop: '14px', marginBottom: '8px', fontSize: '9px', color: 'var(--text-muted)' }}>Billing</SectionLabel>
@@ -837,6 +846,13 @@ export default function Settings() {
                     <option value="Asia/Singapore">Asia/Singapore (UTC+8)</option>
                   </select>
                 </div>
+              </Card>
+            )}
+
+            {mobileView === 'security' && (
+              <Card mobile style={{ marginTop: '8px' }}>
+                <SectionLabel>Fingerprint login</SectionLabel>
+                <PasskeySettings standalone />
               </Card>
             )}
 
@@ -1088,6 +1104,7 @@ export default function Settings() {
                 <option value="Asia/Singapore">Asia/Singapore (UTC+8)</option>
               </select>
             </div>
+            <PasskeySettings />
           </Card>
 
           {/* ── Personal Accounts ── */}

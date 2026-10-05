@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { supabase } from '../supabaseClient'
 import { useNavigate, Link } from 'react-router-dom'
+import { Fingerprint } from 'lucide-react'
+import { deviceHasPasskey, passkeyErrorMessage } from '../components/PasskeySettings'
 
 export default function Login() {
   const { register, handleSubmit, formState: { errors } } = useForm()
@@ -13,6 +15,15 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false)
   const [resetEmail, setResetEmail] = useState('')
   const navigate = useNavigate()
+  const [showEmailForm, setShowEmailForm] = useState(false)
+  const [isMobile, setIsMobile] = useState(() => window.matchMedia('(max-width: 768px)').matches)
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)')
+    const onChange = (e) => setIsMobile(e.matches)
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [])
 
   const onSubmit = async (data) => {
     setLoading(true)
@@ -47,6 +58,21 @@ export default function Login() {
     }
   }
 
+  const handlePasskeySignIn = async () => {
+    setLoading(true)
+    setAuthError(null)
+    try {
+      const { error } = await supabase.auth.signInWithPasskey()
+      if (error) throw error
+      navigate('/dashboard')
+    } catch (error) {
+      console.error(error)
+      setAuthError(passkeyErrorMessage(error, 'Fingerprint sign-in failed. Use email or Google instead.'))
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handleGoogleSignIn = async () => {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -55,6 +81,46 @@ export default function Login() {
       }
     })
   }
+
+  const googleButton = (
+    <button
+      onClick={handleGoogleSignIn}
+      style={{
+        width: '100%',
+        background: 'transparent',
+        border: '0.5px solid var(--border-color-2)',
+        borderRadius: '8px',
+        padding: '12px',
+        color: 'var(--text-primary)',
+        fontFamily: 'Inter, sans-serif',
+        fontSize: '14px',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '10px',
+        marginBottom: '24px',
+        transition: 'background 0.2s',
+        minHeight: '44px', // minimum touch target
+      }}
+      onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover-2)'}
+      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+    >
+      <svg width="18" height="18" viewBox="0 0 48 48">
+        <path fill="#FFC107" d="M43.6 20H24v8h11.3C33.6 33.1 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 19.7-8 19.7-20 0-1.3-.1-2.7-.1-4z"/>
+        <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 16 19 13 24 13c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4c-7.7 0-14.4 4.4-17.7 10.7z"/>
+        <path fill="#4CAF50" d="M24 44c5.2 0 9.9-1.9 13.5-5l-6.2-5.2C29.4 35.6 26.8 36 24 36c-5.2 0-9.6-2.9-11.3-7.1l-6.5 5C9.6 39.5 16.3 44 24 44z"/>
+        <path fill="#1976D2" d="M43.6 20H24v8h11.3c-.9 2.5-2.6 4.6-4.8 6l6.2 5.2C40.7 35.7 44 30.3 44 24c0-1.3-.1-2.7-.4-4z"/>
+      </svg>
+      Continue with Google
+    </button>
+  )
+
+  // /login?layout=c previews the fingerprint layout on any device (for testing)
+  const previewLayoutC = new URLSearchParams(window.location.search).get('layout') === 'c'
+  // fingerprint is only offered on mobile, and only if this device has one registered
+  const showFingerprint = isMobile && deviceHasPasskey()
+  const passkeyHome = (showFingerprint || previewLayoutC) && !showEmailForm && !showReset
 
   const inputStyle = {
     width: '100%',
@@ -85,7 +151,13 @@ export default function Login() {
         padding: 'clamp(24px, 5vw, 40px)',
         width: '100%',
         maxWidth: '400px',
+        boxSizing: 'border-box',
+        minHeight: 'calc(100dvh - 32px)', // fill the screen height
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
       }}>
+        <div>
         <h1 style={{
           color: 'var(--text-primary)',
           fontFamily: 'Inter, sans-serif',
@@ -99,37 +171,77 @@ export default function Login() {
           marginBottom: '32px',
         }}>Sign in to your PropJournal account</p>
 
-        <button
-          onClick={handleGoogleSignIn}
-          style={{
-            width: '100%',
-            background: 'transparent',
-            border: '0.5px solid var(--border-color-2)',
-            borderRadius: '8px',
-            padding: '12px',
-            color: 'var(--text-primary)',
-            fontFamily: 'Inter, sans-serif',
-            fontSize: '14px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '10px',
-            marginBottom: '24px',
-            transition: 'background 0.2s',
-            minHeight: '44px', // minimum touch target
-          }}
-          onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover-2)'}
-          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-        >
-          <svg width="18" height="18" viewBox="0 0 48 48">
-            <path fill="#FFC107" d="M43.6 20H24v8h11.3C33.6 33.1 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 19.7-8 19.7-20 0-1.3-.1-2.7-.1-4z"/>
-            <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 16 19 13 24 13c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4c-7.7 0-14.4 4.4-17.7 10.7z"/>
-            <path fill="#4CAF50" d="M24 44c5.2 0 9.9-1.9 13.5-5l-6.2-5.2C29.4 35.6 26.8 36 24 36c-5.2 0-9.6-2.9-11.3-7.1l-6.5 5C9.6 39.5 16.3 44 24 44z"/>
-            <path fill="#1976D2" d="M43.6 20H24v8h11.3c-.9 2.5-2.6 4.6-4.8 6l6.2 5.2C40.7 35.7 44 30.3 44 24c0-1.3-.1-2.7-.4-4z"/>
-          </svg>
-          Continue with Google
-        </button>
+        {passkeyHome && (
+          <div style={{ textAlign: 'center' }}>
+            <button
+              type="button"
+              onClick={handlePasskeySignIn}
+              disabled={loading}
+              aria-label="Sign in with fingerprint"
+              style={{
+                width: '92px', height: '92px', borderRadius: '50%', margin: '8px auto 14px',
+                background: 'var(--green-bg)', border: '1.5px solid var(--brand)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: loading ? 'default' : 'pointer', opacity: loading ? 0.7 : 1,
+              }}
+            >
+              <Fingerprint size={46} color="var(--brand)" strokeWidth={1.5} />
+            </button>
+            <p style={{ color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif', fontSize: '16px', fontWeight: '500', margin: '0 0 4px 0' }}>
+              {loading ? 'Checking…' : 'Touch to sign in'}
+            </p>
+            <p style={{ color: 'var(--text-muted)', fontFamily: 'Inter, sans-serif', fontSize: '13px', margin: '0 0 24px 0' }}>
+              Use your fingerprint or face
+            </p>
+            {authError && (
+              <div style={{
+                background: 'var(--red-bg-2)', border: '0.5px solid var(--red-bg)', borderRadius: '8px',
+                padding: '12px', marginBottom: '20px', color: 'var(--red)', fontSize: '13px',
+                fontFamily: 'Inter, sans-serif', textAlign: 'left',
+              }}>{authError}</div>
+            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+              <div style={{ flex: 1, height: '0.5px', background: 'var(--border-color)' }} />
+              <span style={{ color: 'var(--text-muted)', fontSize: '12px', fontFamily: 'Inter, sans-serif' }}>or</span>
+              <div style={{ flex: 1, height: '0.5px', background: 'var(--border-color)' }} />
+            </div>
+            {googleButton}
+            <button
+              type="button"
+              onClick={() => { setShowEmailForm(true); setAuthError(null) }}
+              style={{
+                width: '100%', background: 'transparent', border: '0.5px solid var(--border-color-2)',
+                borderRadius: '8px', padding: '12px', color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif',
+                fontSize: '14px', cursor: 'pointer', minHeight: '44px',
+              }}
+            >Use email and password</button>
+            <p style={{ color: 'var(--text-muted)', fontFamily: 'Inter, sans-serif', fontSize: '13px', textAlign: 'center', marginTop: '20px' }}>
+              Don't have an account?{' '}
+              <Link to="/signup" style={{ color: 'var(--brand)', textDecoration: 'none' }}>Sign up</Link>
+            </p>
+          </div>
+        )}
+
+        {!passkeyHome && (
+          <>
+        {googleButton}
+
+        {showFingerprint && (
+          <button
+            type="button"
+            onClick={handlePasskeySignIn}
+            disabled={loading}
+            style={{
+              width: '100%', background: 'transparent', border: '0.5px solid var(--border-color-2)',
+              borderRadius: '8px', padding: '12px', color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif',
+              fontSize: '14px', cursor: loading ? 'default' : 'pointer', display: 'flex', alignItems: 'center',
+              justifyContent: 'center', gap: '10px', marginTop: '-12px', marginBottom: '24px', minHeight: '44px',
+            }}
+          >
+            <Fingerprint size={18} />
+            Sign in with fingerprint
+          </button>
+        )}
 
         <div style={{
           display: 'flex',
@@ -332,6 +444,9 @@ export default function Login() {
             </button>
           </div>
         )}
+          </>
+        )}
+        </div>
       </div>
     </div>
   )
