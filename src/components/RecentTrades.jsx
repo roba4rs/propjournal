@@ -39,53 +39,79 @@ function fmtDate(dateStr) {
   return dateStr.slice(5).replace('-', ' ')
 }
 
+const COLS = 'repeat(4, 1fr)'
+
 export default function RecentTrades({ trades = [], loading = false, mobile = false, onTradeClick }) {
   const navigate = useNavigate()
   const recent = [...trades]
     .sort((a, b) => new Date(b.date) - new Date(a.date) || new Date(b.created_at) - new Date(a.created_at))
     .slice(0, 8)
 
-  const rows = (
-    loading ? (
-          [1,2,3].map(i => (
-            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '0.5px solid var(--bg-surface)' }}>
-              <div style={{ height: '12px', width: '80px', background: 'var(--bg-surface-2)', borderRadius: '3px' }} />
-              <div style={{ height: '12px', width: '50px', background: 'var(--bg-surface-2)', borderRadius: '3px' }} />
+  const table = (
+    <>
+      {/* Header row */}
+      <div style={{ display: 'grid', gridTemplateColumns: COLS, padding: '0 12px 10px', borderBottom: '0.5px solid var(--border-color)' }}>
+        {['Pair', 'Outcome', 'Date', 'P&L'].map((h, i) => (
+          <span key={h} style={{
+            color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace', fontSize: '11px',
+            textTransform: 'uppercase', letterSpacing: '0.5px',
+            textAlign: i === 0 ? 'left' : i === 3 ? 'right' : 'center',
+          }}>{h}</span>
+        ))}
+      </div>
+
+      {/* Rows — space-evenly so they fill the card height */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly' }}>
+        {loading ? (
+          [1,2,3,4,5,6,7,8].map(i => (
+            <div key={i} style={{ display: 'grid', gridTemplateColumns: COLS, padding: '0 12px', alignItems: 'center' }}>
+              <div style={{ height: '14px', width: '70px', background: 'var(--bg-surface-2)', borderRadius: '4px', animation: 'pulse 1.5s ease-in-out infinite' }} />
+              <div style={{ height: '14px', width: '50px', background: 'var(--bg-surface-2)', borderRadius: '4px', animation: 'pulse 1.5s ease-in-out infinite' }} />
+              <div style={{ height: '14px', width: '55px', background: 'var(--bg-surface-2)', borderRadius: '4px', margin: '0 auto', animation: 'pulse 1.5s ease-in-out infinite' }} />
+              <div style={{ height: '14px', width: '55px', background: 'var(--bg-surface-2)', borderRadius: '4px', marginLeft: 'auto', animation: 'pulse 1.5s ease-in-out infinite' }} />
             </div>
           ))
         ) : recent.length === 0 ? (
-          <div style={{ padding: '16px 0', color: 'var(--text-faint-2)', fontFamily: 'DM Sans, sans-serif', fontSize: '12px' }}>
-            No trades yet
+          <div style={{ textAlign: 'center', color: 'var(--text-faint-2)', fontFamily: 'DM Sans, sans-serif', fontSize: '13px' }}>
+            No trades yet — log your first trade to get started
           </div>
         ) : (
-          recent.map((t, idx) => (
-            <div key={t.id} style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '8px 0',
-              borderBottom: idx < recent.length - 1 ? '0.5px solid var(--bg-surface)' : 'none',
-              cursor: onTradeClick ? 'pointer' : 'default',
-            }}
-              onClick={() => onTradeClick && onTradeClick(t)}
-            >
-              {/* Left: pair + direction badge */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
-                <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '12px', fontWeight: '500', color: 'var(--text-soft)' }}>{t.pair}</span>
-                {dirBadge(t.direction, true)}
+          recent.map(t => {
+            const pnlVal = parseFloat(t.pnl)
+            const isInProgress = t.outcome === 'in_progress'
+            const isWin  = !isInProgress && (t.outcome === 'win'  || pnlVal > 0)
+            const isLoss = !isInProgress && (t.outcome === 'loss' || pnlVal < 0)
+            const outcomeLabel  = isInProgress ? 'In Progress' : isWin ? 'Win'  : isLoss ? 'Loss' : 'BE'
+            const outcomeBg     = isInProgress ? 'var(--blue-bg-2)' : isWin ? 'var(--green-bg)' : isLoss ? 'var(--red-bg-2)' : 'var(--amber-bg-2)'
+            const outcomeColor  = isInProgress ? 'var(--blue)' : isWin ? 'var(--brand)' : isLoss ? 'var(--red)' : 'var(--amber)'
+            const outcomeBorder = isInProgress ? 'var(--blue-bg)' : isWin ? 'var(--green-bg-2)' : isLoss ? 'var(--red-bg)' : 'var(--amber-bg)'
+            return (
+              <div key={t.id} style={{
+                display: 'grid', gridTemplateColumns: COLS,
+                padding: '10px 12px', alignItems: 'center',
+                borderRadius: '6px',
+                cursor: onTradeClick ? 'pointer' : 'default',
+                transition: 'background 0.1s',
+              }}
+                onClick={() => onTradeClick && onTradeClick(t)}
+                onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+              >
+                <span style={{ color: 'var(--text-secondary)', fontFamily: 'DM Mono, monospace', fontSize: '13px' }}>{t.pair}</span>
+                <span style={{
+                  justifySelf: 'center',
+                  fontSize: '10px', fontFamily: 'DM Mono, monospace', letterSpacing: '0.08em',
+                  textTransform: 'uppercase', padding: '2px 8px', borderRadius: '4px',
+                  background: outcomeBg, color: outcomeColor, border: `0.5px solid ${outcomeBorder}`,
+                }}>{outcomeLabel}</span>
+                <span style={{ color: 'var(--text-faint)', fontFamily: 'DM Mono, monospace', fontSize: '12px', textAlign: 'center' }}>{fmtDate(t.date)}</span>
+                <span style={{ color: pnlColor(t.pnl), fontFamily: 'DM Mono, monospace', fontSize: '12px', fontWeight: '500', textAlign: 'right' }}>{fmt$(t.pnl)}</span>
               </div>
-              {/* Right: pnl + date · session */}
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '12px', fontWeight: '500', color: pnlColor(t.pnl) }}>
-                  {fmt$(t.pnl)}
-                </div>
-                <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '9px', color: 'var(--text-muted)', marginTop: '1px' }}>
-                  {fmtDate(t.date)}{t.session ? ` · ${t.session}` : ''}
-                </div>
-              </div>
-            </div>
-          ))
-        )
+            )
+          })
+        )}
+      </div>
+    </>
   )
 
   // ── MOBILE ────────────────────────────────────────────────────────────────
@@ -103,13 +129,13 @@ export default function RecentTrades({ trades = [], loading = false, mobile = fa
           </span>
         </div>
 
-        {rows}
+        {table}
         <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }`}</style>
       </div>
     )
   }
 
-  // ── DESKTOP — same row layout as mobile, inside the dashboard card ────────
+  // ── DESKTOP ───────────────────────────────────────────────────────────────
   return (
     <div style={{
       background: 'var(--bg-surface)', border: '0.5px solid var(--border-color)',
@@ -117,7 +143,8 @@ export default function RecentTrades({ trades = [], loading = false, mobile = fa
       flex: 1, display: 'flex', flexDirection: 'column',
     }}>
       <h2 style={{ color: 'var(--text-primary)', fontFamily: 'Syne, sans-serif', fontSize: '15px', fontWeight: '600', margin: '0 0 16px 0' }}>Recent Trades</h2>
-      {rows}
+
+      {table}
       <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }`}</style>
     </div>
   )
