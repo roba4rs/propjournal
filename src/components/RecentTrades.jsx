@@ -13,23 +13,6 @@ function pnlColor(n) {
   return 'var(--text-muted)'
 }
 
-function dirBadge(dir, small = false) {
-  const isLong = dir === 'long'
-  return (
-    <span style={{
-      fontSize: small ? '9px' : '10px',
-      fontFamily: 'DM Mono, monospace',
-      letterSpacing: '0.08em',
-      textTransform: 'uppercase',
-      padding: small ? '1px 5px' : '2px 7px',
-      borderRadius: '4px',
-      background: isLong ? 'var(--green-bg)' : 'var(--red-bg-2)',
-      color: isLong ? 'var(--brand)' : 'var(--red)',
-      border: `0.5px solid ${isLong ? 'var(--green-bg-2)' : 'var(--red-bg)'}`,
-    }}>{isLong ? 'Buy' : 'Sell'}</span>
-  )
-}
-
 function fmtDate(dateStr) {
   if (!dateStr) return '—'
   const today = new Date().toISOString().slice(0, 10)
