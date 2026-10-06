@@ -11,6 +11,16 @@ function formatMoney(n) {
   return fixed.endsWith('.00') ? fixed.slice(0, -3) : fixed
 }
 
+// A day whose net result is within this band counts as breakeven (amber), even if it's a few
+// dollars up or down from commission/swap. 0.2% of the account size ($20 on a $10k account),
+// or a flat $20 when the account size isn't known.
+const BE_PCT = 0.002
+const BE_FALLBACK = 20
+function breakevenBand(accountSize) {
+  const size = parseFloat(accountSize)
+  return size > 0 ? size * BE_PCT : BE_FALLBACK
+}
+
 const DAYS_FULL = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const DAYS_SHORT = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
@@ -33,6 +43,7 @@ const TODAY_MONTH = TODAY.getMonth()
 
 export default function CalendarPnL({ trades = [], mobile = false, onDayClick, account }) {
   const today = TODAY
+  const beBand = breakevenBand(account?.account_size)
 
   const defaultMonth = useMemo(() => {
     const dates = trades.filter(t => t.date).map(t => t.date.slice(0, 10)).sort()
@@ -97,14 +108,14 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
       const data = dayData[dateStr]
       if (!data) return
       pnl += data.pnl
-      if (data.pnl > 0) wins++
-      else if (data.pnl < 0) losses++
-      else breakevens++
+      if (Math.abs(data.pnl) <= beBand) breakevens++
+      else if (data.pnl > 0) wins++
+      else losses++
     })
     const tradingDays = wins + losses + breakevens
     const winRate = tradingDays > 0 ? (wins / tradingDays) * 100 : null
     return { pnl, tradingDays, winRate }
-  }, [current, dayData])
+  }, [current, dayData, beBand])
 
   const weekSummaries = useMemo(() => weeks.map(summarize), [weeks, summarize])
   const monthSummary = useMemo(() => summarize(cells), [cells, summarize])
@@ -117,9 +128,9 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
     const hasTrade = data !== undefined
     const pnl = hasTrade ? data.pnl : undefined
     const isToday = day === today.getDate() && current.month === today.getMonth() && current.year === today.getFullYear()
-    const isWin  = hasTrade && pnl > 0
-    const isLoss = hasTrade && pnl < 0
-    const isBE   = hasTrade && pnl === 0
+    const isBE   = hasTrade && Math.abs(pnl) <= beBand
+    const isWin  = hasTrade && !isBE && pnl > 0
+    const isLoss = hasTrade && !isBE && pnl < 0
 
     let bg = 'var(--bg-surface-2)'
     let border = '0.5px solid var(--border-color-2)'
@@ -162,7 +173,7 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
             const { bg, border, hasTrade, data } = cell
             const pnl = hasTrade ? data.pnl : null
             const count = hasTrade ? data.count : null
-            const pnlColor = hasTrade && pnl > 0 ? 'var(--brand)' : hasTrade && pnl < 0 ? 'var(--red)' : 'var(--amber)'
+            const pnlColor = cell.isWin ? 'var(--brand)' : cell.isLoss ? 'var(--red)' : 'var(--amber)'
             const dayColor = cell.isToday ? 'var(--brand)' : hasTrade ? pnlColor : 'var(--text-faint)'
             return (
               <div key={i} style={{
@@ -209,7 +220,7 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
                         textRendering: 'optimizeLegibility',
                         letterSpacing: '-0.2px',
                       }}>
-                        ${formatMoney(Math.abs(pnl))}
+                        {cell.isBE && pnl < 0 ? '-' : ''}${formatMoney(Math.abs(pnl))}
                       </span>
                     )}
 
@@ -314,9 +325,9 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
           const hasTrade = data !== undefined
           const pnl = hasTrade ? data.pnl : undefined
           const count = hasTrade ? data.count : 0
-          const isWin  = hasTrade && pnl > 0
-          const isLoss = hasTrade && pnl < 0
-          const isBE   = hasTrade && pnl === 0
+          const isBE   = hasTrade && Math.abs(pnl) <= beBand
+          const isWin  = hasTrade && !isBE && pnl > 0
+          const isLoss = hasTrade && !isBE && pnl < 0
 
           let bg = day ? (isToday ? 'var(--green-bg)' : 'var(--bg-page)') : 'transparent'
           let borderColor = day ? (isToday ? 'var(--green-bg-2)' : 'var(--border-color)') : 'none'
@@ -345,7 +356,7 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
                   {hasTrade && (
                     <>
                       <span style={{ color: pnlColor, fontFamily: 'DM Mono, monospace', fontSize: '15px', fontWeight: '400', textAlign: 'center', lineHeight: 1.2 }}>
-                        {pnl >= 0 ? '+' : ''}${formatMoney(Math.abs(pnl))}
+                        {pnl >= 0 ? '+' : (isBE ? '-' : '')}${formatMoney(Math.abs(pnl))}
                       </span>
                       <span style={{ position: 'absolute', bottom: '6px', left: '7px', color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace', fontSize: '9px' }}>
                         {count} trade{count !== 1 ? 's' : ''}

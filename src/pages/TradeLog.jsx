@@ -204,6 +204,13 @@ function foldNet(list) {
   });
 }
 
+// A trade within this band of zero (net of commission + swap) is labelled breakeven on import.
+// 0.2% of the account size ($20 on a $10k account), or a flat $20 when the size isn't known.
+function breakevenBand(accountSize) {
+  const size = parseFloat(accountSize);
+  return size > 0 ? size * 0.002 : 20;
+}
+
 // Truncates (never rounds up) to 2 decimals: 49.995 -> "49.99", -0.004 -> "0.00"
 function trunc2(n) {
   const v = parseFloat(n);
@@ -1286,7 +1293,7 @@ function parseDirection(raw) {
 }
 
 // Map a single raw CSV row → normalized trade object
-function fuzzyMapRow(row) {
+function fuzzyMapRow(row, accountSize) {
   // Date — try dedicated date/datetime field first via header alias matching
   let rawDate = fuzzyGet(row, "date");
 
@@ -1307,10 +1314,14 @@ function fuzzyMapRow(row) {
 
   const pnlRaw = fuzzyGet(row, "pnl", { excludeDatetime: true });
   const pnl = pnlRaw !== null && pnlRaw !== "" ? parseFloat(pnlRaw) : null;
-  const outcome = pnl === null ? null : pnl > 0 ? "win" : pnl < 0 ? "loss" : "be";
 
   const commRaw = fuzzyGet(row, "commission", { excludeDatetime: true });
   const swapRaw = fuzzyGet(row, "swap", { excludeDatetime: true });
+
+  // Outcome is judged on the NET result (profit + commission + swap) with a breakeven band
+  const net = (isNaN(pnl) ? 0 : pnl) + (parseFloat(commRaw) || 0) + (parseFloat(swapRaw) || 0);
+  const band = breakevenBand(accountSize);
+  const outcome = pnl === null || isNaN(pnl) ? null : Math.abs(net) <= band ? "be" : net > 0 ? "win" : "loss";
 
   const pairRaw = fuzzyGet(row, "pair");
   const entryRaw = fuzzyGet(row, "entry", { excludeDatetime: true });
@@ -1410,7 +1421,7 @@ function CSVImportModal({ open, onClose, activeAccount, onImported }) {
         setError("The file appears to be empty or unreadable.");
         return;
       }
-      const mapped = rows.map(r => fuzzyMapRow(r)).filter(r => r.pair || r.pnl !== null);
+      const mapped = rows.map(r => fuzzyMapRow(r, activeAccount?.account_size)).filter(r => r.pair || r.pnl !== null);
       if (!mapped.length) {
         setError("No valid trades found. Make sure the CSV has at least a symbol/pair column or a profit/P&L column.");
         return;
