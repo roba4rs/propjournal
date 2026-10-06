@@ -122,8 +122,6 @@ function makeEmptyForm() {
     screenshot_url: null,
     outcome: null,
     extreme_balance: "",
-    commission: "",
-    swap: "",
   };
 }
 
@@ -352,8 +350,6 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
     screenshot_url: editTrade.screenshot_url || null,
     outcome: editTrade.outcome ?? null,
     extreme_balance: editTrade.extreme_balance != null && editTrade.extreme_balance !== "" ? String(editTrade.extreme_balance) : "",
-    commission: costToInput(editTrade.commission, "commission"),
-    swap: costToInput(editTrade.swap, "swap"),
   } : makeEmptyForm();
 
   // Pre-calculate risk $ from pnl for edit mode — must exactly invert calcPnl()
@@ -396,6 +392,14 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
   const [successMsg, setSuccessMsg] = useState(null);
   const [accountRisks, setAccountRisks] = useState(initRisk);
   const [accountRiskModes, setAccountRiskModes] = useState(initRiskModes);
+
+  // Commission & swap are per account (typed as plain positive costs, swap credit as negative)
+  const [accountCosts, setAccountCosts] = useState(() => editTrade
+    ? { [editTrade.account_id]: { commission: costToInput(editTrade.commission, "commission"), swap: costToInput(editTrade.swap, "swap") } }
+    : {});
+  function setCost(accId, key, val) {
+    setAccountCosts(prev => ({ ...prev, [accId]: { ...(prev[accId] || {}), [key]: val } }));
+  }
   const [selectedAccounts, setSelectedAccounts] = useState(initSelectedAccounts);
   const [accountSearch, setAccountSearch] = useState("");
   const [activeAccountId, setActiveAccountId] = useState(() => {
@@ -522,7 +526,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
       setFormError("Select at least one account.");
       return;
     }
-    const result = await onSave(form, screenshotFile, selectedAccounts, accountRisks, accountRiskModes);
+    const result = await onSave(form, screenshotFile, selectedAccounts, accountRisks, accountRiskModes, accountCosts);
     if (result && result.error) {
       setFormError(result.error);
     } else {
@@ -531,6 +535,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
         setSelectedAccounts(new Set());
         setAccountRisks({});
         setAccountRiskModes({});
+        setAccountCosts({});
       }
       setSuccessMsg(editTrade ? "Trade updated." : "Trade logged successfully.");
       setTimeout(onClose, 1200);
@@ -755,22 +760,6 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
               style={{ ...inputStyle, resize: "vertical", minHeight: "100px", fontFamily: "'Inter', sans-serif", lineHeight: "1.6", fontSize: "14px" }} />
           </Card>
 
-          {/* Costs card — commission & swap, deducted from P&L */}
-          <Card label="Commission & Swap (optional)">
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-              <Field label="Commission ($)" hint="Enter the amount paid, e.g. 7.00">
-                <input type="number" step="any" value={form.commission}
-                  onChange={e => set("commission", e.target.value)}
-                  placeholder="e.g. 7.00" style={inputStyle} />
-              </Field>
-              <Field label="Swap ($)" hint="Charge as is (2.50); a credit as -2.50">
-                <input type="number" step="any" value={form.swap}
-                  onChange={e => set("swap", e.target.value)}
-                  placeholder="e.g. 2.50" style={inputStyle} />
-              </Field>
-            </div>
-          </Card>
-
           {/* Extreme balance card — instant/trailing-DD accounts only, optional */}
           <Card label="Extreme Balance (optional)">
             <Field hint="Only fill this in if the account balance touched a new all-time high, or dipped through the DD floor, while this trade was still open — e.g. price ran 2R further than your close before reversing. Leave blank otherwise.">
@@ -865,7 +854,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                           resolvedPctExact = (num / acc.account_size) * 100;
                         }
                       }
-                      const pnl = resolvedPctExact ? calcPnl(resolvedPctExact, acc.account_size, form.rr, form.outcome, signedCost(form.commission, "commission"), signedCost(form.swap, "swap")) : null;
+                      const pnl = resolvedPctExact ? calcPnl(resolvedPctExact, acc.account_size, form.rr, form.outcome, signedCost(accountCosts[acc.id]?.commission, "commission"), signedCost(accountCosts[acc.id]?.swap, "swap")) : null;
                       const pnlNum = pnl !== null ? parseFloat(pnl) : null;
 
                       return (
@@ -974,6 +963,23 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                               </div>
                             )}
                           </div>
+                          {isExpanded && (
+                            <div onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "10px", flexWrap: "wrap" }}>
+                              <span style={{ fontSize: "11px", color: "var(--text-faint)", fontFamily: "'JetBrains Mono', monospace" }}>Costs</span>
+                              <input
+                                type="number" step="any" placeholder="Commission"
+                                value={accountCosts[acc.id]?.commission ?? ""}
+                                onChange={e => setCost(acc.id, "commission", e.target.value)}
+                                style={{ ...inputStyle, width: "110px", padding: "5px 8px", fontSize: "12px", color: "var(--red)" }}
+                              />
+                              <input
+                                type="number" step="any" placeholder="Swap"
+                                value={accountCosts[acc.id]?.swap ?? ""}
+                                onChange={e => setCost(acc.id, "swap", e.target.value)}
+                                style={{ ...inputStyle, width: "90px", padding: "5px 8px", fontSize: "12px", color: "var(--red)" }}
+                              />
+                            </div>
+                          )}
                         </div>
                       );
                     })}
@@ -1002,7 +1008,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                     if (!isNaN(num) && num > 0 && acc.account_size) {
                       resolvedPct = mode === "%" ? num : (num / acc.account_size) * 100;
                     }
-                    const pnl = resolvedPct ? calcPnl(resolvedPct, acc.account_size, form.rr, form.outcome, signedCost(form.commission, "commission"), signedCost(form.swap, "swap")) : null;
+                    const pnl = resolvedPct ? calcPnl(resolvedPct, acc.account_size, form.rr, form.outcome, signedCost(accountCosts[acc.id]?.commission, "commission"), signedCost(accountCosts[acc.id]?.swap, "swap")) : null;
                     return sum + (pnl !== null ? parseFloat(pnl) : 0);
                   }, 0);
                   return pnlColor(total);
@@ -1016,7 +1022,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                       if (!isNaN(num) && num > 0 && acc.account_size) {
                         resolvedPct = mode === "%" ? num : (num / acc.account_size) * 100;
                       }
-                      const pnl = resolvedPct ? calcPnl(resolvedPct, acc.account_size, form.rr, form.outcome, signedCost(form.commission, "commission"), signedCost(form.swap, "swap")) : null;
+                      const pnl = resolvedPct ? calcPnl(resolvedPct, acc.account_size, form.rr, form.outcome, signedCost(accountCosts[acc.id]?.commission, "commission"), signedCost(accountCosts[acc.id]?.swap, "swap")) : null;
                       return sum + (pnl !== null ? parseFloat(pnl) : 0);
                     }, 0);
                     return `${total >= 0 ? "+" : ""}$${trunc2(Math.abs(total))}`;
@@ -1092,8 +1098,8 @@ function TradeDetailModal({ trade, onClose, onEdit, onDelete }) {
             {[
               { label: "Net P&L", value: trade.pnl != null ? `${parseFloat(trade.pnl) >= 0 ? "+" : ""}${fmt(trade.pnl)}` : "—", color: pnlColor(trade.pnl) },
               { label: "R:R", value: trade.rr ? `${trade.rr}R` : "—" },
-              { label: "Swap", value: trade.swap != null ? `${parseFloat(trade.swap) >= 0 ? "+" : ""}${fmt(trade.swap)}` : "—", color: trade.swap != null ? pnlColor(trade.swap) : "var(--text-faint)" },
-              { label: "Commission", value: trade.commission != null ? `${parseFloat(trade.commission) >= 0 ? "+" : ""}${fmt(trade.commission)}` : "—", color: trade.commission != null ? pnlColor(trade.commission) : "var(--text-faint)" },
+              { label: "Swap", value: trade.swap != null ? `${parseFloat(trade.swap) >= 0 ? "+" : ""}${fmt(trade.swap)}` : "—", color: trade.swap != null ? (parseFloat(trade.swap) > 0 ? pnlColor(trade.swap) : "var(--red)") : "var(--text-faint)" },
+              { label: "Commission", value: trade.commission != null ? `${parseFloat(trade.commission) >= 0 ? "+" : ""}${fmt(trade.commission)}` : "—", color: trade.commission != null ? "var(--red)" : "var(--text-faint)" },
               { label: "Session", value: sessionLabel(trade.session) },
               { label: "Entry", value: fmt(trade.entry) },
             ].map(s => (
@@ -1925,7 +1931,7 @@ useEffect(() => {
   }
 
   // ── Save: inserts one row per selected account ──
-  async function handleSave(form, screenshotFile, selectedAccounts, accountRisks, accountRiskModes) {
+  async function handleSave(form, screenshotFile, selectedAccounts, accountRisks, accountRiskModes, accountCosts = {}) {
     setSaving(true);
     setError(null);
     try {
@@ -1960,8 +1966,8 @@ useEffect(() => {
           screenshot_url: sharedScreenshotUrl,
           outcome: form.outcome || null,
           extreme_balance: form.extreme_balance !== "" && form.extreme_balance != null ? parseFloat(form.extreme_balance) : null,
-          commission: storedCost(form.commission, "commission"),
-          swap: storedCost(form.swap, "swap"),
+          commission: storedCost(accountCosts[accId]?.commission, "commission"),
+          swap: storedCost(accountCosts[accId]?.swap, "swap"),
         }).eq("id", editTrade.id);
         if (error) throw error;
 
@@ -1993,8 +1999,8 @@ useEffect(() => {
               screenshot_url: null,
               outcome: form.outcome || null,
               extreme_balance: form.extreme_balance !== "" && form.extreme_balance != null ? parseFloat(form.extreme_balance) : null,
-              commission: storedCost(form.commission, "commission"),
-              swap: storedCost(form.swap, "swap"),
+              commission: storedCost(accountCosts[accId]?.commission, "commission"),
+              swap: storedCost(accountCosts[accId]?.swap, "swap"),
             })
             .select()
             .single();
@@ -2677,8 +2683,6 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
     screenshot_url: editTrade.screenshot_url || null,
     outcome: editTrade.outcome ?? null,
     extreme_balance: editTrade.extreme_balance != null ? String(editTrade.extreme_balance) : "",
-    commission: costToInput(editTrade.commission, "commission"),
-    swap: costToInput(editTrade.swap, "swap"),
   } : makeEmptyForm();
 
   // Pre-calculate risk $ from pnl for edit mode — must exactly invert calcPnl()
@@ -2707,6 +2711,14 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
   const [form, setForm] = useState(initForm);
   const [accountRisks, setAccountRisks] = useState(initRisk);
   const [accountRiskModes, setAccountRiskModes] = useState(initModes);
+
+  // Commission & swap are per account (typed as plain positive costs, swap credit as negative)
+  const [accountCosts, setAccountCosts] = useState(() => editTrade
+    ? { [editTrade.account_id]: { commission: costToInput(editTrade.commission, "commission"), swap: costToInput(editTrade.swap, "swap") } }
+    : {});
+  function setCost(accId, key, val) {
+    setAccountCosts(prev => ({ ...prev, [accId]: { ...(prev[accId] || {}), [key]: val } }));
+  }
   const [selectedAccounts, setSelectedAccounts] = useState(initSelected);
   const [formError, setFormError] = useState(null);
   const [screenshotFile, setScreenshotFile] = useState(null);
@@ -2785,7 +2797,7 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
   async function handleSave() {
     setFormError(null);
     if (selectedAccounts.size === 0) { setFormError("Select at least one account."); return; }
-    const result = await onSave(form, screenshotFile, selectedAccounts, accountRisks, accountRiskModes);
+    const result = await onSave(form, screenshotFile, selectedAccounts, accountRisks, accountRiskModes, accountCosts);
     if (result && result.error) {
       setFormError(result.error);
     } else {
@@ -2794,6 +2806,7 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
         setSelectedAccounts(new Set());
         setAccountRisks({});
         setAccountRiskModes({});
+        setAccountCosts({});
       }
       onClose();
     }
@@ -2984,7 +2997,7 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
                 if (mode === '%') { resolvedPct = num; resolvedPctExact = num; resolvedDollar = ((num / 100) * acc.account_size).toFixed(2); }
                 else { resolvedDollar = num.toFixed(2); resolvedPct = ((num / acc.account_size) * 100).toFixed(2); resolvedPctExact = (num / acc.account_size) * 100; }
               }
-              const pnlVal = resolvedPctExact ? calcPnl(resolvedPctExact, acc.account_size, form.rr, form.outcome, signedCost(form.commission, "commission"), signedCost(form.swap, "swap")) : null;
+              const pnlVal = resolvedPctExact ? calcPnl(resolvedPctExact, acc.account_size, form.rr, form.outcome, signedCost(accountCosts[acc.id]?.commission, "commission"), signedCost(accountCosts[acc.id]?.swap, "swap")) : null;
               const pnlNum = pnlVal !== null ? parseFloat(pnlVal) : null;
               const isChallenge = acc.type !== 'personal';
 
@@ -3060,6 +3073,15 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
                           </div>
                         ))}
                       </div>
+                      <div onClick={e => e.stopPropagation()} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '8px' }}>
+                        {[['commission', 'Commission'], ['swap', 'Swap']].map(([key, lbl]) => (
+                          <input key={key} type="number" step="any" placeholder={lbl}
+                            value={accountCosts[acc.id]?.[key] ?? ''}
+                            onChange={e => setCost(acc.id, key, e.target.value)}
+                            style={{ background: 'var(--bg-hover)', border: '0.5px solid var(--border-color)', borderRadius: '4px', padding: '4px 8px', color: 'var(--red)', fontSize: '11px', fontFamily: "'JetBrains Mono', monospace", width: '100%', boxSizing: 'border-box' }}
+                          />
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -3073,19 +3095,6 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
             <textarea value={form.notes} onChange={e => set('notes', e.target.value)}
               placeholder="Trade rationale, confluences…" rows={3}
               style={{ ...mobileInput, resize: 'vertical', minHeight: '70px', fontFamily: "'Inter', sans-serif", lineHeight: '1.5' }} />
-          </div>
-
-          {/* Commission & swap — deducted from P&L */}
-          <div style={{ padding: '10px 16px', borderBottom: '0.5px solid var(--bg-surface)' }}>
-            <span style={formLbl}>Commission &amp; Swap (optional)</span>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-              <input type="number" step="any" value={form.commission}
-                onChange={e => set('commission', e.target.value)}
-                placeholder="Commission e.g. 7.00" style={mobileInput} />
-              <input type="number" step="any" value={form.swap}
-                onChange={e => set('swap', e.target.value)}
-                placeholder="Swap e.g. 2.50 (credit: -2.50)" style={mobileInput} />
-            </div>
           </div>
 
           {/* Extreme balance — optional, instant/trailing-DD accounts */}
