@@ -1,13 +1,13 @@
 import { useState, useMemo, useEffect, useCallback } from 'react'
 
-// Formats a dollar amount, keeping cents only when they exist.
+// Formats a dollar amount, keeping cents only when they exist. Truncates, never rounds up.
 // 1671        -> "1671"
 // 1671.5      -> "1671.50"
-// 1671.556    -> "1671.56"  (rounded to 2 decimals, trailing .00 dropped)
+// 1671.556    -> "1671.55"  (cut at 2 decimals, trailing .00 dropped)
 function formatMoney(n) {
   const num = typeof n === 'number' ? n : parseFloat(n)
   if (!isFinite(num)) return '0'
-  const fixed = num.toFixed(2)
+  const fixed = (Math.trunc(Number((num * 100).toFixed(6))) / 100).toFixed(2)
   return fixed.endsWith('.00') ? fixed.slice(0, -3) : fixed
 }
 

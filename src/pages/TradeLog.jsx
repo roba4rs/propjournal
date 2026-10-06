@@ -142,8 +142,8 @@ function calcRR(entry, sl, tp) {
 // Strips binary floating-point noise (below 1e-8) without rounding to cents
 function cleanNum(n) { return Number(n.toFixed(8)); }
 
-// Net P&L = gross (from risk x R:R) + commission + swap. Full precision, never rounded to cents.
-// Costs are entered as negatives (e.g. commission -7.00); a positive swap is a credit.
+// Gross P&L from risk x R:R at full precision (never rounded to cents). When signed commission/swap
+// are passed (negative = cost) it returns the NET figure; the form previews do that, saves do not.
 function calcPnl(riskPct, accountSize, rr, outcome, commission = 0, swap = 0) {
   const r = parseFloat(riskPct);
   const a = parseFloat(accountSize);
@@ -170,6 +170,38 @@ function resolveRiskPct(accId, accountRisks, accountRiskModes, accounts) {
   const acc = accounts.find(a => a.id === accId);
   if (!acc?.account_size) return null;
   return (val / acc.account_size) * 100;
+}
+
+// Costs are stored as signed amounts, negative = money out (same as CSV imports and the Dashboard).
+// In the form you type them as plain positive amounts: commission is always a cost, and a
+// swap is a charge when positive and a credit when you type it as a negative number.
+function signedCost(v, kind) {
+  const n = parseFloat(v);
+  if (!isFinite(n)) return 0;
+  const out = kind === "commission" ? -Math.abs(n) : -n;
+  return out === 0 ? 0 : out;
+}
+function storedCost(v, kind) {
+  return v !== "" && v != null && isFinite(parseFloat(v)) ? signedCost(v, kind) : null;
+}
+// Stored cost -> what the form shows (positive = cost)
+function costToInput(stored, kind) {
+  if (stored == null || stored === "") return "";
+  const n = parseFloat(stored);
+  if (!isFinite(n)) return "";
+  const shown = kind === "commission" ? Math.abs(n) : -n;
+  return String(shown === 0 ? 0 : shown);
+}
+// stored pnl is GROSS; net = gross + swap + commission (same rule the Dashboard uses)
+function foldNet(list) {
+  return (list || []).map(t => {
+    if (t.pnl == null && t.swap == null && t.commission == null) return t;
+    return {
+      ...t,
+      pnl_gross: t.pnl,
+      pnl: (parseFloat(t.pnl) || 0) + (parseFloat(t.swap) || 0) + (parseFloat(t.commission) || 0),
+    };
+  });
 }
 
 // Truncates (never rounds up) to 2 decimals: 49.995 -> "49.99", -0.004 -> "0.00"
@@ -313,8 +345,8 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
     screenshot_url: editTrade.screenshot_url || null,
     outcome: editTrade.outcome ?? null,
     extreme_balance: editTrade.extreme_balance != null && editTrade.extreme_balance !== "" ? String(editTrade.extreme_balance) : "",
-    commission: editTrade.commission != null && editTrade.commission !== "" ? String(editTrade.commission) : "",
-    swap: editTrade.swap != null && editTrade.swap !== "" ? String(editTrade.swap) : "",
+    commission: costToInput(editTrade.commission, "commission"),
+    swap: costToInput(editTrade.swap, "swap"),
   } : makeEmptyForm();
 
   // Pre-calculate risk $ from pnl for edit mode — must exactly invert calcPnl()
@@ -322,8 +354,8 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
     if (!editTrade) return {};
     let prefilledRisk = "";
     if (editTrade.pnl != null) {
-      // stored pnl is net: gross = pnl - commission - swap
-      const pnl = parseFloat(editTrade.pnl) - (parseFloat(editTrade.commission) || 0) - (parseFloat(editTrade.swap) || 0);
+      // gross pnl (rows are folded to net for display, the original is kept in pnl_gross)
+      const pnl = parseFloat(editTrade.pnl_gross != null ? editTrade.pnl_gross : editTrade.pnl);
       if (editTrade.outcome === "loss") {
         // calcPnl: gross = -riskAmount  →  riskAmount = abs(gross)
         prefilledRisk = String(cleanNum(Math.abs(pnl)));
@@ -719,15 +751,15 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
           {/* Costs card — commission & swap, deducted from P&L */}
           <Card label="Commission & Swap (optional)">
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-              <Field label="Commission ($)" hint="Costs as negative, e.g. -7.00">
+              <Field label="Commission ($)" hint="Enter the amount paid, e.g. 7.00">
                 <input type="number" step="any" value={form.commission}
                   onChange={e => set("commission", e.target.value)}
-                  placeholder="e.g. -7.00" style={inputStyle} />
+                  placeholder="e.g. 7.00" style={inputStyle} />
               </Field>
-              <Field label="Swap ($)" hint="Credit positive, charge negative">
+              <Field label="Swap ($)" hint="Charge as is (2.50); a credit as -2.50">
                 <input type="number" step="any" value={form.swap}
                   onChange={e => set("swap", e.target.value)}
-                  placeholder="e.g. -2.50" style={inputStyle} />
+                  placeholder="e.g. 2.50" style={inputStyle} />
               </Field>
             </div>
           </Card>
@@ -826,7 +858,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                           resolvedPct = ((num / acc.account_size) * 100).toFixed(2);
                         }
                       }
-                      const pnl = resolvedPct ? calcPnl(resolvedPct, acc.account_size, form.rr, form.outcome, form.commission, form.swap) : null;
+                      const pnl = resolvedPct ? calcPnl(resolvedPct, acc.account_size, form.rr, form.outcome, signedCost(form.commission, "commission"), signedCost(form.swap, "swap")) : null;
                       const pnlNum = pnl !== null ? parseFloat(pnl) : null;
 
                       return (
@@ -963,7 +995,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                     if (!isNaN(num) && num > 0 && acc.account_size) {
                       resolvedPct = mode === "%" ? num : (num / acc.account_size) * 100;
                     }
-                    const pnl = resolvedPct ? calcPnl(resolvedPct, acc.account_size, form.rr, form.outcome, form.commission, form.swap) : null;
+                    const pnl = resolvedPct ? calcPnl(resolvedPct, acc.account_size, form.rr, form.outcome, signedCost(form.commission, "commission"), signedCost(form.swap, "swap")) : null;
                     return sum + (pnl !== null ? parseFloat(pnl) : 0);
                   }, 0);
                   return pnlColor(total);
@@ -977,7 +1009,7 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                       if (!isNaN(num) && num > 0 && acc.account_size) {
                         resolvedPct = mode === "%" ? num : (num / acc.account_size) * 100;
                       }
-                      const pnl = resolvedPct ? calcPnl(resolvedPct, acc.account_size, form.rr, form.outcome, form.commission, form.swap) : null;
+                      const pnl = resolvedPct ? calcPnl(resolvedPct, acc.account_size, form.rr, form.outcome, signedCost(form.commission, "commission"), signedCost(form.swap, "swap")) : null;
                       return sum + (pnl !== null ? parseFloat(pnl) : 0);
                     }, 0);
                     return `${total >= 0 ? "+" : ""}$${trunc2(Math.abs(total))}`;
@@ -1051,7 +1083,7 @@ function TradeDetailModal({ trade, onClose, onEdit, onDelete }) {
             borderRadius: "10px", overflow: "hidden", border: "0.5px solid var(--border-color)",
           }}>
             {[
-              { label: "P&L", value: trade.pnl != null ? `${parseFloat(trade.pnl) >= 0 ? "+" : ""}${fmt(trade.pnl)}` : "—", color: pnlColor(trade.pnl) },
+              { label: "Net P&L", value: trade.pnl != null ? `${parseFloat(trade.pnl) >= 0 ? "+" : ""}${fmt(trade.pnl)}` : "—", color: pnlColor(trade.pnl) },
               { label: "R:R", value: trade.rr ? `${trade.rr}R` : "—" },
               { label: "Swap", value: trade.swap != null ? `${parseFloat(trade.swap) >= 0 ? "+" : ""}${fmt(trade.swap)}` : "—", color: trade.swap != null ? pnlColor(trade.swap) : "var(--text-faint)" },
               { label: "Commission", value: trade.commission != null ? `${parseFloat(trade.commission) >= 0 ? "+" : ""}${fmt(trade.commission)}` : "—", color: trade.commission != null ? pnlColor(trade.commission) : "var(--text-faint)" },
@@ -1792,7 +1824,7 @@ useEffect(() => {
           if (challengeIds.length > 0) {
             const { data: trades } = await supabase
               .from("trades").select("*").in("account_id", challengeIds);
-            (trades || []).forEach(t => {
+            foldNet(trades).forEach(t => {
               if (!tradesByAccount[t.account_id]) tradesByAccount[t.account_id] = [];
               tradesByAccount[t.account_id].push(t);
             });
@@ -1861,7 +1893,7 @@ useEffect(() => {
         .eq("account_id", accountId)
         .order("date", { ascending: false });
       if (error) throw error;
-      setTrades(data || []);
+      setTrades(foldNet(data));
     } catch {
       setError("Failed to load trades.");
     } finally {
@@ -1897,7 +1929,7 @@ useEffect(() => {
         const accId = editTrade.account_id;
         const acc = accounts.find(a => a.id === accId);
         const riskPct = resolveRiskPct(accId, accountRisks, accountRiskModes, accounts);
-        const pnl = calcPnl(riskPct, acc?.account_size, form.rr, form.outcome, form.commission, form.swap);
+        const pnl = calcPnl(riskPct, acc?.account_size, form.rr, form.outcome);
 
         if (screenshotFile) {
           sharedScreenshotUrl = await uploadScreenshot(screenshotFile, editTrade.id, accId);
@@ -1917,8 +1949,8 @@ useEffect(() => {
           screenshot_url: sharedScreenshotUrl,
           outcome: form.outcome || null,
           extreme_balance: form.extreme_balance !== "" && form.extreme_balance != null ? parseFloat(form.extreme_balance) : null,
-          commission: form.commission !== "" && form.commission != null ? parseFloat(form.commission) : null,
-          swap: form.swap !== "" && form.swap != null ? parseFloat(form.swap) : null,
+          commission: storedCost(form.commission, "commission"),
+          swap: storedCost(form.swap, "swap"),
         }).eq("id", editTrade.id);
         if (error) throw error;
 
@@ -1930,7 +1962,7 @@ useEffect(() => {
         for (const accId of selectedIds) {
           const acc = accounts.find(a => a.id === accId);
           const riskPct = resolveRiskPct(accId, accountRisks, accountRiskModes, accounts);
-          const pnl = calcPnl(riskPct, acc?.account_size, form.rr, form.outcome, form.commission, form.swap);
+          const pnl = calcPnl(riskPct, acc?.account_size, form.rr, form.outcome);
 
           const { data: inserted, error: insertError } = await supabase
             .from("trades")
@@ -1950,8 +1982,8 @@ useEffect(() => {
               screenshot_url: null,
               outcome: form.outcome || null,
               extreme_balance: form.extreme_balance !== "" && form.extreme_balance != null ? parseFloat(form.extreme_balance) : null,
-              commission: form.commission !== "" && form.commission != null ? parseFloat(form.commission) : null,
-              swap: form.swap !== "" && form.swap != null ? parseFloat(form.swap) : null,
+              commission: storedCost(form.commission, "commission"),
+              swap: storedCost(form.swap, "swap"),
             })
             .select()
             .single();
@@ -2003,9 +2035,9 @@ useEffect(() => {
       // 2. Fetch all trades for this account
       const { data: allTrades } = await supabase
         .from("trades")
-        .select("pnl, date")
+        .select("pnl, date, swap, commission")
         .eq("account_id", accId);
-      const trades = (allTrades || []).filter(t => t.pnl != null);
+      const trades = foldNet(allTrades).filter(t => t.pnl != null);
 
       // 3. Compute metrics
       // Daily loss (today only)
@@ -2165,7 +2197,7 @@ useEffect(() => {
             const rows = filtered.map(t => [
               t.date, t.pair, t.outcome ?? "", t.direction,
               t.entry ?? "", t.stop_loss ?? "", t.take_profit ?? "",
-              t.rr ?? "", t.swap ?? "", t.commission ?? "", t.pnl ?? "",
+              t.rr ?? "", t.swap ?? "", t.commission ?? "", t.pnl_gross ?? t.pnl ?? "",
               t.session, (t.notes || "").replace(/,/g, " "),
             ]);
             const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
@@ -2491,7 +2523,7 @@ useEffect(() => {
               const rows = filtered.map(t => [
                 t.date, t.pair, t.outcome ?? "", t.direction,
                 t.entry ?? "", t.stop_loss ?? "", t.take_profit ?? "",
-                t.rr ?? "", t.swap ?? "", t.commission ?? "", t.pnl ?? "",
+                t.rr ?? "", t.swap ?? "", t.commission ?? "", t.pnl_gross ?? t.pnl ?? "",
                 t.session, (t.notes || "").replace(/,/g, " "),
               ]);
               const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
@@ -2634,15 +2666,15 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
     screenshot_url: editTrade.screenshot_url || null,
     outcome: editTrade.outcome ?? null,
     extreme_balance: editTrade.extreme_balance != null ? String(editTrade.extreme_balance) : "",
-    commission: editTrade.commission != null ? String(editTrade.commission) : "",
-    swap: editTrade.swap != null ? String(editTrade.swap) : "",
+    commission: costToInput(editTrade.commission, "commission"),
+    swap: costToInput(editTrade.swap, "swap"),
   } : makeEmptyForm();
 
   // Pre-calculate risk $ from pnl for edit mode — must exactly invert calcPnl()
   const initRisk = (() => {
     if (!editTrade || editTrade.pnl == null) return {};
-    // stored pnl is net: gross = pnl - commission - swap
-    const pnl = parseFloat(editTrade.pnl) - (parseFloat(editTrade.commission) || 0) - (parseFloat(editTrade.swap) || 0);
+    // gross pnl (rows are folded to net for display, the original is kept in pnl_gross)
+    const pnl = parseFloat(editTrade.pnl_gross != null ? editTrade.pnl_gross : editTrade.pnl);
     if (editTrade.outcome === "loss") {
       return { [editTrade.account_id]: String(cleanNum(Math.abs(pnl))) };
     }
@@ -2941,7 +2973,7 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
                 if (mode === '%') { resolvedPct = num; resolvedDollar = ((num / 100) * acc.account_size).toFixed(2); }
                 else { resolvedDollar = num.toFixed(2); resolvedPct = ((num / acc.account_size) * 100).toFixed(2); }
               }
-              const pnlVal = resolvedPct ? calcPnl(resolvedPct, acc.account_size, form.rr, form.outcome, form.commission, form.swap) : null;
+              const pnlVal = resolvedPct ? calcPnl(resolvedPct, acc.account_size, form.rr, form.outcome, signedCost(form.commission, "commission"), signedCost(form.swap, "swap")) : null;
               const pnlNum = pnlVal !== null ? parseFloat(pnlVal) : null;
               const isChallenge = acc.type !== 'personal';
 
@@ -3038,10 +3070,10 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
               <input type="number" step="any" value={form.commission}
                 onChange={e => set('commission', e.target.value)}
-                placeholder="Commission e.g. -7.00" style={mobileInput} />
+                placeholder="Commission e.g. 7.00" style={mobileInput} />
               <input type="number" step="any" value={form.swap}
                 onChange={e => set('swap', e.target.value)}
-                placeholder="Swap e.g. -2.50" style={mobileInput} />
+                placeholder="Swap e.g. 2.50 (credit: -2.50)" style={mobileInput} />
             </div>
           </div>
 

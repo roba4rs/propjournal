@@ -42,9 +42,16 @@ function computeStats(trades) {
   }
 }
 
+// Cuts a number off at 2 decimals (never rounds up): 49.995 -> 49.99
+function trunc2(n) {
+  const v = Number(n)
+  if (!isFinite(v)) return 0
+  return Math.trunc(Number((v * 100).toFixed(6))) / 100
+}
+
 function fmt(val) {
   const sign = val >= 0 ? '+' : ''
-  return `${sign}$${Math.abs(val).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  return `${sign}$${trunc2(Math.abs(val)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
@@ -459,7 +466,7 @@ function TradeDetailModal({ trade, onClose, isMobile, onResolve }) {
             {/* Stats row */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
               {[
-                { label: 'P&L',     value: pnlVal != null ? `${pnlVal >= 0 ? '+' : ''}$${Math.abs(pnlVal).toFixed(2)}` : '—', color: pnlColorModal(pnlVal) },
+                { label: 'P&L',     value: pnlVal != null ? `${pnlVal >= 0 ? '+' : ''}$${trunc2(Math.abs(pnlVal)).toFixed(2)}` : '—', color: pnlColorModal(pnlVal) },
                 { label: 'R:R',     value: trade.rr ? `${trade.rr}R` : '—' },
                 { label: 'Session', value: sessionLabel(trade.session) },
                 { label: 'Date',    value: trade.date || '—' },
@@ -528,7 +535,7 @@ function TradeDetailModal({ trade, onClose, isMobile, onResolve }) {
           {/* Stats strip */}
           <div style={{ display: 'flex', gap: '1px', background: 'var(--border-color)', borderRadius: '10px', overflow: 'hidden', border: '0.5px solid var(--border-color)' }}>
             {[
-              { label: 'P&L',     value: pnlVal != null ? `${pnlVal >= 0 ? '+' : ''}$${Math.abs(pnlVal).toFixed(2)}` : '—', color: pnlColorModal(pnlVal) },
+              { label: 'P&L',     value: pnlVal != null ? `${pnlVal >= 0 ? '+' : ''}$${trunc2(Math.abs(pnlVal)).toFixed(2)}` : '—', color: pnlColorModal(pnlVal) },
               { label: 'R:R',     value: trade.rr ? `${trade.rr}R` : '—' },
               { label: 'Session', value: sessionLabel(trade.session) },
               { label: 'Entry',   value: fmtNum(trade.entry) },
@@ -613,7 +620,7 @@ function DayTradesModal({ date, trades, onClose, onSelectTrade, isMobile }) {
         </div>
         <div style={{ textAlign: 'right', flexShrink: 0 }}>
           <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '14px', fontWeight: '500', color: pnlColorModal(pnlVal) }}>
-            {pnlVal != null ? `${pnlVal >= 0 ? '+' : ''}$${Math.abs(pnlVal).toFixed(2)}` : '—'}
+            {pnlVal != null ? `${pnlVal >= 0 ? '+' : ''}$${trunc2(Math.abs(pnlVal)).toFixed(2)}` : '—'}
           </div>
         </div>
         <span style={{ color: 'var(--text-faint-2)', fontSize: '14px', flexShrink: 0 }}>›</span>
@@ -639,7 +646,7 @@ function DayTradesModal({ date, trades, onClose, onSelectTrade, isMobile }) {
               <div style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: '600', color: 'var(--text-secondary)' }}>{formattedDate}</div>
               <div style={{ fontSize: '11px', fontFamily: 'JetBrains Mono, monospace', marginTop: '3px', color: 'var(--text-faint)' }}>
                 {dayTrades.length} trade{dayTrades.length !== 1 ? 's' : ''} ·{' '}
-                <span style={{ color: pnlColorModal(dayPnl) }}>{dayPnl >= 0 ? '+' : ''}${Math.abs(dayPnl).toFixed(2)}</span>
+                <span style={{ color: pnlColorModal(dayPnl) }}>{dayPnl >= 0 ? '+' : ''}${trunc2(Math.abs(dayPnl)).toFixed(2)}</span>
               </div>
             </div>
             <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: '22px', lineHeight: 1 }}>×</button>
@@ -668,7 +675,7 @@ function DayTradesModal({ date, trades, onClose, onSelectTrade, isMobile }) {
             <div style={{ fontFamily: 'Inter, sans-serif', fontSize: '17px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '4px' }}>{formattedDate}</div>
             <div style={{ fontSize: '12px', fontFamily: 'JetBrains Mono, monospace', color: 'var(--text-faint)' }}>
               {dayTrades.length} trade{dayTrades.length !== 1 ? 's' : ''} ·{' '}
-              <span style={{ color: pnlColorModal(dayPnl) }}>{dayPnl >= 0 ? '+' : ''}${Math.abs(dayPnl).toFixed(2)}</span>
+              <span style={{ color: pnlColorModal(dayPnl) }}>{dayPnl >= 0 ? '+' : ''}${trunc2(Math.abs(dayPnl)).toFixed(2)}</span>
             </div>
           </div>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: '24px', lineHeight: 1 }}>×</button>
