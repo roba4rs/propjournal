@@ -846,19 +846,19 @@ function TradeForm({ open, onClose, onSave, editTrade, saving, accounts }) {
                       const mode = accountRiskModes[acc.id] || "$";
                       const rawVal = accountRisks[acc.id] || "";
 
-                      let resolvedPct = null;
+                      let resolvedPctExact = null; // exact risk % (never rounded) used for the P&L maths
                       let resolvedDollar = null;
                       const num = parseFloat(rawVal);
                       if (!isNaN(num) && num > 0 && acc.account_size) {
                         if (mode === "%") {
-                          resolvedPct = num;
+                          resolvedPctExact = num;
                           resolvedDollar = ((num / 100) * acc.account_size).toFixed(2);
                         } else {
                           resolvedDollar = num.toFixed(2);
-                          resolvedPct = ((num / acc.account_size) * 100).toFixed(2);
+                          resolvedPctExact = (num / acc.account_size) * 100;
                         }
                       }
-                      const pnl = resolvedPct ? calcPnl(resolvedPct, acc.account_size, form.rr, form.outcome, signedCost(form.commission, "commission"), signedCost(form.swap, "swap")) : null;
+                      const pnl = resolvedPctExact ? calcPnl(resolvedPctExact, acc.account_size, form.rr, form.outcome, signedCost(form.commission, "commission"), signedCost(form.swap, "swap")) : null;
                       const pnlNum = pnl !== null ? parseFloat(pnl) : null;
 
                       return (
@@ -2968,12 +2968,12 @@ function MobileTradeForm({ onClose, onSave, editTrade, saving, accounts }) {
               const mode = accountRiskModes[acc.id] || '$';
               const rawVal = accountRisks[acc.id] || '';
               const num = parseFloat(rawVal);
-              let resolvedPct = null, resolvedDollar = null;
+              let resolvedPct = null, resolvedPctExact = null, resolvedDollar = null;
               if (!isNaN(num) && num > 0 && acc.account_size) {
-                if (mode === '%') { resolvedPct = num; resolvedDollar = ((num / 100) * acc.account_size).toFixed(2); }
-                else { resolvedDollar = num.toFixed(2); resolvedPct = ((num / acc.account_size) * 100).toFixed(2); }
+                if (mode === '%') { resolvedPct = num; resolvedPctExact = num; resolvedDollar = ((num / 100) * acc.account_size).toFixed(2); }
+                else { resolvedDollar = num.toFixed(2); resolvedPct = ((num / acc.account_size) * 100).toFixed(2); resolvedPctExact = (num / acc.account_size) * 100; }
               }
-              const pnlVal = resolvedPct ? calcPnl(resolvedPct, acc.account_size, form.rr, form.outcome, signedCost(form.commission, "commission"), signedCost(form.swap, "swap")) : null;
+              const pnlVal = resolvedPctExact ? calcPnl(resolvedPctExact, acc.account_size, form.rr, form.outcome, signedCost(form.commission, "commission"), signedCost(form.swap, "swap")) : null;
               const pnlNum = pnlVal !== null ? parseFloat(pnlVal) : null;
               const isChallenge = acc.type !== 'personal';
 
