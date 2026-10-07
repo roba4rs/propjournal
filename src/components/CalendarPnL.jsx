@@ -11,6 +11,13 @@ function formatMoney(n) {
   return fixed.endsWith('.00') ? fixed.slice(0, -3) : fixed
 }
 
+// Mobile calendar only: whole dollars, truncated (never rounded). Display only.
+function formatMoneyWhole(n) {
+  const num = typeof n === 'number' ? n : parseFloat(n)
+  if (!isFinite(num)) return '0'
+  return String(Math.trunc(num))
+}
+
 // A day whose net result is within this band counts as breakeven (amber), even if it's a few
 // dollars up or down from commission/swap. 0.2% of the account size ($20 on a $10k account),
 // or a flat $20 when the account size isn't known.
@@ -220,7 +227,7 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
                         textRendering: 'optimizeLegibility',
                         letterSpacing: '-0.2px',
                       }}>
-                        {cell.isBE && pnl < 0 ? '-' : ''}${formatMoney(Math.abs(pnl))}
+                        {cell.isBE && pnl < 0 ? '-' : ''}${formatMoneyWhole(Math.abs(pnl))}
                       </span>
                     )}
 
@@ -257,7 +264,7 @@ export default function CalendarPnL({ trades = [], mobile = false, onDayClick, a
                 {hasData ? (
                   <>
                     <span style={{ color: pnlColor, fontFamily: 'DM Mono, monospace', fontSize: '8px', fontWeight: '700', lineHeight: 1, whiteSpace: 'nowrap' }}>
-                      ${formatMoney(Math.abs(s.pnl))}
+                      ${formatMoneyWhole(Math.abs(s.pnl))}
                     </span>
                     <span style={{ color: 'var(--text-faint)', fontFamily: 'DM Mono, monospace', fontSize: '7px', lineHeight: 1 }}>
                       {Math.round(s.winRate)}%
